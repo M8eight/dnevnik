@@ -2,24 +2,32 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <annotationProcessing>
-      <profile name="Maven default annotation processors profile" enabled="true">
-        <sourceOutputDir name="target/generated-sources/annotations" />
-        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+      <profile name="Gradle Imported" enabled="true">
         <outputRelativeToContentRoot value="true" />
-        <module name="api-gateway" />
-        <module name="user-service" />
-        <module name="diary-service" />
-        <module name="eureka-server" />
+        <processorPath useClasspath="false">
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.20/18bcea7d5df4d49227b4a0743a536208ce4825bb/lombok-1.18.20.jar" />
+        </processorPath>
+        <module name="dnevnik.grade-service.main" />
       </profile>
     </annotationProcessing>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="api-gateway" options="-parameters" />
-      <module name="diary-service" options="-parameters" />
-      <module name="dnevnik" options="" />
-      <module name="eureka-server" options="-parameters" />
-      <module name="user-service" options="-parameters" />
+      <module name="dnevnik.api-gateway" options="-parameters" />
+      <module name="dnevnik.api-gateway.main" options="-parameters" />
+      <module name="dnevnik.api-gateway.test" options="-parameters" />
+      <module name="dnevnik.eureka-server" options="-parameters" />
+      <module name="dnevnik.eureka-server.main" options="-parameters" />
+      <module name="dnevnik.eureka-server.test" options="-parameters" />
+      <module name="dnevnik.grade-service" options="-parameters" />
+      <module name="dnevnik.grade-service.main" options="-parameters" />
+      <module name="dnevnik.grade-service.test" options="-parameters" />
+      <module name="dnevnik.product-service" options="-parameters" />
+      <module name="dnevnik.product-service.main" options="-parameters" />
+      <module name="dnevnik.product-service.test" options="-parameters" />
+      <module name="dnevnik.user-service" options="-parameters" />
+      <module name="dnevnik.user-service.main" options="-parameters" />
+      <module name="dnevnik.user-service.test" options="-parameters" />
     </option>
   </component>
 </project>

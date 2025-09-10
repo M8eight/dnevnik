@@ -6,18 +6,10 @@ spring:
     name: api-gateway
   cloud:
     gateway:
-      routes:
-        - id: diary-service
-          uri: lb://diary-service
-          predicates:
-            - Path=/diary-service/**
-        - id: user-service
-          uri: lb://user-service
-          predicates:
-            - Path=/api/users/**
-          filters:
-            - StripPrefix=2
-
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
 
 eureka:
   client:
