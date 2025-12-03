@@ -1,4 +1,4 @@
-package com.rusobr.class_service;
+package com.rusobr.service;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

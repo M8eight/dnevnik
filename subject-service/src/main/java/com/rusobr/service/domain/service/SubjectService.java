@@ -1,9 +1,9 @@
-package com.rusobr.class_service.domain.service;
+package com.rusobr.service.domain.service;
 
-import com.rusobr.class_service.domain.model.Subject;
-import com.rusobr.class_service.infrastructure.persistence.repository.SubjectRepository;
-import com.rusobr.class_service.web.dto.CreateSubjectDto;
-import com.rusobr.class_service.web.dto.UpdateSubjectDto;
+import com.rusobr.service.domain.model.Subject;
+import com.rusobr.service.infrastructure.persistence.repository.SubjectRepository;
+import com.rusobr.service.web.dto.CreateSubjectDto;
+import com.rusobr.service.web.dto.UpdateSubjectDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

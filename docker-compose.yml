@@ -1,7 +1,5 @@
-version: '3.9'
-
 services:
-  db:
+  postgres:
     image: postgres:16
     container_name: school-db
     restart: always
@@ -11,8 +9,77 @@ services:
       POSTGRES_DB: school_db
     ports:
       - "5432:5432"
+    networks:
+      - micro-net
     volumes:
       - school-db-data:/var/lib/postgresql/data
+      - ./init-db:/docker-entrypoint-initdb.d
+
+  keycloak:
+    container_name: keycloak_demo
+    image: quay.io/keycloak/keycloak:25.0.5
+    ports:
+      - '9090:8080'
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: password
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+    command:
+      - 'start-dev'
+
+
+  eureka-server:
+    build: ./eureka-server
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    networks:
+      - micro-net
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - eureka-server
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    networks:
+      - micro-net
+
+  grade-service:
+    build: ./grade-service
+    container_name: grade-service
+    ports:
+      - "9003:9003"
+    depends_on:
+      - eureka-server
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/school_db
+      - SPRING_DATASOURCE_USERNAME=school_user
+      - SPRING_DATASOURCE_PASSWORD=school_pass
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    networks:
+      - micro-net
+
+  user-service:
+    build: ./user-service
+    container_name: user-service
+    ports:
+      - "9001:9001"
+    depends_on:
+      - eureka-server
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    networks:
+      - micro-net
 
 volumes:
   school-db-data:
+  keycloak_data:
+
+networks:
+  micro-net:
+    driver: bridge

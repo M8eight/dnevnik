@@ -1,4 +1,4 @@
-package com.rusobr.class_service.domain.model;
+package com.rusobr.service.domain.model;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -25,8 +25,9 @@ public class Grade {
 
     String teacher;
 
-    @ManyToOne(optional = false, fetch = FetchType.EAGER)
-    GradeConstant gradeConstant;
+    //TODO сделать связь с константами оценок
+//    @ManyToOne(optional = false, fetch = FetchType.EAGER)
+//    GradeConstant gradeConstant;
 
     Date date;
 

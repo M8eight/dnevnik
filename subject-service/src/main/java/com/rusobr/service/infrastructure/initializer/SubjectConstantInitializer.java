@@ -1,7 +1,7 @@
-package com.rusobr.class_service.infrastructure.initializer;
+package com.rusobr.service.infrastructure.initializer;
 
-import com.rusobr.class_service.domain.model.Subject;
-import com.rusobr.class_service.infrastructure.persistence.repository.SubjectRepository;
+import com.rusobr.service.domain.model.Subject;
+import com.rusobr.service.infrastructure.persistence.repository.SubjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;

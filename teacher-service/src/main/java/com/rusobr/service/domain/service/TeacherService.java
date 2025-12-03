@@ -1,46 +1,36 @@
-package service.domain.service;
+package com.rusobr.service.domain.service;
 
-import com.rusobr.service.domain.model.Subject;
-import service.infrastructure.persistence.repository.SubjectRepository;
-import com.rusobr.service.web.dto.CreateSubjectDto;
-import com.rusobr.service.web.dto.UpdateSubjectDto;
+import com.rusobr.service.web.dto.RequestTeacherDto;
+import com.rusobr.service.domain.model.Teacher;
+import com.rusobr.service.infrastructure.mapper.TeacherMapper;
+import com.rusobr.service.infrastructure.persistence.repository.TeacherRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class SubjectService {
+public class TeacherService {
 
-    private final SubjectRepository subjectRepository;
+    private final TeacherRepository teacherRepository;
+    private final TeacherMapper teacherMapper;
 
-    public Iterable<Subject> getAllSubjects() {
-        return subjectRepository.findAll();
+    public Iterable<Teacher> getAll() {
+        return teacherRepository.findAll();
     }
 
-    public Subject createSubject(CreateSubjectDto subjectCreateDto) {
-        Subject subject = Subject.builder()
-                .name(subjectCreateDto.getName())
-                .teacher(subjectCreateDto.getTeacher())
-                .build();
-
-        return subjectRepository.save(subject);
+    public Teacher get(Long id) {
+        return teacherRepository.findById(id).orElse(null);
     }
 
-    public Subject updateSubject(Long id, UpdateSubjectDto updateSubjectDto) {
-        Subject subject = subjectRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Subject not found with id: " + id));
-
-        if (updateSubjectDto.getName() != null) {
-            subject.setName(updateSubjectDto.getName());
-        }
-        if (updateSubjectDto.getTeacher() != null) {
-            subject.setTeacher(updateSubjectDto.getTeacher());
-        }
-
-        return subjectRepository.save(subject);
+    public Teacher create(RequestTeacherDto teacher) {
+        Teacher teacherEntity = teacherMapper.toTeacher(teacher);
+        return teacherRepository.save(teacherEntity);
     }
 
-    public void deleteSubject(Long id) {
-        subjectRepository.deleteById(id);
+    //TODO update method сделать
+
+    public void delete(Long id) {
+        teacherRepository.deleteById(id);
     }
+
 }

@@ -1,4 +1,4 @@
-package com.rusobr.service.infrastructure.mappers;
+package com.rusobr.service.infrastructure.mapper;
 
 import com.rusobr.service.domain.model.Grade;
 import com.rusobr.service.web.dto.grade.GradeRequestDto;

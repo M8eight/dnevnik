@@ -13,7 +13,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Setter
 @ToString
 @Builder
-public class Class {
+public class SchoolClass {
     @Id
     @GeneratedValue
     private Long id;

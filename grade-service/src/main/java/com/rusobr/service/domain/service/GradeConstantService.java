@@ -1,9 +1,9 @@
-package com.rusobr.class_service.domain.service;
+package com.rusobr.service.domain.service;
 
-import com.rusobr.class_service.domain.model.GradeConstant;
-import com.rusobr.class_service.infrastructure.persistence.repository.GradeConstantRepository;
-import com.rusobr.class_service.web.dto.gradeConstant.CreateGradeConstantRequestDto;
-import com.rusobr.class_service.web.dto.gradeConstant.UpdateGradeConstantDto;
+import com.rusobr.service.domain.model.GradeConstant;
+import com.rusobr.service.infrastructure.persistence.repository.GradeConstantRepository;
+import com.rusobr.service.web.dto.gradeConstant.CreateGradeConstantRequestDto;
+import com.rusobr.service.web.dto.gradeConstant.UpdateGradeConstantDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

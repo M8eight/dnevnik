@@ -1,5 +1,6 @@
-package com.rusobr.service.domain.model;
+package com.rusobr.service.web.dto;
 
+import com.rusobr.service.domain.model.Teacher;
 import lombok.Value;
 
 import java.io.Serializable;

@@ -1,4 +1,4 @@
-package com.rusobr.class_service.domain.model;
+package com.rusobr.service.domain.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

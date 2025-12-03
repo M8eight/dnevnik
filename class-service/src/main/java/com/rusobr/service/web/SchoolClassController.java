@@ -1,6 +1,8 @@
 package com.rusobr.service.web;
 
-import com.rusobr.service.domain.service.ClassService;
+import com.rusobr.service.domain.model.SchoolClass;
+import com.rusobr.service.web.dto.SchoolClassDto;
+import com.rusobr.service.domain.service.SchoolClassService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -8,28 +10,28 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/class")
 @RequiredArgsConstructor
-public class ClassController {
+public class SchoolClassController {
 
-    private final ClassService classService;
+    private final SchoolClassService classService;
 
     @GetMapping
-    public ResponseEntity<Iterable<Class>> getAllClasses() {
-        return ResponseEntity.ok(classService.getAllClasses());
+    public ResponseEntity<Iterable<SchoolClass>> getAllSchoolClasses() {
+        return ResponseEntity.ok(classService.getAllSchoolClasses());
     }
 
     @PostMapping
-    public ResponseEntity<Class> createClass(@RequestBody Class classRequestDto) {
-        return ResponseEntity.ok(classService.createClass(classRequestDto));
+    public ResponseEntity<SchoolClass> createSchoolClass(@RequestBody SchoolClassDto classRequestDto) {
+        return ResponseEntity.ok(classService.create(classRequestDto));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Class> updateClass(@PathVariable Long id, @RequestBody Class classRequestDto) {
-        return ResponseEntity.ok(classService.updateClass(id, classRequestDto));
+    public ResponseEntity<SchoolClass> updateSchoolClass(@PathVariable Long id, @RequestBody SchoolClass classRequestDto) {
+        return ResponseEntity.ok(classService.update(id, classRequestDto));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Class> deleteClass(@PathVariable Long id) {
-        classService.deleteClass(id);
+    public ResponseEntity<SchoolClass> deleteSchoolClass(@PathVariable Long id) {
+        classService.delete(id);
         return ResponseEntity.ok().build();
     }
 }

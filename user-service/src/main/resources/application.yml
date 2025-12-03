@@ -2,6 +2,10 @@ server:
   port: 9001
 
 spring:
+  security:
+    user:
+      name: user
+      password: password
   application:
     name: user-service
 

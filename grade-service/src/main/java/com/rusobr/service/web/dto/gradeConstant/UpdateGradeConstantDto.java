@@ -1,6 +1,6 @@
-package com.rusobr.class_service.web.dto.gradeConstant;
+package com.rusobr.service.web.dto.gradeConstant;
 
-import com.rusobr.class_service.domain.model.GradeConstant;
+import com.rusobr.service.domain.model.GradeConstant;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;

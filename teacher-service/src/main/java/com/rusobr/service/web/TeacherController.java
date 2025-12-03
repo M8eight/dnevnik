@@ -1,39 +1,40 @@
-package service.web;
+package com.rusobr.service.web;
 
-import service.domain.model.Subject;
-import service.domain.service.SubjectService;
-import com.rusobr.service.web.dto.CreateSubjectDto;
-import com.rusobr.service.web.dto.UpdateSubjectDto;
+import com.rusobr.service.domain.model.Teacher;
+import com.rusobr.service.domain.service.TeacherService;
+import com.rusobr.service.web.dto.RequestTeacherDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@RestController
-@RequestMapping("/api/subjects")
-@RequiredArgsConstructor
-public class SubjectController {
+import java.util.List;
 
-    private final SubjectService subjectService;
+@RestController
+@RequestMapping("/api/teachers")
+@RequiredArgsConstructor
+public class TeacherController {
+
+    private final TeacherService teacherService;
 
     @GetMapping
-    public ResponseEntity<Iterable<Subject>> getAllSubjects() {
-        return ResponseEntity.ok(subjectService.getAllSubjects());
+    public Iterable<Teacher> getAll() {
+        return teacherService.getAll();
+    }
+
+    @GetMapping("/{id}")
+    public Teacher get(@PathVariable Long id) {
+        return teacherService.get(id);
     }
 
     @PostMapping
-    public ResponseEntity<Subject> createSubject(@RequestBody CreateSubjectDto createSubjectDto) {
-        return ResponseEntity.ok(subjectService.createSubject(createSubjectDto));
+    public Teacher create(@RequestBody RequestTeacherDto requestTeacherDto) {
+        return teacherService.create(requestTeacherDto);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Subject> updateSubject(@PathVariable Long id, @RequestBody UpdateSubjectDto updateSubjectDto) {
-        return ResponseEntity.ok(subjectService.updateSubject(id, updateSubjectDto));
-    }
+    //TODO update method сделать
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Subject> deleteSubject(@PathVariable Long id) {
-        subjectService.deleteSubject(id);
-        return ResponseEntity.ok().build();
+    public void delete(@PathVariable Long id) {
+        teacherService.delete(id);
     }
 
 }

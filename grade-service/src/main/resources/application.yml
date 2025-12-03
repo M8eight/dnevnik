@@ -5,9 +5,9 @@ spring:
   application:
     name: grade-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/school_db
-    username: school_user
-    password: school_pass
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/school_db}
+    username: ${SPRING_DATASOURCE_USERNAME:school_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:school_pass}
   jpa:
     hibernate:
       ddl-auto: create-drop

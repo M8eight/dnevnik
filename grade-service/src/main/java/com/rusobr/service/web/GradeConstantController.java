@@ -1,10 +1,10 @@
-package com.rusobr.class_service.web;
+package com.rusobr.service.web;
 
 
-import com.rusobr.class_service.domain.model.GradeConstant;
-import com.rusobr.class_service.domain.service.GradeConstantService;
-import com.rusobr.class_service.web.dto.gradeConstant.CreateGradeConstantRequestDto;
-import com.rusobr.class_service.web.dto.gradeConstant.UpdateGradeConstantDto;
+import com.rusobr.service.domain.model.GradeConstant;
+import com.rusobr.service.domain.service.GradeConstantService;
+import com.rusobr.service.web.dto.gradeConstant.CreateGradeConstantRequestDto;
+import com.rusobr.service.web.dto.gradeConstant.UpdateGradeConstantDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

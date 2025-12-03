@@ -1,6 +1,6 @@
-package com.rusobr.class_service.web.dto;
+package com.rusobr.service.web.dto;
 
-import com.rusobr.class_service.domain.model.Subject;
+import com.rusobr.service.domain.model.Subject;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;

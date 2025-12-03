@@ -1,11 +1,11 @@
 server:
-  port: 9003
+  port: 9004
 
 spring:
   application:
-    name: grade-service
+    name: subject-service
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/school_db}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/subject_db}
     username: ${SPRING_DATASOURCE_USERNAME:school_user}
     password: ${SPRING_DATASOURCE_PASSWORD:school_pass}
   jpa:

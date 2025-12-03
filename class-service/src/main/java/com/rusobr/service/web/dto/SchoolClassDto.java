@@ -1,7 +1,14 @@
-package com.rusobr.service.domain.model;
+package com.rusobr.service.web.dto;
+
+import com.rusobr.service.domain.model.SchoolClass;
+import lombok.Value;
+
+import java.io.Serializable;
 
 /**
- * DTO for {@link com.rusobr.service.domain.model.SchoolClass}
+ * DTO for {@link SchoolClass}
  */
-public class SchoolClassDto {
-  }
+@Value
+public class SchoolClassDto implements Serializable {
+    String name;
+}

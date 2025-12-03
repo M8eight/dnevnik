@@ -7,15 +7,35 @@
         <processorPath useClasspath="false">
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.20/18bcea7d5df4d49227b4a0743a536208ce4825bb/lombok-1.18.20.jar" />
         </processorPath>
+        <module name="dnevnik.class-service.main" />
+        <module name="dnevnik.subject-service.main" />
+      </profile>
+      <profile name="Gradle Imported" enabled="true">
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.20/18bcea7d5df4d49227b4a0743a536208ce4825bb/lombok-1.18.20.jar" />
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.mapstruct/mapstruct-processor/1.5.5.Final/897f6f115930b936287bef552bf5fe28cc64717d/mapstruct-processor-1.5.5.Final.jar" />
+        </processorPath>
+        <module name="dnevnik.teacher-service.main" />
+        <module name="dnevnik.student-service.main" />
         <module name="dnevnik.grade-service.main" />
+        <module name="dnevnik.user-service.main" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="dnevnik.product-service" target="17" />
+      <module name="dnevnik.product-service.main" target="17" />
+      <module name="dnevnik.product-service.test" target="17" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="dnevnik.api-gateway" options="-parameters" />
       <module name="dnevnik.api-gateway.main" options="-parameters" />
       <module name="dnevnik.api-gateway.test" options="-parameters" />
+      <module name="dnevnik.class-service" options="-parameters" />
+      <module name="dnevnik.class-service.main" options="-parameters" />
+      <module name="dnevnik.class-service.test" options="-parameters" />
       <module name="dnevnik.eureka-server" options="-parameters" />
       <module name="dnevnik.eureka-server.main" options="-parameters" />
       <module name="dnevnik.eureka-server.test" options="-parameters" />
@@ -25,6 +45,15 @@
       <module name="dnevnik.product-service" options="-parameters" />
       <module name="dnevnik.product-service.main" options="-parameters" />
       <module name="dnevnik.product-service.test" options="-parameters" />
+      <module name="dnevnik.student-service" options="-parameters" />
+      <module name="dnevnik.student-service.main" options="-parameters" />
+      <module name="dnevnik.student-service.test" options="-parameters" />
+      <module name="dnevnik.subject-service" options="-parameters" />
+      <module name="dnevnik.subject-service.main" options="-parameters" />
+      <module name="dnevnik.subject-service.test" options="-parameters" />
+      <module name="dnevnik.teacher-service" options="-parameters" />
+      <module name="dnevnik.teacher-service.main" options="-parameters" />
+      <module name="dnevnik.teacher-service.test" options="-parameters" />
       <module name="dnevnik.user-service" options="-parameters" />
       <module name="dnevnik.user-service.main" options="-parameters" />
       <module name="dnevnik.user-service.test" options="-parameters" />

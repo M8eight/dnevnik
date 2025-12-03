@@ -1,7 +1,7 @@
-package com.rusobr.class_service.infrastructure.initializer;
+package com.rusobr.service.infrastructure.initializer;
 
-import com.rusobr.class_service.domain.model.GradeConstant;
-import com.rusobr.class_service.infrastructure.persistence.repository.GradeConstantRepository;
+import com.rusobr.service.domain.model.GradeConstant;
+import com.rusobr.service.infrastructure.persistence.repository.GradeConstantRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;

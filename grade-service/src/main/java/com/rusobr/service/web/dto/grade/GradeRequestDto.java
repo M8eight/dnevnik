@@ -1,6 +1,6 @@
-package com.rusobr.class_service.web.dto.grade;
+package com.rusobr.service.web.dto.grade;
 
-import com.rusobr.class_service.domain.model.Grade;
+import com.rusobr.service.domain.model.Grade;
 import lombok.Value;
 
 import java.io.Serializable;
@@ -14,6 +14,5 @@ public class GradeRequestDto implements Serializable {
     String student;
     String subject;
     String teacher;
-    String gradeCode;
     Date date;
 }
