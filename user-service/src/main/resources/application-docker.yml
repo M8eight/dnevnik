@@ -1,0 +1,10 @@
+spring:
+  config:
+    activate:
+      on-profile: docker
+
+  datasource:
+    url: jdbc:postgresql://postgres:5432/school_db
+    username: school_user
+    password: school_pass
+    driver-class-name: org.postgresql.Driver

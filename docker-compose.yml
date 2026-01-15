@@ -32,6 +32,8 @@ services:
   eureka-server:
     build: ./eureka-server
     container_name: eureka-server
+    depends_on:
+      - postgres
     ports:
       - "8761:8761"
     networks:
@@ -64,17 +66,21 @@ services:
     networks:
       - micro-net
 
-  user-service:
-    build: ./user-service
-    container_name: user-service
-    ports:
-      - "9001:9001"
-    depends_on:
-      - eureka-server
-    environment:
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
-    networks:
-      - micro-net
+#  user-service:
+#    build: ./user-service
+#    container_name: user-service
+#    ports:
+#      - "9001:9001"
+#    depends_on:
+#      - eureka-server
+#    environment:
+#      - SPRING_PROFILES_ACTIVE=docker
+#      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+#      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/school_db
+#      - SPRING_DATASOURCE_USERNAME=school_user
+#      - SPRING_DATASOURCE_PASSWORD=school_pass
+#    networks:
+#      - micro-net
 
 volumes:
   school-db-data:

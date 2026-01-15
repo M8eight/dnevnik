@@ -13,6 +13,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Setter
 @ToString
 @Builder
+@Table(name = "users")
 public class User {
     @Id
     @GeneratedValue

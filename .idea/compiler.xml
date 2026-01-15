@@ -57,6 +57,9 @@
       <module name="dnevnik.user-service" options="-parameters" />
       <module name="dnevnik.user-service.main" options="-parameters" />
       <module name="dnevnik.user-service.test" options="-parameters" />
+      <module name="template-service" options="-parameters" />
+      <module name="template-service.main" options="-parameters" />
+      <module name="template-service.test" options="-parameters" />
     </option>
   </component>
 </project>
