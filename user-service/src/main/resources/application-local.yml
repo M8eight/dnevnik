@@ -3,7 +3,7 @@ spring:
     name: user-service
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: validate
     show-sql: false
   flyway:
     enabled: true

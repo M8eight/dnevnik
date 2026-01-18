@@ -22,7 +22,7 @@
         <module name="dnevnik.user-service.main" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
+    <bytecodeTargetLevel target="17">
       <module name="dnevnik.product-service" target="17" />
       <module name="dnevnik.product-service.main" target="17" />
       <module name="dnevnik.product-service.test" target="17" />

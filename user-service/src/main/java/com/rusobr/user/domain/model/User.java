@@ -5,6 +5,8 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.sql.Timestamp;
+
 
 @Entity
 @NoArgsConstructor
@@ -16,7 +18,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Table(name = "users")
 public class User {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String username;
@@ -26,11 +28,9 @@ public class User {
     private String role;
     //student, teacher, admin, parents
 
-    @CreationTimestamp
-    @Column
-    private java.sql.Timestamp created_at;
+    @Column(updatable = false)
+    private Timestamp created_at;
 
-    @UpdateTimestamp
     @Column
-    private java.sql.Timestamp updated_at;
+    private Timestamp updated_at;
 }

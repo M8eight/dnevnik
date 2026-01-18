@@ -51,20 +51,20 @@ services:
     networks:
       - micro-net
 
-  grade-service:
-    build: ./grade-service
-    container_name: grade-service
-    ports:
-      - "9003:9003"
-    depends_on:
-      - eureka-server
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/school_db
-      - SPRING_DATASOURCE_USERNAME=school_user
-      - SPRING_DATASOURCE_PASSWORD=school_pass
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
-    networks:
-      - micro-net
+#  grade-service:
+#    build: ./grade-service
+#    container_name: grade-service
+#    ports:
+#      - "9003:9003"
+#    depends_on:
+#      - eureka-server
+#    environment:
+#      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/school_db
+#      - SPRING_DATASOURCE_USERNAME=school_user
+#      - SPRING_DATASOURCE_PASSWORD=school_pass
+#      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+#    networks:
+#      - micro-net
 
 #  user-service:
 #    build: ./user-service

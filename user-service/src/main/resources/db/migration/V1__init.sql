@@ -1,7 +1,6 @@
-CREATE TABLE IF NOT EXISTS `users` (
-    id LONG PRIMARY KEY AUTO_INCREMENT,
+CREATE TABLE IF NOT EXISTS users (
+    id BIGSERIAL PRIMARY KEY,
     username VARCHAR(255),
     password VARCHAR(255),
-    role VARCHAR(255),
-    PRIMARY KEY (id)
-)
+    role VARCHAR(255)
+);

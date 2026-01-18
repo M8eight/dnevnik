@@ -1,4 +1,13 @@
 spring:
+  application:
+    name: user-service
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
   config:
     activate:
       on-profile: docker
@@ -8,3 +17,15 @@ spring:
     username: school_user
     password: school_pass
     driver-class-name: org.postgresql.Driver
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+logging:
+  level:
+    org.flywaydb: DEBUG
+
+server:
+  port: 9001
