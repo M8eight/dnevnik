@@ -1,0 +1,42 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:9090/realms/dnevnik-realm
+          jwk-set-uri: http://localhost:9090/realms/dnevnik-realm/protocol/openid-connect/certs
+
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        - id: user-service
+          uri: http://localhost:9001
+          predicates:
+            - Path=/api/users/**
+          filters:
+            - TokenRelay=
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+#logging:
+#  level:
+#    org.springframework.cloud.gateway: DEBUG
+#    root: info
+#    org.springframework.security: DEBUG
+#    org.springframework.web.reactive: DEBUG
+#    reactor.netty: DEBUG
+
+

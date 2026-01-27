@@ -18,6 +18,7 @@
         </processorPath>
         <module name="dnevnik.teacher-service.main" />
         <module name="dnevnik.student-service.main" />
+        <module name="dnevnik.template-service.main" />
         <module name="dnevnik.grade-service.main" />
         <module name="dnevnik.user-service.main" />
       </profile>
@@ -54,6 +55,9 @@
       <module name="dnevnik.teacher-service" options="-parameters" />
       <module name="dnevnik.teacher-service.main" options="-parameters" />
       <module name="dnevnik.teacher-service.test" options="-parameters" />
+      <module name="dnevnik.template-service" options="-parameters" />
+      <module name="dnevnik.template-service.main" options="-parameters" />
+      <module name="dnevnik.template-service.test" options="-parameters" />
       <module name="dnevnik.user-service" options="-parameters" />
       <module name="dnevnik.user-service.main" options="-parameters" />
       <module name="dnevnik.user-service.test" options="-parameters" />

@@ -29,27 +29,48 @@ services:
       - 'start-dev'
 
 
-  eureka-server:
-    build: ./eureka-server
-    container_name: eureka-server
-    depends_on:
-      - postgres
+  loki:
+    image: grafana/loki:2.9.0
     ports:
-      - "8761:8761"
-    networks:
-      - micro-net
+      - "3100:3100"
+    volumes:
+      - ./loki.yml:/etc/loki/loki.yml
 
-  api-gateway:
-    build: ./api-gateway
-    container_name: api-gateway
+  promtail:
+    image: grafana/promtail:2.9.0
+    volumes:
+      - ./promtail-config.yml:/etc/promtail/config.yml
+      - ./logs:/var/log/spring
+
+  grafana:
+    image: grafana/grafana:10.0.0
     ports:
-      - "8080:8080"
-    depends_on:
-      - eureka-server
-    environment:
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
-    networks:
-      - micro-net
+      - "3000:3000"
+
+#  eureka-server:
+#    build: ./eureka-server
+#    container_name: eureka-server
+#    depends_on:
+#      - postgres
+#    ports:
+#      - "8761:8761"
+#    networks:
+#      - micro-net
+#
+#  api-gateway:
+#    build: ./api-gateway
+#    container_name: api-gateway
+#    ports:
+#      - "8080:8080"
+#    depends_on:
+#      - eureka-server
+#    environment:
+#      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+#      - LOG_PATH=/var/log/spring
+#    volumes:
+#      - ./logs/gateway:/var/log/spring
+#    networks:
+#      - micro-net
 
 #  grade-service:
 #    build: ./grade-service

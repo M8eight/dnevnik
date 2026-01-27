@@ -11,6 +11,11 @@ spring:
   config:
     activate:
       on-profile: docker
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:9090/realms/dnevnik-realm
 
   datasource:
     url: jdbc:postgresql://postgres:5432/school_db

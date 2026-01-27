@@ -15,6 +15,9 @@ dependencies {
     implementation 'org.flywaydb:flyway-core'
     implementation "org.flywaydb:flyway-database-postgresql"
 
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+
     compileOnly 'org.projectlombok:lombok:1.18.20'
     annotationProcessor 'org.projectlombok:lombok:1.18.20'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -22,7 +25,9 @@ dependencies {
     implementation 'org.mapstruct:mapstruct:1.5.5.Final'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
 
-//    implementation "org.springframework.boot:spring-boot-starter-security"
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'io.micrometer:micrometer-tracing-bridge-brave'
+    implementation 'io.micrometer:micrometer-registry-prometheus'
 }
 
 tasks.named('test') {
