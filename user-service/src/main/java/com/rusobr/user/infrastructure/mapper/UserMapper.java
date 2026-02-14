@@ -1,12 +1,15 @@
 package com.rusobr.user.infrastructure.mapper;
 
 import com.rusobr.user.domain.model.User;
-import com.rusobr.user.web.dto.RequestUserDto;
+import com.rusobr.user.web.dto.CreateUserDtoRequest;
+import com.rusobr.user.web.dto.CreateUserDtoResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface UserMapper {
-    User toUser(RequestUserDto requestUserDto);
-    RequestUserDto toRequestUserDto(User user);
+    User toUser(CreateUserDtoRequest createUserDtoRequest);
+    CreateUserDtoRequest toRequestUserDto(User user);
+
+    CreateUserDtoResponse toCreateUserDto(User user);
 }

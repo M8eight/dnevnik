@@ -1,0 +1,39 @@
+// Чтение логов из файлов
+local.file_match "spring_logs" {
+  path_targets = [{
+    __path__ = "/logs/*.log",
+  }]
+}
+
+loki.source.file "spring_apps" {
+  targets    = local.file_match.spring_logs.targets
+  forward_to = [loki.process.spring_parser.receiver]
+}
+
+// Парсинг и обогащение логов
+loki.process "spring_parser" {
+  forward_to = [loki.write.local_loki.receiver]
+
+  stage.json {
+    expressions = {
+      level   = "level",
+      logger  = "logger",
+      message = "message",
+      trace   = "trace_id",
+    }
+  }
+
+  stage.labels {
+    values = {
+      level  = "",
+      logger = "",
+    }
+  }
+}
+
+// Отправка в Loki
+loki.write "local_loki" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}

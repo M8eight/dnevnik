@@ -27,25 +27,48 @@ services:
       - keycloak_data:/opt/keycloak/data
     command:
       - 'start-dev'
-
+    networks:
+      - micro-net
 
   loki:
-    image: grafana/loki:2.9.0
+    image: grafana/loki:2.9.3
     ports:
       - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
     volumes:
-      - ./loki.yml:/etc/loki/loki.yml
-
-  promtail:
-    image: grafana/promtail:2.9.0
-    volumes:
-      - ./promtail-config.yml:/etc/promtail/config.yml
-      - ./logs:/var/log/spring
+      - ./loki-config.yaml:/etc/loki/local-config.yaml
+      - loki-data:/loki
+    networks:
+      - micro-net
 
   grafana:
-    image: grafana/grafana:10.0.0
+    image: grafana/grafana:10.2.3
     ports:
       - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
+    depends_on:
+      - loki
+    networks:
+      - micro-net
+
+  alloy:
+    image: grafana/alloy:latest
+    ports:
+      - "12345:12345"
+      - "4317:4317"  # OTLP gRPC
+      - "4318:4318"  # OTLP HTTP
+    volumes:
+      - ./alloy-config.alloy:/etc/alloy/config.alloy
+      - ./logs:/logs
+    command: run --server.http.listen-addr=0.0.0.0:12345 --storage.path=/var/lib/alloy/data /etc/alloy/config.alloy
+    networks:
+      - micro-net
+    depends_on:
+      - loki
 
 #  eureka-server:
 #    build: ./eureka-server
@@ -106,6 +129,8 @@ services:
 volumes:
   school-db-data:
   keycloak_data:
+  loki-data:
+  grafana-data:
 
 networks:
   micro-net:

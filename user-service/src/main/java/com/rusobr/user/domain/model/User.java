@@ -2,8 +2,6 @@ package com.rusobr.user.domain.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
 
@@ -21,12 +19,23 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String username;
+    private String firstName;
 
-    private String password;
+    private String lastName;
 
-    private String role;
-    //student, teacher, admin, parents
+    @Column(nullable = false, unique = true)
+    private String keycloack_id;
+
+
+    @OneToOne(mappedBy = "user")
+    private Student student;
+
+    @OneToOne(mappedBy = "user")
+    private Teacher teacher;
+
+    @OneToOne(mappedBy = "user")
+    private Parent parent;
+
 
     @Column(updatable = false)
     private Timestamp created_at;

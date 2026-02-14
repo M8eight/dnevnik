@@ -9,6 +9,7 @@
         </processorPath>
         <module name="dnevnik.class-service.main" />
         <module name="dnevnik.subject-service.main" />
+        <module name="dnevnik.template-service.main" />
       </profile>
       <profile name="Gradle Imported" enabled="true">
         <outputRelativeToContentRoot value="true" />
@@ -18,7 +19,6 @@
         </processorPath>
         <module name="dnevnik.teacher-service.main" />
         <module name="dnevnik.student-service.main" />
-        <module name="dnevnik.template-service.main" />
         <module name="dnevnik.grade-service.main" />
         <module name="dnevnik.user-service.main" />
       </profile>
