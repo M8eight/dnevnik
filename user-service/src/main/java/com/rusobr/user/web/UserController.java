@@ -19,7 +19,7 @@ public class UserController {
     private final KeycloackRestClient keycloackRestClient;
 
     @GetMapping("/create")
-    public String getAll() {
+    public String createUser() {
         CreateKeyCloackUserRequestDto dto = CreateKeyCloackUserRequestDto.builder().username("admin").password("admin").build();
         String keycloackId =  keycloackRestClient.createKeyCloackUser(dto);
         log.info("{} keycloack id", keycloackId);

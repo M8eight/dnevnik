@@ -24,7 +24,7 @@ public class User {
     private String lastName;
 
     @Column(nullable = false, unique = true)
-    private String keycloack_id;
+    private String keycloackId;
 
 
     @OneToOne(mappedBy = "user")

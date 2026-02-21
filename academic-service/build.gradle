@@ -4,6 +4,9 @@ plugins {
     id 'java'
 }
 
+group = 'com.rusobr'
+version = '0.0.1-SNAPSHOT'
+
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
@@ -11,8 +14,8 @@ dependencies {
     implementation 'org.postgresql:postgresql'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
-    implementation 'org.flywaydb:flyway-core'
-    implementation "org.flywaydb:flyway-database-postgresql"
+//    implementation 'org.flywaydb:flyway-core'
+//    implementation "org.flywaydb:flyway-database-postgresql"
 
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
@@ -40,4 +43,8 @@ tasks.named('test') {
 
 bootJar {
     archiveFileName = "${project.name}.jar"
+}
+
+test {
+    useJUnitPlatform()
 }

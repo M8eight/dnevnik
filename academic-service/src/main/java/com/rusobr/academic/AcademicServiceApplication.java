@@ -1,4 +1,4 @@
-package com.rusobr.user;
+package com.rusobr.academic;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -8,8 +8,8 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @SpringBootApplication
 @EnableDiscoveryClient
 @EnableWebMvc
-public class UserServiceApplication {
+public class AcademicServiceApplication {
     public static void main(String[] args) {
-        SpringApplication.run(UserServiceApplication.class, args);
+        SpringApplication.run(AcademicServiceApplication.class, args);
     }
 }

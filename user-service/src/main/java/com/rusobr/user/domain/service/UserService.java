@@ -11,11 +11,13 @@ import com.rusobr.user.web.dto.CreateUserDtoResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@PreAuthorize("hasRole('ROLE_ADMIN')")
 public class UserService {
 
     private final UserRepository userRepository;
@@ -41,7 +43,7 @@ public class UserService {
         );
 
         User userDb = User.builder()
-                .keycloack_id(keycloackUserId)
+                .keycloackId(keycloackUserId)
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .build();
@@ -53,7 +55,7 @@ public class UserService {
     @Transactional
     public void deleteUser(String keycloackUserId) {
         keycloackRestClient.deleteKeyCloackUser(keycloackUserId);
-        User user = userRepository.findByKeycloack_id(keycloackUserId);
+        User user = userRepository.findByKeycloackId(keycloackUserId).orElseThrow(() -> new RuntimeException("User not found"));
         userRepository.delete(user);
 
         log.info("{} user delete", keycloackUserId);

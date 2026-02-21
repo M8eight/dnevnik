@@ -18,9 +18,9 @@
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.mapstruct/mapstruct-processor/1.5.5.Final/897f6f115930b936287bef552bf5fe28cc64717d/mapstruct-processor-1.5.5.Final.jar" />
         </processorPath>
         <module name="dnevnik.teacher-service.main" />
-        <module name="dnevnik.student-service.main" />
         <module name="dnevnik.grade-service.main" />
         <module name="dnevnik.user-service.main" />
+        <module name="dnevnik.academic-service.main" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel target="17">
@@ -31,6 +31,9 @@
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="dnevnik.academic-service" options="-parameters" />
+      <module name="dnevnik.academic-service.main" options="-parameters" />
+      <module name="dnevnik.academic-service.test" options="-parameters" />
       <module name="dnevnik.api-gateway" options="-parameters" />
       <module name="dnevnik.api-gateway.main" options="-parameters" />
       <module name="dnevnik.api-gateway.test" options="-parameters" />
@@ -46,9 +49,6 @@
       <module name="dnevnik.product-service" options="-parameters" />
       <module name="dnevnik.product-service.main" options="-parameters" />
       <module name="dnevnik.product-service.test" options="-parameters" />
-      <module name="dnevnik.student-service" options="-parameters" />
-      <module name="dnevnik.student-service.main" options="-parameters" />
-      <module name="dnevnik.student-service.test" options="-parameters" />
       <module name="dnevnik.subject-service" options="-parameters" />
       <module name="dnevnik.subject-service.main" options="-parameters" />
       <module name="dnevnik.subject-service.test" options="-parameters" />
