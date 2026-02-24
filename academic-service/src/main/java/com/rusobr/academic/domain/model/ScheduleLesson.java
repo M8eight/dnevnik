@@ -13,24 +13,24 @@ import java.util.List;
 @Setter
 @ToString
 @Builder
-public class Lesson {
+@Table(name = "schedule_lessons",
+        uniqueConstraints = @UniqueConstraint(
+                columnNames = {"teaching_assignment_id", "day_of_week", "lesson_number"}
+        ))
+public class ScheduleLesson {
     @Id
     @GeneratedValue
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "teaching_assignment_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "teaching_assignment_id", nullable = false)
     private TeachingAssignment teachingAssignment;
 
-    @OneToMany(mappedBy = "lesson")
-    private List<Attendance> attendances;
-
-    @OneToMany(mappedBy = "lesson")
-    private List<Grade> grades;
-
     @Enumerated(EnumType.STRING)
+    @Column(name = "day_of_week", nullable = false)
     private DayOfWeek dayOfWeek;
 
+    @Column(name = "lesson_number", nullable = false)
     private Integer lessonNumber;
 
     private String classRoom;

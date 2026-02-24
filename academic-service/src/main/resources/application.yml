@@ -3,14 +3,14 @@ spring:
     name: academic-service
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: create-drop
     show-sql: true
-    properties:
-        jakarta.persistence.schema-generation.scripts.action: create
-        jakarta.persistence.schema-generation.scripts.create-target: schema.sql
-        jakarta.persistence.schema-generation.create-source: metadata
+#    properties:
+#        jakarta.persistence.schema-generation.scripts.action: create
+#        jakarta.persistence.schema-generation.scripts.create-target: schema.sql
+#        jakarta.persistence.schema-generation.create-source: metadata
   flyway:
-    enabled: true
+    enabled: false
     baseline-on-migrate: true
   security:
     oauth2:

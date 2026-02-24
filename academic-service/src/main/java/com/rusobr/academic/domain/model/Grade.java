@@ -5,8 +5,6 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.util.Date;
-
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,6 +12,7 @@ import java.util.Date;
 @Setter
 @ToString
 @Builder
+@Table(name = "grades")
 public class Grade {
     @Id
     @GeneratedValue
@@ -21,11 +20,13 @@ public class Grade {
 
     private Long studentId;
 
-    @ManyToOne
-    private Lesson lesson;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "lesson_instance_id", nullable = false)
+    private LessonInstance lessonInstance;
 
     private Integer value;
 
+    //TODO сделать enum
     private String type;
 
     @CreationTimestamp

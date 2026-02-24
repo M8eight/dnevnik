@@ -26,9 +26,6 @@ public class SchoolClass {
 
     private Long classTeacherId;
 
-    @OneToMany(mappedBy = "schoolClass")
-    private List<Lesson> lessons;
-
     @CreationTimestamp
     @Column
     private java.sql.Timestamp created_at;

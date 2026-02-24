@@ -1,10 +1,7 @@
 package com.rusobr.academic.domain.model;
 
 import jakarta.annotation.Nullable;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -16,6 +13,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Setter
 @ToString
 @Builder
+@Table(name = "subjects")
 public class Subject {
     @Id
     @GeneratedValue

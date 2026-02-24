@@ -7,8 +7,6 @@
         <processorPath useClasspath="false">
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.20/18bcea7d5df4d49227b4a0743a536208ce4825bb/lombok-1.18.20.jar" />
         </processorPath>
-        <module name="dnevnik.class-service.main" />
-        <module name="dnevnik.subject-service.main" />
         <module name="dnevnik.template-service.main" />
       </profile>
       <profile name="Gradle Imported" enabled="true">
@@ -17,8 +15,6 @@
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.20/18bcea7d5df4d49227b4a0743a536208ce4825bb/lombok-1.18.20.jar" />
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.mapstruct/mapstruct-processor/1.5.5.Final/897f6f115930b936287bef552bf5fe28cc64717d/mapstruct-processor-1.5.5.Final.jar" />
         </processorPath>
-        <module name="dnevnik.teacher-service.main" />
-        <module name="dnevnik.grade-service.main" />
         <module name="dnevnik.user-service.main" />
         <module name="dnevnik.academic-service.main" />
       </profile>

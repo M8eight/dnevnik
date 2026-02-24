@@ -936,7 +936,7 @@ admin (связан с user по user_id)
 
 [ ] Настроить docker-compose
 
-[ ] Настроить Kubernetes манифесты
+[ ] Настроить Kubernetes манфесты
 
 [ ] Настроить env переменные
 

@@ -4,8 +4,6 @@ import com.rusobr.academic.domain.enums.AttendanceStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.List;
-
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
@@ -13,6 +11,7 @@ import java.util.List;
 @Setter
 @ToString
 @Builder
+@Table(name = "attendances")
 public class Attendance {
     @Id
     @GeneratedValue
@@ -24,5 +23,5 @@ public class Attendance {
     private AttendanceStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private Lesson lessonId;
+    private LessonInstance lessonInstance;
 }
