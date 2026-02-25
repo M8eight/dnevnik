@@ -1,3 +1,13 @@
+Grafana ️ ⚠️
+Feign Clients ⚠️
+Flyway ⚠️
+RabitMQ ⚠️
+MinIO ⚠️
+Micrometer ⚠️
+Flyway ⚠️
+
+front: React + Redux ❌ будет
+
 ✅ User Service - ГОТОВ
 
 user (связан с Keycloak по keycloak_id)

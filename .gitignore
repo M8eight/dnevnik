@@ -39,3 +39,4 @@ out/
 logs/**
 checklist.txt
 README.md
+/.idea/
