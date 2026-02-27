@@ -1,4 +1,0 @@
-CREATE DATABASE student_db;
-CREATE DATABASE teacher_db;
-CREATE DATABASE grade_db;
-CREATE DATABASE subject_db;

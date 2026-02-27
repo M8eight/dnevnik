@@ -1,4 +1,4 @@
-package com.rusobr.user.web.dto;
+package com.rusobr.user.web.dto.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

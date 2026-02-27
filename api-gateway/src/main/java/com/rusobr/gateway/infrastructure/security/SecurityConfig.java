@@ -2,6 +2,7 @@ package com.rusobr.gateway.infrastructure.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
@@ -21,16 +22,16 @@ public class SecurityConfig {
 
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
-        http
-                .csrf(ServerHttpSecurity.CsrfSpec::disable)
-                .authorizeExchange(ex -> ex
-                        .pathMatchers("/actuator/**").permitAll()
-                        .pathMatchers("/auth/**").authenticated()
-                        .anyExchange().authenticated()
-                )
-                .oauth2ResourceServer(oAuth2 -> oAuth2
-                        .jwt(jwt -> {})
-                );
+//        http
+//                .csrf(ServerHttpSecurity.CsrfSpec::disable)
+//                .authorizeExchange(ex -> ex
+//                        .pathMatchers("/actuator/**").permitAll()
+//                        .pathMatchers("/auth/**").authenticated()
+//                        .anyExchange().authenticated()
+//                )
+//                .oauth2ResourceServer(oAuth2 -> oAuth2
+//                        .jwt(jwt -> {})
+//                )
 //                .oauth2ResourceServer(oAuth2 -> oAuth2
 //                        .jwt(jwt -> jwt
 //                                .jwtDecoder(jwtDecoder())
@@ -38,7 +39,13 @@ public class SecurityConfig {
 //                        )
 //                );
 
-        return http.build();
+        return http
+                .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                .authorizeExchange(exchange -> exchange.anyExchange().permitAll())
+                .build();
+
+
+//        return http.build();
     }
 
     public ReactiveJwtDecoder jwtDecoder() {

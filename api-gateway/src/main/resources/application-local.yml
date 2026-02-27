@@ -20,11 +20,18 @@ spring:
           lower-case-service-id: true
       routes:
         - id: user-service
-          uri: http://localhost:9001
+          uri: lb://user-service
           predicates:
-            - Path=/api/users/**
+            - Path=/user-service/**
           filters:
             - TokenRelay=
+        - id: academic-service
+          uri: lb://academic-service
+          predicates:
+            - Path=/academic-service/**
+          filters:
+            - TokenRelay=
+
 
 eureka:
   client:

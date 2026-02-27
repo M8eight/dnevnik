@@ -1,8 +1,8 @@
 package com.rusobr.user.infrastructure.mapper;
 
 import com.rusobr.user.domain.model.User;
-import com.rusobr.user.web.dto.CreateUserDtoRequest;
-import com.rusobr.user.web.dto.CreateUserDtoResponse;
+import com.rusobr.user.web.dto.user.CreateUserDtoRequest;
+import com.rusobr.user.web.dto.user.CreateUserDtoResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
 

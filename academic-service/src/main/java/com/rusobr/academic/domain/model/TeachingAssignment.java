@@ -15,7 +15,7 @@ import lombok.*;
 }))
 public class TeachingAssignment {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private Long teacherId;

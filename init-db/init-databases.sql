@@ -1,0 +1,2 @@
+CREATE DATABASE academic_db;
+CREATE DATABASE user_db;

@@ -14,7 +14,7 @@ import lombok.*;
 @Table(name = "attendances")
 public class Attendance {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private Long studentId;

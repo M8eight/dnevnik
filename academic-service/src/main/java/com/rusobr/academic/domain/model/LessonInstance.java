@@ -18,7 +18,7 @@ import java.time.LocalDate;
         ))
 public class LessonInstance {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

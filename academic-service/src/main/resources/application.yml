@@ -6,8 +6,9 @@ spring:
       ddl-auto: create-drop
     show-sql: true
 #    properties:
+#        jakarta.persistence.schema-generation.database.action: create
 #        jakarta.persistence.schema-generation.scripts.action: create
-#        jakarta.persistence.schema-generation.scripts.create-target: schema.sql
+#        jakarta.persistence.schema-generation.scripts.create-target: schemas/academic-schema.sql
 #        jakarta.persistence.schema-generation.create-source: metadata
   flyway:
     enabled: false
@@ -19,7 +20,7 @@ spring:
           issuer-uri: ${keycloack.url}/realms/${keycloack.realm}
 
   datasource:
-    url: ${PSQL_DB_URL:jdbc:postgresql://localhost:5432/school_db}
+    url: ${PSQL_DB_URL:jdbc:postgresql://localhost:5432/academic_db}
     username: school_user
     password: school_pass
     driver-class-name: org.postgresql.Driver

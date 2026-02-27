@@ -3,10 +3,15 @@ spring:
     name: user-service
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: create-drop
     show-sql: true
+#    properties:
+#      jakarta.persistence.schema-generation.database.action: create
+#      jakarta.persistence.schema-generation.scripts.action: create
+#      jakarta.persistence.schema-generation.scripts.create-target: schemas/user-schema.sql
+#      jakarta.persistence.schema-generation.create-source: metadata
   flyway:
-    enabled: true
+    enabled: false
     baseline-on-migrate: true
   security:
     oauth2:
@@ -15,7 +20,7 @@ spring:
           issuer-uri: ${keycloack.url}/realms/${keycloack.realm}
 
   datasource:
-    url: ${PSQL_DB_URL:jdbc:postgresql://localhost:5432/school_db}
+    url: ${PSQL_DB_URL:jdbc:postgresql://localhost:5432/user_db}
     username: school_user
     password: school_pass
     driver-class-name: org.postgresql.Driver

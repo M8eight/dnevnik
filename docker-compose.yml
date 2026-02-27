@@ -6,7 +6,6 @@ services:
     environment:
       POSTGRES_USER: school_user
       POSTGRES_PASSWORD: school_pass
-      POSTGRES_DB: school_db
     ports:
       - "5432:5432"
     networks:

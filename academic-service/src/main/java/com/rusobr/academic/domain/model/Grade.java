@@ -15,7 +15,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Table(name = "grades")
 public class Grade {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private Long studentId;
