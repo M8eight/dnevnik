@@ -1,6 +1,6 @@
 package com.rusobr.academic.web.controller;
 
-import com.rusobr.academic.domain.service.ScheduleService;
+import com.rusobr.academic.infrastructure.service.ScheduleService;
 import com.rusobr.academic.web.dto.lessonInstance.LessonWeekDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +12,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/")
 public class ScheduleController {
 
     private final ScheduleService scheduleService;

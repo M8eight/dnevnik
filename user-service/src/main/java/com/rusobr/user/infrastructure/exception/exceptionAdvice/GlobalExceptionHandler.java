@@ -1,5 +1,6 @@
 package com.rusobr.user.infrastructure.exception.exceptionAdvice;
 
+import com.rusobr.user.infrastructure.exception.KeycloackUserAlreadyExist;
 import com.rusobr.user.infrastructure.exception.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<String> handle(NotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ex.getMessage());
+    }
+
+    @ExceptionHandler(KeycloackUserAlreadyExist.class)
+    public ResponseEntity<String> handle(KeycloackUserAlreadyExist ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(ex.getMessage());
     }
 }

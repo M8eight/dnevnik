@@ -52,9 +52,6 @@ management:
 keycloack:
   url: ${KEYCLOACK_URL:http://localhost:9090}
   realm: dnevnik-realm
-  admin-token: 123
-  client-id: dnevnik-api
-  client-secret: iyK8jgnsX42Kbh8wKpNe5BFMSBmypnzb
 
 server:
   port: 9002
