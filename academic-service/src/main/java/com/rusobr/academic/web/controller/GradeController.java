@@ -1,9 +1,8 @@
 package com.rusobr.academic.web.controller;
 
-import com.rusobr.academic.domain.service.GradeService;
+import com.rusobr.academic.infrastructure.service.GradeService;
 import com.rusobr.academic.web.dto.grade.GradeRequestDto;
 import com.rusobr.academic.web.dto.grade.GradeResponseDto;
-import com.rusobr.academic.web.dto.subject.SubjectRequestDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

@@ -27,21 +27,27 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+//        http
+//                .sessionManagement(session -> {
+//                    session.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+//                })
+//                .csrf(AbstractHttpConfigurer::disable)
+//                .authorizeHttpRequests(req -> {
+//                    req.requestMatchers("/login**").permitAll()
+//                            .requestMatchers("/public/**", "/actuator/health").permitAll()
+//                            .anyRequest().authenticated();
+//                })
+//                .oauth2ResourceServer(oauth2 -> {
+//                    oauth2.jwt(jwt-> {
+//                        jwt.jwtAuthenticationConverter(jwtConverter());
+//                    });
+//                });
+
         http
-                .sessionManagement(session -> {
-                    session.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-                })
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(req -> {
-                    req.requestMatchers("/login**").permitAll()
-                            .requestMatchers("/public/**", "/actuator/health").permitAll()
-                            .anyRequest().authenticated();
-                })
-                .oauth2ResourceServer(oauth2 -> {
-                    oauth2.jwt(jwt-> {
-                        jwt.jwtAuthenticationConverter(jwtConverter());
-                    });
-                });
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+                .securityContext(AbstractHttpConfigurer::disable)
+                .sessionManagement(AbstractHttpConfigurer::disable);
 
         return http.build();
     }

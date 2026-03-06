@@ -1,9 +1,12 @@
 package com.rusobr.user.domain.model;
 
+import com.rusobr.user.infrastructure.enums.UserRoles;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.sql.Timestamp;
+import java.util.HashSet;
+import java.util.Set;
 
 
 @Entity
@@ -19,6 +22,8 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String username;
+
     private String firstName;
 
     private String lastName;
@@ -26,16 +31,14 @@ public class User {
     @Column(nullable = false, unique = true)
     private String keycloackId;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role_name")
+    @ElementCollection(fetch = FetchType.EAGER, targetClass = UserRoles.class)
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    private Set<UserRoles> roles = new HashSet<>();
 
-    @OneToOne(mappedBy = "user")
-    private Student student;
-
-    @OneToOne(mappedBy = "user")
-    private Teacher teacher;
-
-    @OneToOne(mappedBy = "user")
-    private Parent parent;
-
+    //todo сделать ссылку на ребенка
+    private Long childId;
 
     @Column(updatable = false)
     private Timestamp created_at;
