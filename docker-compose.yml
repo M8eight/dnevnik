@@ -6,6 +6,12 @@ services:
     environment:
       POSTGRES_USER: school_user
       POSTGRES_PASSWORD: school_pass
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U school_user -d user_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
     ports:
       - "5432:5432"
     networks:
@@ -19,15 +25,24 @@ services:
     image: quay.io/keycloak/keycloak:25.0.5
     ports:
       - '9090:8080'
+    command: start-dev --import-realm
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: password
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: school_user
+      KC_DB_PASSWORD: school_pass
+      KC_HOSTNAME: localhost
     volumes:
       - keycloak_data:/opt/keycloak/data
-    command:
-      - 'start-dev'
+      - ./configs/dnevnik-realm-config.json:/opt/keycloak/data/import/realm.json:ro
+
     networks:
       - micro-net
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   loki:
     image: grafana/loki:2.9.3
