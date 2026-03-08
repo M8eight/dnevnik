@@ -1,14 +1,15 @@
 package com.rusobr.user.web.controller;
 
 import com.rusobr.user.infrastructure.service.UserService;
-import com.rusobr.user.web.dto.keycloack.KeycloackUserResponse;
+import com.rusobr.user.web.dto.keycloack.CreateUserResponse;
 import com.rusobr.user.web.dto.keycloack.role.AssignRoleToUserRequest;
-import com.rusobr.user.web.dto.keycloack.KeycloackUserRequest;
-import com.rusobr.user.web.dto.keycloack.role.KeycloackRoleDto;
+import com.rusobr.user.web.dto.keycloack.CreateUserRequest;
+import com.rusobr.user.web.dto.keycloack.role.KeycloackRole;
 import com.rusobr.user.web.dto.user.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,8 +32,9 @@ public class UserController {
     }
 
     @PostMapping("/create")
-    public KeycloackUserResponse createUser(@RequestBody KeycloackUserRequest keycloackUserRequest) {
-        return userService.createUser(keycloackUserRequest);
+    @ResponseStatus(HttpStatus.CREATED)
+    public CreateUserResponse createUser(@RequestBody CreateUserRequest createUserRequest) {
+        return userService.createUser(createUserRequest);
     }
 
     @DeleteMapping("/delete")
@@ -42,7 +44,7 @@ public class UserController {
 
 
     @GetMapping("/roles")
-    public List<KeycloackRoleDto> getAllRolesForUser() {
+    public List<KeycloackRole> getAllRolesForUser() {
         return userService.getAllRoles();
     }
 

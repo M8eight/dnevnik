@@ -1,13 +1,15 @@
+package com.rusobr.user;
+
 import com.rusobr.user.domain.model.User;
 import com.rusobr.user.infrastructure.enums.UserRoles;
 import com.rusobr.user.infrastructure.mapper.UserMapper;
 import com.rusobr.user.infrastructure.persistence.repository.UserRepository;
 import com.rusobr.user.infrastructure.service.UserService;
 import com.rusobr.user.infrastructure.webClient.KeycloackRestClient;
-import com.rusobr.user.web.dto.keycloack.KeycloackUserRequest;
-import com.rusobr.user.web.dto.keycloack.KeycloackUserResponse;
+import com.rusobr.user.web.dto.keycloack.CreateUserRequest;
+import com.rusobr.user.web.dto.keycloack.CreateUserResponse;
 import com.rusobr.user.web.dto.keycloack.role.AssignRoleToUserRequest;
-import com.rusobr.user.web.dto.keycloack.role.KeycloackRoleDto;
+import com.rusobr.user.web.dto.keycloack.role.KeycloackRole;
 import com.rusobr.user.web.dto.user.UserResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -81,7 +83,7 @@ public class UserServiceTest {
 
     @Test
     void shouldCreateUser() {
-        KeycloackUserRequest req = new KeycloackUserRequest(
+        CreateUserRequest req = new CreateUserRequest(
                 "AlexK",
                 "123456",
                 "Алексей",
@@ -99,7 +101,7 @@ public class UserServiceTest {
                 .keycloackId("abc-123")
                 .build();
 
-        KeycloackUserResponse userResp = KeycloackUserResponse.builder()
+        CreateUserResponse userResp = CreateUserResponse.builder()
                 .id(1L)
                 .username("AlexK")
                 .firstName("Алексей")
@@ -113,13 +115,13 @@ public class UserServiceTest {
         when(userMapper.toUser(any()))
             .thenReturn(savedUser);
 
-        when(userMapper.toKeycloackUserResponse(any()))
+        when(userMapper.toCreateUserResponse(any()))
                 .thenReturn(userResp);
 
         when(keycloackRestClient.createKeyCloackUser(any()))
                 .thenReturn("abc-123");
 
-        KeycloackUserResponse userResponse = userService.createUser(req);
+        CreateUserResponse userResponse = userService.createUser(req);
 
         assertEquals("Алексей", userResponse.firstName());
         verify(keycloackRestClient).createKeyCloackUser(any());
@@ -129,7 +131,7 @@ public class UserServiceTest {
     @Test
     void shouldDeleteKeycloakUserIfDatabaseFails() {
         // GIVEN
-        KeycloackUserRequest req = new KeycloackUserRequest("AlexK", "123", "Alex", "K");
+        CreateUserRequest req = new CreateUserRequest("AlexK", "123", "Alex", "K");
         String generatedId = "abc-123";
 
         when(keycloackRestClient.createKeyCloackUser(any())).thenReturn(generatedId);
@@ -149,11 +151,11 @@ public class UserServiceTest {
     @DisplayName("Должен возвращать список всех ролей из Keycloak")
     void shouldReturnAllRolesFromKeycloak() {
         // GIVEN
-        List<KeycloackRoleDto> roles = List.of(new KeycloackRoleDto("role-123", "ADMIN"));
+        List<KeycloackRole> roles = List.of(new KeycloackRole("role-123", "ADMIN"));
         when(keycloackRestClient.getAllKeycloackRoles()).thenReturn(roles);
 
         // WHEN
-        List<KeycloackRoleDto> result = userService.getAllRoles();
+        List<KeycloackRole> result = userService.getAllRoles();
 
         // THEN
         assertEquals(1, result.size());

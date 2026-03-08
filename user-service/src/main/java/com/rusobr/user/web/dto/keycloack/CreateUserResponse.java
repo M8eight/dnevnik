@@ -3,7 +3,7 @@ package com.rusobr.user.web.dto.keycloack;
 import lombok.Builder;
 
 @Builder
-public record KeycloackUserResponse(
+public record CreateUserResponse(
     Long id,
     String firstName,
     String lastName,

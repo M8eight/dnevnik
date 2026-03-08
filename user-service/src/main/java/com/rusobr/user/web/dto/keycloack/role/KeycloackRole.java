@@ -1,6 +1,6 @@
 package com.rusobr.user.web.dto.keycloack.role;
 
-public record KeycloackRoleDto (
+public record KeycloackRole(
     String id,
     String name
 ) {}

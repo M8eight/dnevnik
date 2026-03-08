@@ -1,10 +1,9 @@
 package com.rusobr.user.infrastructure.webClient;
 
 import com.rusobr.user.infrastructure.exception.KeycloackUserAlreadyExist;
-import com.rusobr.user.web.dto.keycloack.KeycloackUserResponse;
+import com.rusobr.user.web.dto.keycloack.CreateUserRequest;
 import com.rusobr.user.web.dto.keycloack.role.AssignRoleToUserRequest;
-import com.rusobr.user.web.dto.keycloack.KeycloackUserRequest;
-import com.rusobr.user.web.dto.keycloack.role.KeycloackRoleDto;
+import com.rusobr.user.web.dto.keycloack.role.KeycloackRole;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
@@ -46,18 +45,18 @@ public class KeycloackRestClient {
 //                .block();
 //    }
 
-    public String createKeyCloackUser(KeycloackUserRequest keycloackUserRequest) {
+    public String createKeyCloackUser(CreateUserRequest createUserRequest) {
 
         //todo map this
         Map<String,Object> user = new HashMap<>();
-        user.put("username", keycloackUserRequest.username());
+        user.put("username", createUserRequest.username());
         user.put("enabled", true);
         user.put("emailVerified", true);
 
         List<Map<String, Object>> credentials = new ArrayList<>();
         Map<String, Object> password = Map.of(
                 "type", "password",
-                "value", keycloackUserRequest.password(),
+                "value", createUserRequest.password(),
                 "temporary", false
         );
         credentials.add(password);
@@ -97,17 +96,16 @@ public class KeycloackRestClient {
 
     }
 
-    public List<KeycloackRoleDto> getAllKeycloackRoles() {
+    public List<KeycloackRole> getAllKeycloackRoles() {
         return webClient.get()
                 .uri(keycloackUrl + "/admin/realms/" + keycloackRealm + "/roles")
                 .header("Authorization", "Bearer " + keyCloackTokenProvider.getAccessToken())
-
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, response ->
                         response.bodyToMono(String.class)
                                 .map(body -> new RuntimeException("Keycloak error: " + body))
                 )
-                .bodyToFlux(KeycloackRoleDto.class)
+                .bodyToFlux(KeycloackRole.class)
                 .collectList()
                 .block();
     }
