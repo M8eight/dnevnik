@@ -470,7 +470,6 @@
   "webAuthnPolicySignatureAlgorithms": [
     "ES256"
   ],
-  "webAuthnPolicyRpIds": "",
   "webAuthnPolicyAttestationConveyancePreference": "not specified",
   "webAuthnPolicyAuthenticatorAttachment": "not specified",
   "webAuthnPolicyRequireResidentKey": "not specified",

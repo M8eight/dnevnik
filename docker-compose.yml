@@ -36,7 +36,7 @@ services:
       KC_HOSTNAME: localhost
     volumes:
       - keycloak_data:/opt/keycloak/data
-      - ./configs/dnevnik-realm-config.json:/opt/keycloak/data/import/realm.json:ro
+      - ./configs/dnevnik-realm-realm.json:/opt/keycloak/data/import/realm.json:ro
 
     networks:
       - micro-net

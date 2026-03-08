@@ -4,6 +4,6 @@ public record UserResponse(
         String firstName,
         String lastName,
         String keycloackId,
-        Long userId
+        Long id
 ) {
 }
