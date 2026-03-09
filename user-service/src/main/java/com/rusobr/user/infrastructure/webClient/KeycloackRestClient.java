@@ -1,7 +1,10 @@
 package com.rusobr.user.infrastructure.webClient;
 
-import com.rusobr.user.web.dto.AssignRoleToUserRequestDto;
-import com.rusobr.user.web.dto.CreateKeyCloackUserRequestDto;
+import com.rusobr.user.infrastructure.exception.KeycloackUserAlreadyExist;
+import com.rusobr.user.web.dto.keycloack.CreateUserRequest;
+import com.rusobr.user.web.dto.keycloack.KeycloackUserResponse;
+import com.rusobr.user.web.dto.keycloack.role.AssignRoleToUserRequest;
+import com.rusobr.user.web.dto.keycloack.role.KeycloackRole;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
@@ -11,10 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 @Slf4j
@@ -35,24 +35,46 @@ public class KeycloackRestClient {
         this.webClient = webClientBuilder.build();
     }
 
-    public String createKeyCloackUser(CreateKeyCloackUserRequestDto createKeyCloackUserDto) {
+//    public KeycloackUserResponse getKeycloackUser(String keycloackId) {
+//        return webClient.get().uri(keycloackUrl + "/admin/realms/" + keycloackRealm + "/users/" + keycloackId)
+//                .accept(MediaType.APPLICATION_JSON)
+//                .retrieve()
+//                .bodyToMono(KeycloackUserResponse.class)
+//                .block();
+//    }
+
+    public KeycloackUserResponse getKeycloackUserByUsername(String username) throws KeycloackUserAlreadyExist {
+
+//        log.info("Token {}", keyCloackTokenProvider.getAccessToken());
+
+        List<KeycloackUserResponse> userList = webClient.get().uri(keycloackUrl + "/admin/realms/" +
+                keycloackRealm + "/users" + "?username=" + username + "&exact=true")
+                .header("Authorization", "Bearer " + keyCloackTokenProvider.getAccessToken())
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToFlux(KeycloackUserResponse.class)
+                .collectList()
+                .block();
+
+        return Objects.requireNonNull(userList).get(0);
+    }
+
+    public String createKeyCloackUser(CreateUserRequest createUserRequest) {
 
         //todo map this
         Map<String,Object> user = new HashMap<>();
-        user.put("username", createKeyCloackUserDto.getUsername());
+        user.put("username", createUserRequest.username());
         user.put("enabled", true);
         user.put("emailVerified", true);
 
         List<Map<String, Object>> credentials = new ArrayList<>();
         Map<String, Object> password = Map.of(
                 "type", "password",
-                "value", createKeyCloackUserDto.getPassword(),
+                "value", createUserRequest.password(),
                 "temporary", false
         );
         credentials.add(password);
         user.put("credentials", credentials);
-
-        log.info("{}", user);
 
         return webClient.post()
                 .uri(keycloackUrl + "/admin/realms/" + keycloackRealm + "/users")
@@ -60,6 +82,8 @@ public class KeycloackRestClient {
                 .header("Authorization", "Bearer " + keyCloackTokenProvider.getAccessToken())
                 .bodyValue(user)
                 .retrieve()
+                .onStatus(status -> status.value() == 409,
+                        clientResponse -> Mono.error(new KeycloackUserAlreadyExist("Keycloack User already exists")))
                 .toBodilessEntity()
                 .map(res -> {
                     String location = res.getHeaders().getFirst("Location");
@@ -86,18 +110,34 @@ public class KeycloackRestClient {
 
     }
 
-    public void assignRoleToUser(AssignRoleToUserRequestDto dto) {
+    public List<KeycloackRole> getAllKeycloackRoles() {
+        return webClient.get()
+                .uri(keycloackUrl + "/admin/realms/" + keycloackRealm + "/roles")
+                .header("Authorization", "Bearer " + keyCloackTokenProvider.getAccessToken())
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, response ->
+                        response.bodyToMono(String.class)
+                                .map(body -> new RuntimeException("Keycloak error: " + body))
+                )
+                .bodyToFlux(KeycloackRole.class)
+                .collectList()
+                .block();
+    }
+
+    public void assignRoleToUser(AssignRoleToUserRequest dto) {
         Map<String,Object> role = Map.of(
-                "id", dto.getRoleId(),
-                    "name", dto.getRoleName()
+                "id", dto.roleId(),
+                    "name", dto.roleName()
         );
 
         webClient.post()
-                .uri(keycloackUrl + "/admin/realms/" + keycloackRealm + "/users/" +  dto.getUserId() + "/role-mappings/realm")
+                .uri(keycloackUrl + "/admin/realms/" + keycloackRealm + "/users/" +  dto.keycloackId() + "/role-mappings/realm")
                 .header("Authorization", "Bearer " + keyCloackTokenProvider.getAccessToken())
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(List.of(role))
                 .retrieve()
+                .onStatus(status -> status.value() == 409,
+                        clientResponse -> Mono.error(new KeycloackUserAlreadyExist("Keycloack User role already assigned")))
                 .onStatus(HttpStatusCode::isError, resp ->
                         resp.bodyToMono(String.class)
                                 .flatMap(body -> Mono.error(new RuntimeException("Keycloak: " + body)))
@@ -107,15 +147,15 @@ public class KeycloackRestClient {
 
     }
 
-    public void deleteRoleFromUser(AssignRoleToUserRequestDto dto) {
+    public void deleteRoleFromUser(AssignRoleToUserRequest dto) {
         Map<String,Object> role = Map.of(
-                "id", dto.getRoleId(),
-                "name", dto.getRoleName()
+                "id", dto.roleId(),
+                "name", dto.roleName()
         );
 
 
         webClient.method(HttpMethod.DELETE)
-                .uri(keycloackUrl + "/admin/realms/" + keycloackRealm + "/users/" +  dto.getUserId() + "/role-mappings/realm")
+                .uri(keycloackUrl + "/admin/realms/" + keycloackRealm + "/users/" +  dto.keycloackId() + "/role-mappings/realm")
                 .header("Authorization", "Bearer " + keyCloackTokenProvider.getAccessToken())
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(List.of(role))

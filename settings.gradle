@@ -2,6 +2,6 @@ rootProject.name = 'dnevnik'
 
 include("eureka-server")
 include("api-gateway")
+
 include("user-service")
-include("template-service")
 include('academic-service')

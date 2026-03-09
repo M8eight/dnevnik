@@ -1,6 +1,6 @@
 package com.rusobr.academic.web.controller;
 
-import com.rusobr.academic.domain.service.SubjectService;
+import com.rusobr.academic.infrastructure.service.SubjectService;
 import com.rusobr.academic.web.dto.subject.SubjectRequestDto;
 import com.rusobr.academic.web.dto.subject.SubjectResponseDto;
 import jakarta.validation.Valid;

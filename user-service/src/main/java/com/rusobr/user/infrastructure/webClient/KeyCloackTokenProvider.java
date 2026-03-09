@@ -13,7 +13,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.util.Map;
 
 @Component
-@Slf4j
 public class KeyCloackTokenProvider {
     @Value("${keycloack.client-secret}")
     private String clientSecret;
@@ -55,11 +54,12 @@ public class KeyCloackTokenProvider {
                     .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
                     .block();
 
-            assert res != null;
+            if(res == null || res.get("access_token") == null) {
+                throw new IllegalStateException("Failed to get access token");
+            }
             accessToken = (String) res.get("access_token");
-            log.info("Access token polychit: {}", accessToken);
             long expiresIn = ((Number) res.get("expires_in")).longValue();
-            expireTime = System.currentTimeMillis() + (expiresIn - 5) * 1000L;
+            expireTime = System.currentTimeMillis() + (expiresIn - 30) * 1000L;
         }
         return accessToken;
     }
