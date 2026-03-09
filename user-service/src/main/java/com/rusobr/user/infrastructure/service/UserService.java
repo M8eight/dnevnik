@@ -15,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -38,6 +37,9 @@ public class UserService {
         return userRepository.findAll(pageable).map(userMapper::toUserResponse);
     }
 
+    public List<UserResponse> findBatchUsers(List<Long> ids) {
+        return userRepository.findAllById(ids).stream().map(userMapper::toUserResponse).toList();
+    }
 
     @Transactional
     public CreateUserResponse createUser(CreateUserRequest reqDto) {

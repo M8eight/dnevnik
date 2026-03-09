@@ -2,6 +2,7 @@ package com.rusobr.user.infrastructure.webClient;
 
 import com.rusobr.user.infrastructure.exception.KeycloackUserAlreadyExist;
 import com.rusobr.user.web.dto.keycloack.CreateUserRequest;
+import com.rusobr.user.web.dto.keycloack.KeycloackUserResponse;
 import com.rusobr.user.web.dto.keycloack.role.AssignRoleToUserRequest;
 import com.rusobr.user.web.dto.keycloack.role.KeycloackRole;
 import lombok.extern.slf4j.Slf4j;
@@ -13,10 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 @Slf4j
@@ -44,6 +42,22 @@ public class KeycloackRestClient {
 //                .bodyToMono(KeycloackUserResponse.class)
 //                .block();
 //    }
+
+    public KeycloackUserResponse getKeycloackUserByUsername(String username) throws KeycloackUserAlreadyExist {
+
+//        log.info("Token {}", keyCloackTokenProvider.getAccessToken());
+
+        List<KeycloackUserResponse> userList = webClient.get().uri(keycloackUrl + "/admin/realms/" +
+                keycloackRealm + "/users" + "?username=" + username + "&exact=true")
+                .header("Authorization", "Bearer " + keyCloackTokenProvider.getAccessToken())
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToFlux(KeycloackUserResponse.class)
+                .collectList()
+                .block();
+
+        return Objects.requireNonNull(userList).get(0);
+    }
 
     public String createKeyCloackUser(CreateUserRequest createUserRequest) {
 
@@ -122,6 +136,8 @@ public class KeycloackRestClient {
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(List.of(role))
                 .retrieve()
+                .onStatus(status -> status.value() == 409,
+                        clientResponse -> Mono.error(new KeycloackUserAlreadyExist("Keycloack User role already assigned")))
                 .onStatus(HttpStatusCode::isError, resp ->
                         resp.bodyToMono(String.class)
                                 .flatMap(body -> Mono.error(new RuntimeException("Keycloak: " + body)))
