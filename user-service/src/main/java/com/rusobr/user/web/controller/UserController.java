@@ -31,6 +31,11 @@ public class UserController {
         return userService.findAll(pageable);
     }
 
+    @PostMapping("/batch")
+    public List<UserResponse> getBatchUsers(@RequestBody List<Long> ids) {
+        return userService.findBatchUsers(ids);
+    }
+
     @PostMapping("/create")
     @ResponseStatus(HttpStatus.CREATED)
     public CreateUserResponse createUser(@RequestBody CreateUserRequest createUserRequest) {

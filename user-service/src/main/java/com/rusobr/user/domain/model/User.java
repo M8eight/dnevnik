@@ -31,9 +31,10 @@ public class User {
     @Column(nullable = false, unique = true)
     private String keycloackId;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(name = "role_name")
-    @ElementCollection(fetch = FetchType.EAGER, targetClass = UserRoles.class)
+    @ElementCollection(fetch = FetchType.LAZY, targetClass = UserRoles.class)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
     private Set<UserRoles> roles = new HashSet<>();
 

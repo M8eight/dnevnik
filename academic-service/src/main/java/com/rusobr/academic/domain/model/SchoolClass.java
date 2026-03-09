@@ -5,7 +5,9 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @NoArgsConstructor
@@ -25,6 +27,12 @@ public class SchoolClass {
     private String year;
 
     private Long classTeacherId;
+
+    @Builder.Default
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "class_students", joinColumns = @JoinColumn(name = "school_class_id"))
+    @Column(name = "student_id")
+    private Set<Long> studentIds = new HashSet<>();
 
     @CreationTimestamp
     @Column

@@ -21,4 +21,6 @@ public class ScheduleService {
         return lessonInstanceRepository.getSchedule(classId, studentId, startDate, endDate);
     }
 
+    //todo расписание для учителя какие уроки у нее
+
 }

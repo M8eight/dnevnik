@@ -69,6 +69,18 @@ public class UserControllerTest {
     }
 
     @Test
+    void shouldGetBatchUsers() throws Exception {
+        List<UserResponse> users = List.of(new UserResponse("Алексей", "Кочетыгов", "abc-123", 1L));
+        List<Long> ids = List.of(1L);
+        when(userService.findBatchUsers(any())).thenReturn(users);
+        mockMvc.perform(post("/api/v1/users/batch")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(ids))
+                ).andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1));
+    }
+
+    @Test
     void createUserShouldReturnUser() throws Exception {
         CreateUserRequest req =
                 new CreateUserRequest("AlexK", "123456", "Алексей", "Кочетыгов");
@@ -151,7 +163,6 @@ public class UserControllerTest {
                 .content(objectMapper.writeValueAsString(dto))
         ).andExpect(status().isOk());
     }
-
 
 
     @Test

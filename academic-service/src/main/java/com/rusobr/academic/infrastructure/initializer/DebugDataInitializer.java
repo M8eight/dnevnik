@@ -14,16 +14,6 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.*;
 
-/**
- * Реалистичный заполнитель — Школа №47 "Академия", 2024–2025.
- *
- * Особенности:
- *   - разное кол-во уроков по дням (ПН=6, ВТ=5, СР=4, ЧТ=6, ПТ=3)
- *   - оценки ставятся ~на каждом 3-м уроке и не каждому ученику
- *   - посещаемость отмечается только при нарушении (прогул/опоздание/уважительная)
- *   - 4 недели данных (03.03 – 28.03.2025)
- *   - 5 учеников с разными поведенческими профилями
- */
 @Component
 @RequiredArgsConstructor
 @Transactional
@@ -39,15 +29,8 @@ public class DebugDataInitializer implements CommandLineRunner {
     private final AttendanceRepository         attendanceRepository;
     private final GradeConstantRepository      gradeConstantRepository;
 
-    // ── Ученики (ID из внешней системы) ──────────────────────────────────────
-    // 1 — Отличник:    оценки 4–5, почти не пропускает
-    // 2 — Хорошист:    оценки 3–5, изредка опаздывает
-    // 3 — Троечник:    оценки 2–4, часто прогуливает
-    // 4 — Середнячок А: оценки 3–4, иногда уважительная причина
-    // 5 — Середнячок Б: оценки 2–4, прогулы и опоздания
     private static final List<Long> ALL_STUDENTS = List.of(1L, 2L, 3L, 4L, 5L);
 
-    // Фиксированный seed — данные воспроизводимы при каждом запуске
     private final Random rng = new Random(42);
 
     @Override
@@ -65,9 +48,10 @@ public class DebugDataInitializer implements CommandLineRunner {
         log.info("Предметы: {}", S.size());
 
         // ── 2. Классы ─────────────────────────────────────────────────────────
-        SchoolClass c8a  = saveClass("8А",  "2024", 1L);
-        SchoolClass c8b  = saveClass("8Б",  "2024", 2L);
-        SchoolClass c9a  = saveClass("9А",  "2024", 3L);
+        SchoolClass c8a  = saveClass("8А",  "2024", 2L);
+        c8a.getStudentIds().addAll(List.of(4L, 5L));
+        SchoolClass c8b  = saveClass("8Б",  "2024", 3L);
+        SchoolClass c9a  = saveClass("9А",  "2024", 4L);
         saveClass("9Б",  "2024", 4L);
         saveClass("10А", "2024", 5L);
         saveClass("11А", "2024", 6L);
