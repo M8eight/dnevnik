@@ -4,14 +4,20 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.time.LocalDateTime;
 
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString
+@ToString(exclude = "lessonInstance")
 @Builder
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "grades")
 public class Grade {
     @Id
@@ -29,12 +35,12 @@ public class Grade {
     //TODO сделать enum
     private String type;
 
-    @CreationTimestamp
-    @Column
-    private java.sql.Timestamp created_at;
+    @CreatedDate
+    @Column(updatable = false, name = "created_at")
+    private LocalDateTime createdAt;
 
-    @UpdateTimestamp
-    @Column
-    private java.sql.Timestamp updated_at;
+    @LastModifiedDate
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
 }

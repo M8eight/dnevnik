@@ -15,7 +15,7 @@ import java.util.Set;
 @Table(name = "school_classes")
 @Getter
 @Setter
-@ToString
+@ToString(exclude = "studentIds")
 @Builder
 public class SchoolClass {
     @Id

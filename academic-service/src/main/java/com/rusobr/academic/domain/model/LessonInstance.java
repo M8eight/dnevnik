@@ -10,7 +10,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString
+@ToString(exclude = "scheduleLesson")
 @Builder
 @Table(name = "lesson_instances",
         uniqueConstraints = @UniqueConstraint(
