@@ -2,8 +2,11 @@ package com.rusobr.academic.domain.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.DayOfWeek;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -11,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString
+@ToString(exclude = "teachingAssignment")
 @Builder
 @Table(name = "schedule_lessons",
         uniqueConstraints = @UniqueConstraint(
@@ -34,4 +37,12 @@ public class ScheduleLesson {
     private Integer lessonNumber;
 
     private String classRoom;
+
+    @CreatedDate
+    @Column(updatable = false, name = "created_at")
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 }

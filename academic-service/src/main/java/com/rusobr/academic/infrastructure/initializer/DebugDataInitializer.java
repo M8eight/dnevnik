@@ -27,7 +27,6 @@ public class DebugDataInitializer implements CommandLineRunner {
     private final LessonInstanceRepository     lessonInstanceRepository;
     private final GradeRepository              gradeRepository;
     private final AttendanceRepository         attendanceRepository;
-    private final GradeConstantRepository      gradeConstantRepository;
 
     private static final List<Long> ALL_STUDENTS = List.of(1L, 2L, 3L, 4L, 5L);
 
@@ -124,13 +123,6 @@ public class DebugDataInitializer implements CommandLineRunner {
 
         log.info("Расписание 8А: ПН={}, ВТ={}, СР={}, ЧТ={}, ПТ={} уроков",
                 mon.size(), tue.size(), wed.size(), thu.size(), fri.size());
-
-        // ── 5. Константы оценок ───────────────────────────────────────────────
-        saveGradeConstant(5, "Отлично",             "Отличное знание материала");
-        saveGradeConstant(4, "Хорошо",              "Хорошее знание материала");
-        saveGradeConstant(3, "Удовлетворительно",   "Базовое освоение материала");
-        saveGradeConstant(2, "Неудовлетворительно", "Материал не усвоен");
-        saveGradeConstant(1, "Очень плохо",         "Полное отсутствие знаний");
 
         // ── 6. Четыре недели: уроки + оценки + посещаемость ──────────────────
         LocalDate firstMonday = LocalDate.of(2025, 3, 3);
@@ -299,8 +291,4 @@ public class DebugDataInitializer implements CommandLineRunner {
                 .teacherId(teacherId).schoolClass(sc).subject(subject).build());
     }
 
-    private void saveGradeConstant(int value, String name, String description) {
-        gradeConstantRepository.save(GradeConstant.builder()
-                .value(value).name(name).description(description).build());
-    }
 }

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
@@ -12,25 +13,21 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString(exclude = {"subject", "schoolClass"})
+@ToString(exclude = "lessonInstance")
 @Builder
-@Table(name = "teaching_assignments", uniqueConstraints = @UniqueConstraint(columnNames = {
-        "teacher_id", "school_class_id", "subject_id"
-}))
-public class TeachingAssignment {
+@EntityListeners(AuditingEntityListener.class)
+@Table(name = "homeworks")
+public class Homework {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long teacherId;
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String text;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "school_class_id", nullable = false)
-    private SchoolClass schoolClass;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "subject_id", nullable = false)
-    private Subject subject;
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "lesson_instance_id")
+    private LessonInstance lessonInstance;
 
     @CreatedDate
     @Column(updatable = false, name = "created_at")
@@ -39,4 +36,7 @@ public class TeachingAssignment {
     @LastModifiedDate
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    //todo добавление файлов сделать
+
 }
