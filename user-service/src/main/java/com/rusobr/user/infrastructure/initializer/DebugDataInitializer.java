@@ -1,7 +1,13 @@
 package com.rusobr.user.infrastructure.initializer;
 
+import com.rusobr.user.domain.model.Parent;
+import com.rusobr.user.domain.model.Student;
+import com.rusobr.user.domain.model.Teacher;
 import com.rusobr.user.domain.model.User;
 import com.rusobr.user.infrastructure.enums.UserRoles;
+import com.rusobr.user.infrastructure.persistence.repository.ParentRepository;
+import com.rusobr.user.infrastructure.persistence.repository.StudentRepository;
+import com.rusobr.user.infrastructure.persistence.repository.TeacherRepository;
 import com.rusobr.user.infrastructure.persistence.repository.UserRepository;
 import com.rusobr.user.infrastructure.webClient.KeycloackRestClient;
 import com.rusobr.user.web.dto.keycloack.CreateUserRequest;
@@ -24,6 +30,11 @@ public class DebugDataInitializer implements CommandLineRunner {
 
     private final UserRepository userRepository;
     private final KeycloackRestClient keycloackRestClient;
+
+    private final ParentRepository parentRepository;
+    private final StudentRepository studentRepository;
+    private final TeacherRepository teacherRepository;
+
 
     @Override
     public void run(String... args) throws Exception {
@@ -50,10 +61,18 @@ public class DebugDataInitializer implements CommandLineRunner {
 
         // Определяем параметры роли
         switch (role) {
-            case "admin" -> { roleId = "fb4ae346-9cbb-4c45-93ad-bd89bfe331a4"; userRole = UserRoles.ADMIN; }
-            case "teacher" -> { roleId = "12535b66-c65b-44fb-a686-49f460f3efba"; userRole = UserRoles.TEACHER; }
-            case "student" -> { roleId = "412fe55a-22e8-494e-98b9-ad47b98abc36"; userRole = UserRoles.STUDENT; }
-            case "parent" -> { roleId = "6696880e-db8e-40a1-9035-eb018ce682e4"; userRole = UserRoles.PARENT; }
+            case "admin" -> {
+                roleId = "fb4ae346-9cbb-4c45-93ad-bd89bfe331a4"; userRole = UserRoles.ADMIN;
+            }
+            case "teacher" -> {
+                roleId = "12535b66-c65b-44fb-a686-49f460f3efba"; userRole = UserRoles.TEACHER;
+            }
+            case "student" -> {
+                roleId = "412fe55a-22e8-494e-98b9-ad47b98abc36"; userRole = UserRoles.STUDENT;
+            }
+            case "parent" -> {
+                roleId = "6696880e-db8e-40a1-9035-eb018ce682e4"; userRole = UserRoles.PARENT;
+            }
             default -> throw new IllegalArgumentException("Invalid role: " + role);
         }
 
@@ -74,13 +93,26 @@ public class DebugDataInitializer implements CommandLineRunner {
             keycloackRestClient.assignRoleToUser(new AssignRoleToUserRequest(keycloackId, userRole, roleId));
         } catch (Exception ignored) {}
 
-        userRepository.save(User.builder()
+        User user = User.builder()
                 .username(username)
                 .keycloackId(keycloackId)
                 .firstName(firstName)
                 .lastName(lastName)
                 .roles(Collections.singleton(userRole))
-                .build());
+                .build();
+        userRepository.save(user);
+
+        switch (role) {
+            case "teacher" -> {
+                teacherRepository.save(Teacher.builder().user(user).build());
+            }
+            case "student" -> {
+                studentRepository.save(Student.builder().user(user).build());
+            }
+            case "parent" -> {
+                parentRepository.save(Parent.builder().user(user).build());
+            }
+        }
 
         log.info("User {} created with role {}", username, role);
     }

@@ -4,20 +4,19 @@ import com.rusobr.user.infrastructure.enums.UserRoles;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.Set;
 
 
+@Builder
 @Entity
-@NoArgsConstructor
-@AllArgsConstructor
+@ToString
+@Table(name = "users")
 @Getter
 @Setter
-@ToString
-@Builder
-@Table(name = "users")
-public class User {
+@NoArgsConstructor
+@AllArgsConstructor
+public class User extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -38,12 +37,17 @@ public class User {
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
     private Set<UserRoles> roles = new HashSet<>();
 
-    //todo сделать ссылку на ребенка
-    private Long childId;
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 
-    @Column(updatable = false)
-    private Timestamp created_at;
-
-    @Column
-    private Timestamp updated_at;
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!(obj instanceof User))
+            return false;
+        return id != null && id.equals(this.getId());
+    }
 }
