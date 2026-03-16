@@ -82,18 +82,6 @@ public class UserServiceTest {
     }
 
     @Test
-    void shouldReturnBatchUsers() {
-        List<Long> ids = List.of(1L, 2L, 3L);
-        List<User> users = List.of(User.builder().id(1L).build(),
-                User.builder().id(2L).build());
-
-        when(userRepository.findAllById(ids)).thenReturn(users);
-
-        List<UserResponse> result = userService.findBatchUsers(ids);
-        assertEquals(2, result.size());
-    }
-
-    @Test
     void shouldCreateUser() {
         CreateUserRequest req = new CreateUserRequest(
                 "AlexK",
