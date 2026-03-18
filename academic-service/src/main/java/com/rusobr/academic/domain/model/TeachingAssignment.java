@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
@@ -17,6 +18,7 @@ import java.time.LocalDateTime;
 @Table(name = "teaching_assignments", uniqueConstraints = @UniqueConstraint(columnNames = {
         "teacher_id", "school_class_id", "subject_id"
 }))
+@EntityListeners(AuditingEntityListener.class)
 public class TeachingAssignment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

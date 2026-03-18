@@ -4,10 +4,10 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.DayOfWeek;
-import java.time.LocalDateTime;
-import java.util.List;
+import java.time.Instant;
 
 @Entity
 @NoArgsConstructor
@@ -20,6 +20,7 @@ import java.util.List;
         uniqueConstraints = @UniqueConstraint(
                 columnNames = {"teaching_assignment_id", "day_of_week", "lesson_number"}
         ))
+@EntityListeners(AuditingEntityListener.class)
 public class ScheduleLesson {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,9 +41,9 @@ public class ScheduleLesson {
 
     @CreatedDate
     @Column(updatable = false, name = "created_at")
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     @LastModifiedDate
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    private Instant updatedAt;
 }

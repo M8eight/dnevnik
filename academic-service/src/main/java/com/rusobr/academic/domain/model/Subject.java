@@ -1,10 +1,12 @@
 package com.rusobr.academic.domain.model;
 
-import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.time.Instant;
 
 @Entity
 @NoArgsConstructor
@@ -14,6 +16,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 @ToString
 @Builder
 @Table(name = "subjects")
+@EntityListeners(AuditingEntityListener.class)
 public class Subject {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,11 +25,11 @@ public class Subject {
     @Column(nullable = false)
     private String name;
 
-    @CreationTimestamp
-    @Column
-    private java.sql.Timestamp created_at;
+    @CreatedDate
+    @Column(updatable = false, name = "created_at")
+    private Instant createdAt;
 
-    @UpdateTimestamp
-    @Column
-    private java.sql.Timestamp updated_at;
+    @LastModifiedDate
+    @Column(name = "updated_at")
+    private Instant updatedAt;
 }
