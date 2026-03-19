@@ -15,6 +15,7 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     @Query("""
             select new com.rusobr.user.web.dto.student.StudentResponse(s.id, u.firstName, u.lastName)
                         from Student s join s.user u where s.id in :studentIds
+                            order by u.lastName
     """)
     List<StudentResponse> findAllStudentsByIds(@Param("studentIds") Collection<Long> studentIds);
 }

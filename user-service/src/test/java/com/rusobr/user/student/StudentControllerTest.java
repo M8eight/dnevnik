@@ -1,7 +1,6 @@
 package com.rusobr.user.student;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rusobr.user.domain.model.Student;
 import com.rusobr.user.infrastructure.service.StudentService;
 import com.rusobr.user.web.controller.StudentController;
 import com.rusobr.user.web.dto.student.StudentResponse;
@@ -14,7 +13,6 @@ import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;

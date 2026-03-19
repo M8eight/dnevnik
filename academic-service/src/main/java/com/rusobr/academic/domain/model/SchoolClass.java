@@ -16,7 +16,7 @@ import java.util.Set;
 @Table(name = "school_classes")
 @Getter
 @Setter
-@ToString(exclude = "studentIds")
+@ToString(exclude = "students")
 @Builder
 @EntityListeners(AuditingEntityListener.class)
 public class SchoolClass {
@@ -31,10 +31,8 @@ public class SchoolClass {
     private Long classTeacherId;
 
     @Builder.Default
-    @ElementCollection(fetch = FetchType.LAZY)
-    @CollectionTable(name = "class_students", joinColumns = @JoinColumn(name = "school_class_id"))
-    @Column(name = "student_id")
-    private Set<Long> studentIds = new HashSet<>();
+    @OneToMany(mappedBy = "schoolClass", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ClassStudent> students = new HashSet<>();
 
     @CreatedDate
     @Column(updatable = false, name = "created_at")

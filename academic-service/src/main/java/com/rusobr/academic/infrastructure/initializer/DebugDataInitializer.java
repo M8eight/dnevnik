@@ -13,12 +13,12 @@ import org.springframework.stereotype.Component;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.LongStream;
 
 @Component
 @RequiredArgsConstructor
 @Transactional
 @Slf4j
-@Deprecated
 public class DebugDataInitializer implements CommandLineRunner {
 
     private final SubjectRepository subjectRepository;
@@ -28,63 +28,146 @@ public class DebugDataInitializer implements CommandLineRunner {
     private final LessonInstanceRepository lessonInstanceRepository;
     private final GradeRepository gradeRepository;
     private final AttendanceRepository attendanceRepository;
+    private final AcademicPeriodRepository academicPeriodRepository;
 
-    private static final List<Long> ALL_STUDENTS = List.of(1L, 2L, 3L, 4L, 5L);
+    // Ученики с 1 по 12 из User Microservice
+    private static final List<Long> CLASS_STUDENTS_IDS = LongStream.rangeClosed(1, 12).boxed().toList();
     private final Random rng = new Random(42);
 
     @Override
     public void run(String... args) {
-        log.info("=== Инициализация Академических Данных ===");
+        log.info("=== Инициализация Академических Данных (2025-2026 Учебный год) ===");
 
         // 1. Предметы
         Map<String, Subject> S = new LinkedHashMap<>();
-        for (String name : List.of("Алгебра", "Геометрия", "Русский язык", "Физика", "Химия", "История", "Информатика", "Физкультура")) {
+        for (String name : List.of("Алгебра", "Геометрия", "Русский язык", "Литература", "Физика",
+                "Химия", "Биология", "История", "Информатика", "Английский язык", "Физкультура")) {
             S.put(name, subjectRepository.save(Subject.builder().name(name).build()));
         }
 
         // 2. Класс 8А
-        SchoolClass c8a = saveClass("8А", "2024", 10L);
-        c8a.getStudentIds().addAll(ALL_STUDENTS);
+        SchoolClass c8a = SchoolClass.builder()
+                .name("8А")
+                .year("2025") // Текущий год поступления/обучения
+                .classTeacherId(17L)
+                .students(new HashSet<>())
+                .build();
+
+        CLASS_STUDENTS_IDS.forEach(sid -> {
+            ClassStudent cs = ClassStudent.builder()
+                    .schoolClass(c8a)
+                    .studentId(sid)
+                    .build();
+            c8a.getStudents().add(cs);
+        });
         schoolClassRepository.save(c8a);
 
-        // 3. Назначения учителей (ID 10-17)
-        TeachingAssignment taAlg = saveTA(10L, c8a, S.get("Алгебра"));
-        TeachingAssignment taGeo = saveTA(10L, c8a, S.get("Геометрия"));
-        TeachingAssignment taRus = saveTA(11L, c8a, S.get("Русский язык"));
-        TeachingAssignment taPhy = saveTA(12L, c8a, S.get("Физика"));
-        TeachingAssignment taChe = saveTA(13L, c8a, S.get("Химия"));
-        TeachingAssignment taHis = saveTA(15L, c8a, S.get("История"));
-        TeachingAssignment taIT  = saveTA(16L, c8a, S.get("Информатика"));
-        TeachingAssignment taPE  = saveTA(17L, c8a, S.get("Физкультура"));
+        // 3. Назначения
+        TeachingAssignment taAlg = saveTA(17L, c8a, S.get("Алгебра"));
+        TeachingAssignment taGeo = saveTA(17L, c8a, S.get("Геометрия"));
+        TeachingAssignment taRus = saveTA(18L, c8a, S.get("Русский язык"));
+        TeachingAssignment taLit = saveTA(26L, c8a, S.get("Литература"));
+        TeachingAssignment taPhy = saveTA(19L, c8a, S.get("Физика"));
 
         // 4. Расписание
-        List<ScheduleLesson> mon = schedule(DayOfWeek.MONDAY, List.of(new Slot(1, "201", taRus), new Slot(2, "305", taAlg)));
-        List<ScheduleLesson> tue = schedule(DayOfWeek.TUESDAY, List.of(new Slot(1, "401", taPhy), new Slot(2, "116", taIT)));
-        List<ScheduleLesson> wed = schedule(DayOfWeek.WEDNESDAY, List.of(new Slot(1, "402", taChe), new Slot(2, "Спортзал", taPE)));
+        List<ScheduleLesson> mon = schedule(DayOfWeek.MONDAY, List.of(
+                new Slot(1, "201", taRus), new Slot(2, "201", taLit), new Slot(3, "305", taAlg)
+        ));
+        List<ScheduleLesson> wed = schedule(DayOfWeek.WEDNESDAY, List.of(
+                new Slot(1, "201", taRus), new Slot(2, "305", taAlg), new Slot(3, "215", taPhy)
+        ));
 
-        // 5. Данные за 2 недели
-        LocalDate day = LocalDate.of(2025, 3, 3);
-        for (int i = 0; i < 2; i++) {
-            buildDay(day.plusWeeks(i), mon);
-            buildDay(day.plusWeeks(i).plusDays(1), tue);
-            buildDay(day.plusWeeks(i).plusDays(2), wed);
+        // 5. Генерация "прошлых" данных (за последние 3 недели от сегодня)
+        // Чтобы в журнале уже были какие-то оценки при открытии
+        LocalDate startDay = LocalDate.now().minusWeeks(3).with(DayOfWeek.MONDAY);
+        for (int i = 0; i < 4; i++) {
+            LocalDate week = startDay.plusWeeks(i);
+            buildDay(week, mon, c8a);
+            buildDay(week.plusDays(2), wed, c8a);
         }
 
-        log.info("=== Академические данные готовы ===");
+        log.info("Создаем академические периоды для 2025-2026 года");
+
+        // Четверти теперь покрывают реальное время
+        AcademicPeriod periodOne = AcademicPeriod.builder()
+                .startDate(LocalDate.of(2025, 9, 1))
+                .endDate(LocalDate.of(2025, 10, 26))
+                .name("Первая четверть")
+                .schoolYear("2025-2026")
+                .build();
+
+        AcademicPeriod periodTwo = AcademicPeriod.builder()
+                .startDate(LocalDate.of(2025, 11, 5))
+                .endDate(LocalDate.of(2025, 12, 28))
+                .name("Вторая четверть")
+                .schoolYear("2025-2026")
+                .build();
+
+        // Сегодня 19 марта 2026 — попадает сюда!
+        AcademicPeriod periodThree = AcademicPeriod.builder()
+                .startDate(LocalDate.of(2026, 1, 9))
+                .endDate(LocalDate.of(2026, 3, 22))
+                .name("Третья четверть")
+                .schoolYear("2025-2026")
+                .build();
+
+        AcademicPeriod periodFour = AcademicPeriod.builder()
+                .startDate(LocalDate.of(2026, 3, 30))
+                .endDate(LocalDate.of(2026, 5, 30))
+                .name("Четвертая четверть")
+                .schoolYear("2025-2026")
+                .build();
+
+        academicPeriodRepository.saveAll(Arrays.asList(periodOne, periodTwo, periodThree, periodFour));
+
+        log.info("=== Инициализация завершена. Сегодня: {} ===", LocalDate.now());
     }
 
-    private void buildDay(LocalDate date, List<ScheduleLesson> slots) {
+    private void buildDay(LocalDate date, List<ScheduleLesson> slots, SchoolClass schoolClass) {
+        GradeType[] allGradeTypes = GradeType.values();
+
         for (ScheduleLesson slot : slots) {
-            LessonInstance li = lessonInstanceRepository.save(LessonInstance.builder().date(date).scheduleLesson(slot).build());
-            for (Long sid : ALL_STUDENTS) {
-                if (rng.nextInt(100) < 40) {
-                    gradeRepository.save(Grade.builder().lessonInstance(li).studentId(sid).value(3 + rng.nextInt(3)).type(GradeType.HOMEWORK.name()).build());
+            LessonInstance li = lessonInstanceRepository.save(
+                    LessonInstance.builder().date(date).scheduleLesson(slot).build()
+            );
+
+            // Итерируемся по списку студентов из сущности ClassStudent
+            for (ClassStudent cs : schoolClass.getStudents()) {
+                Long sid = cs.getStudentId();
+
+                if (rng.nextInt(100) < 25) {
+                    gradeRepository.save(Grade.builder()
+                            .lessonInstance(li)
+                            .studentId(sid)
+                            .value(generateRealisticGrade())
+                            .type(allGradeTypes[rng.nextInt(allGradeTypes.length)].name())
+                            .build());
                 }
-                if (rng.nextInt(100) < 5) {
-                    attendanceRepository.save(Attendance.builder().lessonInstance(li).studentId(sid).status(AttendanceStatus.ABSENT).build());
+
+                if (rng.nextInt(100) < 4) {
+                    attendanceRepository.save(Attendance.builder()
+                            .lessonInstance(li)
+                            .studentId(sid)
+                            .status(generateRealisticAttendanceStatus())
+                            .build());
                 }
             }
         }
+    }
+
+    private int generateRealisticGrade() {
+        int chance = rng.nextInt(100);
+        if (chance < 40) return 5;
+        if (chance < 75) return 4;
+        if (chance < 95) return 3;
+        return 2;
+    }
+
+    private AttendanceStatus generateRealisticAttendanceStatus() {
+        int chance = rng.nextInt(100);
+        if (chance < 50) return AttendanceStatus.ABSENT;
+        if (chance < 80) return AttendanceStatus.LATE;
+        return AttendanceStatus.EXCUSED;
     }
 
     private record Slot(int number, String room, TeachingAssignment ta) {}
@@ -92,22 +175,21 @@ public class DebugDataInitializer implements CommandLineRunner {
     private List<ScheduleLesson> schedule(DayOfWeek day, List<Slot> slots) {
         List<ScheduleLesson> res = new ArrayList<>();
         for (Slot s : slots) {
-            res.add(scheduleLessonRepository.save(ScheduleLesson.builder().dayOfWeek(day).lessonNumber(s.number()).classRoom(s.room()).teachingAssignment(s.ta()).build()));
+            res.add(scheduleLessonRepository.save(ScheduleLesson.builder()
+                    .dayOfWeek(day)
+                    .lessonNumber(s.number())
+                    .classRoom(s.room())
+                    .teachingAssignment(s.ta())
+                    .build()));
         }
         return res;
     }
 
-    private SchoolClass saveClass(String name, String year, Long teacherId) {
-        // ИСПРАВЛЕНО: используем HashSet вместо ArrayList для соответствия типу Set<Long>
-        return schoolClassRepository.save(SchoolClass.builder()
-                .name(name)
-                .year(year)
-                .classTeacherId(teacherId)
-                .studentIds(new HashSet<>())
-                .build());
-    }
-
     private TeachingAssignment saveTA(Long tid, SchoolClass sc, Subject sub) {
-        return teachingAssignmentRepository.save(TeachingAssignment.builder().teacherId(tid).schoolClass(sc).subject(sub).build());
+        return teachingAssignmentRepository.save(TeachingAssignment.builder()
+                .teacherId(tid)
+                .schoolClass(sc)
+                .subject(sub)
+                .build());
     }
 }

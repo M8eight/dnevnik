@@ -19,7 +19,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -35,37 +34,46 @@ public class DebugDataInitializer implements CommandLineRunner {
     private final TeacherRepository teacherRepository;
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
         log.info("=== Запуск инициализации пользователей (Синхронизация ID) ===");
 
-        // 1-5: Ученики (ID: 1, 2, 3, 4, 5)
-        createUser("student1", "12345678", "Иван", "Иванов", "student");
-        createUser("student2", "12345678", "Мария", "Петрова", "student");
-        createUser("student3", "12345678", "Алексей", "Сидоров", "student");
-        createUser("student4", "12345678", "Ника", "Демидова", "student");
-        createUser("student5", "12345678", "Артем", "Смирнов", "student");
+        // 1-12: Ученики 8 "А" (ID: 1-12)
+        createUser("ivanov_i", "12345678", "Иван", "Иванов", "student");
+        createUser("petrova_m", "12345678", "Мария", "Петрова", "student");
+        createUser("sidorov_a", "12345678", "Алексей", "Сидоров", "student");
+        createUser("demidova_n", "12345678", "Ника", "Демидова", "student");
+        createUser("smirnov_a", "12345678", "Артем", "Смирнов", "student");
+        createUser("kuznetsova_e", "12345678", "Екатерина", "Кузнецова", "student");
+        createUser("popov_d", "12345678", "Дмитрий", "Попов", "student");
+        createUser("sokolova_a", "12345678", "Анастасия", "Соколова", "student");
+        createUser("lebedev_m", "12345678", "Максим", "Лебедев", "student");
+        createUser("kozlova_p", "12345678", "Полина", "Козлова", "student");
+        createUser("novikov_i", "12345678", "Илья", "Новиков", "student");
+        createUser("morozova_v", "12345678", "Виктория", "Морозова", "student");
 
-        // 6-9: Родители и Админ (Занимаем промежуточные ID)
-        createUser("admin", "12345678", "Иван", "Админов", "admin"); // ID: 6
-        createUser("parent1", "12345678", "Елена", "Демидова", "parent"); // ID: 7
-        createUser("parent2", "12345678", "Дмитрий", "Смирнов", "parent"); // ID: 8
-        createUser("spare_user", "12345678", "Запасной", "Юзер", "admin"); // ID: 9
+        // 13-16: Администрация и Родители (ID: 13-16)
+        createUser("admin", "12345678", "Елена", "Директорова", "admin"); // 13
+        createUser("parent_demidova", "12345678", "Ольга", "Демидова", "parent"); // 14
+        createUser("parent_smirnov", "12345678", "Сергей", "Смирнов", "parent"); // 15
+        createUser("parent_ivanova", "12345678", "Наталья", "Иванова", "parent"); // 16
 
-        // 10-18: Учителя (ID: 10, 11, 12, 13, 14, 15, 16, 17, 18)
-        createUser("math_teacher", "12345678", "Петр", "Математиков", "teacher"); // 10
-        createUser("lang_teacher", "12345678", "Анна", "Словесник", "teacher");   // 11
-        createUser("phys_teacher", "12345678", "Виктор", "Физиков", "teacher");   // 12
-        createUser("chem_teacher", "12345678", "Елена", "Химикова", "teacher");   // 13
-        createUser("bio_teacher",  "12345678", "Ольга", "Биологова", "teacher");  // 14
-        createUser("hist_teacher", "12345678", "Игорь", "Историков", "teacher");  // 15
-        createUser("it_teacher",   "12345678", "Семен", "Айтишников", "teacher"); // 16
-        createUser("pe_teacher",   "12345678", "Олег", "Спортов", "teacher");     // 17
-        createUser("draw_teacher", "12345678", "Борис", "Чертежник", "teacher");  // 18
+        // 17-26: Учителя предметники (ID: 17-26)
+        createUser("teacher_math", "12345678", "Ирина", "Николаевна (Математика)", "teacher"); // 17
+        createUser("teacher_rus", "12345678", "Светлана", "Юрьевна (Русский)", "teacher"); // 18
+        createUser("teacher_phys", "12345678", "Виктор", "Степанович (Физика)", "teacher"); // 19
+        createUser("teacher_chem", "12345678", "Татьяна", "Васильевна (Химия)", "teacher"); // 20
+        createUser("teacher_bio", "12345678", "Марина", "Олеговна (Биология)", "teacher"); // 21
+        createUser("teacher_hist", "12345678", "Игорь", "Анатольевич (История)", "teacher"); // 22
+        createUser("teacher_it", "12345678", "Александр", "Сергеевич (Информатика)", "teacher"); // 23
+        createUser("teacher_pe", "12345678", "Евгений", "Владимирович (Физра)", "teacher"); // 24
+        createUser("teacher_eng", "12345678", "Анна", "Павловна (Английский)", "teacher"); // 25
+        createUser("teacher_lit", "12345678", "Оксана", "Дмитриевна (Литература)", "teacher"); // 26
 
-        log.info("Все тестовые пользователи созданы. Проверьте, что ID в БД совпадают с ожиданиями.");
+        log.info("=== Тестовые пользователи созданы. ID учителей начинаются с 17. ===");
     }
 
     private void createUser(String username, String password, String firstName, String lastName, String role) {
+        // Твоя оригинальная логика создания (без изменений)
         String roleId;
         UserRoles userRole;
 
@@ -106,7 +114,5 @@ public class DebugDataInitializer implements CommandLineRunner {
             case "student" -> studentRepository.save(Student.builder().user(user).build());
             case "parent"  -> parentRepository.save(Parent.builder().user(user).build());
         }
-
-        log.info("Создан {} с ID: {}", username, user.getId());
     }
 }

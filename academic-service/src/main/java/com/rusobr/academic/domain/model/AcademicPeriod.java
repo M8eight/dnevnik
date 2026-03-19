@@ -22,9 +22,11 @@ public class AcademicPeriod {
 
     private String schoolYear;
 
-    LocalDate startDate;
+    private boolean isClosed = false;
 
-    LocalDate endDate;
+    private LocalDate startDate;
+
+    private LocalDate endDate;
 
     public boolean contains(LocalDate date) {
         return !date.isBefore(startDate) && !date.isAfter(endDate);
