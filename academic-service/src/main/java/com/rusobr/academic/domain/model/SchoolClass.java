@@ -2,11 +2,12 @@ package com.rusobr.academic.domain.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.Instant;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -15,8 +16,9 @@ import java.util.Set;
 @Table(name = "school_classes")
 @Getter
 @Setter
-@ToString(exclude = "studentIds")
+@ToString(exclude = "students")
 @Builder
+@EntityListeners(AuditingEntityListener.class)
 public class SchoolClass {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,16 +31,14 @@ public class SchoolClass {
     private Long classTeacherId;
 
     @Builder.Default
-    @ElementCollection(fetch = FetchType.LAZY)
-    @CollectionTable(name = "class_students", joinColumns = @JoinColumn(name = "school_class_id"))
-    @Column(name = "student_id")
-    private Set<Long> studentIds = new HashSet<>();
+    @OneToMany(mappedBy = "schoolClass", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ClassStudent> students = new HashSet<>();
 
-    @CreationTimestamp
-    @Column
-    private java.sql.Timestamp created_at;
+    @CreatedDate
+    @Column(updatable = false, name = "created_at")
+    private Instant createdAt;
 
-    @UpdateTimestamp
-    @Column
-    private java.sql.Timestamp updated_at;
+    @LastModifiedDate
+    @Column(name = "updated_at")
+    private Instant updatedAt;
 }

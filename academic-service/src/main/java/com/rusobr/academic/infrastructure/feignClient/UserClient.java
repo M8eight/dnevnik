@@ -12,7 +12,7 @@ import java.util.Set;
 public interface UserClient {
 
     @PostMapping("/api/v1/users/batch")
-    Set<UserResponse> getBatchUsers(@RequestBody Set<Long> ids);
+    List<UserResponse> getBatchUsers(@RequestBody List<Long> ids);
 
 
 }
