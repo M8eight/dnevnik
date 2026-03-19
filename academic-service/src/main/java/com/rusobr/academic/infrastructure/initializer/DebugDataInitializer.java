@@ -19,6 +19,7 @@ import java.util.stream.LongStream;
 @RequiredArgsConstructor
 @Transactional
 @Slf4j
+@Deprecated
 public class DebugDataInitializer implements CommandLineRunner {
 
     private final SubjectRepository subjectRepository;

@@ -78,10 +78,18 @@ public class DebugDataInitializer implements CommandLineRunner {
         UserRoles userRole;
 
         switch (role) {
-            case "admin" -> { roleId = "fb4ae346-9cbb-4c45-93ad-bd89bfe331a4"; userRole = UserRoles.ADMIN; }
-            case "teacher" -> { roleId = "12535b66-c65b-44fb-a686-49f460f3efba"; userRole = UserRoles.TEACHER; }
-            case "student" -> { roleId = "412fe55a-22e8-494e-98b9-ad47b98abc36"; userRole = UserRoles.STUDENT; }
-            case "parent" -> { roleId = "6696880e-db8e-40a1-9035-eb018ce682e4"; userRole = UserRoles.PARENT; }
+            case "admin" -> {
+                roleId = "fb4ae346-9cbb-4c45-93ad-bd89bfe331a4"; userRole = UserRoles.ADMIN;
+            }
+            case "teacher" -> {
+                roleId = "12535b66-c65b-44fb-a686-49f460f3efba"; userRole = UserRoles.TEACHER;
+            }
+            case "student" -> {
+                roleId = "412fe55a-22e8-494e-98b9-ad47b98abc36"; userRole = UserRoles.STUDENT;
+            }
+            case "parent" -> {
+                roleId = "6696880e-db8e-40a1-9035-eb018ce682e4"; userRole = UserRoles.PARENT;
+            }
             default -> throw new IllegalArgumentException("Invalid role: " + role);
         }
 
@@ -107,7 +115,26 @@ public class DebugDataInitializer implements CommandLineRunner {
                 .firstName(firstName)
                 .lastName(lastName)
                 .roles(Collections.singleton(userRole))
-                .build());
+                .build();
+        userRepository.save(user);
+
+        switch (role) {
+            case "teacher" -> {
+                teacherRepository.save(Teacher.builder().user(user).build());
+            }
+            case "student" -> {
+                studentRepository.save(Student.builder().user(user).build());
+            }
+            case "parent" -> {
+                parentRepository.save(Parent.builder().user(user).build());
+            }
+        }
+
+        switch (role) {
+            case "teacher" -> teacherRepository.save(Teacher.builder().user(user).build());
+            case "student" -> studentRepository.save(Student.builder().user(user).build());
+            case "parent"  -> parentRepository.save(Parent.builder().user(user).build());
+        }
 
         switch (role) {
             case "teacher" -> teacherRepository.save(Teacher.builder().user(user).build());
