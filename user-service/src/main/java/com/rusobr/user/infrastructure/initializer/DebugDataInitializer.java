@@ -19,6 +19,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
+import java.util.HashSet;
 
 @Component
 @RequiredArgsConstructor
@@ -114,8 +115,8 @@ public class DebugDataInitializer implements CommandLineRunner {
                 .keycloackId(keycloackId)
                 .firstName(firstName)
                 .lastName(lastName)
-                .roles(Collections.singleton(userRole))
-                .build();
+                .roles(new HashSet<>(Collections.singleton(userRole)))
+                .build());
         userRepository.save(user);
 
         switch (role) {
@@ -128,18 +129,6 @@ public class DebugDataInitializer implements CommandLineRunner {
             case "parent" -> {
                 parentRepository.save(Parent.builder().user(user).build());
             }
-        }
-
-        switch (role) {
-            case "teacher" -> teacherRepository.save(Teacher.builder().user(user).build());
-            case "student" -> studentRepository.save(Student.builder().user(user).build());
-            case "parent"  -> parentRepository.save(Parent.builder().user(user).build());
-        }
-
-        switch (role) {
-            case "teacher" -> teacherRepository.save(Teacher.builder().user(user).build());
-            case "student" -> studentRepository.save(Student.builder().user(user).build());
-            case "parent"  -> parentRepository.save(Parent.builder().user(user).build());
         }
     }
 }
