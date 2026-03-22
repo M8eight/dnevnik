@@ -32,6 +32,15 @@ spring:
           filters:
             - TokenRelay=
 
+springdoc:
+  swagger-ui:
+    urls:
+      - name: "User service"
+        url: /user-service/v3/api-docs
+      - name: "Academic service"
+        url: /academic-service/v3/api-docs
+  api-docs:
+    path: /v3/api-docs
 
 eureka:
   client:

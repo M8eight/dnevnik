@@ -25,6 +25,10 @@ spring:
     password: school_pass
     driver-class-name: org.postgresql.Driver
 
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+
 eureka:
   client:
     service-url:
