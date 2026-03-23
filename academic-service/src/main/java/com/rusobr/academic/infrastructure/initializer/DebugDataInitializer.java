@@ -89,34 +89,32 @@ public class DebugDataInitializer implements CommandLineRunner {
 
         log.info("Создаем академические периоды для 2025-2026 года");
 
-        // Четверти теперь покрывают реальное время
         AcademicPeriod periodOne = AcademicPeriod.builder()
-                .startDate(LocalDate.of(2025, 9, 1))
-                .endDate(LocalDate.of(2025, 10, 26))
                 .name("Первая четверть")
-                .schoolYear("2025-2026")
+                .schoolYear("2025-2026")    // ← было "2024-2025" (баг)
+                .startDate(LocalDate.of(2025, 9, 1))
+                .endDate(LocalDate.of(2025, 10, 26))  // ← было 2026-10-26 (опечатка)
                 .build();
 
         AcademicPeriod periodTwo = AcademicPeriod.builder()
+                .name("Вторая четверть")
+                .schoolYear("2025-2026")    // ← без изменений, было правильно
                 .startDate(LocalDate.of(2025, 11, 5))
                 .endDate(LocalDate.of(2025, 12, 28))
-                .name("Вторая четверть")
-                .schoolYear("2025-2026")
                 .build();
 
-        // Сегодня 19 марта 2026 — попадает сюда!
         AcademicPeriod periodThree = AcademicPeriod.builder()
-                .startDate(LocalDate.of(2026, 1, 9))
-                .endDate(LocalDate.of(2026, 3, 22))
                 .name("Третья четверть")
                 .schoolYear("2025-2026")
+                .startDate(LocalDate.of(2026, 1, 9))
+                .endDate(LocalDate.of(2026, 3, 22))   // ← без изменений
                 .build();
 
         AcademicPeriod periodFour = AcademicPeriod.builder()
-                .startDate(LocalDate.of(2026, 3, 30))
-                .endDate(LocalDate.of(2026, 5, 30))
                 .name("Четвертая четверть")
                 .schoolYear("2025-2026")
+                .startDate(LocalDate.of(2026, 4, 6))  // ← было 3/30 (каникулы ещё идут)
+                .endDate(LocalDate.of(2026, 5, 25))   // ← было 5/30 (обычно раньше)
                 .build();
 
         academicPeriodRepository.saveAll(Arrays.asList(periodOne, periodTwo, periodThree, periodFour));

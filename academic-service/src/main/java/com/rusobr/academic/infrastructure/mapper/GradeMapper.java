@@ -9,10 +9,11 @@ import com.rusobr.academic.web.dto.userService.UserResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.ReportingPolicy;
 
 import java.util.List;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface GradeMapper {
     GradeResponseDto toGradeResponseDto(Grade grade);
     Grade toGrade(GradeRequestDto gradeRequestDto);
