@@ -22,6 +22,7 @@ public class AcademicPeriod {
 
     private String schoolYear;
 
+    @Builder.Default
     private boolean isClosed = false;
 
     private LocalDate startDate;

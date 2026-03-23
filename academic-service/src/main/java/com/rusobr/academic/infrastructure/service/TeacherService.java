@@ -40,10 +40,11 @@ public class TeacherService {
             date = LocalDate.now();
         }
 
-        //Получаем список учеников feign, левая колонка (переиспользуем метод getUsersIdFromClass)
+        //Получаем classId по teachingAssignmentId
         Long classId = teachingAssignmentRepository.findByIdWithClassId(teachingAssignmentId)
                 .orElseThrow(() -> new NotFoundException("Not Found ClassId in findByIdWithClassId"));
 
+        //Получаем список учеников feign, левая колонка (переиспользуем метод getUsersIdFromClass)
         List<UserResponse> classStudents = getUsersIdFromClass(classId);
         log.info("classStudents: {}", classStudents);
 
@@ -51,5 +52,4 @@ public class TeacherService {
 
         return gradeMapper.toGradeJournalResponse(classStudents, journalData);
     }
-
 }
