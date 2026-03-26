@@ -1,9 +1,12 @@
 package com.rusobr.academic.infrastructure.service;
 
+import com.rusobr.academic.domain.model.AcademicPeriod;
 import com.rusobr.academic.domain.model.Grade;
 import com.rusobr.academic.infrastructure.exception.NotFoundException;
 import com.rusobr.academic.infrastructure.mapper.GradeMapper;
+import com.rusobr.academic.infrastructure.persistence.repository.AcademicPeriodRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.GradeRepository;
+import com.rusobr.academic.infrastructure.persistence.repository.LessonInstanceRepository;
 import com.rusobr.academic.web.dto.grade.GradeRequestDto;
 import com.rusobr.academic.web.dto.grade.GradeResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +15,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -19,6 +24,8 @@ public class GradeService {
 
     private final GradeRepository gradeRepository;
     private final GradeMapper gradeMapper;
+    private final AcademicPeriodRepository academicPeriodRepository;
+    private final LessonInstanceRepository lessonInstanceRepository;
 
     public Page<GradeResponseDto> getGrades(Pageable pageable) {
         return gradeRepository.findAll(pageable).map(gradeMapper::toGradeResponseDto);
@@ -31,6 +38,12 @@ public class GradeService {
 
     @Transactional
     public GradeResponseDto createGrade(GradeRequestDto grade) {
+
+        AcademicPeriod academicPeriod = academicPeriodRepository.findByDate(grade.date())
+                .orElseThrow(() -> new NotFoundException("Academic period not found"));
+
+
+
         Grade gradeEntity = gradeMapper.toGrade(grade);
         return gradeMapper.toGradeResponseDto(gradeRepository.save(gradeEntity));
     }

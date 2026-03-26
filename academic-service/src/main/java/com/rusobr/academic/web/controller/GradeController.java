@@ -16,8 +16,8 @@ public class GradeController {
     private final GradeService gradeService;
 
     @PostMapping
-    public GradeResponseDto createGrade(@RequestBody @Valid GradeRequestDto createGradeRequestDto) {
-        return gradeService.createGrade(createGradeRequestDto);
+    public void createGrade(@RequestBody @Valid GradeRequestDto createGradeRequestDto) {
+//        return gradeService.createGrade(createGradeRequestDto);
     }
 
     @GetMapping

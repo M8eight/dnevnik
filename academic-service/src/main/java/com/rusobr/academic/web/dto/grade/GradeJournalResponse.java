@@ -10,7 +10,7 @@ import java.util.List;
 public record GradeJournalResponse(
         List<UserResponse> users,
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-        List<LocalDate> dates,
+        List<DateScheduleAssignDto> dates,
         List<TeacherGradeDto> grades,
         AcademicPeriodDto period
 ) {

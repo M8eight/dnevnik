@@ -1,13 +1,14 @@
 package com.rusobr.academic.web.dto.grade;
 
-import jakarta.validation.constraints.NotBlank;
+import com.rusobr.academic.domain.enums.GradeType;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 
 public record GradeRequestDto (
-    @NotBlank String student,
-    @NotBlank String subject,
-    @NotBlank String teacher,
-    @NotNull LocalDate date
+    @NotNull Long studentId,
+    @NotNull Long teacherAssignmentId,
+    @NotNull LocalDate date,
+    @NotNull int value,
+    @NotNull GradeType gradeType
 ) {}

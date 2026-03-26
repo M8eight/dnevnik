@@ -18,7 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
@@ -52,50 +53,54 @@ public class DebugDataInitializer implements CommandLineRunner {
         createUser("morozova_v", "12345678", "Виктория", "Морозова", "student");
 
         // 13-16: Администрация и Родители (ID: 13-16)
-        createUser("admin", "12345678", "Елена", "Директорова", "admin"); // 13
-        createUser("parent_demidova", "12345678", "Ольга", "Демидова", "parent"); // 14
-        createUser("parent_smirnov", "12345678", "Сергей", "Смирнов", "parent"); // 15
-        createUser("parent_ivanova", "12345678", "Наталья", "Иванова", "parent"); // 16
+        createUser("admin", "12345678", "Елена", "Директорова", "admin");
+        createUser("parent_demidova", "12345678", "Ольга", "Демидова", "parent");
+        createUser("parent_smirnov", "12345678", "Сергей", "Смирнов", "parent");
+        createUser("parent_ivanova", "12345678", "Наталья", "Иванова", "parent");
 
         // 17-26: Учителя предметники (ID: 17-26)
-        createUser("teacher_math", "12345678", "Ирина", "Николаевна (Математика)", "teacher"); // 17
-        createUser("teacher_rus", "12345678", "Светлана", "Юрьевна (Русский)", "teacher"); // 18
-        createUser("teacher_phys", "12345678", "Виктор", "Степанович (Физика)", "teacher"); // 19
-        createUser("teacher_chem", "12345678", "Татьяна", "Васильевна (Химия)", "teacher"); // 20
-        createUser("teacher_bio", "12345678", "Марина", "Олеговна (Биология)", "teacher"); // 21
-        createUser("teacher_hist", "12345678", "Игорь", "Анатольевич (История)", "teacher"); // 22
-        createUser("teacher_it", "12345678", "Александр", "Сергеевич (Информатика)", "teacher"); // 23
-        createUser("teacher_pe", "12345678", "Евгений", "Владимирович (Физра)", "teacher"); // 24
-        createUser("teacher_eng", "12345678", "Анна", "Павловна (Английский)", "teacher"); // 25
-        createUser("teacher_lit", "12345678", "Оксана", "Дмитриевна (Литература)", "teacher"); // 26
+        createUser("teacher_math", "12345678", "Ирина", "Николаевна (Математика)", "teacher");
+        createUser("teacher_rus", "12345678", "Светлана", "Юрьевна (Русский)", "teacher");
+        createUser("teacher_phys", "12345678", "Виктор", "Степанович (Физика)", "teacher");
+        createUser("teacher_chem", "12345678", "Татьяна", "Васильевна (Химия)", "teacher");
+        createUser("teacher_bio", "12345678", "Марина", "Олеговна (Биология)", "teacher");
+        createUser("teacher_hist", "12345678", "Игорь", "Анатольевич (История)", "teacher");
+        createUser("teacher_it", "12345678", "Александр", "Сергеевич (Информатика)", "teacher");
+        createUser("teacher_pe", "12345678", "Евгений", "Владимирович (Физра)", "teacher");
+        createUser("teacher_eng", "12345678", "Анна", "Павловна (Английский)", "teacher");
+        createUser("teacher_lit", "12345678", "Оксана", "Дмитриевна (Литература)", "teacher");
 
         log.info("=== Тестовые пользователи созданы. ID учителей начинаются с 17. ===");
     }
 
     private void createUser(String username, String password, String firstName, String lastName, String role) {
-        // Твоя оригинальная логика создания (без изменений)
         String roleId;
         UserRoles userRole;
 
         switch (role) {
             case "admin" -> {
-                roleId = "fb4ae346-9cbb-4c45-93ad-bd89bfe331a4"; userRole = UserRoles.ADMIN;
+                roleId = "fb4ae346-9cbb-4c45-93ad-bd89bfe331a4";
+                userRole = UserRoles.ADMIN;
             }
             case "teacher" -> {
-                roleId = "12535b66-c65b-44fb-a686-49f460f3efba"; userRole = UserRoles.TEACHER;
+                roleId = "12535b66-c65b-44fb-a686-49f460f3efba";
+                userRole = UserRoles.TEACHER;
             }
             case "student" -> {
-                roleId = "412fe55a-22e8-494e-98b9-ad47b98abc36"; userRole = UserRoles.STUDENT;
+                roleId = "412fe55a-22e8-494e-98b9-ad47b98abc36";
+                userRole = UserRoles.STUDENT;
             }
             case "parent" -> {
-                roleId = "6696880e-db8e-40a1-9035-eb018ce682e4"; userRole = UserRoles.PARENT;
+                roleId = "6696880e-db8e-40a1-9035-eb018ce682e4";
+                userRole = UserRoles.PARENT;
             }
             default -> throw new IllegalArgumentException("Invalid role: " + role);
         }
 
-        String keycloackId = "";
+        String keycloackId;
         try {
-            keycloackId = keycloackRestClient.createKeyCloackUser(new CreateUserRequest(username, password, firstName, lastName));
+            keycloackId = keycloackRestClient.createKeyCloackUser(
+                    new CreateUserRequest(username, password, firstName, lastName));
         } catch (Exception e) {
             if (e.getMessage().contains("Keycloack User already exists") || e.getMessage().contains("409")) {
                 keycloackId = keycloackRestClient.getKeycloackUserByUsername(username).id();
@@ -114,27 +119,8 @@ public class DebugDataInitializer implements CommandLineRunner {
                 .keycloackId(keycloackId)
                 .firstName(firstName)
                 .lastName(lastName)
-                .roles(Collections.singleton(userRole))
-                .build();
-        userRepository.save(user);
-
-        switch (role) {
-            case "teacher" -> {
-                teacherRepository.save(Teacher.builder().user(user).build());
-            }
-            case "student" -> {
-                studentRepository.save(Student.builder().user(user).build());
-            }
-            case "parent" -> {
-                parentRepository.save(Parent.builder().user(user).build());
-            }
-        }
-
-        switch (role) {
-            case "teacher" -> teacherRepository.save(Teacher.builder().user(user).build());
-            case "student" -> studentRepository.save(Student.builder().user(user).build());
-            case "parent"  -> parentRepository.save(Parent.builder().user(user).build());
-        }
+                .roles(new HashSet<>(Set.of(userRole)))
+                .build());
 
         switch (role) {
             case "teacher" -> teacherRepository.save(Teacher.builder().user(user).build());

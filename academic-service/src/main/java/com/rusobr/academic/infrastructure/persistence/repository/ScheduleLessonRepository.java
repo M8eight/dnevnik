@@ -13,4 +13,6 @@ import java.util.List;
 public interface ScheduleLessonRepository extends JpaRepository<ScheduleLesson, Long> {
     @Query("select sl.dayOfWeek from ScheduleLesson sl where sl.teachingAssignment.id = :teachingAssignmentId")
     List<DayOfWeek> findDaysOfWeeksByTeachingAssignmentId(@Param("teachingAssignmentId") Long teachingAssignmentId);
+
+    List<ScheduleLesson> findByTeachingAssignmentId(Long teachingAssignmentId);
 }
