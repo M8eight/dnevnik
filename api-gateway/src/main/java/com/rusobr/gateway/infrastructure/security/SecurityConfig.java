@@ -2,6 +2,7 @@ package com.rusobr.gateway.infrastructure.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
@@ -41,7 +42,10 @@ public class SecurityConfig {
 
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
-                .authorizeExchange(exchange -> exchange.anyExchange().permitAll())
+                .authorizeExchange(exchange -> exchange
+                        .pathMatchers("/user-service/v3/api-docs/**", "/swagger-ui/**").permitAll()
+                        .pathMatchers("/academic-service/v3/api-docs/**", "/swagger-ui/**").permitAll()
+                        .anyExchange().permitAll())
                 .build();
 
 

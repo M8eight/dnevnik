@@ -21,12 +21,15 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: ${keycloack.url}/realms/${keycloack.realm}
-
   datasource:
     url: ${PSQL_DB_URL:jdbc:postgresql://localhost:5432/academic_db}
     username: school_user
     password: school_pass
     driver-class-name: org.postgresql.Driver
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
 
 eureka:
   client:
