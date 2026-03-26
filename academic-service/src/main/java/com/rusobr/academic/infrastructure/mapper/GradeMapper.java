@@ -6,16 +6,17 @@ import com.rusobr.academic.web.dto.grade.GradeJournalResponse;
 import com.rusobr.academic.web.dto.grade.GradeRequestDto;
 import com.rusobr.academic.web.dto.grade.GradeResponseDto;
 import com.rusobr.academic.web.dto.userService.UserResponse;
-import org.mapstruct.Mapper;
-import org.mapstruct.MappingConstants;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.ReportingPolicy;
+import org.mapstruct.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface GradeMapper {
-    GradeResponseDto toGradeResponseDto(Grade grade);
+    @Mapping(target = "date", source = "date")
+    @Mapping(target = "gradeId", source = "grade.id")
+    @Mapping(target = "gradeType", source = "grade.type")
+    GradeResponseDto toGradeResponseDto(Grade grade, LocalDate date);
     Grade toGrade(GradeRequestDto gradeRequestDto);
     void updateEntityFromDto(GradeRequestDto dto, @MappingTarget Grade grade);
     GradeJournalResponse toGradeJournalResponse(List<UserResponse> users, GradeJournalData grade);

@@ -1,5 +1,6 @@
 package com.rusobr.academic.infrastructure.exception.exceptionAdvice;
 
+import com.rusobr.academic.infrastructure.exception.Conflict;
 import com.rusobr.academic.infrastructure.exception.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,8 +10,14 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<String> handle(NotFoundException ex) {
+    public ResponseEntity<String> handleNotFound(NotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ex.getMessage());
+    }
+
+    @ExceptionHandler(Conflict.class)
+    public ResponseEntity<String> handleConflict(NotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(ex.getMessage());
     }
 }

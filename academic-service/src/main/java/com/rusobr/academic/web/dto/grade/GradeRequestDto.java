@@ -7,7 +7,7 @@ import java.time.LocalDate;
 
 public record GradeRequestDto (
     @NotNull Long studentId,
-    @NotNull Long teacherAssignmentId,
+    @NotNull Long scheduleLessonId,
     @NotNull LocalDate date,
     @NotNull int value,
     @NotNull GradeType gradeType

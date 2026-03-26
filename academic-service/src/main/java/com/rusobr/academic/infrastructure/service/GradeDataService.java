@@ -56,7 +56,7 @@ public class GradeDataService {
         List<DateScheduleAssignDto> dates = academicPeriod.getStartDate()
                 .datesUntil(academicPeriod.getEndDate().plusDays(1))
                 .filter(dateV -> dayToLessonId.containsKey(dateV.getDayOfWeek()))
-                .map(dateV -> new DateScheduleAssignDto(dateV, dayToLessonId.get(date.getDayOfWeek())))
+                .map(dateV -> new DateScheduleAssignDto(dateV, dayToLessonId.get(dateV.getDayOfWeek())))
                 .toList();
 
         //Получаем список оценок с присвоенными к ним studentId

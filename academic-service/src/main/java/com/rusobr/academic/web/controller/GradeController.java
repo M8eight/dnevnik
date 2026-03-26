@@ -16,27 +16,27 @@ public class GradeController {
     private final GradeService gradeService;
 
     @PostMapping
-    public void createGrade(@RequestBody @Valid GradeRequestDto createGradeRequestDto) {
-//        return gradeService.createGrade(createGradeRequestDto);
+    public GradeResponseDto createGrade(@RequestBody @Valid GradeRequestDto createGradeRequestDto) {
+        return gradeService.createGrade(createGradeRequestDto);
     }
 
-    @GetMapping
-    public Page<GradeResponseDto> getGrades(Pageable pageable) {
-        return gradeService.getGrades(pageable);
-    }
-
-    @GetMapping("/{id}")
-    public GradeResponseDto getGradeById(@PathVariable Long id) {
-        return gradeService.getGrade(id);
-    }
-
-    @PutMapping("/{id}")
-    public GradeResponseDto updateGrade(@PathVariable Long id, @RequestBody @Valid GradeRequestDto dto) {
-        return gradeService.updateGrade(id, dto);
-    }
-
-    @DeleteMapping("/{id}")
-    public void deleteGradeById(@PathVariable Long id) {
-        gradeService.deleteGrade(id);
-    }
+//    @GetMapping
+//    public Page<GradeResponseDto> getGrades(Pageable pageable) {
+//        return gradeService.getGrades(pageable);
+//    }
+//
+//    @GetMapping("/{id}")
+//    public GradeResponseDto getGradeById(@PathVariable Long id) {
+//        return gradeService.getGrade(id);
+//    }
+//
+//    @PutMapping("/{id}")
+//    public GradeResponseDto updateGrade(@PathVariable Long id, @RequestBody @Valid GradeRequestDto dto) {
+//        return gradeService.updateGrade(id, dto);
+//    }
+//
+//    @DeleteMapping("/{id}")
+//    public void deleteGradeById(@PathVariable Long id) {
+//        gradeService.deleteGrade(id);
+//    }
 }
