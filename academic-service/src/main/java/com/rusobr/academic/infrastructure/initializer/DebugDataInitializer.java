@@ -123,7 +123,6 @@ public class DebugDataInitializer implements CommandLineRunner {
     }
 
     private void buildDay(LocalDate date, List<ScheduleLesson> slots, SchoolClass schoolClass) {
-        GradeType[] allGradeTypes = GradeType.values();
 
         for (ScheduleLesson slot : slots) {
             LessonInstance li = lessonInstanceRepository.save(
@@ -139,7 +138,7 @@ public class DebugDataInitializer implements CommandLineRunner {
                             .lessonInstance(li)
                             .studentId(sid)
                             .value(generateRealisticGrade())
-                            .type(allGradeTypes[rng.nextInt(allGradeTypes.length)].name())
+                            .type(GradeType.values()[rng.nextInt(GradeType.values().length)])
                             .build());
                 }
 
@@ -169,7 +168,8 @@ public class DebugDataInitializer implements CommandLineRunner {
         return AttendanceStatus.EXCUSED;
     }
 
-    private record Slot(int number, String room, TeachingAssignment ta) {}
+    private record Slot(int number, String room, TeachingAssignment ta) {
+    }
 
     private List<ScheduleLesson> schedule(DayOfWeek day, List<Slot> slots) {
         List<ScheduleLesson> res = new ArrayList<>();
