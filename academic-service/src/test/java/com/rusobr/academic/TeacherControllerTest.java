@@ -3,6 +3,7 @@ package com.rusobr.academic;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rusobr.academic.infrastructure.service.TeacherService;
 import com.rusobr.academic.web.controller.TeacherController;
+import com.rusobr.academic.web.dto.grade.DateScheduleAssignDto;
 import com.rusobr.academic.web.dto.grade.GradeJournalResponse;
 import com.rusobr.academic.web.dto.userService.UserResponse;
 import org.junit.jupiter.api.DisplayName;
@@ -23,10 +24,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
 @WebMvcTest(controllers = TeacherController.class)
 @AutoConfigureMockMvc(addFilters = false)
 public class TeacherControllerTest {
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -57,21 +58,26 @@ public class TeacherControllerTest {
     @Test
     @DisplayName("Должен вернуть данные журнала с оценками")
     void shouldReturnGradeJournal() throws Exception {
-        // Подготовка данных
+        // dates теперь List<DateScheduleAssignDto> — проверяем вложенное поле date
+        List<DateScheduleAssignDto> dates = List.of(
+                new DateScheduleAssignDto(LocalDate.of(2025, 9, 1), 10L)
+        );
+
         GradeJournalResponse response = new GradeJournalResponse(
                 List.of(new UserResponse("Алексей", "Кочетыгов", "abc-123", 1L)),
-                List.of(LocalDate.of(2025, 9, 1)),
-                List.of(), // пустые оценки для краткости
-                null // DTO периода
+                dates,
+                List.of(),
+                null
         );
 
         when(teacherService.getClassGrades(any(), any())).thenReturn(response);
 
-        // Выполняем запрос с параметром даты
         mockMvc.perform(get("/api/v1/class/grades/1")
                         .param("date", "2025-09-01"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.users[0].firstName").value("Алексей"))
-                .andExpect(jsonPath("$.dates[0]").value("2025-09-01"));
+                // DateScheduleAssignDto сериализуется как объект, поэтому обращаемся к полю date
+                .andExpect(jsonPath("$.dates[0].date").value("2025-09-01"))
+                .andExpect(jsonPath("$.dates[0].scheduleId").value(10));
     }
 }

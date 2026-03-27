@@ -1,5 +1,6 @@
 package com.rusobr.academic;
 
+import com.rusobr.academic.domain.enums.GradeType;
 import com.rusobr.academic.infrastructure.feignClient.UserClient;
 import com.rusobr.academic.infrastructure.mapper.GradeMapper;
 import com.rusobr.academic.infrastructure.persistence.repository.SchoolClassRepository;
@@ -7,6 +8,7 @@ import com.rusobr.academic.infrastructure.persistence.repository.TeachingAssignm
 import com.rusobr.academic.infrastructure.service.GradeDataService;
 import com.rusobr.academic.infrastructure.service.TeacherService;
 import com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodDto;
+import com.rusobr.academic.web.dto.grade.DateScheduleAssignDto;
 import com.rusobr.academic.web.dto.grade.GradeJournalData;
 import com.rusobr.academic.web.dto.grade.GradeJournalResponse;
 import com.rusobr.academic.web.dto.grade.TeacherGradeDto;
@@ -22,6 +24,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -60,6 +64,8 @@ public class TeacherServiceTest {
 
         verify(schoolClassRepository).getStudentIdsFromSchoolClasses(classId);
         verify(userClient).getBatchUsers(userIds);
+
+        assertEquals(2, res.size());
     }
 
     @Test
@@ -67,13 +73,20 @@ public class TeacherServiceTest {
     void shouldGetClassGrades() {
         Long teachingAssignmentId = 1L;
         LocalDate date = LocalDate.now();
+
         List<UserResponse> usersRes = List.of(
                 new UserResponse("Алексей", "Кочетыгов", "abc-123", 1L),
                 new UserResponse("Алексей", "Кочетыгов", "abc-123", 2L)
         );
+
+        // dates теперь List<DateScheduleAssignDto>
+        List<DateScheduleAssignDto> dates = List.of(
+                new DateScheduleAssignDto(LocalDate.of(2025, 9, 1), 10L)
+        );
+
         GradeJournalData journalData = new GradeJournalData(
-                List.of(LocalDate.of(2025, 9, 1)),
-                List.of(new TeacherGradeDto(1L, 1L, 5, "TEST", LocalDate.of(2025, 9, 2))),
+                dates,
+                List.of(new TeacherGradeDto(1L, 1L, 5, GradeType.TEST, LocalDate.of(2025, 9, 2))),
                 new AcademicPeriodDto(
                         1L,
                         "Первая четверть",
@@ -81,23 +94,29 @@ public class TeacherServiceTest {
                         false,
                         LocalDate.of(2025, 9, 1),
                         LocalDate.of(2025, 10, 26)
-                )
+                ),
+                List.of() // scheduleLessons
         );
-        GradeJournalResponse resultDto = new GradeJournalResponse(usersRes, journalData.dates(), journalData.grades(), journalData.period());
 
-        when(schoolClassRepository.getStudentIdsFromSchoolClasses(any())).thenReturn(List.of(1L));
+        GradeJournalResponse resultDto = new GradeJournalResponse(
+                usersRes, journalData.dates(), journalData.grades(), journalData.period()
+        );
+
+        when(teachingAssignmentRepository.findByIdWithClassId(teachingAssignmentId))
+                .thenReturn(Optional.of(1L));
+        when(schoolClassRepository.getStudentIdsFromSchoolClasses(1L)).thenReturn(List.of(1L, 2L));
         when(userClient.getBatchUsers(any())).thenReturn(usersRes);
-
-        when(teachingAssignmentRepository.findByIdWithClassId(any())).thenReturn(Optional.of(1L));
-        when(gradeDataService.getGradeData(any(), any())).thenReturn(journalData);
-        when(gradeMapper.toGradeJournalResponse(any(), any())).thenReturn(resultDto);
+        when(gradeDataService.getGradeData(teachingAssignmentId, date)).thenReturn(journalData);
+        when(gradeMapper.toGradeJournalResponse(usersRes, journalData)).thenReturn(resultDto);
 
         GradeJournalResponse res = teacherService.getClassGrades(teachingAssignmentId, date);
 
-        verify(teachingAssignmentRepository).findByIdWithClassId(any());
-        verify(gradeDataService).getGradeData(any(), any());
+        verify(teachingAssignmentRepository).findByIdWithClassId(teachingAssignmentId);
+        verify(gradeDataService).getGradeData(teachingAssignmentId, date);
+        // Добавляем проверку маппера — он тоже должен вызываться
+        verify(gradeMapper).toGradeJournalResponse(usersRes, journalData);
 
-
+        assertNotNull(res);
+        assertEquals(2, res.users().size());
     }
-
 }

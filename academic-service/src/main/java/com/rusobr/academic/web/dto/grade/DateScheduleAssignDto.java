@@ -1,15 +1,11 @@
 package com.rusobr.academic.web.dto.grade;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.rusobr.academic.domain.enums.GradeType;
 
 import java.time.LocalDate;
 
-public record TeacherGradeDto(
-        Long studentId,
-        Long gradeId,
-        Integer value,
-        GradeType type,
+public record DateScheduleAssignDto(
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-        LocalDate date
+        LocalDate date,
+        Long scheduleId
 ) {}

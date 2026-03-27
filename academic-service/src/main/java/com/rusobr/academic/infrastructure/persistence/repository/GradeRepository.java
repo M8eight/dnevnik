@@ -2,12 +2,15 @@ package com.rusobr.academic.infrastructure.persistence.repository;
 
 import com.rusobr.academic.domain.model.Grade;
 import com.rusobr.academic.web.dto.grade.TeacherGradeDto;
+import jakarta.persistence.Entity;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface GradeRepository extends JpaRepository<Grade, Long> {
@@ -30,4 +33,7 @@ public interface GradeRepository extends JpaRepository<Grade, Long> {
             order by s.id asc, g.createdAt
             """)
     List<TeacherGradeDto> getClassGrades(@Param("assignmentId") Long assignmentId);
+
+    @EntityGraph(attributePaths = {"lessonInstance"})
+    Optional<Grade> findWithLessonInstanceById(Long id);
 }

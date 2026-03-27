@@ -1,6 +1,9 @@
 package com.rusobr.academic.domain.model;
 
+import com.rusobr.academic.domain.enums.GradeType;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -28,10 +31,13 @@ public class Grade {
     @JoinColumn(name = "lesson_instance_id", nullable = false)
     private LessonInstance lessonInstance;
 
+    @Max(5)
+    @Min(1)
     private Integer value;
 
     //TODO сделать enum
-    private String type;
+    @Enumerated(EnumType.STRING)
+    private GradeType type;
 
     @CreatedDate
     @Column(updatable = false, name = "created_at")
