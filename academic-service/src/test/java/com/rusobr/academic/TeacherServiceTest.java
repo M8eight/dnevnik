@@ -7,11 +7,11 @@ import com.rusobr.academic.infrastructure.persistence.repository.SchoolClassRepo
 import com.rusobr.academic.infrastructure.persistence.repository.TeachingAssignmentRepository;
 import com.rusobr.academic.infrastructure.service.GradeDataService;
 import com.rusobr.academic.infrastructure.service.TeacherService;
-import com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodDto;
+import com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodResponse;
 import com.rusobr.academic.web.dto.grade.DateScheduleAssignDto;
-import com.rusobr.academic.web.dto.grade.GradeJournalData;
+import com.rusobr.academic.web.dto.grade.GetGradeDataDto;
 import com.rusobr.academic.web.dto.grade.GradeJournalResponse;
-import com.rusobr.academic.web.dto.grade.TeacherGradeDto;
+import com.rusobr.academic.web.dto.grade.GradeJournalItemDto;
 import com.rusobr.academic.web.dto.userService.UserResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -84,18 +84,17 @@ public class TeacherServiceTest {
                 new DateScheduleAssignDto(LocalDate.of(2025, 9, 1), 10L)
         );
 
-        GradeJournalData journalData = new GradeJournalData(
+        GetGradeDataDto journalData = new GetGradeDataDto(
                 dates,
-                List.of(new TeacherGradeDto(1L, 1L, 5, GradeType.TEST, LocalDate.of(2025, 9, 2))),
-                new AcademicPeriodDto(
+                List.of(new GradeJournalItemDto(1L, 1L, 5, GradeType.TEST, LocalDate.of(2025, 9, 2))),
+                new AcademicPeriodResponse(
                         1L,
                         "Первая четверть",
                         "2025",
                         false,
                         LocalDate.of(2025, 9, 1),
                         LocalDate.of(2025, 10, 26)
-                ),
-                List.of() // scheduleLessons
+                )
         );
 
         GradeJournalResponse resultDto = new GradeJournalResponse(

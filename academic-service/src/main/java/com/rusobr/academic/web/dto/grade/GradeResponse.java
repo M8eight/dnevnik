@@ -2,9 +2,7 @@ package com.rusobr.academic.web.dto.grade;
 
 import com.rusobr.academic.domain.enums.GradeType;
 
-import java.time.LocalDate;
-
-public record GradeResponseDto(
+public record GradeResponse(
         Long gradeId,
         Long studentId,
         int value,

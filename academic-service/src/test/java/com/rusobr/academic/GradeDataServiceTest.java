@@ -9,10 +9,10 @@ import com.rusobr.academic.infrastructure.persistence.repository.AcademicPeriodR
 import com.rusobr.academic.infrastructure.persistence.repository.GradeRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.ScheduleLessonRepository;
 import com.rusobr.academic.infrastructure.service.GradeDataService;
-import com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodDto;
+import com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodResponse;
 import com.rusobr.academic.web.dto.grade.DateScheduleAssignDto;
-import com.rusobr.academic.web.dto.grade.GradeJournalData;
-import com.rusobr.academic.web.dto.grade.TeacherGradeDto;
+import com.rusobr.academic.web.dto.grade.GetGradeDataDto;
+import com.rusobr.academic.web.dto.grade.GradeJournalItemDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -70,8 +70,8 @@ public class GradeDataServiceTest {
 
         List<ScheduleLesson> resScheduleLessons = List.of(mondayLesson, wednesdayLesson);
 
-        List<TeacherGradeDto> grades = List.of(
-                new TeacherGradeDto(1L, 1L, 5, GradeType.TEST, LocalDate.of(2025, 9, 7))
+        List<GradeJournalItemDto> grades = List.of(
+                new GradeJournalItemDto(1L, 1L, 5, GradeType.TEST, LocalDate.of(2025, 9, 7))
         );
 
         when(academicPeriodRepository.findByDate(any())).thenReturn(resAcademicPeriod);
@@ -79,7 +79,7 @@ public class GradeDataServiceTest {
                 .thenReturn(resScheduleLessons);
         when(gradeRepository.getClassGrades(teachingAssignmentId)).thenReturn(grades);
         when(academicPeriodMapper.toDto(any(AcademicPeriod.class))).thenReturn(
-                new AcademicPeriodDto(1L,
+                new AcademicPeriodResponse(1L,
                         "Первая четверть",
                         "2025-2026",
                         false,
@@ -87,7 +87,7 @@ public class GradeDataServiceTest {
                         LocalDate.of(2025, 10, 26))
         );
 
-        GradeJournalData res = gradeDataService.getGradeData(teachingAssignmentId, date);
+        GetGradeDataDto res = gradeDataService.getGradeData(teachingAssignmentId, date);
 
         verify(academicPeriodRepository).findByDate(date);
         verify(scheduleLessonRepository).findByTeachingAssignmentId(teachingAssignmentId);

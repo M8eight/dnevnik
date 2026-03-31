@@ -6,7 +6,7 @@ import com.rusobr.academic.domain.enums.GradeType;
 
 import java.time.LocalDate;
 
-public record LessonWeekDto(
+public record LessonWeekItemDto(
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
         LocalDate date,
         int lessonNumber,

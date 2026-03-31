@@ -2,13 +2,13 @@ package com.rusobr.academic;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rusobr.academic.domain.enums.GradeType;
-import com.rusobr.academic.infrastructure.exception.Conflict;
+import com.rusobr.academic.infrastructure.exception.ConflictException;
 import com.rusobr.academic.infrastructure.exception.NotFoundException;
 import com.rusobr.academic.infrastructure.service.GradeService;
 import com.rusobr.academic.web.controller.GradeController;
-import com.rusobr.academic.web.dto.grade.GradeResponseDto;
-import com.rusobr.academic.web.dto.grade.createGrade.CreateGradeRequestDto;
-import com.rusobr.academic.web.dto.grade.createGrade.CreateGradeResponseDto;
+import com.rusobr.academic.web.dto.grade.GradeResponse;
+import com.rusobr.academic.web.dto.grade.createGrade.CreateGradeRequest;
+import com.rusobr.academic.web.dto.grade.createGrade.CreateGradeResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +49,7 @@ public class GradeControllerTest {
     @Test
     @DisplayName("GET /grades/{id} — 200 и тело ответа")
     void getGradeById_ShouldReturn200() throws Exception {
-        GradeResponseDto dto = new GradeResponseDto(1L, 10L, 5, GradeType.TEST);
+        GradeResponse dto = new GradeResponse(1L, 10L, 5, GradeType.TEST);
         when(gradeService.getGradeById(1L)).thenReturn(dto);
 
         mockMvc.perform(get("/api/v1/grades/1"))
@@ -78,14 +78,14 @@ public class GradeControllerTest {
     @Test
     @DisplayName("POST /grades — 200 и тело ответа при успешном создании")
     void createGrade_ShouldReturn200() throws Exception {
-        CreateGradeRequestDto request = new CreateGradeRequestDto(
+        CreateGradeRequest request = new CreateGradeRequest(
                 1L, 2L, LocalDate.of(2025, 9, 1), 5, GradeType.TEST
         );
-        CreateGradeResponseDto response = new CreateGradeResponseDto(
+        CreateGradeResponse response = new CreateGradeResponse(
                 1L, 5, GradeType.TEST, 100L, LocalDate.of(2025, 9, 1)
         );
 
-        when(gradeService.createGrade(any(CreateGradeRequestDto.class))).thenReturn(response);
+        when(gradeService.createGrade(any(CreateGradeRequest.class))).thenReturn(response);
 
         mockMvc.perform(post("/api/v1/grades")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -113,7 +113,7 @@ public class GradeControllerTest {
     @Test
     @DisplayName("POST /grades — 404 если период не найден")
     void createGrade_ShouldReturn404_WhenPeriodNotFound() throws Exception {
-        CreateGradeRequestDto request = new CreateGradeRequestDto(
+        CreateGradeRequest request = new CreateGradeRequest(
                 1L, 2L, LocalDate.of(2025, 9, 1), 5, GradeType.TEST
         );
 
@@ -129,11 +129,11 @@ public class GradeControllerTest {
     @Test
     @DisplayName("POST /grades — 409 если период закрыт")
     void createGrade_ShouldReturn409_WhenPeriodIsClosed() throws Exception {
-        CreateGradeRequestDto request = new CreateGradeRequestDto(
+        CreateGradeRequest request = new CreateGradeRequest(
                 1L, 2L, LocalDate.of(2025, 9, 1), 5, GradeType.TEST
         );
 
-        when(gradeService.createGrade(any())).thenThrow(new Conflict("Academic period is closed"));
+        when(gradeService.createGrade(any())).thenThrow(new ConflictException("Academic period is closed"));
 
         mockMvc.perform(post("/api/v1/grades")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -171,7 +171,7 @@ public class GradeControllerTest {
     @Test
     @DisplayName("DELETE /grades/{id} — 409 если период закрыт")
     void deleteGrade_ShouldReturn409_WhenPeriodIsClosed() throws Exception {
-        doThrow(new Conflict("Academic period is closed"))
+        doThrow(new ConflictException("Academic period is closed"))
                 .when(gradeService).deleteGrade(1L);
 
         mockMvc.perform(delete("/api/v1/grades/1"))

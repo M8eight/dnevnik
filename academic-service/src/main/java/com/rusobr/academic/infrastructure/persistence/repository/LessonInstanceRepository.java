@@ -1,7 +1,7 @@
 package com.rusobr.academic.infrastructure.persistence.repository;
 
 import com.rusobr.academic.domain.model.LessonInstance;
-import com.rusobr.academic.web.dto.lessonInstance.LessonWeekDto;
+import com.rusobr.academic.web.dto.lessonInstance.LessonWeekItemDto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,7 +14,7 @@ import java.util.Optional;
 @Repository
 public interface LessonInstanceRepository extends JpaRepository<LessonInstance, Long> {
     @Query("""
-                select new com.rusobr.academic.web.dto.lessonInstance.LessonWeekDto(
+                select new com.rusobr.academic.web.dto.lessonInstance.LessonWeekItemDto(
                         li.date,
                         sl.lessonNumber,
                         sl.classRoom,
@@ -33,7 +33,7 @@ public interface LessonInstanceRepository extends JpaRepository<LessonInstance, 
                     and li.date between :startDate and :endDate
                 order by li.date asc, sl.lessonNumber asc
             """)
-    List<LessonWeekDto> getSchedule(
+    List<LessonWeekItemDto> getSchedule(
             @Param("classId") Long classId,
             @Param("student_id") Long studentId,
             @Param("startDate") LocalDate startDate,

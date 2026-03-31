@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.LocalDate;
 
-public record AcademicPeriodDto(
+public record AcademicPeriodResponse(
         Long id,
         String name,
         String schoolYear,

@@ -1,6 +1,6 @@
 package com.rusobr.academic.infrastructure.exception.exceptionAdvice;
 
-import com.rusobr.academic.infrastructure.exception.Conflict;
+import com.rusobr.academic.infrastructure.exception.ConflictException;
 import com.rusobr.academic.infrastructure.exception.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,8 +15,8 @@ public class GlobalExceptionHandler {
                 .body(ex.getMessage());
     }
 
-    @ExceptionHandler(Conflict.class)
-    public ResponseEntity<String> handleConflict(Conflict ex) {
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<String> handleConflict(ConflictException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(ex.getMessage());
     }
