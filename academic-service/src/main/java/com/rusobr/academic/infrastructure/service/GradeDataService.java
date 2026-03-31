@@ -8,8 +8,8 @@ import com.rusobr.academic.infrastructure.persistence.repository.AcademicPeriodR
 import com.rusobr.academic.infrastructure.persistence.repository.GradeRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.ScheduleLessonRepository;
 import com.rusobr.academic.web.dto.grade.DateScheduleAssignDto;
-import com.rusobr.academic.web.dto.grade.GradeJournalData;
-import com.rusobr.academic.web.dto.grade.TeacherGradeDto;
+import com.rusobr.academic.web.dto.grade.GetGradeDataDto;
+import com.rusobr.academic.web.dto.grade.GradeJournalItemDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -32,7 +32,7 @@ public class GradeDataService {
     private final GradeRepository gradeRepository;
 
     @Transactional(readOnly = true)
-    public GradeJournalData getGradeData(Long teachingAssignmentId, LocalDate date) {
+    public GetGradeDataDto getGradeData(Long teachingAssignmentId, LocalDate date) {
 
         //Получаем период из бд по дате
         AcademicPeriod academicPeriod = academicPeriodRepository.findByDate(date)
@@ -60,8 +60,8 @@ public class GradeDataService {
                 .toList();
 
         //Получаем список оценок с присвоенными к ним studentId
-        List<TeacherGradeDto> grades = gradeRepository.getClassGrades(teachingAssignmentId);
+        List<GradeJournalItemDto> grades = gradeRepository.getClassGrades(teachingAssignmentId);
 
-        return new GradeJournalData(dates, grades, academicPeriodMapper.toDto(academicPeriod), scheduleLessons);
+        return new GetGradeDataDto(dates, grades, academicPeriodMapper.toDto(academicPeriod));
     }
 }

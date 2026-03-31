@@ -1,8 +1,7 @@
 package com.rusobr.academic.infrastructure.persistence.repository;
 
 import com.rusobr.academic.domain.model.Grade;
-import com.rusobr.academic.web.dto.grade.TeacherGradeDto;
-import jakarta.persistence.Entity;
+import com.rusobr.academic.web.dto.grade.GradeJournalItemDto;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,7 +15,7 @@ import java.util.Optional;
 public interface GradeRepository extends JpaRepository<Grade, Long> {
     //Запрос берет из schoolClass ученика и сопоставляет оценками и ограничивает данные по teachingAssignmentId
     @Query("""
-            select new com.rusobr.academic.web.dto.grade.TeacherGradeDto(
+            select new com.rusobr.academic.web.dto.grade.GradeJournalItemDto(
                 s.id,
                 g.id,
                 g.value,
@@ -32,7 +31,7 @@ public interface GradeRepository extends JpaRepository<Grade, Long> {
             where ta.id = :assignmentId
             order by s.id asc, g.createdAt
             """)
-    List<TeacherGradeDto> getClassGrades(@Param("assignmentId") Long assignmentId);
+    List<GradeJournalItemDto> getClassGrades(@Param("assignmentId") Long assignmentId);
 
     @EntityGraph(attributePaths = {"lessonInstance"})
     Optional<Grade> findWithLessonInstanceById(Long id);

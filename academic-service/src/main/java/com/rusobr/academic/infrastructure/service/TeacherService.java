@@ -5,7 +5,7 @@ import com.rusobr.academic.infrastructure.feignClient.UserClient;
 import com.rusobr.academic.infrastructure.mapper.GradeMapper;
 import com.rusobr.academic.infrastructure.persistence.repository.SchoolClassRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.TeachingAssignmentRepository;
-import com.rusobr.academic.web.dto.grade.GradeJournalData;
+import com.rusobr.academic.web.dto.grade.GetGradeDataDto;
 import com.rusobr.academic.web.dto.grade.GradeJournalResponse;
 import com.rusobr.academic.web.dto.userService.UserResponse;
 import lombok.RequiredArgsConstructor;
@@ -48,7 +48,7 @@ public class TeacherService {
         List<UserResponse> classStudents = getUsersIdFromClass(classId);
         log.info("classStudents: {}", classStudents);
 
-        GradeJournalData journalData = gradeDataService.getGradeData(teachingAssignmentId, date);
+        GetGradeDataDto journalData = gradeDataService.getGradeData(teachingAssignmentId, date);
 
         return gradeMapper.toGradeJournalResponse(classStudents, journalData);
     }

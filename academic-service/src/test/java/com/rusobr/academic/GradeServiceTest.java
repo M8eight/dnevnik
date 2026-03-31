@@ -5,7 +5,7 @@ import com.rusobr.academic.domain.model.AcademicPeriod;
 import com.rusobr.academic.domain.model.Grade;
 import com.rusobr.academic.domain.model.LessonInstance;
 import com.rusobr.academic.domain.model.ScheduleLesson;
-import com.rusobr.academic.infrastructure.exception.Conflict;
+import com.rusobr.academic.infrastructure.exception.ConflictException;
 import com.rusobr.academic.infrastructure.exception.NotFoundException;
 import com.rusobr.academic.infrastructure.mapper.GradeMapper;
 import com.rusobr.academic.infrastructure.persistence.repository.AcademicPeriodRepository;
@@ -13,9 +13,9 @@ import com.rusobr.academic.infrastructure.persistence.repository.GradeRepository
 import com.rusobr.academic.infrastructure.persistence.repository.LessonInstanceRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.ScheduleLessonRepository;
 import com.rusobr.academic.infrastructure.service.GradeService;
-import com.rusobr.academic.web.dto.grade.GradeResponseDto;
-import com.rusobr.academic.web.dto.grade.createGrade.CreateGradeRequestDto;
-import com.rusobr.academic.web.dto.grade.createGrade.CreateGradeResponseDto;
+import com.rusobr.academic.web.dto.grade.GradeResponse;
+import com.rusobr.academic.web.dto.grade.createGrade.CreateGradeRequest;
+import com.rusobr.academic.web.dto.grade.createGrade.CreateGradeResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -56,12 +56,12 @@ public class GradeServiceTest {
     void getGradeById_ShouldReturnDto_WhenGradeExists() {
         Long gradeId = 1L;
         Grade grade = Grade.builder().id(gradeId).studentId(10L).value(5).build();
-        GradeResponseDto dto = new GradeResponseDto(gradeId, 10L, 5, GradeType.TEST);
+        GradeResponse dto = new GradeResponse(gradeId, 10L, 5, GradeType.TEST);
 
         when(gradeRepository.findById(gradeId)).thenReturn(Optional.of(grade));
         when(gradeMapper.toGradeResponseDto(grade)).thenReturn(dto);
 
-        GradeResponseDto result = gradeService.getGradeById(gradeId);
+        GradeResponse result = gradeService.getGradeById(gradeId);
 
         assertEquals(dto, result);
         verify(gradeRepository).findById(gradeId);
@@ -90,12 +90,12 @@ public class GradeServiceTest {
     @DisplayName("createGrade — успешно создать, LessonInstance уже существует")
     void createGrade_ShouldReturnDto_WhenLessonInstanceExists() {
         LocalDate date = LocalDate.of(2025, 9, 1);
-        CreateGradeRequestDto request = new CreateGradeRequestDto(1L, 2L, date, 5, GradeType.TEST);
+        CreateGradeRequest request = new CreateGradeRequest(1L, 2L, date, 5, GradeType.TEST);
 
         AcademicPeriod period = AcademicPeriod.builder().isClosed(false).build();
         LessonInstance lessonInstance = LessonInstance.builder().id(10L).date(date).build();
         Grade savedGrade = Grade.builder().id(100L).studentId(1L).value(5).type(GradeType.TEST).build();
-        CreateGradeResponseDto responseDto = new CreateGradeResponseDto(1L, 5, GradeType.TEST, 100L, date);
+        CreateGradeResponse responseDto = new CreateGradeResponse(1L, 5, GradeType.TEST, 100L, date);
 
         when(academicPeriodRepository.findByDate(date)).thenReturn(Optional.of(period));
         when(lessonInstanceRepository.findByDateAndScheduleLessonId(date, 2L))
@@ -103,7 +103,7 @@ public class GradeServiceTest {
         when(gradeRepository.save(any(Grade.class))).thenReturn(savedGrade);
         when(gradeMapper.toCreateGradeResponseDto(savedGrade, date)).thenReturn(responseDto);
 
-        CreateGradeResponseDto result = gradeService.createGrade(request);
+        CreateGradeResponse result = gradeService.createGrade(request);
 
         assertEquals(responseDto, result);
         verify(academicPeriodRepository).findByDate(date);
@@ -117,13 +117,13 @@ public class GradeServiceTest {
     @DisplayName("createGrade — создать LessonInstance если его ещё нет")
     void createGrade_ShouldCreateLessonInstance_WhenNotExists() {
         LocalDate date = LocalDate.of(2025, 9, 1);
-        CreateGradeRequestDto request = new CreateGradeRequestDto(1L, 2L, date, 4, GradeType.TEST);
+        CreateGradeRequest request = new CreateGradeRequest(1L, 2L, date, 4, GradeType.TEST);
 
         AcademicPeriod period = AcademicPeriod.builder().isClosed(false).build();
         ScheduleLesson schedule = new ScheduleLesson();
         LessonInstance newInstance = LessonInstance.builder().id(20L).date(date).scheduleLesson(schedule).build();
         Grade savedGrade = Grade.builder().id(101L).studentId(1L).value(4).type(GradeType.TEST).build();
-        CreateGradeResponseDto responseDto = new CreateGradeResponseDto(1L, 4, GradeType.TEST, 101L, date);
+        CreateGradeResponse responseDto = new CreateGradeResponse(1L, 4, GradeType.TEST, 101L, date);
 
         when(academicPeriodRepository.findByDate(date)).thenReturn(Optional.of(period));
         when(lessonInstanceRepository.findByDateAndScheduleLessonId(date, 2L)).thenReturn(Optional.empty());
@@ -132,7 +132,7 @@ public class GradeServiceTest {
         when(gradeRepository.save(any(Grade.class))).thenReturn(savedGrade);
         when(gradeMapper.toCreateGradeResponseDto(savedGrade, date)).thenReturn(responseDto);
 
-        CreateGradeResponseDto result = gradeService.createGrade(request);
+        CreateGradeResponse result = gradeService.createGrade(request);
 
         assertEquals(responseDto, result);
         verify(scheduleLessonRepository).findById(2L);
@@ -143,7 +143,7 @@ public class GradeServiceTest {
     @DisplayName("createGrade — NotFoundException если академический период не найден")
     void createGrade_ShouldThrowNotFoundException_WhenPeriodNotFound() {
         LocalDate date = LocalDate.of(2025, 9, 1);
-        CreateGradeRequestDto request = new CreateGradeRequestDto(1L, 2L, date, 5, GradeType.TEST);
+        CreateGradeRequest request = new CreateGradeRequest(1L, 2L, date, 5, GradeType.TEST);
 
         when(academicPeriodRepository.findByDate(date)).thenReturn(Optional.empty());
 
@@ -158,12 +158,12 @@ public class GradeServiceTest {
     @DisplayName("createGrade — Conflict если период закрыт")
     void createGrade_ShouldThrowConflict_WhenPeriodIsClosed() {
         LocalDate date = LocalDate.of(2025, 9, 1);
-        CreateGradeRequestDto request = new CreateGradeRequestDto(1L, 2L, date, 5, GradeType.TEST);
+        CreateGradeRequest request = new CreateGradeRequest(1L, 2L, date, 5, GradeType.TEST);
 
         AcademicPeriod closedPeriod = AcademicPeriod.builder().isClosed(true).build();
         when(academicPeriodRepository.findByDate(date)).thenReturn(Optional.of(closedPeriod));
 
-        Conflict ex = assertThrows(Conflict.class,
+        ConflictException ex = assertThrows(ConflictException.class,
                 () -> gradeService.createGrade(request));
 
         assertEquals("Academic period is closed", ex.getMessage());
@@ -174,7 +174,7 @@ public class GradeServiceTest {
     @DisplayName("createGrade — NotFoundException если ScheduleLesson не найден при создании LessonInstance")
     void createGrade_ShouldThrowNotFoundException_WhenScheduleLessonNotFound() {
         LocalDate date = LocalDate.of(2025, 9, 1);
-        CreateGradeRequestDto request = new CreateGradeRequestDto(1L, 2L, date, 5, GradeType.TEST);
+        CreateGradeRequest request = new CreateGradeRequest(1L, 2L, date, 5, GradeType.TEST);
 
         AcademicPeriod period = AcademicPeriod.builder().isClosed(false).build();
         when(academicPeriodRepository.findByDate(date)).thenReturn(Optional.of(period));
@@ -237,7 +237,7 @@ public class GradeServiceTest {
         when(gradeRepository.findWithLessonInstanceById(gradeId)).thenReturn(Optional.of(grade));
         when(academicPeriodRepository.findByDate(date)).thenReturn(Optional.of(closedPeriod));
 
-        Conflict ex = assertThrows(Conflict.class,
+        ConflictException ex = assertThrows(ConflictException.class,
                 () -> gradeService.deleteGrade(gradeId));
 
         assertEquals("Academic period is closed", ex.getMessage());
