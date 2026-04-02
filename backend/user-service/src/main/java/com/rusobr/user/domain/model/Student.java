@@ -23,6 +23,8 @@ public class Student extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Parent parent;
 
+    private String studyProfile;
+
     @Override
     public int hashCode() {
         return getClass().hashCode();

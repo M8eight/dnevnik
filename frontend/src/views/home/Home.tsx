@@ -2,6 +2,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { useUser } from "@/hooks/use-user";
 
 const student = {
   name: "Кочетыгов Алексей",
@@ -10,39 +11,99 @@ const student = {
   period: "3 четверть",
   rating: 4.8,
 };
- 
+
 const curator = {
   initials: "ОП",
   name: "Ольга Петровна",
   room: "Кабинет 214",
   contact: "+79112096511  @maxmax",
 };
- 
+
 // todayLessons — массив объектов, рендерим через .map()
 const todayLessons = [
-  { num: "01", name: "Математика",  time: "08:30 – 09:15" },
-  { num: "02", name: "Физика",      time: "09:25 – 10:10" },
-  { num: "03", name: "Литература",  time: "10:25 – 11:10" },
+  { num: "01", name: "Математика", time: "08:30 – 09:15" },
+  { num: "02", name: "Физика", time: "09:25 – 10:10" },
+  { num: "03", name: "Литература", time: "10:25 – 11:10" },
 ];
- 
+
 const todayGrades = [
-  { subject: "Алгебра",  grade: 5 },
-  { subject: "История",  grade: 2 },
+  { subject: "Алгебра", grade: 5 },
+  { subject: "История", grade: 2 },
 ];
- 
+
 const homework = [
-  { text: "Подготовиться к контрол.", subject: "Алгебра",  color: "bg-[var(--red)]" },
-  { text: "Реферат по истории",       subject: "История",   color: "bg-[var(--gold)]" },
+  { text: "Подготовиться к контрол.", subject: "Алгебра", color: "bg-[var(--red)]" },
+  { text: "Реферат по истории", subject: "История", color: "bg-[var(--gold)]" },
 ];
- 
+
 // weekSchedule — пятидневка
 const weekSchedule = [
-  { day: "Пн",  today: false, lessons: ["Математика", "Русский язык", "Химия"] },
-  { day: "Вт",  today: true,  lessons: ["Математика", "Физика", "Литература"] },
-  { day: "Ср",  today: false, lessons: ["Химия", "История", "Алгебра"] },
-  { day: "Чт",  today: false, lessons: ["Английский", "Биология", "Физкультура"] },
-  { day: "Пт",  today: false, lessons: ["Информатика", "География", "Русский язык"] },
+  { day: "Пн", today: false, lessons: ["Математика", "Русский язык", "Химия"] },
+  { day: "Вт", today: true, lessons: ["Математика", "Физика", "Литература"] },
+  { day: "Ср", today: false, lessons: ["Химия", "История", "Алгебра"] },
+  { day: "Чт", today: false, lessons: ["Английский", "Биология", "Физкультура"] },
+  { day: "Пт", today: false, lessons: ["Информатика", "География", "Русский язык"] },
 ];
+
+function UserCard() {
+  const { data: user, isLoading, isError } = useUser(1);
+
+  if (isLoading) return (
+    <Card className="col-span-12 md:col-span-6 bg-[var(--bg-card)] border-black/10">
+      <CardContent className="p-7">
+        <p className="text-[var(--ink-faint)]">Загрузка...</p>
+      </CardContent>
+    </Card>
+  )
+
+  if (isError) return (
+    <Card className="col-span-12 md:col-span-6 bg-[var(--bg-card)] border-black/10">
+      <CardContent className="p-7">
+        <p className="text-[var(--red)]">Ошибка загрузки</p>
+      </CardContent>
+    </Card>
+  )
+
+  return (
+    <Card className="col-span-12 md:col-span-6 bg-[var(--bg-card)] border-black/10 relative overflow-hidden
+                         hover:-translate-y-1 hover:shadow-xl transition-all duration-200">
+      <CardContent className="p-7">
+
+        <Chip className="border-[var(--red)] text-[var(--red)] bg-[var(--red-light)]">
+          ученик
+        </Chip>
+
+        <div className="absolute top-5 right-6 w-14 h-14 rounded-full border-2 border-[var(--red)] opacity-15 flex items-center justify-center">
+          <svg className="w-7 h-7 fill-[var(--red)]" viewBox="0 0 24 24">
+            <path d="M12 2C9.243 2 7 4.243 7 7s2.243 5 5 5 5-2.243 5-5-2.243-5-5-5zM2.001 22c0-4.418 4.477-8 9.999-8s9.999 3.582 9.999 8H2.001z" />
+          </svg>
+        </div>
+
+        <p className="font-serif text-2xl font-bold text-[var(--navy)] mb-4">
+          {user?.lastName} {user?.firstName}
+        </p>
+
+        <div className="flex flex-wrap gap-10">
+          {[
+            { label: "Класс", value: student.grade, accent: true },
+            { label: "Профиль", value: student.profile },
+            { label: "Период", value: student.period },
+          ].map(({ label, value, accent }) => (
+            <div key={label}>
+              <p className="text-[9px] font-bold tracking-[0.15em] uppercase text-[var(--ink-faint)] mb-1">
+                {label}
+              </p>
+              <p className={`font-bold ${accent ? "text-[var(--red)]" : "text-[var(--ink)]"}`}>
+                {value}
+              </p>
+            </div>
+          ))}
+        </div>
+
+      </CardContent>
+    </Card>
+  );
+}
 
 
 function Chip({ children, className = "" }: { children: React.ReactNode, className?: string }) {
@@ -58,7 +119,7 @@ function Chip({ children, className = "" }: { children: React.ReactNode, classNa
     </Badge>
   );
 }
- 
+
 // ─── Оценка — цвет бейджа зависит от значения ────────────
 function GradeBadge({ grade }: { grade: number }) {
   // Объект-словарь: ключ → классы Tailwind
@@ -84,101 +145,36 @@ function GradeBadge({ grade }: { grade: number }) {
 
 
 function Home() {
- return (
-    // Обёртка на всю страницу
-    // min-h-screen — минимум 100vh
-    // bg-[var(--bg)] — тянем CSS-переменную из :root в index.css
-    // font-sans — шрифт Manrope, прописанный в tailwind.config.js
+  return (
     <div className="relative z-10 min-h-screen px-8 pt-24 pb-10">
- 
-      {/* ── Шапка ──────────────────────────────────────── */}
-      {/* flex items-end justify-between — аналог d-flex align-items-end justify-content-between */}
+
       <header className="flex items-end justify-between mb-10 pb-6 border-b border-black/10 max-w-6xl mx-auto">
- 
-        {/* Левая часть: красная полоска через border-l-4 */}
+
         <div className="border-l-4 border-[var(--red)] pl-5">
-          {/* text-[10px] — произвольный размер, недоступный через стандартные классы */}
           <p className="text-[10px] font-extrabold tracking-[0.22em] text-[var(--red)] uppercase mb-1">
             ✦ Академический год 25/26
           </p>
-          {/* font-serif — Playfair Display из tailwind.config */}
-          {/* clamp() — адаптивный размер, пишем в [] как произвольное значение */}
           <h1 className="font-serif font-black text-[clamp(2rem,4.5vw,3.2rem)] text-[var(--navy)] leading-none">
             Учебный{" "}
             <em className="not-italic text-[var(--red)]">дневник</em>
           </h1>
         </div>
- 
-        {/* Правая часть: дата */}
+
         <div className="text-right text-[11px] font-semibold text-[var(--ink-dim)] uppercase tracking-widest">
           Вторник
-          {/* block — переносим на новую строку без <br> */}
           <strong className="block font-serif text-[1.6rem] font-bold text-[var(--ink)] normal-case tracking-normal leading-tight">
             31
           </strong>
           Марта, 2026
         </div>
       </header>
- 
-      {/* ── Bento-сетка ────────────────────────────────── */}
-      {/*
-        grid grid-cols-12 — 12-колоночная сетка (аналог Bootstrap row)
-        gap-5 — gap: 1.25rem
-        max-w-6xl mx-auto — центрирование + ограничение ширины
-      */}
+
       <main className="grid grid-cols-12 gap-5 max-w-6xl mx-auto">
- 
-        {/* ── Карточка: Профиль ── col-span-7 = grid-column: 1/8 */}
-        {/*
-          shadcn Card уже даёт белый фон + тень + border-radius
-          Мы переопределяем bg через className
-          relative overflow-hidden — для декоративного штампа внутри
-        */}
-        <Card className="col-span-12 md:col-span-6 bg-[var(--bg-card)] border-black/10 relative overflow-hidden
-                         hover:-translate-y-1 hover:shadow-xl transition-all duration-200">
-          <CardContent className="p-7">
- 
-            <Chip className="border-[var(--red)] text-[var(--red)] bg-[var(--red-light)]">
-              ученик
-            </Chip>
- 
-            {/* Декоративный штамп — абсолютное позиционирование */}
-            {/* absolute top-5 right-6 — position: absolute; top: 1.25rem; right: 1.5rem */}
-            <div className="absolute top-5 right-6 w-14 h-14 rounded-full border-2 border-[var(--red)] opacity-15 flex items-center justify-center">
-              <svg className="w-7 h-7 fill-[var(--red)]" viewBox="0 0 24 24">
-                <path d="M12 2C9.243 2 7 4.243 7 7s2.243 5 5 5 5-2.243 5-5-2.243-5-5-5zM2.001 22c0-4.418 4.477-8 9.999-8s9.999 3.582 9.999 8H2.001z"/>
-              </svg>
-            </div>
- 
-            <p className="font-serif text-2xl font-bold text-[var(--navy)] mb-4">
-              {student.name}
-            </p>
- 
-            {/* flex flex-wrap gap-10 — горизонтальный список метаданных */}
-            <div className="flex flex-wrap gap-10">
-              {[
-                { label: "Класс",   value: student.grade,   accent: true },
-                { label: "Профиль", value: student.profile },
-                { label: "Период",  value: student.period },
-              ].map(({ label, value, accent }) => (
-                <div key={label}>
-                  <p className="text-[9px] font-bold tracking-[0.15em] uppercase text-[var(--ink-faint)] mb-1">
-                    {label}
-                  </p>
-                  <p className={`font-bold ${accent ? "text-[var(--red)]" : "text-[var(--ink)]"}`}>
-                    {value}
-                  </p>
-                </div>
-              ))}
-            </div>
- 
-          </CardContent>
-        </Card>
- 
-        {/* ── Рейтинг ── col-span-2 */}
+
+        <UserCard />
+
         <Card className="col-span-6 md:col-span-2 bg-[var(--bg-card)] border-black/10
                          hover:-translate-y-1 hover:shadow-xl transition-all duration-200">
-          {/* flex flex-col items-center justify-center text-center — центрируем всё */}
           <CardContent className="p-6 flex flex-col items-center justify-center text-center">
             <Chip className="border-[var(--gold)] text-[var(--gold)] bg-[var(--gold-light)]">
               Рейтинг
@@ -189,17 +185,14 @@ function Home() {
             <span className="text-[10px] font-bold tracking-[0.18em] uppercase text-[var(--ink-faint)] mt-1 mb-4">
               средний балл
             </span>
- 
-            {/* shadcn Progress — value в процентах (4.8/5 * 100 = 96) */}
-            {/* [&>div] — Tailwind-способ стилизовать дочерний элемент shadcn */}
+
             <Progress
               value={96}
               className="h-1 bg-[var(--gold-light)] [&>div]:bg-[var(--gold)] w-full"
             />
           </CardContent>
         </Card>
- 
-        {/* ── Куратор ── col-span-3 */}
+
         <Card className="col-span-6 md:col-span-4 bg-[var(--bg-card)] border-black/10
                          hover:-translate-y-1 hover:shadow-xl transition-all duration-200">
           <CardContent className="pt-6">
@@ -207,10 +200,8 @@ function Home() {
               классный руководитель
             </Chip>
 
- 
-            {/* flex items-center gap-3 — горизонтальный flex с аватаром */}
+
             <div className="flex items-center gap-3">
-              {/* shadcn Avatar — круглый контейнер с инициалами */}
               <Avatar className="bg-[var(--navy-light)] h-12 w-12">
                 <AvatarFallback className="bg-[var(--navy-light)] text-[var(--navy)] font-serif font-bold">
                   {curator.initials}
@@ -218,15 +209,12 @@ function Home() {
               </Avatar>
               <div>
                 <p className="font-bold text-[var(--ink)]">{curator.name}</p>
-                {/* text-[10px] tracking-[0.1em] — мелкий подзаголовок */}
                 <p className="text-[10px] font-semibold text-[var(--ink-faint)] uppercase tracking-[0.1em]">
                   {curator.room}
                 </p>
               </div>
             </div>
- 
-            {/* Контакты под разделителем */}
-            {/* mt-4 pt-4 border-t — горизонтальная линия + отступы */}
+
             <div className="mt-4 pt-4 border-t border-black/10">
               <p className="text-[9px] font-bold tracking-[0.15em] uppercase text-[var(--ink-faint)] mb-1">
                 Контакты
@@ -235,16 +223,14 @@ function Home() {
             </div>
           </CardContent>
         </Card>
- 
-        {/* ── Сегодня: уроки ── col-span-4 */}
+
         <Card className="col-span-12 md:col-span-4 bg-[var(--bg-card)] border-black/10
                          hover:-translate-y-1 hover:shadow-xl transition-all duration-200">
           <CardContent className="pt-6">
             <Chip className="border-[var(--red)] text-[var(--red)] bg-[var(--red-light)]">
               Сегодня
             </Chip>
- 
-            {/* .map() — вместо копипасты трёх одинаковых блоков */}
+
             <div className="divide-y divide-black/[0.07]">
               {todayLessons.map((l) => (
                 // key — обязателен при .map() в React
@@ -262,7 +248,7 @@ function Home() {
             </div>
           </CardContent>
         </Card>
- 
+
         {/* ── Оценки ── col-span-4 */}
         <Card className="col-span-12 md:col-span-4 bg-[var(--bg-card)] border-black/10
                          hover:-translate-y-1 hover:shadow-xl transition-all duration-200">
@@ -270,7 +256,7 @@ function Home() {
             <Chip className="border-[var(--green)] text-[var(--green)] bg-[var(--green-light)]">
               Оценки за сегодня
             </Chip>
- 
+
             <div className="divide-y divide-black/[0.07]">
               {todayGrades.map((g) => (
                 <div key={g.subject} className="flex items-center justify-between py-3">
@@ -281,7 +267,7 @@ function Home() {
             </div>
           </CardContent>
         </Card>
- 
+
         {/* ── ДЗ на завтра ── col-span-4 */}
         <Card className="col-span-12 md:col-span-4 bg-[var(--bg-card2)] border-black/10
                          hover:-translate-y-1 hover:shadow-xl transition-all duration-200">
@@ -289,7 +275,7 @@ function Home() {
             <Chip className="border-[var(--brown)] text-[var(--brown)] bg-[var(--brown-light)]">
               ДЗ на завтра
             </Chip>
- 
+
             <div className="flex flex-col gap-2 mt-1">
               {homework.map((hw) => (
                 <div
@@ -308,7 +294,7 @@ function Home() {
             </div>
           </CardContent>
         </Card>
- 
+
         {/* ── Расписание на неделю ── col-span-12 (на всю ширину) */}
         <Card className="col-span-12 bg-[var(--bg-card)] border-black/10
                          hover:-translate-y-1 hover:shadow-xl transition-all duration-200">
@@ -316,7 +302,7 @@ function Home() {
             <Chip className="border-[var(--brown)] text-[var(--brown)] bg-[var(--brown-light)]">
               Расписание на неделю
             </Chip>
- 
+
             {/*
               grid-cols-3 md:grid-cols-5 — адаптив:
               на мобиле 3 колонки, на md+ (768px) — 5 колонок
@@ -340,7 +326,7 @@ function Home() {
                   `}>
                     {d.today ? `${d.day} — сегодня` : d.day}
                   </p>
- 
+
                   {/* Предметы */}
                   <div className="flex flex-col gap-1">
                     {d.lessons.map((lesson) => (
@@ -358,7 +344,7 @@ function Home() {
             </div>
           </CardContent>
         </Card>
- 
+
       </main>
     </div>
   );
