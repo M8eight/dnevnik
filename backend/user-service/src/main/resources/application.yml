@@ -1,0 +1,63 @@
+spring:
+  application:
+    name: user-service
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+#    properties:
+#      jakarta.persistence.schema-generation.database.action: create
+#      jakarta.persistence.schema-generation.scripts.action: create
+#      jakarta.persistence.schema-generation.scripts.create-target: schemas/user-schema.sql
+#      jakarta.persistence.schema-generation.create-source: metadata
+  flyway:
+    enabled: false
+    baseline-on-migrate: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${keycloack.url}/realms/${keycloack.realm}
+
+  datasource:
+    url: ${PSQL_DB_URL:jdbc:postgresql://localhost:5432/user_db}
+    username: school_user
+    password: school_pass
+    driver-class-name: org.postgresql.Driver
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+#logging:
+#  level:
+#    root: INFO
+#    org.flywaydb: DEBUG
+#    org.springframework: INFO
+#  file:
+#    path: ./logs
+
+logging:
+  loki:
+    url: http://localhost:3100/loki/api/v1/push
+  level:
+    root: INFO
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+
+keycloack:
+  url: ${KEYCLOACK_URL:http://localhost:9090}
+  realm: dnevnik-realm
+  client-id: dnevnik-backend
+  client-secret: lFpKKXUky4yFUuAHQm1sbkAG2BcoY2kv
+
+server:
+  port: 9001
