@@ -41,9 +41,9 @@ public class StudentControllerTest {
     void shouldReturnAllStudentsByIds() throws Exception {
         List<Long> ids = List.of(1L, 2L, 3L);
         List<StudentResponse> res = List.of(
-                new StudentResponse(1L, "Алексей", "Кочетыгов"),
-                new StudentResponse(2L, "Андрей", "Малахов"),
-                new StudentResponse(3L, "Михаил", "Баварский")
+                new StudentResponse(1L, "Алексей", "Кочетыгов", "abc-123"),
+                new StudentResponse(2L, "Андрей", "Малахов", "abc-321"),
+                new StudentResponse(3L, "Михаил", "Баварский", "abc-122")
         );
 
         when(studentService.findBatchStudents(any())).thenReturn(res);

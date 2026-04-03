@@ -6,10 +6,10 @@ import com.rusobr.user.infrastructure.exception.KeycloackUserAlreadyExist;
 import com.rusobr.user.infrastructure.exception.NotFoundException;
 import com.rusobr.user.infrastructure.service.UserService;
 import com.rusobr.user.web.controller.UserController;
-import com.rusobr.user.web.dto.keycloack.CreateUserRequest;
-import com.rusobr.user.web.dto.keycloack.CreateUserResponse;
-import com.rusobr.user.web.dto.keycloack.role.AssignRoleToUserRequest;
-import com.rusobr.user.web.dto.keycloack.role.KeycloackRole;
+import com.rusobr.user.web.dto.keycloak.CreateUserRequest;
+import com.rusobr.user.web.dto.keycloak.CreateUserResponse;
+import com.rusobr.user.web.dto.keycloak.role.AssignRoleToUserRequest;
+import com.rusobr.user.web.dto.keycloak.role.KeycloakRole;
 import com.rusobr.user.web.dto.user.UserResponse;
 import jakarta.ws.rs.core.MediaType;
 import org.junit.jupiter.api.DisplayName;
@@ -18,13 +18,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 
-import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -60,7 +58,7 @@ public class UserControllerTest {
         mockMvc.perform(get("/api/v1/users/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.keycloackId").value("abc-123"));
+                .andExpect(jsonPath("$.keycloakId").value("abc-123"));
     }
 
     @Test
@@ -98,7 +96,7 @@ public class UserControllerTest {
                         .content(objectMapper.writeValueAsString(req))
                 ).andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.keycloackId").value("abc-123"));
+                .andExpect(jsonPath("$.keycloakId").value("abc-123"));
     }
 
     @Test
@@ -121,7 +119,7 @@ public class UserControllerTest {
         doNothing().when(userService).deleteUser("abc-123");
 
         mockMvc.perform(delete("/api/v1/users/delete")
-                .param("keycloackId", "abc-123")
+                .param("keycloakId", "abc-123")
         ).andExpect(status().isOk());
     }
 
@@ -146,7 +144,7 @@ public class UserControllerTest {
     @Test
     @DisplayName("Получить все роли")
     void getAllRoles_shouldReturnRoles() throws Exception {
-        when(userService.getAllRoles()).thenReturn(List.of(new KeycloackRole("role-123", "ADMIN")));
+        when(userService.getAllRoles()).thenReturn(List.of(new KeycloakRole("role-123", "ADMIN")));
 
         mockMvc.perform(get("/api/v1/users/roles"))
                 .andExpect(status().isOk())

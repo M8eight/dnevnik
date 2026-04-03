@@ -1,4 +1,4 @@
-package com.rusobr.user.web.dto.keycloack;
+package com.rusobr.user.web.dto.keycloak;
 
 import lombok.Builder;
 
@@ -8,5 +8,5 @@ public record CreateUserResponse(
     String firstName,
     String lastName,
     String username,
-    String keycloackId
+    String keycloakId
 ) {}

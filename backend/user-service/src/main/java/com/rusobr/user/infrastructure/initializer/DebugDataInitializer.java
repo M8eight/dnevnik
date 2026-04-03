@@ -9,9 +9,9 @@ import com.rusobr.user.infrastructure.persistence.repository.ParentRepository;
 import com.rusobr.user.infrastructure.persistence.repository.StudentRepository;
 import com.rusobr.user.infrastructure.persistence.repository.TeacherRepository;
 import com.rusobr.user.infrastructure.persistence.repository.UserRepository;
-import com.rusobr.user.infrastructure.webClient.KeycloackRestClient;
-import com.rusobr.user.web.dto.keycloack.CreateUserRequest;
-import com.rusobr.user.web.dto.keycloack.role.AssignRoleToUserRequest;
+import com.rusobr.user.infrastructure.webClient.KeycloakRestClient;
+import com.rusobr.user.web.dto.keycloak.CreateUserRequest;
+import com.rusobr.user.web.dto.keycloak.role.AssignRoleToUserRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +29,7 @@ import java.util.Set;
 public class DebugDataInitializer implements CommandLineRunner {
 
     private final UserRepository userRepository;
-    private final KeycloackRestClient keycloackRestClient;
+    private final KeycloakRestClient keycloakRestClient;
     private final ParentRepository parentRepository;
     private final StudentRepository studentRepository;
     private final TeacherRepository teacherRepository;
@@ -97,13 +97,13 @@ public class DebugDataInitializer implements CommandLineRunner {
             default -> throw new IllegalArgumentException("Invalid role: " + role);
         }
 
-        String keycloackId;
+        String keycloakId;
         try {
-            keycloackId = keycloackRestClient.createKeyCloackUser(
+            keycloakId = keycloakRestClient.createKeyCloakUser(
                     new CreateUserRequest(username, password, firstName, lastName));
         } catch (Exception e) {
-            if (e.getMessage().contains("Keycloack User already exists") || e.getMessage().contains("409")) {
-                keycloackId = keycloackRestClient.getKeycloackUserByUsername(username).id();
+            if (e.getMessage().contains("Keycloak User already exists") || e.getMessage().contains("409")) {
+                keycloakId = keycloakRestClient.getKeycloakUserByUsername(username).id();
                 log.warn("User {} already exists in Keycloak", username);
             } else {
                 throw e;
@@ -111,20 +111,21 @@ public class DebugDataInitializer implements CommandLineRunner {
         }
 
         try {
-            keycloackRestClient.assignRoleToUser(new AssignRoleToUserRequest(keycloackId, userRole, roleId));
+            keycloakRestClient.assignRoleToUser(new AssignRoleToUserRequest(keycloakId, userRole, roleId));
         } catch (Exception ignored) {}
 
         User user = userRepository.save(User.builder()
                 .username(username)
-                .keycloackId(keycloackId)
+                .keycloakId(keycloakId)
+                .keycloakId(keycloakId)
                 .firstName(firstName)
                 .lastName(lastName)
                 .roles(new HashSet<>(Set.of(userRole)))
                 .build());
 
         switch (role) {
-            case "teacher" -> teacherRepository.save(Teacher.builder().user(user).build());
-            case "student" -> studentRepository.save(Student.builder().user(user).build());
+            case "teacher" -> teacherRepository.save(Teacher.builder().phoneNumber("+123131132").email("assadasd@aadssda.com").user(user).build());
+            case "student" -> studentRepository.save(Student.builder().studyProfile("Социо-эконом").user(user).build());
             case "parent"  -> parentRepository.save(Parent.builder().user(user).build());
         }
     }
