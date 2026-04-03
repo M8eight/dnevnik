@@ -1,4 +1,4 @@
-package com.rusobr.user.web.dto.keycloack;
+package com.rusobr.user.web.dto.keycloak;
 
 import lombok.Builder;
 

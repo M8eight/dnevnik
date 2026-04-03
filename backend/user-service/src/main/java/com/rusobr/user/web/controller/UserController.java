@@ -1,10 +1,10 @@
 package com.rusobr.user.web.controller;
 
 import com.rusobr.user.infrastructure.service.UserService;
-import com.rusobr.user.web.dto.keycloack.CreateUserResponse;
-import com.rusobr.user.web.dto.keycloack.role.AssignRoleToUserRequest;
-import com.rusobr.user.web.dto.keycloack.CreateUserRequest;
-import com.rusobr.user.web.dto.keycloack.role.KeycloackRole;
+import com.rusobr.user.web.dto.keycloak.CreateUserResponse;
+import com.rusobr.user.web.dto.keycloak.role.AssignRoleToUserRequest;
+import com.rusobr.user.web.dto.keycloak.CreateUserRequest;
+import com.rusobr.user.web.dto.keycloak.role.KeycloakRole;
 import com.rusobr.user.web.dto.user.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -43,13 +43,13 @@ public class UserController {
     }
 
     @DeleteMapping("/delete")
-    public void deleteUser(@RequestParam String keycloackId) {
-        userService.deleteUser(keycloackId);
+    public void deleteUser(@RequestParam String keycloakId) {
+        userService.deleteUser(keycloakId);
     }
 
 
     @GetMapping("/roles")
-    public List<KeycloackRole> getAllRolesForUser() {
+    public List<KeycloakRole> getAllRolesForUser() {
         return userService.getAllRoles();
     }
 

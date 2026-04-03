@@ -1,8 +1,8 @@
 package com.rusobr.user.infrastructure.mapper;
 
 import com.rusobr.user.domain.model.User;
-import com.rusobr.user.web.dto.keycloack.CreateUserRequest;
-import com.rusobr.user.web.dto.keycloack.CreateUserResponse;
+import com.rusobr.user.web.dto.keycloak.CreateUserRequest;
+import com.rusobr.user.web.dto.keycloak.CreateUserResponse;
 import com.rusobr.user.web.dto.user.UserResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;

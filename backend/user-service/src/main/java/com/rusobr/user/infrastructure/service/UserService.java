@@ -4,11 +4,11 @@ import com.rusobr.user.domain.model.User;
 import com.rusobr.user.infrastructure.exception.NotFoundException;
 import com.rusobr.user.infrastructure.mapper.UserMapper;
 import com.rusobr.user.infrastructure.persistence.repository.UserRepository;
-import com.rusobr.user.infrastructure.webClient.KeycloackRestClient;
-import com.rusobr.user.web.dto.keycloack.CreateUserResponse;
-import com.rusobr.user.web.dto.keycloack.role.AssignRoleToUserRequest;
-import com.rusobr.user.web.dto.keycloack.CreateUserRequest;
-import com.rusobr.user.web.dto.keycloack.role.KeycloackRole;
+import com.rusobr.user.infrastructure.webClient.KeycloakRestClient;
+import com.rusobr.user.web.dto.keycloak.CreateUserResponse;
+import com.rusobr.user.web.dto.keycloak.role.AssignRoleToUserRequest;
+import com.rusobr.user.web.dto.keycloak.CreateUserRequest;
+import com.rusobr.user.web.dto.keycloak.role.KeycloakRole;
 import com.rusobr.user.web.dto.user.UserResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,7 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final KeycloackRestClient keycloackRestClient;
+    private final KeycloakRestClient keycloackRestClient;
     private final UserMapper userMapper;
 
     public UserResponse findUserDbById(Long id) {
@@ -43,11 +43,11 @@ public class UserService {
 
     @Transactional
     public CreateUserResponse createUser(CreateUserRequest reqDto) {
-        String keycloackUserId = keycloackRestClient.createKeyCloackUser(reqDto);
+        String keycloackUserId = keycloackRestClient.createKeyCloakUser(reqDto);
 
         try {
             User user = userMapper.toUser(reqDto);
-            user.setKeycloackId(keycloackUserId);
+            user.setKeycloakId(keycloackUserId);
             return userMapper.toCreateUserResponse(userRepository.save(user));
         } catch (Exception e) {
             keycloackRestClient.deleteKeyCloackUser(keycloackUserId);
@@ -58,18 +58,18 @@ public class UserService {
     @Transactional
     public void deleteUser(String keycloackUserId) {
         keycloackRestClient.deleteKeyCloackUser(keycloackUserId);
-        User user = userRepository.findByKeycloackId(keycloackUserId).orElseThrow(() -> new NotFoundException("User not found"));
+        User user = userRepository.findByKeycloakId(keycloackUserId).orElseThrow(() -> new NotFoundException("User not found"));
         userRepository.delete(user);
     }
 
-    public List<KeycloackRole> getAllRoles() {
+    public List<KeycloakRole> getAllRoles() {
         return keycloackRestClient.getAllKeycloackRoles();
     }
 
     @Transactional
     public void assignRoleToUser(AssignRoleToUserRequest assignRoleToUserRequestDto) {
         keycloackRestClient.assignRoleToUser(assignRoleToUserRequestDto);
-        User userDb = userRepository.findByKeycloackId(assignRoleToUserRequestDto.keycloackId()).orElseThrow(() -> new NotFoundException("User not found"));
+        User userDb = userRepository.findByKeycloakId(assignRoleToUserRequestDto.keycloakId()).orElseThrow(() -> new NotFoundException("User not found"));
         userDb.getRoles().add(assignRoleToUserRequestDto.roleName());
         userRepository.save(userDb);
     }
@@ -77,7 +77,7 @@ public class UserService {
     @Transactional
     public void deleteRoleFromUser(AssignRoleToUserRequest assignRoleToUserRequestDto) {
         keycloackRestClient.deleteRoleFromUser(assignRoleToUserRequestDto);
-        User userDb = userRepository.findByKeycloackId(assignRoleToUserRequestDto.keycloackId()).orElseThrow(() -> new RuntimeException("User not found"));
+        User userDb = userRepository.findByKeycloakId(assignRoleToUserRequestDto.keycloakId()).orElseThrow(() -> new RuntimeException("User not found"));
         userDb.getRoles().remove(assignRoleToUserRequestDto.roleName());
         userRepository.save(userDb);
     }

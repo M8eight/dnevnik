@@ -28,7 +28,7 @@ public class User extends BaseEntity {
     private String lastName;
 
     @Column(nullable = false, unique = true)
-    private String keycloackId;
+    private String keycloakId;
 
     @Builder.Default
     @Enumerated(EnumType.STRING)

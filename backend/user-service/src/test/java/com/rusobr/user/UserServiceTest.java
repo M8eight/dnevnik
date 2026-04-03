@@ -5,11 +5,11 @@ import com.rusobr.user.infrastructure.enums.UserRoles;
 import com.rusobr.user.infrastructure.mapper.UserMapper;
 import com.rusobr.user.infrastructure.persistence.repository.UserRepository;
 import com.rusobr.user.infrastructure.service.UserService;
-import com.rusobr.user.infrastructure.webClient.KeycloackRestClient;
-import com.rusobr.user.web.dto.keycloack.CreateUserRequest;
-import com.rusobr.user.web.dto.keycloack.CreateUserResponse;
-import com.rusobr.user.web.dto.keycloack.role.AssignRoleToUserRequest;
-import com.rusobr.user.web.dto.keycloack.role.KeycloackRole;
+import com.rusobr.user.infrastructure.webClient.KeycloakRestClient;
+import com.rusobr.user.web.dto.keycloak.CreateUserRequest;
+import com.rusobr.user.web.dto.keycloak.CreateUserResponse;
+import com.rusobr.user.web.dto.keycloak.role.AssignRoleToUserRequest;
+import com.rusobr.user.web.dto.keycloak.role.KeycloakRole;
 import com.rusobr.user.web.dto.user.UserResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -42,7 +42,7 @@ public class UserServiceTest {
     private UserMapper userMapper;
 
     @Mock
-    private KeycloackRestClient keycloackRestClient;
+    private KeycloakRestClient keycloackRestClient;
 
     @InjectMocks
     private UserService userService;
@@ -69,7 +69,7 @@ public class UserServiceTest {
 
     @Test
     void shouldReturnUser() {
-        User user = User.builder().id(1L).firstName("Татьяна").lastName("Михайловна").keycloackId("abc-123").build();
+        User user = User.builder().id(1L).firstName("Татьяна").lastName("Михайловна").keycloakId("abc-123").build();
         UserResponse userResponse = new UserResponse("Татьяна", "Михайловна", "abc-123", 1L);
 
         when(userRepository.findById(1L))
@@ -90,7 +90,7 @@ public class UserServiceTest {
                 "Кочетыгов"
         );
 
-        when(keycloackRestClient.createKeyCloackUser(any()))
+        when(keycloackRestClient.createKeyCloakUser(any()))
                 .thenReturn("abc-123");
 
         User savedUser = User.builder()
@@ -98,7 +98,7 @@ public class UserServiceTest {
                 .firstName("Алексей")
                 .lastName("Кочетыгов")
                 .username("AlexK")
-                .keycloackId("abc-123")
+                .keycloakId("abc-123")
                 .build();
 
         CreateUserResponse userResp = CreateUserResponse.builder()
@@ -106,7 +106,7 @@ public class UserServiceTest {
                 .username("AlexK")
                 .firstName("Алексей")
                 .lastName("Кочетыгов")
-                .keycloackId("abc-123")
+                .keycloakId("abc-123")
                 .build();
 
         when(userRepository.save(any()))
@@ -118,13 +118,13 @@ public class UserServiceTest {
         when(userMapper.toCreateUserResponse(any()))
                 .thenReturn(userResp);
 
-        when(keycloackRestClient.createKeyCloackUser(any()))
+        when(keycloackRestClient.createKeyCloakUser(any()))
                 .thenReturn("abc-123");
 
         CreateUserResponse userResponse = userService.createUser(req);
 
         assertEquals("Алексей", userResponse.firstName());
-        verify(keycloackRestClient).createKeyCloackUser(any());
+        verify(keycloackRestClient).createKeyCloakUser(any());
         verify(userRepository).save(any());
     }
 
@@ -134,7 +134,7 @@ public class UserServiceTest {
         CreateUserRequest req = new CreateUserRequest("AlexK", "123", "Alex", "K");
         String generatedId = "abc-123";
 
-        when(keycloackRestClient.createKeyCloackUser(any())).thenReturn(generatedId);
+        when(keycloackRestClient.createKeyCloakUser(any())).thenReturn(generatedId);
         when(userMapper.toUser(any())).thenReturn(new User());
         // Имитируем падение базы данных
         when(userRepository.save(any())).thenThrow(new RuntimeException("DB Error"));
@@ -151,11 +151,11 @@ public class UserServiceTest {
     @DisplayName("Должен возвращать список всех ролей из Keycloak")
     void shouldReturnAllRolesFromKeycloak() {
         // GIVEN
-        List<KeycloackRole> roles = List.of(new KeycloackRole("role-123", "ADMIN"));
+        List<KeycloakRole> roles = List.of(new KeycloakRole("role-123", "ADMIN"));
         when(keycloackRestClient.getAllKeycloackRoles()).thenReturn(roles);
 
         // WHEN
-        List<KeycloackRole> result = userService.getAllRoles();
+        List<KeycloakRole> result = userService.getAllRoles();
 
         // THEN
         assertEquals(1, result.size());
@@ -169,7 +169,7 @@ public class UserServiceTest {
         String kId = "user-uuid";
         AssignRoleToUserRequest assignReq = new AssignRoleToUserRequest("user-uuid", UserRoles.ADMIN, "role-123");
         User user = User.builder()
-                .keycloackId(kId)
+                .keycloakId(kId)
                 .roles(new HashSet<>())
                 .id(1L)
                 .username("AlexK")
@@ -178,7 +178,7 @@ public class UserServiceTest {
                 .build();
 
         doNothing().when(keycloackRestClient).assignRoleToUser(any());
-        when(userRepository.findByKeycloackId(kId)).thenReturn(Optional.of(user));
+        when(userRepository.findByKeycloakId(kId)).thenReturn(Optional.of(user));
         when(userRepository.save(any())).thenReturn(user);
 
         // WHEN
@@ -202,9 +202,9 @@ public class UserServiceTest {
         // Создаем пользователя, у которого уже есть роль ADMIN
         Set<UserRoles> roles = new HashSet<>();
         roles.add(UserRoles.ADMIN);
-        User user = User.builder().keycloackId(kId).roles(roles).build();
+        User user = User.builder().keycloakId(kId).roles(roles).build();
 
-        when(userRepository.findByKeycloackId(kId)).thenReturn(Optional.of(user));
+        when(userRepository.findByKeycloakId(kId)).thenReturn(Optional.of(user));
 
         // WHEN
         userService.deleteRoleFromUser(req);
@@ -232,7 +232,7 @@ public class UserServiceTest {
     void shouldThrowExceptionWhenUserNotFoundDuringRoleDeletion() {
         // GIVEN
         AssignRoleToUserRequest req = new AssignRoleToUserRequest("not-exist", UserRoles.ADMIN, "role-123");
-        when(userRepository.findByKeycloackId(anyString())).thenReturn(Optional.empty());
+        when(userRepository.findByKeycloakId(anyString())).thenReturn(Optional.empty());
 
         // WHEN & THEN
         assertThrows(RuntimeException.class, () -> userService.deleteRoleFromUser(req));
@@ -244,8 +244,8 @@ public class UserServiceTest {
     void shouldDeleteUserFromBothSystems() {
         // GIVEN
         String kId = "user-uuid";
-        User user = User.builder().keycloackId(kId).build();
-        when(userRepository.findByKeycloackId(kId)).thenReturn(Optional.of(user));
+        User user = User.builder().keycloakId(kId).build();
+        when(userRepository.findByKeycloakId(kId)).thenReturn(Optional.of(user));
 
         // WHEN
         userService.deleteUser(kId);
@@ -259,7 +259,7 @@ public class UserServiceTest {
     void shouldThrowExceptionWhenUserNotFoundByKId() {
         // GIVEN
         String kId = "wrong-id";
-        when(userRepository.findByKeycloackId(kId)).thenReturn(Optional.empty());
+        when(userRepository.findByKeycloakId(kId)).thenReturn(Optional.empty());
 
         // WHEN & THEN
         assertThrows(RuntimeException.class, () -> userService.deleteUser(kId));
