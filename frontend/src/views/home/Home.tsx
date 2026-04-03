@@ -2,21 +2,13 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useUser } from "@/hooks/use-user";
+import type { User } from "@/services/user-service";
 
 const student = {
-  name: "Кочетыгов Алексей",
-  grade: '8 «А»',
-  profile: "Социально-экономический",
   period: "3 четверть",
   rating: 4.8,
-};
-
-const curator = {
-  initials: "ОП",
-  name: "Ольга Петровна",
-  room: "Кабинет 214",
-  contact: "+79112096511  @maxmax",
 };
 
 // todayLessons — массив объектов, рендерим через .map()
@@ -45,24 +37,7 @@ const weekSchedule = [
   { day: "Пт", today: false, lessons: ["Информатика", "География", "Русский язык"] },
 ];
 
-function UserCard() {
-  const { data: user, isLoading, isError } = useUser(1);
-
-  if (isLoading) return (
-    <Card className="col-span-12 md:col-span-6 bg-[var(--bg-card)] border-black/10">
-      <CardContent className="p-7">
-        <p className="text-[var(--ink-faint)]">Загрузка...</p>
-      </CardContent>
-    </Card>
-  )
-
-  if (isError) return (
-    <Card className="col-span-12 md:col-span-6 bg-[var(--bg-card)] border-black/10">
-      <CardContent className="p-7">
-        <p className="text-[var(--red)]">Ошибка загрузки</p>
-      </CardContent>
-    </Card>
-  )
+function UserCard({ user }: { user: User }) {
 
   return (
     <Card className="col-span-12 md:col-span-6 bg-[var(--bg-card)] border-black/10 relative overflow-hidden
@@ -85,8 +60,8 @@ function UserCard() {
 
         <div className="flex flex-wrap gap-10">
           {[
-            { label: "Класс", value: student.grade, accent: true },
-            { label: "Профиль", value: student.profile },
+            { label: "Класс", value: user?.schoolClass?.name, accent: true },
+            { label: "Профиль", value: user?.studyProfile },
             { label: "Период", value: student.period },
           ].map(({ label, value, accent }) => (
             <div key={label}>
@@ -143,8 +118,32 @@ function GradeBadge({ grade }: { grade: number }) {
   );
 }
 
+function CurrentDate() {
+  const now = new Date();
+
+  const dayName = now.toLocaleDateString("ru-RU", { weekday: "long" });
+  const day = now.getDate();
+  const monthYear = now.toLocaleDateString("ru-RU", { month: "long", year: "numeric" });
+
+  // "января, 2026" → capitalize первую букву
+  const monthYearCapitalized = monthYear.charAt(0).toUpperCase() + monthYear.slice(1);
+
+  return (
+    <div className="text-right text-[11px] font-semibold text-[var(--ink-dim)] uppercase tracking-widest">
+      {dayName}
+      <strong className="block font-serif text-[1.6rem] font-bold text-[var(--ink)] normal-case tracking-normal leading-tight">
+        {day}
+      </strong>
+      {monthYearCapitalized}
+    </div>
+  );
+}
+
 
 function Home() {
+
+  const { data: user, isLoading, isError } = useUser(2);
+
   return (
     <div className="relative z-10 min-h-screen px-8 pt-24 pb-10">
 
@@ -160,18 +159,49 @@ function Home() {
           </h1>
         </div>
 
-        <div className="text-right text-[11px] font-semibold text-[var(--ink-dim)] uppercase tracking-widest">
-          Вторник
-          <strong className="block font-serif text-[1.6rem] font-bold text-[var(--ink)] normal-case tracking-normal leading-tight">
-            31
-          </strong>
-          Марта, 2026
-        </div>
+        <CurrentDate />
       </header>
 
       <main className="grid grid-cols-12 gap-5 max-w-6xl mx-auto">
 
-        <UserCard />
+        {/* if (isLoading) return (
+        <Card className="col-span-12 md:col-span-6 bg-[var(--bg-card)] border-black/10">
+          <CardContent className="p-7">
+            <p className="text-[var(--ink-faint)]">Загрузка...</p>
+          </CardContent>
+        </Card>
+        ) */}
+
+        {/* if (isError) return (
+        <Card className="col-span-12 md:col-span-6 bg-[var(--bg-card)] border-black/10">
+          <CardContent className="p-7">
+            <p className="text-[var(--red)]">Ошибка загрузки</p>
+          </CardContent>
+        </Card>
+        ) */}
+
+        {isLoading ? (
+          <Card className="col-span-12 md:col-span-6 bg-[var(--bg-card)] border-black/10">
+            <CardContent className="p-7">
+              {/* Повторяет форму реального контента */}
+              <Skeleton className="h-4 w-16 mb-4 rounded-md" />         {/* чип */}
+              <Skeleton className="h-7 w-48 mb-4 rounded-md" />         {/* имя */}
+              <div className="flex gap-10">
+                <Skeleton className="h-4 w-16 rounded-md" />
+                <Skeleton className="h-4 w-24 rounded-md" />
+                <Skeleton className="h-4 w-20 rounded-md" />
+              </div>
+            </CardContent>
+          </Card>
+        ) : isError || !user ? (
+          <Card className="col-span-12 md:col-span-6 bg-[var(--bg-card)] border-black/10">
+            <CardContent className="p-7">
+              <p className="text-[var(--red)]">Ошибка загрузки</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <UserCard user={user} />
+        )}
 
         <Card className="col-span-6 md:col-span-2 bg-[var(--bg-card)] border-black/10
                          hover:-translate-y-1 hover:shadow-xl transition-all duration-200">
@@ -204,14 +234,11 @@ function Home() {
             <div className="flex items-center gap-3">
               <Avatar className="bg-[var(--navy-light)] h-12 w-12">
                 <AvatarFallback className="bg-[var(--navy-light)] text-[var(--navy)] font-serif font-bold">
-                  {curator.initials}
+                  {user?.schoolClassTeacher?.firstName[0]}{user?.schoolClassTeacher?.lastName[0]}
                 </AvatarFallback>
               </Avatar>
               <div>
-                <p className="font-bold text-[var(--ink)]">{curator.name}</p>
-                <p className="text-[10px] font-semibold text-[var(--ink-faint)] uppercase tracking-[0.1em]">
-                  {curator.room}
-                </p>
+                <p className="font-bold text-[var(--ink)]">{user?.schoolClassTeacher?.firstName} {user?.schoolClassTeacher?.lastName}</p>
               </div>
             </div>
 
@@ -219,7 +246,7 @@ function Home() {
               <p className="text-[9px] font-bold tracking-[0.15em] uppercase text-[var(--ink-faint)] mb-1">
                 Контакты
               </p>
-              <p className="text-sm font-semibold text-[var(--ink)]">{curator.contact}</p>
+              <p className="text-sm font-semibold text-[var(--ink)]">{user?.schoolClassTeacher?.email} {user?.schoolClassTeacher?.phoneNumber}</p>
             </div>
           </CardContent>
         </Card>

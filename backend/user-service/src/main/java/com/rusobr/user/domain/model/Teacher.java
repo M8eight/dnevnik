@@ -20,6 +20,10 @@ public class Teacher extends BaseEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
+    private String phoneNumber;
+
+    private String email;
+
     @Override
     public int hashCode() {
         return getClass().hashCode();

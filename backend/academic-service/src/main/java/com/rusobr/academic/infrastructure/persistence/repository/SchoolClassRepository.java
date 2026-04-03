@@ -1,12 +1,14 @@
 package com.rusobr.academic.infrastructure.persistence.repository;
 
 import com.rusobr.academic.domain.model.SchoolClass;
+import com.rusobr.academic.web.dto.schoolClass.SchoolClassResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface SchoolClassRepository extends JpaRepository<SchoolClass, Long> {
@@ -18,5 +20,17 @@ public interface SchoolClassRepository extends JpaRepository<SchoolClass, Long> 
             """)
     List<Long> getStudentIdsFromSchoolClasses(@Param("classId") Long classId);
 
+    @Query("""
+            select new com.rusobr.academic.web.dto.schoolClass.SchoolClassResponse(
+                 sc.id,
+                 sc.name,
+                 sc.year,
+                 sc.classTeacherId
+            )
+            from ClassStudent cs
+            join cs.schoolClass sc
+            where cs.studentId = :studentId
+            """)
+    Optional<SchoolClassResponse> getSchoolClassByStudentId(@Param("studentId") Long studentId);
 
 }
