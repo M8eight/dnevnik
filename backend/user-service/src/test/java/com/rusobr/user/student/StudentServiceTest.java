@@ -28,13 +28,13 @@ public class StudentServiceTest {
     @DisplayName("Возвращает batch запрос с пользователями")
     void shouldReturnBatchStudents() {
         List<Long> req = List.of(1L, 2L);
-        List<StudentResponse> students = List.of(new StudentResponse(1L, "Алексей", "Кочетыгов"), new StudentResponse(2L, "Наталья", "Анатольевна"));
+        List<StudentResponse> students = List.of(new StudentResponse(1L, "Алексей", "Кочетыгов", "abc-133"), new StudentResponse(2L, "Наталья", "Анатольевна", "abc-111"));
 
         when(studentRepository.findAllStudentsByIds(req)).thenReturn(students);
 
         List<StudentResponse> res = studentService.findBatchStudents(req);
         assertEquals(students.size(), res.size());
-        assertEquals(students.get(1).firstname(), res.get(1).firstname());
+        assertEquals(students.get(1).firstName(), res.get(1).firstName());
     }
 
     @Test
