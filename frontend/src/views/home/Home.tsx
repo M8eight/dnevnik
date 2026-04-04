@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useUser } from "@/hooks/use-user";
+import { useAvgGrade } from "@/hooks/use-grade";
 import type { User } from "@/services/user-service";
 
 const student = {
@@ -143,6 +144,7 @@ function CurrentDate() {
 function Home() {
 
   const { data: user, isLoading, isError } = useUser(2);
+  const { data: avgGrade } = useAvgGrade(2, 3);
 
   return (
     <div className="relative z-10 min-h-screen px-8 pt-24 pb-10">
@@ -203,21 +205,20 @@ function Home() {
           <UserCard user={user} />
         )}
 
-        <Card className="col-span-6 md:col-span-2 bg-[var(--bg-card)] border-black/10
-                         hover:-translate-y-1 hover:shadow-xl transition-all duration-200">
+        <Card className="col-span-6 md:col-span-2 ...">
           <CardContent className="p-6 flex flex-col items-center justify-center text-center">
             <Chip className="border-[var(--gold)] text-[var(--gold)] bg-[var(--gold-light)]">
               Рейтинг
             </Chip>
             <span className="font-serif text-[3.5rem] font-black text-[var(--navy)] leading-none">
-              {student.rating}
+              {avgGrade ?? "—"}
             </span>
             <span className="text-[10px] font-bold tracking-[0.18em] uppercase text-[var(--ink-faint)] mt-1 mb-4">
               средний балл
             </span>
 
             <Progress
-              value={96}
+              value={avgGrade ? (avgGrade / 5) * 100 : 0}
               className="h-1 bg-[var(--gold-light)] [&>div]:bg-[var(--gold)] w-full"
             />
           </CardContent>

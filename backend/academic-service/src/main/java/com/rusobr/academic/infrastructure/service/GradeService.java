@@ -19,6 +19,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -34,6 +36,13 @@ public class GradeService {
     public GradeResponse getGradeById(Long gradeId) {
         Grade grade = gradeRepository.findById(gradeId).orElseThrow(() -> new NotFoundException("Grade not found gradeId: " + gradeId));
         return gradeMapper.toGradeResponseDto(grade);
+    }
+
+    public Double getAverageGrade(Long studentId, Long academicPeriodId) {
+        AcademicPeriod academicPeriod = academicPeriodRepository.findById(academicPeriodId)
+                .orElseThrow(() -> new NotFoundException("Academic period not found academicPeriodId: " + academicPeriodId));
+        log.info(academicPeriod.toString());
+        return gradeRepository.getAverageGrade(studentId, academicPeriod.getStartDate(), academicPeriod.getEndDate());
     }
 
     @Transactional

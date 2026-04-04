@@ -60,39 +60,43 @@ public class KeycloakRestClient {
     }
 
     public String createKeyCloakUser(CreateUserRequest createUserRequest) {
-
-        //todo map this
-        Map<String,Object> user = new HashMap<>();
+        Map<String, Object> user = new HashMap<>();
         user.put("username", createUserRequest.username());
         user.put("enabled", true);
         user.put("emailVerified", true);
-
-        List<Map<String, Object>> credentials = new ArrayList<>();
-        Map<String, Object> password = Map.of(
+        user.put("credentials", List.of(Map.of(
                 "type", "password",
                 "value", createUserRequest.password(),
                 "temporary", false
-        );
-        credentials.add(password);
-        user.put("credentials", credentials);
+        )));
 
-        return webClient.post()
-                .uri(keycloackUrl + "/admin/realms/" + keycloackRealm + "/users")
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + keyCloackTokenProvider.getAccessToken())
-                .bodyValue(user)
-                .retrieve()
-                .onStatus(status -> status.value() == 409,
-                        clientResponse -> Mono.error(new KeycloackUserAlreadyExist("Keycloack User already exists")))
-                .toBodilessEntity()
-                .map(res -> {
-                    String location = res.getHeaders().getFirst("Location");
-                    if (location == null) {
-                        throw new RuntimeException("Location header not found");
-                    }
-                    return location.substring(location.lastIndexOf("/") + 1);
-                })
-                .block();
+        try {
+            return webClient.post()
+                    .uri(keycloackUrl + "/admin/realms/" + keycloackRealm + "/users")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header("Authorization", "Bearer " + keyCloackTokenProvider.getAccessToken())
+                    .bodyValue(user)
+                    .retrieve()
+                    // Вместо Mono.error просто логируем и обрабатываем ниже
+                    .onStatus(status -> status.value() == 409,
+                            clientResponse -> Mono.empty())
+                    .toBodilessEntity()
+                    .flatMap(res -> {
+                        if (res.getStatusCode().value() == 409) {
+                            return Mono.empty();
+                        }
+                        String location = res.getHeaders().getFirst("Location");
+                        return Mono.just(location.substring(location.lastIndexOf("/") + 1));
+                    })
+                    .blockOptional() // Используем Optional, чтобы обработать пустоту
+                    .orElseGet(() -> {
+                        log.info("User {} already exists, fetching existing ID", createUserRequest.username());
+                        return getKeycloakUserByUsername(createUserRequest.username()).id();
+                    });
+        } catch (Exception e) {
+            log.error("Failed to create/get Keycloak user: {}", e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
 
     public void deleteKeyCloackUser(String userId)
