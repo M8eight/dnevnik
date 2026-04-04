@@ -1,5 +1,5 @@
 # Школьный дневник
-![structure](https://em-content.zobj.net/source/skype/295/nerd-face_1f913.png)
+![structure](https://s3.getstickerpack.com/storage/uploads/sticker-pack/masuna/sticker_7.png?002b536beb497fbee8281fc11f77d100)
 
 # ⚠️!В процессе!⚠️
 
