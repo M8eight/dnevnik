@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,4 +36,18 @@ public interface GradeRepository extends JpaRepository<Grade, Long> {
 
     @EntityGraph(attributePaths = {"lessonInstance"})
     Optional<Grade> findWithLessonInstanceById(Long id);
+
+    @Query("""
+            select avg(g.value * g.weight)
+            from Grade g
+            join g.lessonInstance li
+            join li.scheduleLesson sl
+            join sl.teachingAssignment ta
+            join ta.schoolClass sc
+            join sc.students cs
+            where cs.studentId = :studentId
+            and li.date between :startDate and :endDate
+            """)
+    Double getAverageGrade(@Param("studentId") Long studentId,
+                            @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 }

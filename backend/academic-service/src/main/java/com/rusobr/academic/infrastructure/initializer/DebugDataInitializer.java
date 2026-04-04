@@ -138,6 +138,7 @@ public class DebugDataInitializer implements CommandLineRunner {
                             .lessonInstance(li)
                             .studentId(sid)
                             .value(generateRealisticGrade())
+                            .weight(1)
                             .type(GradeType.values()[rng.nextInt(GradeType.values().length)])
                             .build());
                 }

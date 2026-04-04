@@ -35,6 +35,9 @@ public class Grade {
     @Min(1)
     private Integer value;
 
+    @Min(1)
+    private Integer weight;
+
     //TODO сделать enum
     @Enumerated(EnumType.STRING)
     private GradeType type;

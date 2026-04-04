@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -14,4 +15,7 @@ public interface AcademicPeriodRepository extends JpaRepository<AcademicPeriod,L
 
     @Query("select ap from AcademicPeriod ap where ap.startDate <= :date and ap.endDate >= :date ")
     Optional<AcademicPeriod> findByDate(@Param("date") LocalDate date);
+
+    List<AcademicPeriod> findAllByOrderByStartDateAsc();
+
 }
