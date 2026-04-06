@@ -18,7 +18,10 @@ import java.time.LocalDateTime;
 @ToString
 @Builder
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "attendances")
+@Table(name = "attendances",
+        uniqueConstraints = @UniqueConstraint(
+                columnNames = {"studentId", "lesson_instance_id"}
+        ))
 public class Attendance {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
