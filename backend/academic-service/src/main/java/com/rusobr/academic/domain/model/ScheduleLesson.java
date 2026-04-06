@@ -8,6 +8,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.DayOfWeek;
 import java.time.Instant;
+import java.time.LocalDate;
 
 @Entity
 @NoArgsConstructor
@@ -38,6 +39,10 @@ public class ScheduleLesson {
     private Integer lessonNumber;
 
     private String classRoom;
+
+    private LocalDate validFrom;
+
+    private LocalDate validTo;
 
     @CreatedDate
     @Column(updatable = false, name = "created_at")

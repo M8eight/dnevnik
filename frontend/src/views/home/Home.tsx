@@ -4,25 +4,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useUser } from "@/hooks/use-user";
-import { useAvgGrade } from "@/hooks/use-grade";
+import { useAvgGrade, useGradesByDate } from "@/hooks/use-grade";
 import type { User } from "@/services/user-service";
+import { useScheduleByDate } from "@/hooks/use-schedule";
 
 const student = {
   period: "3 четверть",
   rating: 4.8,
 };
-
-// todayLessons — массив объектов, рендерим через .map()
-const todayLessons = [
-  { num: "01", name: "Математика", time: "08:30 – 09:15" },
-  { num: "02", name: "Физика", time: "09:25 – 10:10" },
-  { num: "03", name: "Литература", time: "10:25 – 11:10" },
-];
-
-const todayGrades = [
-  { subject: "Алгебра", grade: 5 },
-  { subject: "История", grade: 2 },
-];
 
 const homework = [
   { text: "Подготовиться к контрол.", subject: "Алгебра", color: "bg-[var(--red)]" },
@@ -145,6 +134,8 @@ function Home() {
 
   const { data: user, isLoading, isError } = useUser(2);
   const { data: avgGrade } = useAvgGrade(2, 3);
+  const { data: todayGrades } = useGradesByDate(1, "2026-04-08");
+  const { data: todaySchedule } = useScheduleByDate(1, "MONDAY", "2026-03-30")
 
   return (
     <div className="relative z-10 min-h-screen px-8 pt-24 pb-10">
@@ -260,16 +251,16 @@ function Home() {
             </Chip>
 
             <div className="divide-y divide-black/[0.07]">
-              {todayLessons.map((l) => (
+              {todaySchedule?.map((l) => (
                 // key — обязателен при .map() в React
-                <div key={l.num} className="flex items-center gap-4 py-3">
+                <div key={l.lessonNumber} className="flex items-center gap-4 py-3">
                   {/* Большое полупрозрачное число — декоративный элемент */}
                   <span className="font-serif text-[1.6rem] font-bold text-[var(--red-light)] leading-none min-w-[32px]">
-                    {l.num}
+                    {l.lessonNumber}
                   </span>
                   <div>
-                    <p className="font-bold text-sm text-[var(--ink)]">{l.name}</p>
-                    <p className="text-[10px] font-semibold text-[var(--ink-faint)] mt-0.5">{l.time}</p>
+                    <p className="font-bold text-sm text-[var(--ink)]">{l.subjectName}</p>
+                    <p className="text-[10px] font-semibold text-[var(--ink-faint)] mt-0.5">{l.classRoom}</p>
                   </div>
                 </div>
               ))}
@@ -286,17 +277,17 @@ function Home() {
             </Chip>
 
             <div className="divide-y divide-black/[0.07]">
-              {todayGrades.map((g) => (
-                <div key={g.subject} className="flex items-center justify-between py-3">
-                  <span className="font-semibold text-sm">{g.subject}</span>
-                  <GradeBadge grade={g.grade} />
+              {todayGrades?.map((g) => (
+                <div key={g.subjectName} className="flex items-center justify-between py-3">
+                  <span className="font-semibold text-sm">{g.subjectName}</span>
+                  <GradeBadge grade={g.value} />
                 </div>
               ))}
             </div>
           </CardContent>
         </Card>
 
-        {/* ── ДЗ на завтра ── col-span-4 */}
+        {/* ── ДZ на завтра ── col-span-4 */}
         <Card className="col-span-12 md:col-span-4 bg-[var(--bg-card2)] border-black/10
                          hover:-translate-y-1 hover:shadow-xl transition-all duration-200">
           <CardContent className="pt-6">
