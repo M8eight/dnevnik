@@ -2,6 +2,7 @@ package com.rusobr.academic.infrastructure.persistence.repository;
 
 import com.rusobr.academic.domain.model.Grade;
 import com.rusobr.academic.web.dto.grade.GradeJournalItemDto;
+import com.rusobr.academic.web.dto.grade.GradeWithSubjectNameResponse;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -50,4 +51,21 @@ public interface GradeRepository extends JpaRepository<Grade, Long> {
             """)
     Double getAverageGrade(@Param("studentId") Long studentId,
                             @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
+    @Query("""
+       select new com.rusobr.academic.web.dto.grade.GradeWithSubjectNameResponse(
+            g.id,
+            g.value,
+            g.type,
+            s.name
+       )
+       from Grade g
+       join g.lessonInstance li
+       join li.scheduleLesson sl
+       join sl.teachingAssignment ta
+       join ta.subject s
+       where li.date = :date
+       and g.studentId = :studentId
+""")
+    List<GradeWithSubjectNameResponse> findAllGradesByDate(@Param("studentId") Long studentId, @Param("date")  LocalDate date);
 }
