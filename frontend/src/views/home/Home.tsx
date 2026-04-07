@@ -7,6 +7,7 @@ import { useUser } from "@/hooks/use-user";
 import { useAvgGrade, useGradesByDate } from "@/hooks/use-grade";
 import type { User } from "@/services/user-service";
 import { useScheduleByDate } from "@/hooks/use-schedule";
+import { useHomeworkByDate } from "@/hooks/use-homework";
 
 const student = {
   period: "3 четверть",
@@ -129,6 +130,15 @@ function CurrentDate() {
   );
 }
 
+//функция возвращает hsl цвет из строки
+function subjectColor(name: string): string {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const h = Math.abs(hash) % 360;
+  return `hsl(${h}, 60%, 45%)`;
+}
 
 function Home() {
 
@@ -136,6 +146,7 @@ function Home() {
   const { data: avgGrade } = useAvgGrade(2, 3);
   const { data: todayGrades } = useGradesByDate(1, "2026-04-08");
   const { data: todaySchedule } = useScheduleByDate(1, "MONDAY", "2026-03-30")
+  const { data: homework } = useHomeworkByDate("2026-04-08", 10);
 
   return (
     <div className="relative z-10 min-h-screen px-8 pt-24 pb-10">
@@ -296,17 +307,20 @@ function Home() {
             </Chip>
 
             <div className="flex flex-col gap-2 mt-1">
-              {homework.map((hw) => (
+              {homework?.map((hw) => (
                 <div
-                  key={hw.subject}
+                  key={hw.id}
                   className="flex items-center gap-3 px-3 py-2 rounded-xl bg-white/50 border border-black/[0.07]"
                 >
                   {/* Цветная точка — w-2 h-2 rounded-full */}
-                  <span className={`w-2 h-2 rounded-full flex-shrink-0 ${hw.color}`} />
+                  <span
+                    className={`w-2 h-2 rounded-full flex-shrink-0`}
+                    style={{ backgroundColor: subjectColor(hw.subjectName) }}
+                  />
                   <span className="text-[13px] font-semibold text-[var(--ink)]">{hw.text}</span>
                   {/* ml-auto — прижимает элемент вправо (как ms-auto в Bootstrap) */}
                   <span className="ml-auto text-[10px] font-bold text-[var(--ink-faint)] uppercase tracking-[0.08em]">
-                    {hw.subject}
+                    {hw.subjectName}
                   </span>
                 </div>
               ))}

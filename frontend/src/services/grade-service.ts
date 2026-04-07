@@ -1,4 +1,4 @@
-import api from "../axios/axios";
+import api from "@/axios/axios";
 
 export type AvgGrade = number;
 export interface Grade {
