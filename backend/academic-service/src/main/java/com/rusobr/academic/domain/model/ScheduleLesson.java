@@ -2,12 +2,11 @@ package com.rusobr.academic.domain.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.DayOfWeek;
-import java.time.Instant;
+import java.time.LocalDate;
 
 @Entity
 @NoArgsConstructor
@@ -16,12 +15,10 @@ import java.time.Instant;
 @Setter
 @ToString(exclude = "teachingAssignment")
 @Builder
-@Table(name = "schedule_lessons",
-        uniqueConstraints = @UniqueConstraint(
-                columnNames = {"teaching_assignment_id", "day_of_week", "lesson_number"}
-        ))
-@EntityListeners(AuditingEntityListener.class)
-public class ScheduleLesson {
+@Table(name = "schedule_lessons")
+@SQLRestriction("deleted_at is NULL")
+@SQLDelete(sql = "update schedule_lessons set deleted_at = now() where id = ?")
+public class ScheduleLesson extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -39,11 +36,8 @@ public class ScheduleLesson {
 
     private String classRoom;
 
-    @CreatedDate
-    @Column(updatable = false, name = "created_at")
-    private Instant createdAt;
+    private LocalDate validFrom;
 
-    @LastModifiedDate
-    @Column(name = "updated_at")
-    private Instant updatedAt;
+    private LocalDate validTo;
+
 }
