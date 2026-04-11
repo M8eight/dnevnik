@@ -12,6 +12,7 @@ import com.rusobr.academic.infrastructure.persistence.repository.GradeRepository
 import com.rusobr.academic.infrastructure.persistence.repository.LessonInstanceRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.ScheduleLessonRepository;
 import com.rusobr.academic.web.dto.grade.GradeResponse;
+import com.rusobr.academic.web.dto.grade.GradeWithSubjectNameResponse;
 import com.rusobr.academic.web.dto.grade.createGrade.CreateGradeRequest;
 import com.rusobr.academic.web.dto.grade.createGrade.CreateGradeResponse;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -43,6 +45,10 @@ public class GradeService {
                 .orElseThrow(() -> new NotFoundException("Academic period not found academicPeriodId: " + academicPeriodId));
         log.info(academicPeriod.toString());
         return gradeRepository.getAverageGrade(studentId, academicPeriod.getStartDate(), academicPeriod.getEndDate());
+    }
+
+    public List<GradeWithSubjectNameResponse> findAllGradesByDate(Long studentId, LocalDate date) {
+        return gradeRepository.findAllGradesByDate(studentId, date);
     }
 
     @Transactional

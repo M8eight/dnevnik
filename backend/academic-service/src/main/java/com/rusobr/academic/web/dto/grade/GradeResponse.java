@@ -7,5 +7,4 @@ public record GradeResponse(
         Long studentId,
         int value,
         GradeType gradeType
-
 ) {}

@@ -180,6 +180,7 @@ public class DebugDataInitializer implements CommandLineRunner {
                     .lessonNumber(s.number())
                     .classRoom(s.room())
                     .teachingAssignment(s.ta())
+                    .validFrom(LocalDate.now().minusWeeks(2))
                     .build()));
         }
         return res;
