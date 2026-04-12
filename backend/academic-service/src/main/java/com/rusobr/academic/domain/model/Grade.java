@@ -5,11 +5,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.time.Instant;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @NoArgsConstructor
@@ -18,9 +15,10 @@ import java.time.Instant;
 @Setter
 @ToString(exclude = "lessonInstance")
 @Builder
-@EntityListeners(AuditingEntityListener.class)
 @Table(name = "grades")
-public class Grade {
+@SQLRestriction("deleted_at is NULL")
+@SQLDelete(sql = "update grades set deleted_at = now() where id = ?")
+public class Grade extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -41,13 +39,5 @@ public class Grade {
     //TODO сделать enum
     @Enumerated(EnumType.STRING)
     private GradeType type;
-
-    @CreatedDate
-    @Column(updatable = false, name = "created_at")
-    private Instant createdAt;
-
-    @LastModifiedDate
-    @Column(name = "updated_at")
-    private Instant updatedAt;
 
 }

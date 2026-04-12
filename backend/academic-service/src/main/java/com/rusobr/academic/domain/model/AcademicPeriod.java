@@ -2,6 +2,8 @@ package com.rusobr.academic.domain.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDate;
 
@@ -12,12 +14,10 @@ import java.time.LocalDate;
 @Setter
 @ToString
 @Builder
-@Table(name = "academic_periods",
-    uniqueConstraints = @UniqueConstraint(
-            columnNames = {"school_year", "name"}
-    )
-)
-public class AcademicPeriod {
+@Table(name = "academic_periods")
+@SQLRestriction("deleted_at is NULL")
+@SQLDelete(sql = "update school_classes set deleted_at = now() where id = ?")
+public class AcademicPeriod extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

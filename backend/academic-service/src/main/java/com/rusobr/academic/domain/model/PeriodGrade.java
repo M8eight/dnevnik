@@ -4,11 +4,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.time.Instant;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @NoArgsConstructor
@@ -17,11 +14,10 @@ import java.time.Instant;
 @Setter
 @Builder
 @ToString(exclude = {"academicPeriod", "teachingAssignment"})
-@EntityListeners(AuditingEntityListener.class)
-@Table(name = "period_grades", uniqueConstraints = @UniqueConstraint(columnNames = {
-        "student_id", "academic_period_id", "teaching_assignment_id"
-}))
-public class PeriodGrade {
+@Table(name = "period_grades")
+@SQLRestriction("deleted_at is NULL")
+@SQLDelete(sql = "update period_grades set deleted_at = now() where id = ?")
+public class PeriodGrade extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -43,13 +39,4 @@ public class PeriodGrade {
 
     @Column(name = "student_id", nullable = false)
     private Long studentId;
-
-    @CreatedDate
-    @Column(updatable = false, name = "created_at")
-    private Instant createdAt;
-
-    @LastModifiedDate
-    @Column(name = "updated_at")
-    private Instant updatedAt;
-
 }

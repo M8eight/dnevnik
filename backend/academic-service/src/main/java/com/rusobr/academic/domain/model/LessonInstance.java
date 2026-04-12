@@ -2,6 +2,8 @@ package com.rusobr.academic.domain.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDate;
 
@@ -12,11 +14,10 @@ import java.time.LocalDate;
 @Setter
 @ToString(exclude = "scheduleLesson")
 @Builder
-@Table(name = "lesson_instances",
-        uniqueConstraints = @UniqueConstraint(
-                columnNames = {"schedule_lesson_id", "lesson_date"}
-        ))
-public class LessonInstance {
+@Table(name = "lesson_instances")
+@SQLRestriction("deleted_at is NULL")
+@SQLDelete(sql = "update lesson_instances set deleted_at = now() where id = ?")
+public class LessonInstance extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

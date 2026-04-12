@@ -2,11 +2,9 @@ package com.rusobr.academic.domain.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
-import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -18,8 +16,9 @@ import java.util.Set;
 @Setter
 @ToString(exclude = "students")
 @Builder
-@EntityListeners(AuditingEntityListener.class)
-public class SchoolClass {
+@SQLRestriction("deleted_at is NULL")
+@SQLDelete(sql = "update school_classes set deleted_at = now() where id = ?")
+public class SchoolClass extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -33,12 +32,4 @@ public class SchoolClass {
     @Builder.Default
     @OneToMany(mappedBy = "schoolClass", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ClassStudent> students = new HashSet<>();
-
-    @CreatedDate
-    @Column(updatable = false, name = "created_at")
-    private Instant createdAt;
-
-    @LastModifiedDate
-    @Column(name = "updated_at")
-    private Instant updatedAt;
 }
