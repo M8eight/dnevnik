@@ -3,7 +3,7 @@ spring:
     name: user-service
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: validate
     show-sql: true
 #    properties:
 #      jakarta.persistence.schema-generation.database.action: create
@@ -11,8 +11,7 @@ spring:
 #      jakarta.persistence.schema-generation.scripts.create-target: schemas/user-schema.sql
 #      jakarta.persistence.schema-generation.create-source: metadata
   flyway:
-    enabled: false
-    baseline-on-migrate: true
+    enabled: true
   security:
     oauth2:
       resourceserver:

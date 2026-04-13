@@ -3,6 +3,8 @@ package com.rusobr.user.domain.model;
 import com.rusobr.user.infrastructure.enums.UserRoles;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -16,6 +18,8 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@SQLRestriction("deleted_at is NULL")
+@SQLDelete(sql = "update users set deleted_at = now() where id = ?")
 public class User extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,7 +31,7 @@ public class User extends BaseEntity {
 
     private String lastName;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String keycloakId;
 
     @Builder.Default
@@ -48,6 +52,6 @@ public class User extends BaseEntity {
             return true;
         if (!(obj instanceof User))
             return false;
-        return id != null && id.equals(this.getId());
+        return id != null && id.equals(((User) obj).getId());
     }
 }
