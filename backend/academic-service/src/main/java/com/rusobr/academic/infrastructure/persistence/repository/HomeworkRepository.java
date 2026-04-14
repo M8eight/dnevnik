@@ -25,7 +25,7 @@ public interface HomeworkRepository extends CrudRepository<Homework, Long> {
         join ta.subject su
         join ta.schoolClass sc
         join sc.students s
-        where li.date = :date
+        where li.lessonDate = :date
         and s.studentId = :studentId
 """)
     List<HomeworkResponse> findHomeworksByDate(@Param("date") LocalDate date, @Param("studentId") Long studentId);
