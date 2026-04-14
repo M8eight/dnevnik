@@ -1,4 +1,4 @@
-import { getScheduleByDate, getScheduleByStudentId, type ScheduleItem, type ScheduleResponse } from "@/services/schedule-service"
+import { getDiaryLessonsByStudentIdAndDateRange, getScheduleByDate, getScheduleByStudentId, type DiaryResponse, type ScheduleItem, type ScheduleResponse } from "@/services/schedule-service"
 import { useQuery } from "@tanstack/react-query"
 
 export const useScheduleByDate = (studentId: number, dayOfWeek: string, date: string) => {
@@ -14,5 +14,17 @@ export const useScheduleByStudentId = (studentId: number) => {
         queryKey: ['schedule', 'full', studentId],
         queryFn: () => getScheduleByStudentId(studentId),
         enabled: !!studentId,
+    })
+}
+
+export const useDiaryLessonsByStudentIdAndDateRange = (
+    studentId: number, 
+    startDate: string, 
+    endDate: string
+) => {
+    return useQuery<DiaryResponse>({
+        queryKey: ['schedule', 'diary', studentId, startDate, endDate],
+        queryFn: () => getDiaryLessonsByStudentIdAndDateRange(studentId, startDate, endDate),
+        enabled: !!studentId && !!startDate && !!endDate,
     })
 }
