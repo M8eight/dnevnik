@@ -29,5 +29,4 @@
 ![structure](./docs/diagram.png)
 
 ### Макеты фронта
-#### красная рамка - заглушки
-![plain](./docs/img.png)
+![maket](./docs/img.png)

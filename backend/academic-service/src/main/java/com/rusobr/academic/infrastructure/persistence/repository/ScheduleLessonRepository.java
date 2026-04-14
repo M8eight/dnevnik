@@ -2,6 +2,7 @@ package com.rusobr.academic.infrastructure.persistence.repository;
 
 import com.rusobr.academic.domain.model.ScheduleLesson;
 import com.rusobr.academic.web.dto.scheduleLesson.ScheduleLessonResponse;
+import com.rusobr.academic.web.dto.scheduleLesson.SchoolLessonResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -36,6 +37,23 @@ public interface ScheduleLessonRepository extends JpaRepository<ScheduleLesson, 
     List<ScheduleLessonResponse> getScheduleByDate(@Param("studentId") Long studentId,
                                                    @Param("dayOfWeek") DayOfWeek dayOfWeek,
                                                    @Param("date") LocalDate date);
+
+    @Query("""
+            select new com.rusobr.academic.web.dto.scheduleLesson.SchoolLessonResponse(
+                sl.id,
+                sl.lessonNumber,
+                su.name,
+                sl.classRoom,
+                sl.dayOfWeek
+            )
+            from ScheduleLesson sl
+            join sl.teachingAssignment ta
+            join ta.schoolClass sc
+            join sc.students st
+            join ta.subject su
+            where st.studentId = :studentId
+            """)
+    List<SchoolLessonResponse> findAllByStudentId(@Param("studentId") Long studentId);
 
     List<ScheduleLesson> findByTeachingAssignmentId(Long teachingAssignmentId);
 }

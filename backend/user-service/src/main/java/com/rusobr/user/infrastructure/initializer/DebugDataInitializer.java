@@ -38,42 +38,47 @@ public class DebugDataInitializer implements CommandLineRunner {
     public void run(String... args) {
         log.info("=== Запуск инициализации пользователей (Синхронизация ID) ===");
 
-        // 1-12: Ученики 8 "А" (ID: 1-12)
-        createUser("ivanov_i", "12345678", "Иван", "Иванов", "student");
-        createUser("petrova_m", "12345678", "Мария", "Петрова", "student");
-        createUser("sidorov_a", "12345678", "Алексей", "Сидоров", "student");
-        createUser("demidova_n", "12345678", "Ника", "Демидова", "student");
-        createUser("smirnov_a", "12345678", "Артем", "Смирнов", "student");
-        createUser("kuznetsova_e", "12345678", "Екатерина", "Кузнецова", "student");
-        createUser("popov_d", "12345678", "Дмитрий", "Попов", "student");
-        createUser("sokolova_a", "12345678", "Анастасия", "Соколова", "student");
-        createUser("lebedev_m", "12345678", "Максим", "Лебедев", "student");
-        createUser("kozlova_p", "12345678", "Полина", "Козлова", "student");
-        createUser("novikov_i", "12345678", "Илья", "Новиков", "student");
-        createUser("morozova_v", "12345678", "Виктория", "Морозова", "student");
+        createUser("ivanov_i",        "12345678", "Иван",      "Иванов",                    "student");
+        createUser("petrova_m",       "12345678", "Мария",     "Петрова",                   "student");
+        createUser("sidorov_a",       "12345678", "Алексей",   "Сидоров",                   "student");
+        createUser("demidova_n",      "12345678", "Ника",      "Демидова",                  "student");
+        createUser("smirnov_a",       "12345678", "Артем",     "Смирнов",                   "student");
+        createUser("kuznetsova_e",    "12345678", "Екатерина", "Кузнецова",                 "student");
+        createUser("popov_d",         "12345678", "Дмитрий",   "Попов",                     "student");
+        createUser("sokolova_a",      "12345678", "Анастасия", "Соколова",                  "student");
+        createUser("lebedev_m",       "12345678", "Максим",    "Лебедев",                   "student");
+        createUser("kozlova_p",       "12345678", "Полина",    "Козлова",                   "student");
+        createUser("novikov_i",       "12345678", "Илья",      "Новиков",                   "student");
+        createUser("morozova_v",      "12345678", "Виктория",  "Морозова",                  "student");
+        createUser("admin",           "12345678", "Елена",     "Директорова",               "admin");
+        createUser("parent_demidova", "12345678", "Ольга",     "Демидова",                  "parent");
+        createUser("parent_smirnov",  "12345678", "Сергей",    "Смирнов",                   "parent");
+        createUser("parent_ivanova",  "12345678", "Наталья",   "Иванова",                   "parent");
+        createUser("teacher_math",    "12345678", "Ирина",     "Николаевна (Математика)",   "teacher");
+        createUser("teacher_rus",     "12345678", "Светлана",  "Юрьевна (Русский)",         "teacher");
+        createUser("teacher_phys",    "12345678", "Виктор",    "Степанович (Физика)",       "teacher");
+        createUser("teacher_chem",    "12345678", "Татьяна",   "Васильевна (Химия)",        "teacher");
+        createUser("teacher_bio",     "12345678", "Марина",    "Олеговна (Биология)",       "teacher");
+        createUser("teacher_hist",    "12345678", "Игорь",     "Анатольевич (История)",     "teacher");
+        createUser("teacher_it",      "12345678", "Александр", "Сергеевич (Информатика)",   "teacher");
+        createUser("teacher_pe",      "12345678", "Евгений",   "Владимирович (Физра)",      "teacher");
+        createUser("teacher_eng",     "12345678", "Анна",      "Павловна (Английский)",     "teacher");
+        createUser("teacher_lit",     "12345678", "Оксана",    "Дмитриевна (Литература)",   "teacher");
 
-        // 13-16: Администрация и Родители (ID: 13-16)
-        createUser("admin", "12345678", "Елена", "Директорова", "admin");
-        createUser("parent_demidova", "12345678", "Ольга", "Демидова", "parent");
-        createUser("parent_smirnov", "12345678", "Сергей", "Смирнов", "parent");
-        createUser("parent_ivanova", "12345678", "Наталья", "Иванова", "parent");
-
-        // 17-26: Учителя предметники (ID: 17-26)
-        createUser("teacher_math", "12345678", "Ирина", "Николаевна (Математика)", "teacher");
-        createUser("teacher_rus", "12345678", "Светлана", "Юрьевна (Русский)", "teacher");
-        createUser("teacher_phys", "12345678", "Виктор", "Степанович (Физика)", "teacher");
-        createUser("teacher_chem", "12345678", "Татьяна", "Васильевна (Химия)", "teacher");
-        createUser("teacher_bio", "12345678", "Марина", "Олеговна (Биология)", "teacher");
-        createUser("teacher_hist", "12345678", "Игорь", "Анатольевич (История)", "teacher");
-        createUser("teacher_it", "12345678", "Александр", "Сергеевич (Информатика)", "teacher");
-        createUser("teacher_pe", "12345678", "Евгений", "Владимирович (Физра)", "teacher");
-        createUser("teacher_eng", "12345678", "Анна", "Павловна (Английский)", "teacher");
-        createUser("teacher_lit", "12345678", "Оксана", "Дмитриевна (Литература)", "teacher");
-
-        log.info("=== Тестовые пользователи созданы. ID учителей начинаются с 17. ===");
+        log.info("=== Инициализация завершена ===");
+        log.info("=== ID пользователей (для academic-service) ===");
+        userRepository.findAll().forEach(u ->
+                log.info("username={} id={} roles={}", u.getUsername(), u.getId(), u.getRoles())
+        );
     }
 
     private void createUser(String username, String password, String firstName, String lastName, String role) {
+        if (userRepository.existsByUsername(username)) {
+            User existing = userRepository.findByUsername(username).orElseThrow();
+            log.info("User {} already exists in DB with id={}, skipping.", username, existing.getId());
+            return;
+        }
+
         String roleId;
         UserRoles userRole;
 
@@ -104,7 +109,7 @@ public class DebugDataInitializer implements CommandLineRunner {
         } catch (Exception e) {
             if (e.getMessage().contains("Keycloak User already exists") || e.getMessage().contains("409")) {
                 keycloakId = keycloakRestClient.getKeycloakUserByUsername(username).id();
-                log.warn("User {} already exists in Keycloak", username);
+                log.warn("User {} already exists in Keycloak, fetched id={}", username, keycloakId);
             } else {
                 throw e;
             }
@@ -117,16 +122,20 @@ public class DebugDataInitializer implements CommandLineRunner {
         User user = userRepository.save(User.builder()
                 .username(username)
                 .keycloakId(keycloakId)
-                .keycloakId(keycloakId)
                 .firstName(firstName)
                 .lastName(lastName)
                 .roles(new HashSet<>(Set.of(userRole)))
                 .build());
 
+        log.info("Created user: username={} id={} role={}", username, user.getId(), role);
+
         switch (role) {
-            case "teacher" -> teacherRepository.save(Teacher.builder().phoneNumber("+123131132").email("assadasd@aadssda.com").user(user).build());
-            case "student" -> studentRepository.save(Student.builder().studyProfile("Социо-эконом").user(user).build());
-            case "parent"  -> parentRepository.save(Parent.builder().user(user).build());
+            case "teacher" -> teacherRepository.save(
+                    Teacher.builder().phoneNumber("+123131132").email("assadasd@aadssda.com").user(user).build());
+            case "student" -> studentRepository.save(
+                    Student.builder().studyProfile("Социо-эконом").user(user).build());
+            case "parent"  -> parentRepository.save(
+                    Parent.builder().user(user).build());
         }
     }
 }

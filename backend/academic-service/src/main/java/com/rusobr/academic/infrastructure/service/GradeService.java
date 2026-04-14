@@ -20,6 +20,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -44,7 +46,13 @@ public class GradeService {
         AcademicPeriod academicPeriod = academicPeriodRepository.findById(academicPeriodId)
                 .orElseThrow(() -> new NotFoundException("Academic period not found academicPeriodId: " + academicPeriodId));
         log.info(academicPeriod.toString());
-        return gradeRepository.getAverageGrade(studentId, academicPeriod.getStartDate(), academicPeriod.getEndDate());
+        Double avg = gradeRepository.getAverageGrade(studentId, academicPeriod.getStartDate(), academicPeriod.getEndDate());
+        if (avg == null) return null;
+
+        return BigDecimal.valueOf(avg)
+                .setScale(2, RoundingMode.HALF_UP)
+                .doubleValue();
+
     }
 
     public List<GradeWithSubjectNameResponse> findAllGradesByDate(Long studentId, LocalDate date) {
