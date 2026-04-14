@@ -6,13 +6,14 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString(exclude = "scheduleLesson")
+@ToString(exclude = {"scheduleLesson", "homeworks", "grades", "attendances"})
 @Builder
 @Table(name = "lesson_instances")
 @SQLRestriction("deleted_at is NULL")
@@ -27,5 +28,15 @@ public class LessonInstance extends BaseEntity {
     private ScheduleLesson scheduleLesson;
 
     @Column(name = "lesson_date", nullable = false)
-    private LocalDate date;
+    private LocalDate lessonDate;
+
+    @OneToMany(mappedBy = "lessonInstance")
+    private List<Homework> homeworks;
+
+    @OneToMany(mappedBy = "lessonInstance")
+    private List<Grade> grades;
+
+    @OneToMany(mappedBy = "lessonInstance")
+    private List<Attendance> attendances;
+
 }
