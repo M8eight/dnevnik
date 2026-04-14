@@ -12,16 +12,15 @@ import org.springframework.stereotype.Component;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 
 @Component
 @RequiredArgsConstructor
 @Transactional
 @Slf4j
-@Deprecated
 public class DebugDataInitializer implements CommandLineRunner {
 
-    // 6 апреля 2026 — это ПОНЕДЕЛЬНИК. Идеальная точка отсчета.
     private static final LocalDate ANCHOR_DATE = LocalDate.of(2026, 4, 6);
 
     private final SubjectRepository subjectRepository;
@@ -45,18 +44,16 @@ public class DebugDataInitializer implements CommandLineRunner {
 
         log.info("=== Полная инициализация академических данных (8А класс) ===");
 
-        // 1. Предметы
         Map<String, Subject> subjects = new LinkedHashMap<>();
         List.of("Алгебра", "Геометрия", "Русский язык", "Литература", "Физика",
                         "Химия", "Биология", "История", "Информатика", "Английский язык", "Физкультура")
                 .forEach(name -> subjects.put(name, subjectRepository.save(Subject.builder().name(name).build())));
 
-        // 2. Класс 8А и студенты
         List<Long> studentIds = java.util.stream.LongStream.rangeClosed(1, 12).boxed().toList();
         SchoolClass c8a = SchoolClass.builder()
                 .name("8А")
                 .year("2025")
-                .classTeacherId(17L) // Классрук - учитель математики
+                .classTeacherId(17L)
                 .students(new HashSet<>())
                 .build();
 
@@ -68,8 +65,6 @@ public class DebugDataInitializer implements CommandLineRunner {
         });
         schoolClassRepository.save(c8a);
 
-        // 3. Назначения учителей (Teaching Assignments)
-        // Распределяем предметы по ID учителей (17-26)
         Map<String, TeachingAssignment> ta = new HashMap<>();
         ta.put("Алг", saveTA(17L, c8a, subjects.get("Алгебра")));
         ta.put("Гео", saveTA(17L, c8a, subjects.get("Геометрия")));
@@ -83,7 +78,6 @@ public class DebugDataInitializer implements CommandLineRunner {
         ta.put("Анг", saveTA(24L, c8a, subjects.get("Английский язык")));
         ta.put("Спорт", saveTA(25L, c8a, subjects.get("Физкультура")));
 
-        // 4. Шаблон расписания на неделю
         Map<DayOfWeek, List<Slot>> weeklyPlan = new LinkedHashMap<>();
 
         weeklyPlan.put(DayOfWeek.MONDAY, List.of(
@@ -116,21 +110,17 @@ public class DebugDataInitializer implements CommandLineRunner {
                 new Slot(5, "Зал", ta.get("Спорт"))
         ));
 
-        // Сохраняем расписание (ScheduleLesson)
         Map<DayOfWeek, List<ScheduleLesson>> savedSchedule = new HashMap<>();
         weeklyPlan.forEach((day, slots) -> savedSchedule.put(day, schedule(day, slots)));
 
-        // 5. Генерация реальных уроков (LessonInstance) на 4 недели
         for (int i = 0; i < 4; i++) {
             LocalDate mondayOfCurrentWeek = ANCHOR_DATE.plusWeeks(i);
             savedSchedule.forEach((day, lessons) -> {
-                // Вычисляем дату конкретного дня: Понедельник + (номер дня - 1)
                 LocalDate dateOfLesson = mondayOfCurrentWeek.plusDays(day.getValue() - 1);
                 buildDay(dateOfLesson, lessons, c8a);
             });
         }
 
-        // 6. Периоды
         savePeriods();
 
         log.info("=== Инициализация завершена успешно ===");
@@ -155,7 +145,7 @@ public class DebugDataInitializer implements CommandLineRunner {
     void buildDay(LocalDate date, List<ScheduleLesson> slots, SchoolClass schoolClass) {
         for (ScheduleLesson slot : slots) {
             LessonInstance li = lessonInstanceRepository.save(
-                    LessonInstance.builder().date(date).scheduleLesson(slot).build()
+                    LessonInstance.builder().lessonDate(date).scheduleLesson(slot).build()
             );
 
             homeworkRepository.save(Homework.builder()
@@ -164,13 +154,11 @@ public class DebugDataInitializer implements CommandLineRunner {
 
             for (ClassStudent cs : schoolClass.getStudents()) {
                 Long sid = cs.getStudentId();
-                // 30% шанс получить оценку
                 if (rng.nextInt(100) < 30) {
                     gradeRepository.save(Grade.builder()
                             .lessonInstance(li).studentId(sid)
                             .value(generateRealisticGrade()).weight(1).type(GradeType.HOMEWORK).build());
                 }
-                // 5% шанс пропуска
                 if (rng.nextInt(100) < 5) {
                     attendanceRepository.save(Attendance.builder()
                             .lessonInstance(li).studentId(sid)

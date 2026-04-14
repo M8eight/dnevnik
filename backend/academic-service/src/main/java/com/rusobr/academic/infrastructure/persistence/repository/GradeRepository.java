@@ -22,7 +22,7 @@ public interface GradeRepository extends JpaRepository<Grade, Long> {
                 g.id,
                 g.value,
                 g.type,
-                li.date
+                li.lessonDate
             )
             from Grade g
             join g.lessonInstance li
@@ -47,7 +47,7 @@ public interface GradeRepository extends JpaRepository<Grade, Long> {
             join ta.schoolClass sc
             join sc.students cs
             where cs.studentId = :studentId
-            and li.date between :startDate and :endDate
+            and li.lessonDate between :startDate and :endDate
             """)
     Double getAverageGrade(@Param("studentId") Long studentId,
                             @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
@@ -64,7 +64,7 @@ public interface GradeRepository extends JpaRepository<Grade, Long> {
        join li.scheduleLesson sl
        join sl.teachingAssignment ta
        join ta.subject s
-       where li.date = :date
+       where li.lessonDate = :date
        and g.studentId = :studentId
 """)
     List<GradeWithSubjectNameResponse> findAllGradesByDate(@Param("studentId") Long studentId, @Param("date")  LocalDate date);

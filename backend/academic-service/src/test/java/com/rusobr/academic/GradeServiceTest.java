@@ -98,7 +98,7 @@ public class GradeServiceTest {
         CreateGradeResponse responseDto = new CreateGradeResponse(1L, 5, GradeType.TEST, 100L, date);
 
         when(academicPeriodRepository.findByDate(date)).thenReturn(Optional.of(period));
-        when(lessonInstanceRepository.findByDateAndScheduleLessonId(date, 2L))
+        when(lessonInstanceRepository.findByLessonDateAndScheduleLessonId(date, 2L))
                 .thenReturn(Optional.of(lessonInstance));
         when(gradeRepository.save(any(Grade.class))).thenReturn(savedGrade);
         when(gradeMapper.toCreateGradeResponseDto(savedGrade, date)).thenReturn(responseDto);
@@ -107,7 +107,7 @@ public class GradeServiceTest {
 
         assertEquals(responseDto, result);
         verify(academicPeriodRepository).findByDate(date);
-        verify(lessonInstanceRepository).findByDateAndScheduleLessonId(date, 2L);
+        verify(lessonInstanceRepository).findByLessonDateAndScheduleLessonId(date, 2L);
         // ScheduleLesson не нужен — LessonInstance уже есть
         verifyNoInteractions(scheduleLessonRepository);
         verify(gradeRepository).save(any(Grade.class));
@@ -126,7 +126,7 @@ public class GradeServiceTest {
         CreateGradeResponse responseDto = new CreateGradeResponse(1L, 4, GradeType.TEST, 101L, date);
 
         when(academicPeriodRepository.findByDate(date)).thenReturn(Optional.of(period));
-        when(lessonInstanceRepository.findByDateAndScheduleLessonId(date, 2L)).thenReturn(Optional.empty());
+        when(lessonInstanceRepository.findByLessonDateAndScheduleLessonId(date, 2L)).thenReturn(Optional.empty());
         when(scheduleLessonRepository.findById(2L)).thenReturn(Optional.of(schedule));
         when(lessonInstanceRepository.save(any(LessonInstance.class))).thenReturn(newInstance);
         when(gradeRepository.save(any(Grade.class))).thenReturn(savedGrade);
@@ -178,7 +178,7 @@ public class GradeServiceTest {
 
         AcademicPeriod period = AcademicPeriod.builder().isClosed(false).build();
         when(academicPeriodRepository.findByDate(date)).thenReturn(Optional.of(period));
-        when(lessonInstanceRepository.findByDateAndScheduleLessonId(date, 2L)).thenReturn(Optional.empty());
+        when(lessonInstanceRepository.findByLessonDateAndScheduleLessonId(date, 2L)).thenReturn(Optional.empty());
         when(scheduleLessonRepository.findById(2L)).thenReturn(Optional.empty());
 
         NotFoundException ex = assertThrows(NotFoundException.class,

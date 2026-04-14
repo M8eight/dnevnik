@@ -15,7 +15,7 @@ import java.util.Optional;
 public interface LessonInstanceRepository extends JpaRepository<LessonInstance, Long> {
     @Query("""
                 select new com.rusobr.academic.web.dto.lessonInstance.LessonWeekItemDto(
-                        li.date,
+                        li.lessonDate,
                         sl.lessonNumber,
                         sl.classRoom,
                         sbj.name,
@@ -30,8 +30,8 @@ public interface LessonInstanceRepository extends JpaRepository<LessonInstance, 
                 left join Grade g on g.lessonInstance = li and g.studentId = :student_id
                 left join Attendance a on a.lessonInstance = li and a.studentId = :student_id
                 where ta.schoolClass.id = :classId
-                    and li.date between :startDate and :endDate
-                order by li.date asc, sl.lessonNumber asc
+                    and li.lessonDate between :startDate and :endDate
+                order by li.lessonDate asc, sl.lessonNumber asc
             """)
     List<LessonWeekItemDto> getSchedule(
             @Param("classId") Long classId,
@@ -40,5 +40,26 @@ public interface LessonInstanceRepository extends JpaRepository<LessonInstance, 
             @Param("endDate") LocalDate endDate
     );
 
-    Optional<LessonInstance> findByDateAndScheduleLessonId(LocalDate date, Long scheduleLessonId);
+    @Query("""
+                select distinct li
+                from LessonInstance li
+                join fetch li.scheduleLesson sl
+                join fetch sl.teachingAssignment ta
+                join ta.schoolClass sc
+                join sc.students st
+                join fetch ta.subject su
+                left join fetch Grade g on g.lessonInstance = li and g.studentId = :studentId
+                left join fetch Attendance a on a.lessonInstance = li and a.studentId = :studentId
+                left join fetch Homework h on h.lessonInstance = li
+                where st.studentId = :studentId
+                    and li.lessonDate between :startDate and :endDate
+                    and (g.studentId = :studentId or g.id is null)
+                    and (a.studentId = :studentId or a.id is null)
+                order by li.lessonDate
+            """)
+    List<LessonInstance> findDiaryLessonsByStudentIdAndDateRange(@Param("studentId") Long studentId,
+                                                                      @Param("startDate") LocalDate startDate,
+                                                                      @Param("endDate") LocalDate endDate);
+
+    Optional<LessonInstance> findByLessonDateAndScheduleLessonId(LocalDate date, Long scheduleLessonId);
 }

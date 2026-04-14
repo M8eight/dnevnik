@@ -8,15 +8,8 @@ spring:
     hibernate:
       ddl-auto: validate
     show-sql: true
-
-#    properties:
-#        jakarta.persistence.schema-generation.database.action: create
-#        jakarta.persistence.schema-generation.scripts.action: create
-#        jakarta.persistence.schema-generation.scripts.create-target: schemas/academic-schema.sql
-#        jakarta.persistence.schema-generation.create-source: metadata
   flyway:
     enabled: true
-#    baseline-on-migrate: true
     locations: classpath:db/migration
   security:
     oauth2:
@@ -37,14 +30,6 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
-
-#logging:
-#  level:
-#    root: INFO
-#    org.flywaydb: DEBUG
-#    org.springframework: INFO
-#  file:
-#    path: ./logs
 
 logging:
   loki:

@@ -69,16 +69,16 @@ public class GradeService {
             throw new ConflictException("Academic period is closed");
         }
 
-        LessonInstance lessonInstance = lessonInstanceRepository.findByDateAndScheduleLessonId(gradeDto.date(), gradeDto.scheduleLessonId()).orElseGet(() -> {
+        LessonInstance lessonInstance = lessonInstanceRepository.findByLessonDateAndScheduleLessonId(gradeDto.date(), gradeDto.scheduleLessonId()).orElseGet(() -> {
             ScheduleLesson schedule = scheduleLessonRepository.findById(gradeDto.scheduleLessonId()).orElseThrow(() -> new NotFoundException("Schedule lesson not found"));
 
-            return lessonInstanceRepository.save(LessonInstance.builder().date(gradeDto.date()).scheduleLesson(schedule).build());
+            return lessonInstanceRepository.save(LessonInstance.builder().lessonDate(gradeDto.date()).scheduleLesson(schedule).build());
         });
 
         Grade gradeEntity = Grade.builder().studentId(gradeDto.studentId()).value(gradeDto.value()).type(gradeDto.gradeType()).lessonInstance(lessonInstance).build();
 
 
-        return gradeMapper.toCreateGradeResponseDto(gradeRepository.save(gradeEntity), lessonInstance.getDate());
+        return gradeMapper.toCreateGradeResponseDto(gradeRepository.save(gradeEntity), lessonInstance.getLessonDate());
 
     }
 
@@ -88,7 +88,7 @@ public class GradeService {
         Grade grade = gradeRepository.findWithLessonInstanceById(id)
                 .orElseThrow(() -> new NotFoundException("Grade not found gradeId: " + id));
 
-        AcademicPeriod academicPeriod = academicPeriodRepository.findByDate(grade.getLessonInstance().getDate())
+        AcademicPeriod academicPeriod = academicPeriodRepository.findByDate(grade.getLessonInstance().getLessonDate())
                 .orElseThrow(() -> new NotFoundException("Academic period not found"));
         if (academicPeriod.isClosed()) {
             throw new ConflictException("Academic period is closed");
