@@ -26,8 +26,7 @@
   - tailwindcss
 
 ### Структура бд
-![structure](diagram.png)
+![structure](./docs/diagram.png)
 
 ### Макеты фронта
-#### красная рамка - заглушки
-![maket](img.png)
+![maket](./docs/img.png)

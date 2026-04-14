@@ -50,7 +50,7 @@ services:
       - "3100:3100"
     command: -config.file=/etc/loki/local-config.yaml
     volumes:
-      - ./loki-config.yaml:/etc/loki/local-config.yaml
+      - ./configs/loki-config.yaml:/etc/loki/local-config.yaml
       - loki-data:/loki
     networks:
       - micro-net
@@ -63,7 +63,7 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     volumes:
       - grafana-data:/var/lib/grafana
-      - ./grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
+      - ./configs/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
     depends_on:
       - loki
     networks:
@@ -76,7 +76,7 @@ services:
       - "4317:4317"  # OTLP gRPC
       - "4318:4318"  # OTLP HTTP
     volumes:
-      - ./alloy-config.alloy:/etc/alloy/config.alloy
+      - ./configs/alloy-config.alloy:/etc/alloy/config.alloy
       - ./logs:/logs
     command: run --server.http.listen-addr=0.0.0.0:12345 --storage.path=/var/lib/alloy/data /etc/alloy/config.alloy
     networks:
