@@ -1,7 +1,6 @@
 package com.rusobr.user.infrastructure.service;
 
 import com.rusobr.user.domain.model.Student;
-import com.rusobr.user.domain.model.User;
 import com.rusobr.user.infrastructure.exception.NotFoundException;
 import com.rusobr.user.infrastructure.feignClient.SchoolClassClient;
 import com.rusobr.user.infrastructure.mapper.StudentMapper;
@@ -36,20 +35,17 @@ public class StudentService {
         return studentRepository.findAllStudentsByIds(ids);
     }
 
-    public StudentResponseDetail findStudentById(Long id) {
+    public StudentResponseDetail findStudentDetailById(Long id) {
         if (id == null) {
             return null;
         }
 
         Student student = studentRepository.findWithUserById(id)
                 .orElseThrow(() -> new NotFoundException("Student not found"));
-        User userData = student.getUser();
+//        User userData = student.getUser();
 
-        SchoolClassResponse schoolClass = schoolClassClient.getSchoolClassByStudentId(userData.getId());
-        log.info(schoolClass.toString());
-        log.info(String.valueOf(schoolClass.classTeacherId()));
+        SchoolClassResponse schoolClass = schoolClassClient.getSchoolClassByStudentId(student.getId());
         TeacherResponse teacher = teacherService.findWithUserById(schoolClass.classTeacherId());
-        log.info(teacher.toString());
 
         return studentMapper.toStudentResponse(student, schoolClass, teacher);
     }
