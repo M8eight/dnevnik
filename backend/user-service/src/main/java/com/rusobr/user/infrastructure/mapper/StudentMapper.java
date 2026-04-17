@@ -13,7 +13,6 @@ import org.mapstruct.ReportingPolicy;
 public interface StudentMapper {
 
     @Mapping(target = "id", source = "student.id")
-    @Mapping(target = "userId", source = "student.user.id")
     @Mapping(target = "keycloakId", source = "student.user.keycloakId")
     @Mapping(target = "firstName", source = "student.user.firstName")
     @Mapping(target = "lastName", source = "student.user.lastName")

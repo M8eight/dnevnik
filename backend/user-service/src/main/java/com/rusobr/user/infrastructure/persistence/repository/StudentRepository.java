@@ -22,5 +22,5 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     List<StudentResponse> findAllStudentsByIds(@Param("studentIds") Collection<Long> studentIds);
 
     @EntityGraph(attributePaths = {"user"})
-    Optional<Student> findWithUserById(Long studentId);
+    Optional<Student> findWithUserById(Long userId);
 }

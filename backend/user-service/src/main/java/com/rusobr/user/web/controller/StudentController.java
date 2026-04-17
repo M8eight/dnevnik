@@ -23,7 +23,7 @@ public class StudentController {
 
     @GetMapping("/{id}")
     public StudentResponseDetail findById(@PathVariable Long id) {
-        return studentService.findStudentById(id);
+        return studentService.findStudentDetailById(id);
     }
 
     @DeleteMapping("/{id}")
