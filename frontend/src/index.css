@@ -171,3 +171,18 @@ body::after {
     @apply font-sans;
   }
 }
+
+[data-radix-scroll-area-viewport] {
+  scroll-behavior: smooth;
+}
+
+/* Стилизация самого "хваталки" (thumb) */
+.ScrollAreaThumb {
+  background-color: rgba(0, 0, 0, 0.2) !important;
+  border-radius: 10px;
+  transition: background-color 0.2s ease;
+}
+
+.ScrollAreaThumb:hover {
+  background-color: var(--red) !important; /* При наведении станет фирменным красным */
+}
