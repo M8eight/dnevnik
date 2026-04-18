@@ -111,16 +111,16 @@ function subjectColor(name: string): string {
 }
 
 function Home() {
-  const studentId = 1; // В будущем брать из контекста авторизации
+  const studentId = 1;
   const today = new Date();
-  const todayDateStr = new Date().toISOString().split('T')[0]; // ГГГГ-ММ-ДД
+  const todayDateStr = new Date().toISOString().split('T')[0];
   const currentDayOfWeek = new Intl.DateTimeFormat('en-US', { weekday: 'long' })
     .format(today)
     .toUpperCase();
 
   // Данные из API
   const { data: user, isLoading, isError } = useUser(studentId);
-  const { data: avgGrade } = useAvgGrade(studentId, 4); // 4 четверть
+  const { data: avgGrade } = useAvgGrade(studentId, 4);
   const { data: todayGrades } = useGradesByDate(studentId, todayDateStr);
   const { data: todaySchedule } = useScheduleByDate(studentId, currentDayOfWeek, todayDateStr);
   const { data: fullSchedule } = useScheduleByStudentId(studentId);
