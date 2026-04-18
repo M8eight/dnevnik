@@ -31,3 +31,4 @@
 ### Макеты фронта
 ![maket](./docs/img.png)
 ![maket2](./docs/img2.png)
+![maket3](./docs/img3.png)
