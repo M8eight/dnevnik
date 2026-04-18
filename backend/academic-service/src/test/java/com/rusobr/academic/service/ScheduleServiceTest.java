@@ -33,39 +33,6 @@ public class ScheduleServiceTest {
     @InjectMocks ScheduleService service;
 
     @Nested
-    @DisplayName("getSchedule")
-    class GetSchedule {
-
-        @Test
-        @DisplayName("делегирует вызов репозиторию и возвращает результат")
-        void delegatesToRepository() {
-            LocalDate start = LocalDate.of(2026, 4, 13);
-            LocalDate end = LocalDate.of(2026, 4, 19);
-            LessonWeekItemDto item = new LessonWeekItemDto(start, 1, "101", "Математика", 5, GradeType.CONTROL, AttendanceStatus.ABSENT);
-
-            when(lessonInstanceRepository.getSchedule(1L, 2L, start, end)).thenReturn(List.of(item));
-
-            List<LessonWeekItemDto> result = service.getSchedule(1L, 2L, start, end);
-
-            assertThat(result).containsExactly(item);
-            verify(lessonInstanceRepository).getSchedule(1L, 2L, start, end);
-        }
-
-        @Test
-        @DisplayName("нет уроков — возвращает пустой список")
-        void noLessons_returnsEmpty() {
-            LocalDate start = LocalDate.of(2026, 4, 13);
-            LocalDate end = LocalDate.of(2026, 4, 19);
-
-            when(lessonInstanceRepository.getSchedule(1L, 2L, start, end)).thenReturn(List.of());
-
-            List<LessonWeekItemDto> result = service.getSchedule(1L, 2L, start, end);
-
-            assertThat(result).isEmpty();
-        }
-    }
-
-    @Nested
     @DisplayName("getScheduleByDate")
     class GetScheduleByDate {
 

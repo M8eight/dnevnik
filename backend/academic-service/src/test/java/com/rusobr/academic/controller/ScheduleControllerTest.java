@@ -39,47 +39,6 @@ public class ScheduleControllerTest {
     @MockitoBean JpaMetamodelMappingContext jpaMetamodelMappingContext;
 
     @Nested
-    @DisplayName("GET /api/v1/classes/{studentId}/schedule")
-    class GetSchedule {
-
-        @Test
-        @DisplayName("возвращает 200 и список уроков")
-        void returns200WithList() throws Exception {
-            LocalDate start = LocalDate.of(2026, 4, 13);
-            LocalDate end = LocalDate.of(2026, 4, 19);
-            LessonWeekItemDto item = new LessonWeekItemDto(start, 1, "101", "Математика", 5, GradeType.CONTROL, AttendanceStatus.ABSENT);
-
-            when(scheduleService.getSchedule(10L, 1L, start, end)).thenReturn(List.of(item));
-
-            mockMvc.perform(get("/api/v1/classes/1/schedule")
-                            .param("classId", "10")
-                            .param("startDate", "2026-04-13")
-                            .param("endDate", "2026-04-19"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.length()").value(1))
-                    .andExpect(jsonPath("$[0].subjectName").value("Математика"))
-                    .andExpect(jsonPath("$[0].lessonNumber").value(1))
-                    .andExpect(jsonPath("$[0].classroom").value("101"));
-        }
-
-        @Test
-        @DisplayName("нет уроков — возвращает 200 и пустой список")
-        void returns200WithEmptyList() throws Exception {
-            LocalDate start = LocalDate.of(2026, 4, 13);
-            LocalDate end = LocalDate.of(2026, 4, 19);
-
-            when(scheduleService.getSchedule(10L, 1L, start, end)).thenReturn(List.of());
-
-            mockMvc.perform(get("/api/v1/classes/1/schedule")
-                            .param("classId", "10")
-                            .param("startDate", "2026-04-13")
-                            .param("endDate", "2026-04-19"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.length()").value(0));
-        }
-    }
-
-    @Nested
     @DisplayName("GET /api/v1/schedule/by-date")
     class GetScheduleByDate {
 

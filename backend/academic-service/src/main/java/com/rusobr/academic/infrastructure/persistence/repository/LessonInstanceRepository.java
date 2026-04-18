@@ -13,32 +13,6 @@ import java.util.Optional;
 
 @Repository
 public interface LessonInstanceRepository extends JpaRepository<LessonInstance, Long> {
-    @Query("""
-                select new com.rusobr.academic.web.dto.lessonInstance.LessonWeekItemDto(
-                        li.lessonDate,
-                        sl.lessonNumber,
-                        sl.classRoom,
-                        sbj.name,
-                        g.value,
-                        g.type,
-                        a.status
-                    )
-                from LessonInstance li
-                join li.scheduleLesson sl
-                join sl.teachingAssignment ta
-                join ta.subject sbj
-                left join Grade g on g.lessonInstance = li and g.studentId = :student_id
-                left join Attendance a on a.lessonInstance = li and a.studentId = :student_id
-                where ta.schoolClass.id = :classId
-                    and li.lessonDate between :startDate and :endDate
-                order by li.lessonDate asc, sl.lessonNumber asc
-            """)
-    List<LessonWeekItemDto> getSchedule(
-            @Param("classId") Long classId,
-            @Param("student_id") Long studentId,
-            @Param("startDate") LocalDate startDate,
-            @Param("endDate") LocalDate endDate
-    );
 
     @Query("""
                 select distinct li
