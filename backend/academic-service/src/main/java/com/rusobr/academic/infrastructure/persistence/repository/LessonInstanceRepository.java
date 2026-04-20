@@ -2,6 +2,9 @@ package com.rusobr.academic.infrastructure.persistence.repository;
 
 import com.rusobr.academic.domain.model.LessonInstance;
 import com.rusobr.academic.web.dto.lessonInstance.GradeJournalProjection;
+import com.rusobr.academic.web.dto.lessonInstance.LessonInstanceDto;
+import com.rusobr.academic.web.dto.lessonInstance.teacher.AttendanceStudentProjection;
+import com.rusobr.academic.web.dto.lessonInstance.teacher.GradeStudentProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -72,4 +75,59 @@ public interface LessonInstanceRepository extends JpaRepository<LessonInstance, 
     List<LocalDate> findLessonDatesByStudentId(@Param("studentId") Long studentId,
                                          @Param("startDate") LocalDate startDate,
                                          @Param("endDate") LocalDate endDate);
+
+    @Query("""
+        select distinct new com.rusobr.academic.web.dto.lessonInstance.LessonInstanceDto(
+            li.id,
+            li.lessonDate
+        )
+        from LessonInstance li
+        join li.scheduleLesson sl
+        join TeachingAssignment ta on ta.id = :teachingAssignmentId
+        where li.lessonDate between :startDate and :endDate
+        order by li.lessonDate asc
+""")
+    List<LessonInstanceDto> findLessonInstanceByTeachingAssignmentId(@Param("teachingAssignmentId") Long teachingAssignmentId,
+                                                                     @Param("startDate") LocalDate startDate,
+                                                                     @Param("endDate") LocalDate endDate);
+
+    @Query("""
+        select new com.rusobr.academic.web.dto.lessonInstance.teacher.GradeStudentProjection(
+            g.id,
+            g.value,
+            g.weight,
+            g.type,
+            g.studentId,
+            li.id
+        )
+        from LessonInstance li
+        join li.scheduleLesson sl
+        join sl.teachingAssignment ta
+        join li.grades g
+        where li.lessonDate between :startDate and :endDate
+            and ta.id = :teachingAssignmentId
+        order by li.lessonDate asc
+    """)
+    List<GradeStudentProjection> findGradesByTeachingAssignment(@Param("teachingAssignmentId") Long teachingAssignmentId,
+                                                                @Param("startDate") LocalDate startDate,
+                                                                @Param("endDate") LocalDate endDate);
+
+    @Query("""
+        select new com.rusobr.academic.web.dto.lessonInstance.teacher.AttendanceStudentProjection(
+            a.id,
+            a.status,
+            a.studentId,
+            li.id
+        )
+        from LessonInstance li
+        join li.scheduleLesson sl
+        join sl.teachingAssignment ta
+        join li.attendances a
+        where li.lessonDate between :startDate and :endDate
+            and ta.id = :teachingAssignmentId
+        order by li.lessonDate asc
+    """)
+    List<AttendanceStudentProjection> findAttendancesByTeachingAssignment(@Param("teachingAssignmentId") Long teachingAssignmentId,
+                                                                          @Param("startDate") LocalDate startDate,
+                                                                          @Param("endDate") LocalDate endDate);
 }
