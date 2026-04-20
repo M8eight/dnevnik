@@ -1,8 +1,8 @@
 package com.rusobr.academic.web.controller;
 
 import com.rusobr.academic.infrastructure.service.LessonInstanceService;
-import com.rusobr.academic.web.dto.lessonInstance.GradeJournalProjection;
 import com.rusobr.academic.web.dto.lessonInstance.GradesLessonsResponse;
+import com.rusobr.academic.web.dto.lessonInstance.teacher.TeacherJournalResponse;
 import com.rusobr.academic.web.dto.scheduleLesson.DiaryLessonResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,6 +32,13 @@ public class LessonInstanceController {
     public GradesLessonsResponse getGradesLessonsByStudentId(@RequestParam("studentId") Long studentId,
                                                              @RequestParam("academicPeriodId") Long academicPeriodId) {
         return lessonInstanceService.getGradesLessonsByStudentId(studentId, academicPeriodId);
+    }
+
+    @GetMapping("/grades/by-teaching-assignment")
+    public TeacherJournalResponse getGradesByTeachingAssignment(
+            @RequestParam("teachingAssignmentId") Long teachingAssignmentId,
+            @RequestParam("academicPeriodId") Long academicPeriodId) {
+        return lessonInstanceService.getGradesAttendancesByTeachingAssignment(teachingAssignmentId, academicPeriodId);
     }
 
 }
