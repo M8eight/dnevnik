@@ -83,8 +83,9 @@ public interface LessonInstanceRepository extends JpaRepository<LessonInstance, 
         )
         from LessonInstance li
         join li.scheduleLesson sl
-        join TeachingAssignment ta on ta.id = :teachingAssignmentId
+        join sl.teachingAssignment ta
         where li.lessonDate between :startDate and :endDate
+            and ta.id = :teachingAssignmentId
         order by li.lessonDate asc
 """)
     List<LessonInstanceDto> findLessonInstanceByTeachingAssignmentId(@Param("teachingAssignmentId") Long teachingAssignmentId,

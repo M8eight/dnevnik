@@ -1,9 +1,7 @@
 package com.rusobr.academic.infrastructure.persistence.repository;
 
 import com.rusobr.academic.domain.model.SchoolClass;
-import com.rusobr.academic.web.dto.lessonInstance.teacher.StudentJournalDto;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassResponse;
-import com.rusobr.academic.web.dto.userService.UserResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -36,7 +34,7 @@ public interface SchoolClassRepository extends JpaRepository<SchoolClass, Long> 
     Optional<SchoolClassResponse> getSchoolClassByStudentId(@Param("studentId") Long studentId);
 
     @Query("""
-            select sc.id
+            select cs.studentId
             from ClassStudent cs
             join cs.schoolClass sc
             join TeachingAssignment ta on ta.schoolClass = sc
