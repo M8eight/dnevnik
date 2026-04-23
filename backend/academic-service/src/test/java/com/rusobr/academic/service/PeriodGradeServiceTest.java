@@ -102,7 +102,7 @@ public class PeriodGradeServiceTest {
         @DisplayName("успешно создаёт оценку")
         void success() {
             PeriodGradeRequest dto = new PeriodGradeRequest(5, "Отлично", 1L, 1L, LocalDate.of(2026, 3, 31));
-            AcademicPeriod period = AcademicPeriod.builder().isClosed(false).build();
+            AcademicPeriod period = AcademicPeriod.builder().closed(false).build();
             TeachingAssignment ta = TeachingAssignment.builder().build();
             PeriodGrade saved = PeriodGrade.builder().build();
             PeriodGradeResponse expected = new PeriodGradeResponse(1L, 5, "Отлично", 1L);
@@ -136,7 +136,7 @@ public class PeriodGradeServiceTest {
         @DisplayName("период закрыт — бросает ConflictException")
         void periodClosed_throwsConflictException() {
             PeriodGradeRequest dto = new PeriodGradeRequest(5, "Отлично", 1L, 1L, LocalDate.of(2026, 3, 31));
-            AcademicPeriod closedPeriod = AcademicPeriod.builder().isClosed(true).build();
+            AcademicPeriod closedPeriod = AcademicPeriod.builder().closed(true).build();
 
             when(academicPeriodRepository.findByDate(dto.date())).thenReturn(Optional.of(closedPeriod));
 
@@ -151,7 +151,7 @@ public class PeriodGradeServiceTest {
         @DisplayName("teachingAssignment не найден — бросает NotFoundException")
         void teachingAssignmentNotFound_throwsNotFoundException() {
             PeriodGradeRequest dto = new PeriodGradeRequest(5, "Отлично", 1L, 1L, LocalDate.of(2026, 3, 31));
-            AcademicPeriod period = AcademicPeriod.builder().isClosed(false).build();
+            AcademicPeriod period = AcademicPeriod.builder().closed(false).build();
 
             when(academicPeriodRepository.findByDate(dto.date())).thenReturn(Optional.of(period));
             when(teachingAssignmentRepository.findById(1L)).thenReturn(Optional.empty());
@@ -171,7 +171,7 @@ public class PeriodGradeServiceTest {
         @Test
         @DisplayName("успешно удаляет оценку")
         void success() {
-            AcademicPeriod period = AcademicPeriod.builder().isClosed(false).build();
+            AcademicPeriod period = AcademicPeriod.builder().closed(false).build();
             PeriodGrade grade = PeriodGrade.builder().academicPeriod(period).build();
 
             when(periodGradeRepository.findWithAcademicPeriodById(1L)).thenReturn(Optional.of(grade));
@@ -196,7 +196,7 @@ public class PeriodGradeServiceTest {
         @Test
         @DisplayName("период закрыт — бросает ConflictException")
         void periodClosed_throwsConflictException() {
-            AcademicPeriod closedPeriod = AcademicPeriod.builder().isClosed(true).build();
+            AcademicPeriod closedPeriod = AcademicPeriod.builder().closed(true).build();
             PeriodGrade grade = PeriodGrade.builder().academicPeriod(closedPeriod).build();
 
             when(periodGradeRepository.findWithAcademicPeriodById(1L)).thenReturn(Optional.of(grade));

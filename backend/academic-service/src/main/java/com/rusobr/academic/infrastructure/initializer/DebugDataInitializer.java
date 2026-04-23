@@ -283,16 +283,16 @@ public class DebugDataInitializer implements CommandLineRunner {
         academicPeriodRepository.saveAll(List.of(
                 AcademicPeriod.builder().name("Первая четверть").schoolYear("2025-2026")
                         .startDate(LocalDate.of(2025, 9, 1)).endDate(LocalDate.of(2025, 10, 26))
-                        .isClosed(true).build(),
+                        .closed(true).build(),
                 AcademicPeriod.builder().name("Вторая четверть").schoolYear("2025-2026")
                         .startDate(LocalDate.of(2025, 11, 5)).endDate(LocalDate.of(2025, 12, 28))
-                        .isClosed(true).build(),
+                        .closed(true).build(),
                 AcademicPeriod.builder().name("Третья четверть").schoolYear("2025-2026")
                         .startDate(LocalDate.of(2026, 1, 9)).endDate(LocalDate.of(2026, 3, 31))
-                        .isClosed(true).build(),
+                        .closed(true).build(),
                 AcademicPeriod.builder().name("Четвертая четверть").schoolYear("2025-2026")
                         .startDate(LocalDate.of(2026, 4, 6)).endDate(LocalDate.of(2026, 5, 25))
-                        .isClosed(false).build()
+                        .closed(false).build()
         ));
     }
 

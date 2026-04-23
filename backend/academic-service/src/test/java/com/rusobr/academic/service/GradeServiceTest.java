@@ -84,7 +84,7 @@ public class GradeServiceTest {
         LocalDate date = LocalDate.of(2025, 9, 1);
         CreateGradeRequest request = new CreateGradeRequest(1L, 2L, date, 5, GradeType.TEST);
 
-        AcademicPeriod period = AcademicPeriod.builder().isClosed(false).build();
+        AcademicPeriod period = AcademicPeriod.builder().closed(false).build();
         LessonInstance lessonInstance = LessonInstance.builder().id(10L).lessonDate(date).build();
         Grade savedGrade = Grade.builder().id(100L).studentId(1L).value(5).type(GradeType.TEST).build();
         CreateGradeResponse responseDto = new CreateGradeResponse(1L, 5, GradeType.TEST, 100L, date);
@@ -111,7 +111,7 @@ public class GradeServiceTest {
         LocalDate date = LocalDate.of(2025, 9, 1);
         CreateGradeRequest request = new CreateGradeRequest(1L, 2L, date, 4, GradeType.TEST);
 
-        AcademicPeriod period = AcademicPeriod.builder().isClosed(false).build();
+        AcademicPeriod period = AcademicPeriod.builder().closed(false).build();
         ScheduleLesson schedule = new ScheduleLesson();
         LessonInstance newInstance = LessonInstance.builder().id(20L).lessonDate(date).scheduleLesson(schedule).build();
         Grade savedGrade = Grade.builder().id(101L).studentId(1L).value(4).type(GradeType.TEST).build();
@@ -152,7 +152,7 @@ public class GradeServiceTest {
         LocalDate date = LocalDate.of(2025, 9, 1);
         CreateGradeRequest request = new CreateGradeRequest(1L, 2L, date, 5, GradeType.TEST);
 
-        AcademicPeriod closedPeriod = AcademicPeriod.builder().isClosed(true).build();
+        AcademicPeriod closedPeriod = AcademicPeriod.builder().closed(true).build();
         when(academicPeriodRepository.findByDate(date)).thenReturn(Optional.of(closedPeriod));
 
         ConflictException ex = assertThrows(ConflictException.class,
@@ -168,7 +168,7 @@ public class GradeServiceTest {
         LocalDate date = LocalDate.of(2025, 9, 1);
         CreateGradeRequest request = new CreateGradeRequest(1L, 2L, date, 5, GradeType.TEST);
 
-        AcademicPeriod period = AcademicPeriod.builder().isClosed(false).build();
+        AcademicPeriod period = AcademicPeriod.builder().closed(false).build();
         when(academicPeriodRepository.findByDate(date)).thenReturn(Optional.of(period));
         when(lessonInstanceRepository.findByLessonDateAndScheduleLessonId(date, 2L)).thenReturn(Optional.empty());
         when(scheduleLessonRepository.findById(2L)).thenReturn(Optional.empty());
@@ -190,7 +190,7 @@ public class GradeServiceTest {
 
         LessonInstance lessonInstance = LessonInstance.builder().lessonDate(date).build();
         Grade grade = Grade.builder().id(gradeId).lessonInstance(lessonInstance).build();
-        AcademicPeriod period = AcademicPeriod.builder().isClosed(false).build();
+        AcademicPeriod period = AcademicPeriod.builder().closed(false).build();
 
         when(gradeRepository.findWithLessonInstanceById(gradeId)).thenReturn(Optional.of(grade));
         when(academicPeriodRepository.findByDate(date)).thenReturn(Optional.of(period));
@@ -221,7 +221,7 @@ public class GradeServiceTest {
 
         LessonInstance lessonInstance = LessonInstance.builder().lessonDate(date).build();
         Grade grade = Grade.builder().id(gradeId).lessonInstance(lessonInstance).build();
-        AcademicPeriod closedPeriod = AcademicPeriod.builder().isClosed(true).build();
+        AcademicPeriod closedPeriod = AcademicPeriod.builder().closed(true).build();
 
         when(gradeRepository.findWithLessonInstanceById(gradeId)).thenReturn(Optional.of(grade));
         when(academicPeriodRepository.findByDate(date)).thenReturn(Optional.of(closedPeriod));

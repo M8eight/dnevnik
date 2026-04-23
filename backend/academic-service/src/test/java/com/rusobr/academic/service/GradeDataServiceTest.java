@@ -130,7 +130,7 @@ public class GradeDataServiceTest {
                         .schoolYear("2025-2026")
                         .startDate(LocalDate.of(2025, 9, 1))
                         .endDate(LocalDate.of(2025, 10, 26))
-                        .isClosed(false)
+                        .closed(false)
                         .name("Первая четверть")
                         .build()
         );

@@ -16,6 +16,11 @@ public interface AcademicPeriodRepository extends JpaRepository<AcademicPeriod,L
     @Query("select ap from AcademicPeriod ap where ap.startDate <= :date and ap.endDate >= :date ")
     Optional<AcademicPeriod> findByDate(@Param("date") LocalDate date);
 
-    List<AcademicPeriod> findAllByOrderByStartDateAsc();
+    @Query("""
+    select ap
+    from AcademicPeriod ap
+    order by ap.startDate asc
+""")
+    List<AcademicPeriod> findAllOrder();
 
 }

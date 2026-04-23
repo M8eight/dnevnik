@@ -5,7 +5,7 @@ create table academic_periods
     school_year varchar(50),
     start_date  date,
     end_date    date,
-    is_closed   boolean not null,
+    closed   boolean not null,
     created_at  timestamptz,
     updated_at  timestamptz,
     deleted_at  timestamptz
