@@ -102,7 +102,7 @@ export default function GradesPage() {
   }, [periods, selectedPeriodId]);
 
   const periodIdToFetch = selectedPeriodId ? parseInt(selectedPeriodId, 10) : 4;
-  const { data: response, isLoading: isLoadingGrades, isError } = useGradesLessonsByStudentId(1, periodIdToFetch);
+  const { data: response, isLoading: isLoadingGrades, isError } = useGradesLessonsByStudentId(27, periodIdToFetch);
 
   const isLoading = isLoadingPeriods || isLoadingGrades || !selectedPeriodId;
 

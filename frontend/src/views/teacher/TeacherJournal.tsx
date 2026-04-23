@@ -1,33 +1,29 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, BookOpen, Users, TrendingUp } from "lucide-react";
+import { BookOpen, Users, TrendingUp, BookCheck } from "lucide-react";
 import { useTeacherJournal } from "@/hooks/use-teacher-journal";
 import { format } from "date-fns/format";
 import { ru } from "date-fns/locale";
 import type {
-  StudentMetadata,
-  LessonInstanceDto,
   StudentJournalEntry,
   GradeJournalDto,
   AttendanceJournalDto,
 } from "@/services/teacher-journal-service";
+import { useTeachingAssignmentDetail } from "@/hooks/use-teaching-assignment";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const ATTENDANCE_LABEL: Record<string, string> = {
-  ABSENT:  "Н",
-  EXCUSED: "ОП",
-  SICK:    "Б",
-  LATE:    "О",
+  ABSENT: "Н", EXCUSED: "ОП", SICK: "Б", LATE: "О",
 };
 
 const ATTENDANCE_STYLE: Record<string, string> = {
-  "Н":  "bg-red-50 text-red-500 ring-red-100",
+  "Н": "bg-red-50 text-red-500 ring-red-100",
   "ОП": "bg-amber-50 text-amber-500 ring-amber-100",
-  "Б":  "bg-emerald-50 text-emerald-600 ring-emerald-100",
-  "О":  "bg-blue-50 text-blue-500 ring-blue-100",
+  "Б": "bg-emerald-50 text-emerald-600 ring-emerald-100",
+  "О": "bg-blue-50 text-blue-500 ring-blue-100",
 };
 
 const GRADE_STYLE: Record<number, string> = {
@@ -37,15 +33,10 @@ const GRADE_STYLE: Record<number, string> = {
   2: "bg-red-50 text-red-600 ring-red-100",
 };
 
-const PAGE_SIZE = 15;
-
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const formatColDate = (dateStr: string) =>
-  format(new Date(dateStr), "dd MMM", { locale: ru });
-
-const formatColDay = (dateStr: string) =>
-  format(new Date(dateStr), "EEEEEE", { locale: ru }).toUpperCase();
+const formatColDate = (dateStr: string) => format(new Date(dateStr), "dd MMM", { locale: ru });
+const formatColDay = (dateStr: string) => format(new Date(dateStr), "EEEEEE", { locale: ru }).toUpperCase();
 
 const calcAvg = (grades: GradeJournalDto[]): string => {
   if (!grades.length) return "—";
@@ -62,28 +53,17 @@ const avgStyle = (avg: string): string => {
   return "text-red-600 font-bold";
 };
 
-// ─── Primitives ───────────────────────────────────────────────────────────────
+// ─── Components ───────────────────────────────────────────────────────────────
 
 function Chip({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
-    <Badge
-      variant="outline"
-      className={`text-[10px] px-3 py-1 font-extrabold tracking-[0.2em] uppercase rounded-full ${className}`}
-    >
+    <Badge variant="outline" className={`text-[10px] px-3 py-1 font-extrabold tracking-[0.2em] uppercase rounded-full ${className}`}>
       {children}
     </Badge>
   );
 }
 
-// ─── Cell: grade + attendance in one lesson slot ───────────────────────────────
-
-function LessonCell({
-  grade,
-  attendance,
-}: {
-  grade?: GradeJournalDto;
-  attendance?: AttendanceJournalDto;
-}) {
+function LessonCell({ grade, attendance }: { grade?: GradeJournalDto; attendance?: AttendanceJournalDto; }) {
   const attLabel = attendance ? (ATTENDANCE_LABEL[attendance.status] ?? "") : "";
   const attStyle = ATTENDANCE_STYLE[attLabel] ?? "";
 
@@ -98,16 +78,12 @@ function LessonCell({
   return (
     <div className="w-full h-full flex flex-col items-center justify-center gap-1.5 py-1">
       {grade && (
-        <span
-          className={`w-[32px] h-[32px] rounded-[10px] flex items-center justify-center font-serif text-[16px] font-bold ring-1 ring-black/[0.06] ${GRADE_STYLE[grade.value] ?? "bg-gray-50 text-gray-500"}`}
-        >
+        <span className={`w-[32px] h-[32px] rounded-[10px] flex items-center justify-center font-serif text-[16px] font-bold ring-1 ring-black/[0.06] ${GRADE_STYLE[grade.value] ?? "bg-gray-50 text-gray-500"}`}>
           {grade.value}
         </span>
       )}
       {attLabel && (
-        <span
-          className={`w-[32px] h-[32px] rounded-[10px] flex items-center justify-center font-extrabold text-[13px] ring-1 ring-black/[0.06] ${attStyle}`}
-        >
+        <span className={`w-[32px] h-[32px] rounded-[10px] flex items-center justify-center font-extrabold text-[13px] ring-1 ring-black/[0.06] ${attStyle}`}>
           {attLabel}
         </span>
       )}
@@ -115,125 +91,18 @@ function LessonCell({
   );
 }
 
-// ─── Column header ─────────────────────────────────────────────────────────────
-
-function ColHeader({ lesson }: { lesson: LessonInstanceDto }) {
-  const isToday = lesson.date === new Date().toISOString().split("T")[0];
-  return (
-    <th
-      className={`min-w-[64px] w-[64px] text-center align-bottom pb-4 border-b border-black/[0.08] ${isToday ? "border-b-2 border-b-[var(--red)]/40" : ""}`}
-    >
-      <div className="flex flex-col items-center gap-1">
-        <span className={`text-[9px] font-extrabold tracking-[0.15em] uppercase ${isToday ? "text-[var(--red)]" : "text-black/30"}`}>
-          {formatColDay(lesson.date)}
-        </span>
-        <span className={`text-[12px] font-bold leading-tight ${isToday ? "text-[var(--red)]" : "text-[var(--navy)]"}`}>
-          {formatColDate(lesson.date)}
-        </span>
-        {isToday && <span className="w-1.5 h-1.5 rounded-full bg-[var(--red)] block mt-1 opacity-60" />}
-      </div>
-    </th>
-  );
-}
-
-// ─── Student row ───────────────────────────────────────────────────────────────
-
-function StudentRow({
-  student,
-  entry,
-  visibleLessons,
-  rowIdx,
-}: {
-  student: StudentMetadata;
-  entry?: StudentJournalEntry;
-  visibleLessons: LessonInstanceDto[];
-  rowIdx: number;
-}) {
-  const gradeMap = useMemo(() => {
-    const m: Record<number, GradeJournalDto> = {};
-    entry?.grades.forEach((g) => { m[g.lessonInstanceId] = g; });
-    return m;
-  }, [entry]);
-
-  const attendanceMap = useMemo(() => {
-    const m: Record<number, AttendanceJournalDto> = {};
-    entry?.attendances.forEach((a) => { m[a.lessonInstanceId] = a; });
-    return m;
-  }, [entry]);
-
-  const avg = calcAvg(entry?.grades ?? []);
-
-  return (
-    <tr
-      className={`transition-colors hover:bg-[var(--navy-light)]/20 group ${rowIdx % 2 === 0 ? "bg-transparent" : "bg-black/[0.012]"}`}
-    >
-      {/* Name (Sticky Left) */}
-      <td className="sticky left-0 z-10 bg-white/95 group-hover:bg-[#F4F7FB]/95 transition-colors px-4 py-2 border-b border-r border-black/[0.05] shadow-[2px_0_8px_-2px_rgba(0,0,0,0.03)]"
-          style={{ backdropFilter: "blur(8px)" }}>
-        <div className="flex items-center gap-3">
-          <span className="text-[11px] font-extrabold text-black/15 min-w-[20px] text-right">
-            {rowIdx + 1}
-          </span>
-          <div>
-            <p className="text-[13px] font-bold text-[var(--navy)] whitespace-nowrap leading-tight">
-              {student.lastName}
-            </p>
-            <p className="text-[11px] text-black/35 whitespace-nowrap">{student.firstName}</p>
-          </div>
-        </div>
-      </td>
-
-      {/* Lesson cells */}
-      {visibleLessons.map((lesson) => (
-        <td
-          key={lesson.id}
-          // Высота увеличена до 80px, чтобы два квадрата по 32px + отступы помещались свободно
-          className="text-center border-b border-black/[0.04] h-[80px] p-0"
-        >
-          <LessonCell
-            grade={gradeMap[lesson.id]}
-            attendance={attendanceMap[lesson.id]}
-          />
-        </td>
-      ))}
-
-      {/* Average (Sticky Right) */}
-      <td className="sticky right-0 z-10 bg-white/95 group-hover:bg-[#F4F7FB]/95 transition-colors text-center border-b border-l border-black/[0.08] px-4 py-2 shadow-[-2px_0_8px_-2px_rgba(0,0,0,0.03)]"
-          style={{ backdropFilter: "blur(8px)" }}>
-        <span className={`font-serif text-[18px] ${avgStyle(avg)}`}>{avg}</span>
-      </td>
-    </tr>
-  );
-}
-
-// ─── Stats strip ──────────────────────────────────────────────────────────────
-
-function StatsStrip({
-  data,
-}: {
-  data: {
-    academicPeriod: { name: string; schoolYear: string };
-    students: StudentMetadata[];
-    lessonInstances: LessonInstanceDto[];
-    studentsJournal: StudentJournalEntry[];
-  };
-}) {
-  const totalGrades = data.studentsJournal.reduce((s, e) => s + e.grades.length, 0);
-  const totalAbsent = data.studentsJournal.reduce(
-    (s, e) => s + e.attendances.filter((a) => a.status === "ABSENT").length,
-    0
-  );
-  const allGrades   = data.studentsJournal.flatMap((e) => e.grades.map((g) => g.value));
-  const periodAvg   = allGrades.length
-    ? (allGrades.reduce((a, b) => a + b, 0) / allGrades.length).toFixed(2)
-    : "—";
+function StatsStrip({ data }: { data: any }) {
+  const totalGrades = data.studentsJournal.reduce((s: number, e: any) => s + e.grades.length, 0);
+  const totalAbsent = data.studentsJournal.reduce((s: number, e: any) => s + e.attendances.filter((a: any) => a.status === "ABSENT").length, 0);
+  const allGrades = data.studentsJournal.flatMap((e: any) => e.grades.map((g: any) => g.value));
+  const periodAvg = allGrades.length ? (allGrades.reduce((a: number, b: number) => a + b, 0) / allGrades.length).toFixed(2) : "—";
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 anim-in">
       {[
-        { icon: Users,      label: "Учеников",   val: data.students.length,         sub: data.academicPeriod.name },
-        { icon: BookOpen,   label: "Уроков",     val: data.lessonInstances.length,  sub: `Оценок: ${totalGrades}` },
-        { icon: TrendingUp, label: "Ср. балл",   val: periodAvg,                    sub: `Пропусков: ${totalAbsent}` },
+        { icon: Users, label: "Учеников", val: data.students.length, sub: data.academicPeriod.name },
+        { icon: BookOpen, label: "Уроков", val: data.lessonInstances.length, sub: `Оценок: ${totalGrades}` },
+        { icon: TrendingUp, label: "Ср. балл", val: periodAvg, sub: `Пропусков: ${totalAbsent}` },
       ].map(({ icon: Icon, label, val, sub }) => (
         <div key={label} className="glass-card rounded-[22px] p-6 flex items-center gap-5">
           <div className="w-12 h-12 rounded-[14px] bg-[var(--navy-light)]/40 flex items-center justify-center flex-shrink-0">
@@ -252,32 +121,40 @@ function StatsStrip({
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
-interface TeacherJournalProps {
-  teachingAssignmentId?: number;
-  academicPeriodId?: number;
-  subjectName?: string;
-  className?: string;
-}
+export default function TeacherJournal() {
+  const teacherId = 17;
+  const academicPeriodId = 4;
+  const { data: assignments } = useTeachingAssignmentDetail(teacherId);
+  const [selectedAssignmentId, setSelectedAssignmentId] = useState<string>("");
 
-export default function TeacherJournal({
-  teachingAssignmentId = 2,
-  academicPeriodId = 4,
-  subjectName = "НАЗВАНИЕПРЕДМЕТА",
-  className: groupName = "Класс",
-}: TeacherJournalProps) {
-  const { data, isLoading } = useTeacherJournal(teachingAssignmentId, academicPeriodId);
-  const [page, setPage] = useState(0);
+  useEffect(() => {
+    if (assignments && assignments.length > 0 && !selectedAssignmentId) {
+      setSelectedAssignmentId(assignments[0].teachingAssignmentId.toString());
+    }
+  }, [assignments, selectedAssignmentId]);
 
-  const sortedLessons = useMemo(
-    () => [...(data?.lessonInstances ?? [])].sort((a, b) => a.date.localeCompare(b.date)),
-    [data]
+  const { data, isLoading } = useTeacherJournal(
+    selectedAssignmentId ? parseInt(selectedAssignmentId) : 0,
+    academicPeriodId
   );
 
-  const totalPages = Math.max(1, Math.ceil(sortedLessons.length / PAGE_SIZE));
-  const visibleLessons = sortedLessons.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+  // Фильтрация уроков: убираем дубликаты по датам, если они есть
+  const sortedLessons = useMemo(() => {
+    if (!data?.lessonInstances) return [];
+    const sorted = [...data.lessonInstances].sort((a, b) => a.date.localeCompare(b.date));
 
-  const sortedStudents = useMemo(
-    () => [...(data?.students ?? [])].sort((a, b) => a.lastName.localeCompare(b.lastName, "ru")),
+    // Если хочешь оставить дубликаты дат, просто верни sorted. 
+    // Если хочешь только одну колонку на дату, используй фильтр ниже:
+    const uniqueDates = new Set();
+    return sorted.filter(lesson => {
+      if (uniqueDates.has(lesson.date)) return false;
+      uniqueDates.add(lesson.date);
+      return true;
+    });
+  }, [data]);
+
+  const sortedStudents = useMemo(() =>
+    [...(data?.students ?? [])].sort((a, b) => a.lastName.localeCompare(b.lastName, "ru")),
     [data]
   );
 
@@ -287,156 +164,103 @@ export default function TeacherJournal({
     return m;
   }, [data]);
 
+  const currentAssignment = assignments?.find(a => a.teachingAssignmentId.toString() === selectedAssignmentId);
+
   return (
     <div className="relative z-10 min-h-screen px-6 md:px-10 pt-28 pb-14">
-
-      {/* ── Header ── */}
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 pb-6 border-b border-black/[0.08] max-w-[1400px] mx-auto anim-in">
         <div>
           <p className="text-[10px] font-extrabold tracking-[0.25em] text-[var(--red)] uppercase mb-2 flex items-center gap-2">
             <span className="inline-block w-4 h-[2px] bg-[var(--red)] rounded-full" />
-            {data?.academicPeriod.schoolYear ?? "2025–2026"} · {groupName}
+            {data?.academicPeriod.schoolYear ?? "2025–2026"} · {currentAssignment?.schoolClassName ?? "..."}
           </p>
           <h1 className="font-serif font-black text-[clamp(2rem,4vw,3rem)] text-[var(--navy)] leading-[0.95]">
             Табель успеваемости{" "}
             <em className="not-italic relative">
-              <span className="relative z-10 text-[var(--red)]">{subjectName}</span>
+              <span className="relative z-10 text-[var(--red)]">{currentAssignment?.subjectName ?? "..."}</span>
               <span className="absolute bottom-0 left-0 right-0 h-[5px] rounded-full opacity-15 bg-[var(--red)]" />
             </em>
           </h1>
-          {data && (
-            <p className="text-[12px] font-medium text-black/40 mt-3">
-              {data.academicPeriod.name} · {data.academicPeriod.startDate} — {data.academicPeriod.endDate}
-            </p>
-          )}
         </div>
 
-        {/* Column pagination */}
-        {!isLoading && totalPages > 1 && (
-          <div className="flex items-center gap-3">
-            <Button
-              onClick={() => setPage((p) => Math.max(0, p - 1))}
-              disabled={page === 0}
-              variant="outline"
-              size="icon"
-              className="glass-pill h-11 w-11 border-0 rounded-[14px] bg-white/50 text-[var(--navy)] hover:bg-white hover:scale-105 transition-all shadow-sm disabled:opacity-40 disabled:hover:scale-100"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </Button>
-
-            <div className="text-center min-w-[80px]">
-              <p className="text-[9px] font-extrabold uppercase text-black/30 tracking-[0.2em] mb-0.5">Страница</p>
-              <p className="font-serif text-[18px] font-black text-[var(--navy)] leading-none">
-                {page + 1} <span className="text-black/20 font-sans text-[14px]">/</span> {totalPages}
-              </p>
+        <Select value={selectedAssignmentId} onValueChange={setSelectedAssignmentId}>
+          <SelectTrigger className="glass-pill min-w-[280px] h-5 font-bold text-[13px] rounded-2xl text-[var(--navy)] px-4 border-0 shadow-none">
+            <div className="flex items-center gap-2">
+              <BookCheck className="w-4 h-4 text-[var(--red)] shrink-0" />
+              <SelectValue placeholder="Выберите группу" />
             </div>
+          </SelectTrigger>
+          <SelectContent className="rounded-2xl border border-white/60 shadow-2xl p-1 bg-white/90 backdrop-blur-2xl">
+            {assignments?.map((p) => (
+              <SelectItem key={p.teachingAssignmentId} value={p.teachingAssignmentId.toString()} className="font-bold text-[13px] py-2.5 px-3 rounded-xl cursor-pointer">
+                <span className="text-[var(--red)]">{p.schoolClassName}</span> · {p.subjectName}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-            <Button
-              onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-              disabled={page === totalPages - 1}
-              variant="outline"
-              size="icon"
-              className="glass-pill h-11 w-11 border-0 rounded-[14px] bg-white/50 text-[var(--navy)] hover:bg-white hover:scale-105 transition-all shadow-sm disabled:opacity-40 disabled:hover:scale-100"
-            >
-              <ChevronRight className="h-5 w-5" />
-            </Button>
-          </div>
-        )}
       </header>
 
       <div className="max-w-[1400px] mx-auto">
-
-        {/* ── Stats ── */}
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            {[0, 1, 2].map((i) => (
-              <div key={i} className="glass-card rounded-[22px] p-6 flex gap-4">
-                <Skeleton className="h-12 w-12 rounded-[14px]" />
-                <div>
-                  <Skeleton className="h-3 w-16 mb-2 rounded-full" />
-                  <Skeleton className="h-6 w-10 mb-2 rounded-lg" />
-                  <Skeleton className="h-3 w-20 rounded-full" />
-                </div>
-              </div>
-            ))}
+            {[0, 1, 2].map((i) => <Skeleton key={i} className="h-32 rounded-[22px]" />)}
           </div>
-        ) : data ? (
-          <StatsStrip data={data} />
-        ) : null}
+        ) : data && <StatsStrip data={data} />}
 
-        {/* ── Table ── */}
-        <div className="glass-card rounded-[22px] overflow-hidden anim-in relative">
-          {isLoading ? (
-            <div className="p-8 flex flex-col gap-4">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="flex gap-4 items-center">
-                  <Skeleton className="h-10 w-48 rounded-xl" />
-                  {Array.from({ length: 6 }).map((__, j) => (
-                    <Skeleton key={j} className="h-10 w-14 rounded-lg flex-shrink-0" />
-                  ))}
-                  <Skeleton className="h-10 w-12 rounded-xl ml-auto" />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="overflow-x-auto w-full custom-scrollbar pb-2">
-              <table className="w-full min-w-max border-collapse">
-                <thead>
-                  <tr>
-                    {/* Name column header (Sticky Left) */}
-                    <th className="sticky left-0 z-20 bg-white/95 text-left px-4 pb-4 border-b border-r border-black/[0.08] shadow-[2px_0_8px_-2px_rgba(0,0,0,0.03)]"
-                        style={{ backdropFilter: "blur(8px)", minWidth: 240 }}>
-                      <div className="flex items-center gap-2">
-                        <Chip className="border-[var(--navy)]/20 text-[var(--navy)] bg-[var(--navy-light)]/30 mt-1">
-                          Ученик
-                        </Chip>
+        {/* Контейнер таблицы с горизонтальным скроллом */}
+        <div className="glass-card rounded-[22px] overflow-hidden anim-in border-none shadow-xl">
+          <div className="overflow-x-auto custom-scrollbar">
+            <table className="w-full border-collapse bg-white">
+              <thead>
+                <tr className="bg-slate-50/50">
+                  {/* Уменьшил ширину колонки (w-[180px]) и сделал её монотонной */}
+                  <th className="sticky left-0 z-20 bg-slate-50/95 text-left px-4 py-6 border-b border-r border-black/[0.05] w-[180px] min-w-[180px]">
+                    <Chip className="border-[var(--navy)]/20 text-[var(--navy)]">Ученик</Chip>
+                  </th>
+                  {sortedLessons.map((l) => (
+                    <th key={l.id} className="min-w-[64px] text-center align-middle py-4 border-b border-black/[0.05]">
+                      <div className="flex flex-col items-center gap-0.5">
+                        <span className="text-[12px] font-extrabold text-black/30 uppercase">{formatColDay(l.date)}</span>
+                        <span className="text-[12px] font-bold text-[var(--navy)]">{formatColDate(l.date)}</span>
                       </div>
                     </th>
-
-                    {visibleLessons.map((l) => (
-                      <ColHeader key={l.id} lesson={l} />
-                    ))}
-
-                    {/* Average column header (Sticky Right) */}
-                    <th className="sticky right-0 z-20 bg-white/95 text-center pb-4 px-4 border-b border-l border-black/[0.08] shadow-[-2px_0_8px_-2px_rgba(0,0,0,0.03)]"
-                        style={{ backdropFilter: "blur(8px)", minWidth: 80 }}>
-                      <Chip className="border-[var(--gold)]/30 text-[var(--gold)] bg-amber-50 mt-1">
-                        Ср.б
-                      </Chip>
-                    </th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {sortedStudents.map((student, idx) => (
-                    <StudentRow
-                      key={student.id}
-                      student={student}
-                      entry={journalMap[student.id]}
-                      visibleLessons={visibleLessons}
-                      rowIdx={idx}
-                    />
                   ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-
-        {/* ── Legend ── */}
-        <div className="mt-6 flex flex-wrap gap-5 items-center bg-white/40 px-5 py-3 rounded-full border border-black/[0.04] w-fit">
-          <p className="text-[9px] font-extrabold uppercase tracking-[0.2em] text-black/30">Обозначения</p>
-          {[
-            { label: "Н — отсутствовал", cls: "text-red-500" },
-            { label: "ОП — оправдан",    cls: "text-amber-500" },
-            { label: "Б — болезнь",      cls: "text-emerald-600" },
-            { label: "О — опоздание",    cls: "text-blue-500" },
-          ].map(({ label, cls }) => (
-            <span key={label} className={`text-[12px] font-bold ${cls} flex items-center gap-1.5`}>
-              <span className={`w-2 h-2 rounded-full currentColor bg-current opacity-20`} />
-              {label}
-            </span>
-          ))}
+                  <th className="sticky right-0 z-20 bg-slate-50/95 text-center px-4 border-b border-l border-black/[0.05] w-[70px]">
+                    <Chip className="border-amber-200 text-amber-600 bg-amber-50/50">Ср.б</Chip>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {isLoading ? (
+                  <tr><td colSpan={sortedLessons.length + 2} className="p-10"><Skeleton className="h-20 w-full" /></td></tr>
+                ) : sortedStudents.map((student, idx) => {
+                  const entry = journalMap[student.id];
+                  const avg = calcAvg(entry?.grades ?? []);
+                  return (
+                    <tr key={student.id} className="hover:bg-slate-50/80 transition-colors border-b border-black/[0.03]">
+                      <td className="sticky left-0 z-10 bg-white/95 px-4 py-3 border-r border-black/[0.05]">
+                        <div className="truncate">
+                          <p className="text-[13px] font-bold text-[var(--navy)] leading-tight">{student.lastName} {student.firstName}</p>
+                        </div>
+                      </td>
+                      {sortedLessons.map((lesson) => (
+                        <td key={lesson.id} className="h-[70px] p-0 text-center">
+                          <LessonCell
+                            grade={entry?.grades.find(g => g.lessonInstanceId === lesson.id)}
+                            attendance={entry?.attendances.find(a => a.lessonInstanceId === lesson.id)}
+                          />
+                        </td>
+                      ))}
+                      <td className="sticky right-0 z-10 bg-white/95 text-center border-l border-black/[0.05]">
+                        <span className={`font-serif text-[16px] ${avgStyle(avg)}`}>{avg}</span>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
