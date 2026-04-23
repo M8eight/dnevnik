@@ -1,5 +1,5 @@
 # Школьный дневник
-![structure](https://s3.getstickerpack.com/storage/uploads/sticker-pack/masuna/sticker_7.png?002b536beb497fbee8281fc11f77d100)
+![structure](./docs/molang.png)
 
 # ⚠️!В процессе!⚠️
 
@@ -32,3 +32,4 @@
 ![maket](./docs/img.png)
 ![maket2](./docs/img2.png)
 ![maket3](./docs/img3.png)
+![maket3](./docs/img4.png)
