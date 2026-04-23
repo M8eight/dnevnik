@@ -7,11 +7,13 @@ import com.rusobr.academic.infrastructure.mapper.AcademicPeriodMapper;
 import com.rusobr.academic.infrastructure.persistence.repository.AcademicPeriodRepository;
 import com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -20,7 +22,7 @@ public class AcademicPeriodService {
     private final AcademicPeriodMapper academicPeriodMapper;
 
     public List<AcademicPeriodResponse> getAcademicPeriods() {
-        return academicPeriodRepository.findAllByOrderByStartDateAsc().stream().map(academicPeriodMapper::toDto).toList();
+        return academicPeriodRepository.findAllOrder().stream().map(academicPeriodMapper::toDto).toList();
     }
 
     public void closePeriod(Long id) {

@@ -7,7 +7,7 @@ public record AcademicPeriodResponse(
         Long id,
         String name,
         String schoolYear,
-        boolean isClosed,
+        Boolean isClosed,
         LocalDate startDate,
         LocalDate endDate
 ) {

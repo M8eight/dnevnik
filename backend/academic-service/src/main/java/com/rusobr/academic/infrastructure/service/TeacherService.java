@@ -7,6 +7,7 @@ import com.rusobr.academic.infrastructure.persistence.repository.SchoolClassRepo
 import com.rusobr.academic.infrastructure.persistence.repository.TeachingAssignmentRepository;
 import com.rusobr.academic.web.dto.grade.GetGradeDataDto;
 import com.rusobr.academic.web.dto.grade.GradeJournalResponse;
+import com.rusobr.academic.web.dto.teachingAssignment.TeachingAssignmentWithSubjectProjection;
 import com.rusobr.academic.web.dto.userService.UserResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,5 +52,9 @@ public class TeacherService {
         GetGradeDataDto journalData = gradeDataService.getGradeData(teachingAssignmentId, date);
 
         return gradeMapper.toGradeJournalResponse(classStudents, journalData);
+    }
+
+    public List<TeachingAssignmentWithSubjectProjection> getTeachingAssignmentDetails(Long teacherId) {
+        return teachingAssignmentRepository.findTeachingAssignmentDetailByTeacherId(teacherId);
     }
 }

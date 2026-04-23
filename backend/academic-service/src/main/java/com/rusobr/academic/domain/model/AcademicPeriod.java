@@ -27,7 +27,7 @@ public class AcademicPeriod extends BaseEntity {
     private String schoolYear;
 
     @Builder.Default
-    private boolean isClosed = false;
+    private boolean closed = false;
 
     private LocalDate startDate;
 

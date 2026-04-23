@@ -41,7 +41,7 @@ public class AcademicPeriodServiceTest {
             AcademicPeriod period = AcademicPeriod.builder().build();
             AcademicPeriodResponse dto = new AcademicPeriodResponse(1L, "Q1", "2025-2026", false, LocalDate.of(2025, 9, 1), LocalDate.of(2025, 11, 30));
 
-            when(academicPeriodRepository.findAllByOrderByStartDateAsc()).thenReturn(List.of(period));
+            when(academicPeriodRepository.findAllOrder()).thenReturn(List.of(period));
             when(academicPeriodMapper.toDto(period)).thenReturn(dto);
 
             List<AcademicPeriodResponse> result = service.getAcademicPeriods();
@@ -53,7 +53,7 @@ public class AcademicPeriodServiceTest {
         @Test
         @DisplayName("нет периодов — возвращает пустой список")
         void emptyRepository_returnsEmpty() {
-            when(academicPeriodRepository.findAllByOrderByStartDateAsc()).thenReturn(List.of());
+            when(academicPeriodRepository.findAllOrder()).thenReturn(List.of());
 
             List<AcademicPeriodResponse> result = service.getAcademicPeriods();
 
@@ -69,7 +69,7 @@ public class AcademicPeriodServiceTest {
         @Test
         @DisplayName("успешно закрывает период")
         void success() {
-            AcademicPeriod period = AcademicPeriod.builder().isClosed(false).build();
+            AcademicPeriod period = AcademicPeriod.builder().closed(false).build();
 
             when(academicPeriodRepository.findById(1L)).thenReturn(Optional.of(period));
 
@@ -96,7 +96,7 @@ public class AcademicPeriodServiceTest {
         @Test
         @DisplayName("успешно открывает период")
         void success() {
-            AcademicPeriod period = AcademicPeriod.builder().isClosed(true).build();
+            AcademicPeriod period = AcademicPeriod.builder().closed(true).build();
 
             when(academicPeriodRepository.findById(1L)).thenReturn(Optional.of(period));
 
@@ -124,7 +124,7 @@ public class AcademicPeriodServiceTest {
         @DisplayName("успешно обновляет все поля")
         void success_updatesAllFields() {
             AcademicPeriod period = AcademicPeriod.builder()
-                    .isClosed(false)
+                    .closed(false)
                     .startDate(LocalDate.of(2025, 9, 1))
                     .endDate(LocalDate.of(2025, 11, 30))
                     .build();
@@ -154,7 +154,7 @@ public class AcademicPeriodServiceTest {
         @Test
         @DisplayName("период закрыт — бросает ConflictException")
         void periodClosed_throwsConflictException() {
-            AcademicPeriod period = AcademicPeriod.builder().isClosed(true).build();
+            AcademicPeriod period = AcademicPeriod.builder().closed(true).build();
             AcademicPeriodResponse req = new AcademicPeriodResponse(null, null, null, false, null, null);
 
             when(academicPeriodRepository.findById(1L)).thenReturn(Optional.of(period));
@@ -168,7 +168,7 @@ public class AcademicPeriodServiceTest {
         @DisplayName("startDate после endDate — бросает ConflictException")
         void startAfterEnd_throwsConflictException() {
             AcademicPeriod period = AcademicPeriod.builder()
-                    .isClosed(false)
+                    .closed(false)
                     .startDate(LocalDate.of(2025, 9, 1))
                     .endDate(LocalDate.of(2025, 11, 30))
                     .build();
@@ -187,7 +187,7 @@ public class AcademicPeriodServiceTest {
         @DisplayName("null поля в запросе — не затирает существующие значения")
         void nullFields_preservesExistingValues() {
             AcademicPeriod period = AcademicPeriod.builder()
-                    .isClosed(false)
+                    .closed(false)
                     .name("Old name")
                     .schoolYear("2024-2025")
                     .startDate(LocalDate.of(2025, 9, 1))

@@ -252,7 +252,7 @@ function WeekScheduleCard({ fullSchedule, currentDayOfWeek }: { fullSchedule?: a
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 function Home() {
-  const studentId = 1;
+  const studentId = 27;
   const today = new Date();
   const todayDateStr = today.toISOString().split("T")[0];
   const currentDayOfWeek = new Intl.DateTimeFormat("en-US", { weekday: "long" })
