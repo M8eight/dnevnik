@@ -2,6 +2,7 @@ package com.rusobr.academic.web.controller;
 
 import com.rusobr.academic.infrastructure.service.TeacherService;
 import com.rusobr.academic.web.dto.grade.GradeJournalResponse;
+import com.rusobr.academic.web.dto.teachingAssignment.TeachingAssignmentWithSubjectProjection;
 import com.rusobr.academic.web.dto.userService.UserResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,7 @@ import java.util.List;
 @Slf4j
 @RequestMapping("/api/v1")
 public class TeacherController {
+
     private final TeacherService teacherService;
 
     @GetMapping("/class/{id}")
@@ -28,5 +30,10 @@ public class TeacherController {
                                                @RequestParam(required = false)
                                                @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         return teacherService.getClassGrades(teacherAssignmentId, date);
+    }
+
+    @GetMapping("/teacher/assignments")
+    public List<TeachingAssignmentWithSubjectProjection> getTeachingAssignmentDetail(@RequestParam("teacherId") Long teacherId) {
+        return teacherService.getTeachingAssignmentDetails(teacherId);
     }
 }
