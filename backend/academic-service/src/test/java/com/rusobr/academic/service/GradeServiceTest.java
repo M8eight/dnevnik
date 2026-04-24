@@ -4,18 +4,18 @@ import com.rusobr.academic.domain.enums.GradeType;
 import com.rusobr.academic.domain.model.AcademicPeriod;
 import com.rusobr.academic.domain.model.Grade;
 import com.rusobr.academic.domain.model.LessonInstance;
-import com.rusobr.academic.domain.model.ScheduleLesson;
 import com.rusobr.academic.infrastructure.exception.ConflictException;
 import com.rusobr.academic.infrastructure.exception.NotFoundException;
 import com.rusobr.academic.infrastructure.mapper.GradeMapper;
+import com.rusobr.academic.infrastructure.mapper.LessonInstanceMapper;
 import com.rusobr.academic.infrastructure.persistence.repository.AcademicPeriodRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.GradeRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.LessonInstanceRepository;
-import com.rusobr.academic.infrastructure.persistence.repository.ScheduleLessonRepository;
 import com.rusobr.academic.infrastructure.service.GradeService;
 import com.rusobr.academic.web.dto.grade.GradeResponse;
 import com.rusobr.academic.web.dto.grade.createGrade.CreateGradeRequest;
 import com.rusobr.academic.web.dto.grade.createGrade.CreateGradeResponse;
+import com.rusobr.academic.web.dto.lessonInstance.LessonInstanceDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,11 +41,15 @@ public class GradeServiceTest {
     @Mock
     private GradeMapper gradeMapper;
     @Mock
+    private LessonInstanceMapper lessonInstanceMapper;
+    @Mock
     private AcademicPeriodRepository academicPeriodRepository;
     @Mock
     private LessonInstanceRepository lessonInstanceRepository;
-    @Mock
-    private ScheduleLessonRepository scheduleLessonRepository;
+
+    // ─────────────────────────────────────────────
+    // getGradeById
+    // ─────────────────────────────────────────────
 
     @Test
     @DisplayName("getGradeById — вернуть DTO если оценка найдена")
@@ -78,109 +82,90 @@ public class GradeServiceTest {
         verifyNoInteractions(gradeMapper);
     }
 
+    // ─────────────────────────────────────────────
+    // createGrade
+    // ─────────────────────────────────────────────
+
     @Test
-    @DisplayName("createGrade — успешно создать, LessonInstance уже существует")
-    void createGrade_ShouldReturnDto_WhenLessonInstanceExists() {
+    @DisplayName("createGrade — успешно создать оценку")
+    void createGrade_ShouldReturnDto_WhenValid() {
         LocalDate date = LocalDate.of(2025, 9, 1);
-        CreateGradeRequest request = new CreateGradeRequest(1L, 2L, date, 5, GradeType.TEST);
+        CreateGradeRequest request = new CreateGradeRequest(1L, 10L, null, 5, 1, GradeType.TEST);
 
-        AcademicPeriod period = AcademicPeriod.builder().closed(false).build();
         LessonInstance lessonInstance = LessonInstance.builder().id(10L).lessonDate(date).build();
+        AcademicPeriod period = AcademicPeriod.builder().closed(false).build();
+        Grade mappedGrade = Grade.builder().studentId(1L).value(5).type(GradeType.TEST).build();
         Grade savedGrade = Grade.builder().id(100L).studentId(1L).value(5).type(GradeType.TEST).build();
-        CreateGradeResponse responseDto = new CreateGradeResponse(1L, 5, GradeType.TEST, 100L, date);
+        LessonInstanceDto lessonInstanceDto = new LessonInstanceDto(10L, date);
+        CreateGradeResponse responseDto = new CreateGradeResponse(100L, 1L, lessonInstanceDto, 5, 1, GradeType.TEST);
 
+        when(lessonInstanceRepository.findById(10L)).thenReturn(Optional.of(lessonInstance));
         when(academicPeriodRepository.findByDate(date)).thenReturn(Optional.of(period));
-        when(lessonInstanceRepository.findByLessonDateAndScheduleLessonId(date, 2L))
-                .thenReturn(Optional.of(lessonInstance));
+        when(gradeMapper.toGrade(request)).thenReturn(mappedGrade);
         when(gradeRepository.save(any(Grade.class))).thenReturn(savedGrade);
-        when(gradeMapper.toCreateGradeResponseDto(savedGrade, date)).thenReturn(responseDto);
+        when(lessonInstanceMapper.toLessonInstanceDto(lessonInstance)).thenReturn(lessonInstanceDto);
+        when(gradeMapper.toCreateGradeResponseDto(savedGrade, lessonInstanceDto)).thenReturn(responseDto);
 
         CreateGradeResponse result = gradeService.createGrade(request);
 
         assertEquals(responseDto, result);
+        verify(lessonInstanceRepository).findById(10L);
         verify(academicPeriodRepository).findByDate(date);
-        verify(lessonInstanceRepository).findByLessonDateAndScheduleLessonId(date, 2L);
-        // ScheduleLesson не нужен — LessonInstance уже есть
-        verifyNoInteractions(scheduleLessonRepository);
         verify(gradeRepository).save(any(Grade.class));
     }
 
     @Test
-    @DisplayName("createGrade — создать LessonInstance если его ещё нет")
-    void createGrade_ShouldCreateLessonInstance_WhenNotExists() {
-        LocalDate date = LocalDate.of(2025, 9, 1);
-        CreateGradeRequest request = new CreateGradeRequest(1L, 2L, date, 4, GradeType.TEST);
+    @DisplayName("createGrade — NotFoundException если LessonInstance не найден")
+    void createGrade_ShouldThrowNotFoundException_WhenLessonInstanceNotFound() {
+        CreateGradeRequest request = new CreateGradeRequest(1L, 10L, null, 5, 1, GradeType.TEST);
 
-        AcademicPeriod period = AcademicPeriod.builder().closed(false).build();
-        ScheduleLesson schedule = new ScheduleLesson();
-        LessonInstance newInstance = LessonInstance.builder().id(20L).lessonDate(date).scheduleLesson(schedule).build();
-        Grade savedGrade = Grade.builder().id(101L).studentId(1L).value(4).type(GradeType.TEST).build();
-        CreateGradeResponse responseDto = new CreateGradeResponse(1L, 4, GradeType.TEST, 101L, date);
+        when(lessonInstanceRepository.findById(10L)).thenReturn(Optional.empty());
 
-        when(academicPeriodRepository.findByDate(date)).thenReturn(Optional.of(period));
-        when(lessonInstanceRepository.findByLessonDateAndScheduleLessonId(date, 2L)).thenReturn(Optional.empty());
-        when(scheduleLessonRepository.findById(2L)).thenReturn(Optional.of(schedule));
-        when(lessonInstanceRepository.save(any(LessonInstance.class))).thenReturn(newInstance);
-        when(gradeRepository.save(any(Grade.class))).thenReturn(savedGrade);
-        when(gradeMapper.toCreateGradeResponseDto(savedGrade, date)).thenReturn(responseDto);
+        NotFoundException ex = assertThrows(NotFoundException.class,
+                () -> gradeService.createGrade(request));
 
-        CreateGradeResponse result = gradeService.createGrade(request);
-
-        assertEquals(responseDto, result);
-        verify(scheduleLessonRepository).findById(2L);
-        verify(lessonInstanceRepository).save(any(LessonInstance.class));
+        assertEquals("Lesson instance not found", ex.getMessage());
+        verifyNoInteractions(academicPeriodRepository, gradeRepository, gradeMapper);
     }
 
     @Test
     @DisplayName("createGrade — NotFoundException если академический период не найден")
     void createGrade_ShouldThrowNotFoundException_WhenPeriodNotFound() {
         LocalDate date = LocalDate.of(2025, 9, 1);
-        CreateGradeRequest request = new CreateGradeRequest(1L, 2L, date, 5, GradeType.TEST);
+        CreateGradeRequest request = new CreateGradeRequest(1L, 10L, null, 5, 1, GradeType.TEST);
+        LessonInstance lessonInstance = LessonInstance.builder().id(10L).lessonDate(date).build();
 
+        when(lessonInstanceRepository.findById(10L)).thenReturn(Optional.of(lessonInstance));
         when(academicPeriodRepository.findByDate(date)).thenReturn(Optional.empty());
 
         NotFoundException ex = assertThrows(NotFoundException.class,
                 () -> gradeService.createGrade(request));
 
         assertEquals("Academic period not found", ex.getMessage());
-        verifyNoInteractions(lessonInstanceRepository, gradeRepository, scheduleLessonRepository);
+        verifyNoInteractions(gradeRepository);
     }
 
     @Test
-    @DisplayName("createGrade — Conflict если период закрыт")
+    @DisplayName("createGrade — ConflictException если период закрыт")
     void createGrade_ShouldThrowConflict_WhenPeriodIsClosed() {
         LocalDate date = LocalDate.of(2025, 9, 1);
-        CreateGradeRequest request = new CreateGradeRequest(1L, 2L, date, 5, GradeType.TEST);
-
+        CreateGradeRequest request = new CreateGradeRequest(1L, 10L, null, 5, 1, GradeType.TEST);
+        LessonInstance lessonInstance = LessonInstance.builder().id(10L).lessonDate(date).build();
         AcademicPeriod closedPeriod = AcademicPeriod.builder().closed(true).build();
+
+        when(lessonInstanceRepository.findById(10L)).thenReturn(Optional.of(lessonInstance));
         when(academicPeriodRepository.findByDate(date)).thenReturn(Optional.of(closedPeriod));
 
         ConflictException ex = assertThrows(ConflictException.class,
                 () -> gradeService.createGrade(request));
 
-        assertEquals("Academic period is closed", ex.getMessage());
-        verifyNoInteractions(lessonInstanceRepository, gradeRepository);
+        assertEquals("Academic period is already closed", ex.getMessage());
+        verifyNoInteractions(gradeRepository);
     }
 
-    @Test
-    @DisplayName("createGrade — NotFoundException если ScheduleLesson не найден при создании LessonInstance")
-    void createGrade_ShouldThrowNotFoundException_WhenScheduleLessonNotFound() {
-        LocalDate date = LocalDate.of(2025, 9, 1);
-        CreateGradeRequest request = new CreateGradeRequest(1L, 2L, date, 5, GradeType.TEST);
-
-        AcademicPeriod period = AcademicPeriod.builder().closed(false).build();
-        when(academicPeriodRepository.findByDate(date)).thenReturn(Optional.of(period));
-        when(lessonInstanceRepository.findByLessonDateAndScheduleLessonId(date, 2L)).thenReturn(Optional.empty());
-        when(scheduleLessonRepository.findById(2L)).thenReturn(Optional.empty());
-
-        NotFoundException ex = assertThrows(NotFoundException.class,
-                () -> gradeService.createGrade(request));
-
-        assertEquals("Schedule lesson not found", ex.getMessage());
-        verify(lessonInstanceRepository, never()).save(any());
-        verify(gradeRepository, never()).save(any());
-    }
-
+    // ─────────────────────────────────────────────
+    // deleteGrade
+    // ─────────────────────────────────────────────
 
     @Test
     @DisplayName("deleteGrade — успешно удалить оценку")
@@ -214,7 +199,26 @@ public class GradeServiceTest {
     }
 
     @Test
-    @DisplayName("deleteGrade — Conflict если период закрыт")
+    @DisplayName("deleteGrade — NotFoundException если период не найден")
+    void deleteGrade_ShouldThrowNotFoundException_WhenPeriodNotFound() {
+        Long gradeId = 1L;
+        LocalDate date = LocalDate.of(2025, 9, 1);
+
+        LessonInstance lessonInstance = LessonInstance.builder().lessonDate(date).build();
+        Grade grade = Grade.builder().id(gradeId).lessonInstance(lessonInstance).build();
+
+        when(gradeRepository.findWithLessonInstanceById(gradeId)).thenReturn(Optional.of(grade));
+        when(academicPeriodRepository.findByDate(date)).thenReturn(Optional.empty());
+
+        NotFoundException ex = assertThrows(NotFoundException.class,
+                () -> gradeService.deleteGrade(gradeId));
+
+        assertEquals("Academic period not found", ex.getMessage());
+        verify(gradeRepository, never()).delete(any());
+    }
+
+    @Test
+    @DisplayName("deleteGrade — ConflictException если период закрыт")
     void deleteGrade_ShouldThrowConflict_WhenPeriodIsClosed() {
         Long gradeId = 1L;
         LocalDate date = LocalDate.of(2025, 9, 1);
@@ -230,25 +234,6 @@ public class GradeServiceTest {
                 () -> gradeService.deleteGrade(gradeId));
 
         assertEquals("Academic period is closed", ex.getMessage());
-        verify(gradeRepository, never()).delete(any());
-    }
-
-    @Test
-    @DisplayName("deleteGrade — NotFoundException если период не найден по дате урока")
-    void deleteGrade_ShouldThrowNotFoundException_WhenPeriodNotFound() {
-        Long gradeId = 1L;
-        LocalDate date = LocalDate.of(2025, 9, 1);
-
-        LessonInstance lessonInstance = LessonInstance.builder().lessonDate(date).build();
-        Grade grade = Grade.builder().id(gradeId).lessonInstance(lessonInstance).build();
-
-        when(gradeRepository.findWithLessonInstanceById(gradeId)).thenReturn(Optional.of(grade));
-        when(academicPeriodRepository.findByDate(date)).thenReturn(Optional.empty());
-
-        NotFoundException ex = assertThrows(NotFoundException.class,
-                () -> gradeService.deleteGrade(gradeId));
-
-        assertEquals("Academic period not found", ex.getMessage());
         verify(gradeRepository, never()).delete(any());
     }
 }
