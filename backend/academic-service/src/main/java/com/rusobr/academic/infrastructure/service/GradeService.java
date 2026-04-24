@@ -3,14 +3,13 @@ package com.rusobr.academic.infrastructure.service;
 import com.rusobr.academic.domain.model.AcademicPeriod;
 import com.rusobr.academic.domain.model.Grade;
 import com.rusobr.academic.domain.model.LessonInstance;
-import com.rusobr.academic.domain.model.ScheduleLesson;
 import com.rusobr.academic.infrastructure.exception.ConflictException;
 import com.rusobr.academic.infrastructure.exception.NotFoundException;
 import com.rusobr.academic.infrastructure.mapper.GradeMapper;
+import com.rusobr.academic.infrastructure.mapper.LessonInstanceMapper;
 import com.rusobr.academic.infrastructure.persistence.repository.AcademicPeriodRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.GradeRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.LessonInstanceRepository;
-import com.rusobr.academic.infrastructure.persistence.repository.ScheduleLessonRepository;
 import com.rusobr.academic.web.dto.grade.GradeResponse;
 import com.rusobr.academic.web.dto.grade.GradeWithSubjectNameResponse;
 import com.rusobr.academic.web.dto.grade.createGrade.CreateGradeRequest;
@@ -35,7 +34,7 @@ public class GradeService {
     private final GradeMapper gradeMapper;
     private final AcademicPeriodRepository academicPeriodRepository;
     private final LessonInstanceRepository lessonInstanceRepository;
-    private final ScheduleLessonRepository scheduleLessonRepository;
+    private final LessonInstanceMapper lessonInstanceMapper;
 
     public GradeResponse getGradeById(Long gradeId) {
         Grade grade = gradeRepository.findById(gradeId).orElseThrow(() -> new NotFoundException("Grade not found gradeId: " + gradeId));
@@ -45,14 +44,12 @@ public class GradeService {
     public Double getAverageGrade(Long studentId, Long academicPeriodId) {
         AcademicPeriod academicPeriod = academicPeriodRepository.findById(academicPeriodId)
                 .orElseThrow(() -> new NotFoundException("Academic period not found academicPeriodId: " + academicPeriodId));
-        log.info(academicPeriod.toString());
         Double avg = gradeRepository.getAverageGrade(studentId, academicPeriod.getStartDate(), academicPeriod.getEndDate());
         if (avg == null) return null;
 
         return BigDecimal.valueOf(avg)
                 .setScale(2, RoundingMode.HALF_UP)
                 .doubleValue();
-
     }
 
     public List<GradeWithSubjectNameResponse> findAllGradesByDate(Long studentId, LocalDate date) {
@@ -62,23 +59,19 @@ public class GradeService {
     @Transactional
     public CreateGradeResponse createGrade(CreateGradeRequest gradeDto) {
 
-        log.info("createGrade({})", gradeDto);
-
-        AcademicPeriod academicPeriod = academicPeriodRepository.findByDate(gradeDto.date()).orElseThrow(() -> new NotFoundException("Academic period not found"));
+        LessonInstance lessonInstance = lessonInstanceRepository.findById(gradeDto.lessonInstanceId())
+                .orElseThrow(() -> new NotFoundException("Lesson instance not found"));
+        AcademicPeriod academicPeriod = academicPeriodRepository.findByDate(lessonInstance.getLessonDate())
+                .orElseThrow(() -> new NotFoundException("Academic period not found"));
         if (academicPeriod.isClosed()) {
-            throw new ConflictException("Academic period is closed");
+            throw new ConflictException("Academic period is already closed");
         }
 
-        LessonInstance lessonInstance = lessonInstanceRepository.findByLessonDateAndScheduleLessonId(gradeDto.date(), gradeDto.scheduleLessonId()).orElseGet(() -> {
-            ScheduleLesson schedule = scheduleLessonRepository.findById(gradeDto.scheduleLessonId()).orElseThrow(() -> new NotFoundException("Schedule lesson not found"));
+        Grade grade = gradeMapper.toGrade(gradeDto);
+        grade.setLessonInstance(lessonInstance);
 
-            return lessonInstanceRepository.save(LessonInstance.builder().lessonDate(gradeDto.date()).scheduleLesson(schedule).build());
-        });
-
-        Grade gradeEntity = Grade.builder().studentId(gradeDto.studentId()).value(gradeDto.value()).type(gradeDto.gradeType()).lessonInstance(lessonInstance).build();
-
-
-        return gradeMapper.toCreateGradeResponseDto(gradeRepository.save(gradeEntity), lessonInstance.getLessonDate());
+        return gradeMapper.toCreateGradeResponseDto(
+                gradeRepository.save(grade), lessonInstanceMapper.toLessonInstanceDto(lessonInstance));
 
     }
 
@@ -95,7 +88,7 @@ public class GradeService {
         }
 
         gradeRepository.delete(grade);
-        log.info("deleteGrade({})", id);
+
     }
 
 }

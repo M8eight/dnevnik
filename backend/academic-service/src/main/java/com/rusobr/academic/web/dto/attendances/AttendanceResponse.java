@@ -4,6 +4,7 @@ import com.rusobr.academic.domain.enums.AttendanceStatus;
 
 public record AttendanceResponse(
     Long id,
-    AttendanceStatus status
+    AttendanceStatus status,
+    Long studentId
 ) {
 }
