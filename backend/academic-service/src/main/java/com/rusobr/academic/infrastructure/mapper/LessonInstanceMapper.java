@@ -45,7 +45,6 @@ public interface LessonInstanceMapper {
                 .orElse(null);
     }
 
-    @Mapping(target = "date", source = "lessonDate")
     LessonInstanceDto toLessonInstanceDto(LessonInstance lessonInstance);
 
 

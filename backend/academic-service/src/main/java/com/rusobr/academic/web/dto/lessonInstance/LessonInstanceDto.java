@@ -4,6 +4,6 @@ import java.time.LocalDate;
 
 public record LessonInstanceDto(
         Long id,
-        LocalDate date
+        LocalDate lessonDate
 ) {
 }
