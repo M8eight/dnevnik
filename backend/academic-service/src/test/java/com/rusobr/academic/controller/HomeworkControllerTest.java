@@ -2,7 +2,7 @@ package com.rusobr.academic.controller;
 
 import com.rusobr.academic.infrastructure.service.HomeworkService;
 import com.rusobr.academic.web.controller.HomeworkController;
-import com.rusobr.academic.web.dto.homework.HomeworkResponse;
+import com.rusobr.academic.web.dto.homework.HomeworkHomePageResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -36,8 +36,8 @@ public class HomeworkControllerTest {
         @Test
         @DisplayName("возвращает 200 и список домашних заданий")
         void returns200WithList() throws Exception {
-            HomeworkResponse hw1 = new HomeworkResponse(1L, "Стр. 42, упр. 5", "Математика");
-            HomeworkResponse hw2 = new HomeworkResponse(2L, "Параграф 10", "Физика");
+            HomeworkHomePageResponse hw1 = new HomeworkHomePageResponse(1L, "Стр. 42, упр. 5", "Математика");
+            HomeworkHomePageResponse hw2 = new HomeworkHomePageResponse(2L, "Параграф 10", "Физика");
 
             when(homeworkService.getHomeworksByDate(
                     java.time.LocalDate.of(2026, 4, 14), 1L))

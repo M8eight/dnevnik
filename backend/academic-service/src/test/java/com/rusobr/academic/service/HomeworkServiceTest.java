@@ -2,7 +2,7 @@ package com.rusobr.academic.service;
 
 import com.rusobr.academic.infrastructure.persistence.repository.HomeworkRepository;
 import com.rusobr.academic.infrastructure.service.HomeworkService;
-import com.rusobr.academic.web.dto.homework.HomeworkResponse;
+import com.rusobr.academic.web.dto.homework.HomeworkHomePageResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -32,11 +32,11 @@ public class HomeworkServiceTest {
         @DisplayName("возвращает список домашних заданий для студента на дату")
         void success() {
             LocalDate date = LocalDate.of(2026, 4, 14);
-            HomeworkResponse hw = new HomeworkResponse(1L, "Стр. 42, упр. 5", "Математика");
+            HomeworkHomePageResponse hw = new HomeworkHomePageResponse(1L, "Стр. 42, упр. 5", "Математика");
 
             when(homeworkRepository.findHomeworksByDate(date, 1L)).thenReturn(List.of(hw));
 
-            List<HomeworkResponse> result = service.getHomeworksByDate(date, 1L);
+            List<HomeworkHomePageResponse> result = service.getHomeworksByDate(date, 1L);
 
             assertThat(result).containsExactly(hw);
             verify(homeworkRepository).findHomeworksByDate(date, 1L);
@@ -49,7 +49,7 @@ public class HomeworkServiceTest {
 
             when(homeworkRepository.findHomeworksByDate(date, 1L)).thenReturn(List.of());
 
-            List<HomeworkResponse> result = service.getHomeworksByDate(date, 1L);
+            List<HomeworkHomePageResponse> result = service.getHomeworksByDate(date, 1L);
 
             assertThat(result).isEmpty();
         }

@@ -95,28 +95,22 @@ public class LessonInstanceService {
         //Получаем Academic period
         AcademicPeriod academicPeriod = academicPeriodRepository.findById(academicPeriodId)
                 .orElseThrow(() -> new NotFoundException("Academic period not found: " + academicPeriodId));
-        log.info("Academic period: " + academicPeriod);
 
         //Получаем экземпляры lessonInstance для верхней строки таблицы
         List<LessonInstanceDto> lessonInstances = lessonInstanceRepository.findLessonInstanceByTeachingAssignmentId(teachingAssignmentId,
                 academicPeriod.getStartDate(), academicPeriod.getEndDate());
-        log.info("lessonInstances: {}", lessonInstances);
 
         //Получаем список учеников с именами
         List<Long> studentsIds = schoolClassRepository.findStudentsIdsByTeachingAssignment(teachingAssignmentId);
         List<UserResponse> studentNames = userClient.getBatchUsers(studentsIds);
-        log.info("studentIds {}", studentsIds);
-        log.info("studentNames: {}", studentNames);
 
         //Получаем оценки и посещаемость из базы данных
         List<GradeStudentProjection> grades = lessonInstanceRepository.findGradesByTeachingAssignment(teachingAssignmentId,
                 academicPeriod.getStartDate(), academicPeriod.getEndDate());
-        log.info("grades: {}", grades);
 
         List<AttendanceStudentProjection> attendances = lessonInstanceRepository.findAttendancesByTeachingAssignment(
                 teachingAssignmentId,
                 academicPeriod.getStartDate(), academicPeriod.getEndDate());
-        log.info("attendances: {}", attendances);
 
         //Группируем оценки и посещаемость по id ученика
         var gradeJournal = grades.stream()
@@ -126,7 +120,6 @@ public class LessonInstanceService {
                         ),
                         Collectors.toList()
                 )));
-        log.info("gradeJournal: {}", gradeJournal);
 
         var attendanceJournal = attendances.stream()
                 .collect(Collectors.groupingBy(AttendanceStudentProjection::studentId, LinkedHashMap::new, Collectors.mapping(
@@ -135,13 +128,11 @@ public class LessonInstanceService {
                         ),
                         Collectors.toList()
                 )));
-        log.info("attendanceJournal: {}", attendanceJournal);
 
         //Собираем все в один список
         Set<Long> allStudentIds = new LinkedHashSet<>();
         allStudentIds.addAll(gradeJournal.keySet());
         allStudentIds.addAll(attendanceJournal.keySet());
-        log.info("allStudentIds: {}", allStudentIds);
 
         //Преобразуем в dto с studentId и списком оценок и посещаемости
         List<StudentJournalDto> studentJournal = allStudentIds.stream()
@@ -151,9 +142,17 @@ public class LessonInstanceService {
                         attendanceJournal.getOrDefault(studentId, List.of())
                 ))
                 .toList();
-        log.info("studentJournal: {}", studentJournal);
 
         return new TeacherJournalResponse(academicPeriodMapper.toDto(academicPeriod),
                 studentNames, lessonInstances, studentJournal);
     }
+
+    public List<LessonInstanceDto> getLessonInstanceByTeachingAssignmentId(Long teachingAssignmentId, Long academicPeriodId) {
+        AcademicPeriod academicPeriod = academicPeriodRepository.findById(academicPeriodId)
+                .orElseThrow(() -> new NotFoundException("Academic period not found: " + academicPeriodId));
+
+        return lessonInstanceRepository.findLessonInstanceByTeachingAssignmentId(teachingAssignmentId,
+                academicPeriod.getStartDate(), academicPeriod.getEndDate());
+    }
+
 }

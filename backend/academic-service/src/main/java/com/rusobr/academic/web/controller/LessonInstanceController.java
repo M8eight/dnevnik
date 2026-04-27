@@ -2,6 +2,7 @@ package com.rusobr.academic.web.controller;
 
 import com.rusobr.academic.infrastructure.service.LessonInstanceService;
 import com.rusobr.academic.web.dto.lessonInstance.GradesLessonsResponse;
+import com.rusobr.academic.web.dto.lessonInstance.LessonInstanceDto;
 import com.rusobr.academic.web.dto.lessonInstance.teacher.TeacherJournalResponse;
 import com.rusobr.academic.web.dto.scheduleLesson.DiaryLessonResponse;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ public class LessonInstanceController {
 
     private final LessonInstanceService lessonInstanceService;
 
+    //todo refactor поменять на academic period id
     @GetMapping("/schedule")
     public Map<LocalDate, List<DiaryLessonResponse>> getScheduleByStudentIdAndDatePeriod(@RequestParam("studentId") Long studentId,
                                                                                          @RequestParam("startDate") LocalDate startDate,
@@ -39,6 +41,12 @@ public class LessonInstanceController {
             @RequestParam("teachingAssignmentId") Long teachingAssignmentId,
             @RequestParam("academicPeriodId") Long academicPeriodId) {
         return lessonInstanceService.getGradesAttendancesByTeachingAssignment(teachingAssignmentId, academicPeriodId);
+    }
+
+    @GetMapping("/lesson-instances/by-teaching-assignment")
+    public List<LessonInstanceDto> getLessonInstanceByTeachingAssignment(@RequestParam("teachingAssignmentId") Long teachingAssignmentId,
+                                                                         @RequestParam("academicPeriodId") Long academicPeriodId) {
+        return lessonInstanceService.getLessonInstanceByTeachingAssignmentId(teachingAssignmentId, academicPeriodId);
     }
 
 }
