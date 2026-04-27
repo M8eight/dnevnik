@@ -1,6 +1,6 @@
 import api from "@/axios/axios";
 
-// Метаданные студента (из секции "students")
+
 export interface StudentMetadata {
     id: number;
     firstName: string;
@@ -8,13 +8,12 @@ export interface StudentMetadata {
     keycloakId: string;
 }
 
-// Колонки уроков (из секции "lessonInstances")
+
 export interface LessonInstanceDto {
     id: number;
-    date: string;
+    lessonDate: string;
 }
 
-// Оценка внутри журнала
 export interface GradeJournalDto {
     gradeId: number;
     value: number;
@@ -23,21 +22,18 @@ export interface GradeJournalDto {
     lessonInstanceId: number;
 }
 
-// Посещаемость внутри журнала
 export interface AttendanceJournalDto {
     attendanceId: number;
     status: string;
     lessonInstanceId: number;
 }
 
-// Строка журнала для конкретного студента
 export interface StudentJournalEntry {
     studentId: number;
     grades: GradeJournalDto[];
     attendances: AttendanceJournalDto[];
 }
 
-// Главный ответ от сервера
 export interface TeacherJournalResponse {
     academicPeriod: {
         id: number;
