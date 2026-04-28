@@ -1,6 +1,6 @@
 package com.rusobr.academic.web.dto.scheduleLesson;
 
-import com.rusobr.academic.web.dto.attendances.AttendanceResponse;
+import com.rusobr.academic.web.dto.attendances.journal.AttendanceSimpleResponse;
 import com.rusobr.academic.web.dto.grade.GradeResponse;
 import com.rusobr.academic.web.dto.homework.HomeworkResponse;
 
@@ -16,6 +16,6 @@ public record DiaryLessonResponse(
     String classRoom,
     List<HomeworkResponse> homeworks,
     List<GradeResponse> grades,
-    AttendanceResponse attendance
+    AttendanceSimpleResponse attendance
 ) {
 }

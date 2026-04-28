@@ -3,7 +3,7 @@ package com.rusobr.academic.infrastructure.mapper;
 import com.rusobr.academic.domain.model.Attendance;
 import com.rusobr.academic.domain.model.Grade;
 import com.rusobr.academic.domain.model.LessonInstance;
-import com.rusobr.academic.web.dto.attendances.AttendanceResponse;
+import com.rusobr.academic.web.dto.attendances.journal.AttendanceSimpleResponse;
 import com.rusobr.academic.web.dto.grade.GradeResponse;
 import com.rusobr.academic.web.dto.lessonInstance.LessonInstanceDto;
 import com.rusobr.academic.web.dto.scheduleLesson.DiaryLessonResponse;
@@ -36,12 +36,12 @@ public interface LessonInstanceMapper {
                 .toList();
     }
 
-    default AttendanceResponse filterAttendance(List<Attendance> attendances, @Context Long studentId) {
+    default AttendanceSimpleResponse filterAttendance(List<Attendance> attendances, @Context Long studentId) {
         if (attendances == null) return null;
         return attendances.stream()
                 .filter(a -> a.getStudentId().equals(studentId))
                 .findFirst()
-                .map(a -> new AttendanceResponse(a.getId(), a.getStatus(), a.getStudentId()))
+                .map(a -> new AttendanceSimpleResponse(a.getId(), a.getStatus(), a.getStudentId()))
                 .orElse(null);
     }
 

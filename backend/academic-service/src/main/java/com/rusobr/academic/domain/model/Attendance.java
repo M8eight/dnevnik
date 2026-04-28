@@ -27,5 +27,6 @@ public class Attendance extends BaseEntity {
     private AttendanceStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "lesson_instance_id")
     private LessonInstance lessonInstance;
 }
