@@ -7,6 +7,6 @@ export const useLessonInstancesByTeachingAssignment = (teachingAssignmentId: num
     return useQuery<LessonInstanceDto[]>({
         queryKey: ['lesson-instances', teachingAssignmentId, academicPeriodId],
         queryFn: () => getLessonInstancesByTeachingAssignment(teachingAssignmentId, academicPeriodId),
-        enabled: !!teachingAssignmentId && !!academicPeriodId,
+        enabled: !!teachingAssignmentId && academicPeriodId > 0,
     })
 }

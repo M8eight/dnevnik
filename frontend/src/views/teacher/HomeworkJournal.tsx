@@ -9,6 +9,7 @@ import {
     Send,
     FileText,
     Calendar as CalendarIcon,
+    CalendarDays
 } from "lucide-react";
 import { useTeachingAssignmentDetail } from "@/hooks/use-teaching-assignment";
 import { useCreateHomework, useHomeworksByTeachingAssignment } from "@/hooks/use-homework";
@@ -48,6 +49,7 @@ import { ru } from "date-fns/locale";
 import type { HomeworkResponse, PageResponse } from "@/services/homework-service";
 import { useLessonInstancesByTeachingAssignment } from "@/hooks/use-lesson-instances";
 import type { lessonInstance } from "@/services/lesson-instance-service";
+import { useAcademicPeriods } from "@/hooks/use-academic-period";
 
 function HomeworkPagination({
     currentPage,
@@ -290,7 +292,19 @@ function HomeworkList({
 
 export default function HomeworkJournal() {
     const teacherId = 17;
-    const academicPeriodId = 4;
+
+    const { data: periods } = useAcademicPeriods();
+    const [selectedPeriodId, setSelectedPeriodId] = useState<string>("");
+
+    useEffect(() => {
+        if (periods && periods.length > 0 && !selectedPeriodId) {
+            const active = periods.find((p) => !p.isClosed) ?? periods[periods.length - 1];
+            setSelectedPeriodId(active.id.toString());
+        }
+    }, [periods, selectedPeriodId]);
+
+    const periodIdToFetch = selectedPeriodId ? parseInt(selectedPeriodId, 10) : null;
+
 
     const { data: assignments } = useTeachingAssignmentDetail(teacherId);
     const [selectedAssignmentId, setSelectedAssignmentId] = useState<string>("");
@@ -299,7 +313,7 @@ export default function HomeworkJournal() {
 
     const { data: lessonInstances = [] } = useLessonInstancesByTeachingAssignment(
         selectedAssignmentId ? parseInt(selectedAssignmentId) : 0,
-        academicPeriodId
+        periodIdToFetch ?? 0
     );
 
     const {
@@ -409,6 +423,25 @@ export default function HomeworkJournal() {
                             )}
                         </div>
                     </div>
+
+                    <div className="flex gap-3 items-center">
+                        <Select value={selectedPeriodId} onValueChange={setSelectedPeriodId}>
+                            <SelectTrigger className="glass-pill w-[240px] h-11 font-bold text-[13px] rounded-2xl text-[var(--navy)] px-4 border-0 shadow-none">
+                                <div className="flex items-center gap-2">
+                                    <CalendarDays className="w-4 h-4 text-[var(--red)] shrink-0" />
+                                    <SelectValue placeholder="Выберите четверть" />
+                                </div>
+                            </SelectTrigger>
+                            <SelectContent className="rounded-2xl border border-white/60 shadow-2xl p-1 bg-white/90 backdrop-blur-2xl">
+                                {periods?.map((p) => (
+                                    <SelectItem key={p.id} value={p.id.toString()} className="font-bold text-[13px] text-[var(--navy)] py-2.5 px-3 rounded-xl cursor-pointer">
+                                        {p.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
                     <Select
                         value={selectedAssignmentId}
                         onValueChange={setSelectedAssignmentId}
@@ -432,6 +465,7 @@ export default function HomeworkJournal() {
                             ))}
                         </SelectContent>
                     </Select>
+
                 </div>
             </div>
 
@@ -503,3 +537,4 @@ function NavItem({ to, label }: { to: string; label: string }) {
         </NavLink>
     );
 }
+
