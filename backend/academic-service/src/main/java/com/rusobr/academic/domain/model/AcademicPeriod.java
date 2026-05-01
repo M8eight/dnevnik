@@ -16,7 +16,7 @@ import java.time.LocalDate;
 @Builder
 @Table(name = "academic_periods")
 @SQLRestriction("deleted_at is NULL")
-@SQLDelete(sql = "update school_classes set deleted_at = now() where id = ?")
+@SQLDelete(sql = "update academic_periods set deleted_at = now() where id = ?")
 public class AcademicPeriod extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
