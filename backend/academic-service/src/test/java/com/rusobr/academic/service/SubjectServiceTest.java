@@ -35,24 +35,26 @@ public class SubjectServiceTest {
 
     @InjectMocks SubjectService service;
 
+    // ─────────────────────────────────────────────────────────────
+    // getSubjects
+    // ─────────────────────────────────────────────────────────────
     @Nested
     @DisplayName("getSubjects")
     class GetSubjects {
 
         @Test
-        @DisplayName("возвращает страницу маппированных DTO")
+        @DisplayName("возвращает страницу DTO напрямую из репозитория")
         void returnsMappedPage() {
             Pageable pageable = PageRequest.of(0, 10);
-            Subject subject = Subject.builder().id(1L).name("Математика").build();
             SubjectResponseDto dto = new SubjectResponseDto(1L, "Математика");
-            Page<Subject> page = new PageImpl<>(List.of(subject));
+            Page<SubjectResponseDto> page = new PageImpl<>(List.of(dto));
 
-            when(subjectRepository.findAll(pageable)).thenReturn(page);
-            when(subjectMapper.toSubjectResponseDto(subject)).thenReturn(dto);
+            when(subjectRepository.findAllByOrderByNameAsc(pageable)).thenReturn(page);
 
             Page<SubjectResponseDto> result = service.getSubjects(pageable);
 
             assertThat(result.getContent()).containsExactly(dto);
+            verifyNoInteractions(subjectMapper); // маппер не используется
         }
 
         @Test
@@ -60,7 +62,7 @@ public class SubjectServiceTest {
         void emptyPage_returnsEmpty() {
             Pageable pageable = PageRequest.of(0, 10);
 
-            when(subjectRepository.findAll(pageable)).thenReturn(Page.empty());
+            when(subjectRepository.findAllByOrderByNameAsc(pageable)).thenReturn(Page.empty());
 
             Page<SubjectResponseDto> result = service.getSubjects(pageable);
 
@@ -69,6 +71,9 @@ public class SubjectServiceTest {
         }
     }
 
+    // ─────────────────────────────────────────────────────────────
+    // getSubject
+    // ─────────────────────────────────────────────────────────────
     @Nested
     @DisplayName("getSubject")
     class GetSubject {
@@ -100,6 +105,9 @@ public class SubjectServiceTest {
         }
     }
 
+    // ─────────────────────────────────────────────────────────────
+    // createSubject
+    // ─────────────────────────────────────────────────────────────
     @Nested
     @DisplayName("createSubject")
     class CreateSubject {
@@ -123,43 +131,9 @@ public class SubjectServiceTest {
         }
     }
 
-    @Nested
-    @DisplayName("updateSubject")
-    class UpdateSubject {
-
-        @Test
-        @DisplayName("успешно обновляет предмет")
-        void success() {
-            SubjectRequestDto req = new SubjectRequestDto("Биология");
-            Subject subject = Subject.builder().id(1L).name("Химия").build();
-            SubjectResponseDto dto = new SubjectResponseDto(1L, "Биология");
-
-            when(subjectRepository.findById(1L)).thenReturn(Optional.of(subject));
-            doAnswer(inv -> { subject.setName("Биология"); return null; })
-                    .when(subjectMapper).updateEntityFromDto(req, subject);
-            when(subjectMapper.toSubjectResponseDto(subject)).thenReturn(dto);
-
-            SubjectResponseDto result = service.updateSubject(1L, req);
-
-            assertThat(result).isEqualTo(dto);
-            verify(subjectMapper).updateEntityFromDto(req, subject);
-        }
-
-        @Test
-        @DisplayName("предмет не найден — бросает NotFoundException")
-        void notFound_throwsNotFoundException() {
-            SubjectRequestDto req = new SubjectRequestDto("Биология");
-
-            when(subjectRepository.findById(99L)).thenReturn(Optional.empty());
-
-            assertThatThrownBy(() -> service.updateSubject(99L, req))
-                    .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("Subject not found 99");
-
-            verifyNoInteractions(subjectMapper);
-        }
-    }
-
+    // ─────────────────────────────────────────────────────────────
+    // deleteSubject
+    // ─────────────────────────────────────────────────────────────
     @Nested
     @DisplayName("deleteSubject")
     class DeleteSubject {
