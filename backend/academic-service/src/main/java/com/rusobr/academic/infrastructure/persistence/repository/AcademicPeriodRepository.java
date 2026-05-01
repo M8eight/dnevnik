@@ -1,6 +1,7 @@
 package com.rusobr.academic.infrastructure.persistence.repository;
 
 import com.rusobr.academic.domain.model.AcademicPeriod;
+import com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,10 +18,17 @@ public interface AcademicPeriodRepository extends JpaRepository<AcademicPeriod,L
     Optional<AcademicPeriod> findByDate(@Param("date") LocalDate date);
 
     @Query("""
-    select ap
+    select new com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodResponse(
+        ap.id,
+        ap.name,
+        ap.schoolYear,
+        ap.closed,
+        ap.startDate,
+        ap.endDate
+    )
     from AcademicPeriod ap
     order by ap.startDate asc
 """)
-    List<AcademicPeriod> findAllOrder();
+    List<AcademicPeriodResponse> findAllOrderAsc();
 
 }
