@@ -47,7 +47,7 @@ keycloack:
   url: ${KEYCLOACK_URL:http://localhost:9090}
   realm: dnevnik-realm
   client-id: dnevnik-backend
-  client-secret: lFpKKXUky4yFUuAHQm1sbkAG2BcoY2kv
+  client-secret: iz0AGFzsa5d05DhxdoQphGGkcPXCRlEV
 
 server:
   port: 9001

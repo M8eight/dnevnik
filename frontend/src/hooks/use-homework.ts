@@ -13,7 +13,7 @@ export const useHomeworksByTeachingAssignment = (teachingAssginmentId: number, p
     return useQuery<PageResponse<HomeworkResponse>>({
         queryKey: ['homeworkTeachingAssignment', teachingAssginmentId, page, size],
         queryFn: () => getHomeworksByTeachingAssignment(teachingAssginmentId, page, size),
-        enabled: !!teachingAssginmentId && page >= 0 && !!size,
+        enabled: !!teachingAssginmentId && page !== undefined && size !== undefined,
     })
 }
 

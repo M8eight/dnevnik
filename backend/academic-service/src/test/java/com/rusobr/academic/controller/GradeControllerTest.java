@@ -158,7 +158,7 @@ public class GradeControllerTest {
                 .andExpect(jsonPath("$.weight").value(1))
                 .andExpect(jsonPath("$.gradeType").value("TEST"))
                 .andExpect(jsonPath("$.lessonInstance.id").value(10))
-                .andExpect(jsonPath("$.lessonInstance.date").value("2025-09-01"));
+                .andExpect(jsonPath("$.lessonInstance.lessonDate").value("2025-09-01"));
     }
 
     @Test
