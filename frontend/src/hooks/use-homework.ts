@@ -1,4 +1,4 @@
-import { type Homework, type HomeworkRequest, type HomeworkResponse, type PageResponse, createHomeworks, getHomeworkByDate, getHomeworksByTeachingAssignment } from "@/services/homework-service"
+import { type Homework, type HomeworkRequest, type HomeworkResponse, type PageResponse, createHomeworks, deleteHomework, getHomeworkByDate, getHomeworksByTeachingAssignment } from "@/services/homework-service"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 export const useHomeworkByDate = (date: string, studentId: number) => {
@@ -22,6 +22,17 @@ export const useCreateHomework = () => {
 
     return useMutation({
         mutationFn: (request: HomeworkRequest) => createHomeworks(request),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['homeworkTeachingAssignment'] });
+        }
+    })
+}
+
+export const useDeleteHomework = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation<void, Error, number>({
+        mutationFn: (homeworkId: number) => deleteHomework(homeworkId),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['homeworkTeachingAssignment'] });
         }

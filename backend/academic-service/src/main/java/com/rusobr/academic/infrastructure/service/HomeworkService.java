@@ -1,9 +1,12 @@
 package com.rusobr.academic.infrastructure.service;
 
+import com.rusobr.academic.domain.model.AcademicPeriod;
 import com.rusobr.academic.domain.model.Homework;
 import com.rusobr.academic.domain.model.LessonInstance;
+import com.rusobr.academic.infrastructure.exception.ConflictException;
 import com.rusobr.academic.infrastructure.exception.NotFoundException;
 import com.rusobr.academic.infrastructure.mapper.HomeworkMapper;
+import com.rusobr.academic.infrastructure.persistence.repository.AcademicPeriodRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.HomeworkRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.LessonInstanceRepository;
 import com.rusobr.academic.web.dto.homework.HomeworkHomePageResponse;
@@ -24,6 +27,7 @@ public class HomeworkService {
     private final HomeworkRepository homeworkRepository;
     private final LessonInstanceRepository lessonInstanceRepository;
     private final HomeworkMapper homeworkMapper;
+    private final AcademicPeriodRepository academicPeriodRepository;
 
     @Transactional(readOnly = true)
     public List<HomeworkHomePageResponse> getHomeworksByDate(LocalDate date, Long studentId) {
@@ -41,12 +45,36 @@ public class HomeworkService {
         LessonInstance lessonInstance = lessonInstanceRepository.findById(homeworkRequest.lessonInstanceId())
                 .orElseThrow(() -> new NotFoundException("Lesson Instance Not Found"));
 
+        AcademicPeriod academicPeriod = academicPeriodRepository.findByDate(
+                        lessonInstance.getLessonDate())
+                .orElseThrow(() -> new NotFoundException("Academic Period Not Found"));
+
+        if (academicPeriod.isClosed()) {
+            throw new ConflictException("Academic Period is closed");
+        }
+
         Homework homework = Homework.builder()
                 .lessonInstance(lessonInstance)
                 .text(homeworkRequest.text())
                 .build();
 
         return homeworkMapper.toHomeworkResponse(homeworkRepository.save(homework));
+    }
+
+    @Transactional
+    public void deleteHomework(Long id) {
+        Homework homework = homeworkRepository.findWithLessonInstanceById(id)
+                .orElseThrow(() -> new NotFoundException("Homework Not Found"));
+
+        AcademicPeriod academicPeriod = academicPeriodRepository.findByDate(
+                homework.getLessonInstance().getLessonDate())
+                        .orElseThrow(() -> new NotFoundException("Academic Period Not Found"));
+
+        if (academicPeriod.isClosed()) {
+            throw new ConflictException("Academic Period is closed");
+        }
+
+        homeworkRepository.delete(homework);
     }
 
 }

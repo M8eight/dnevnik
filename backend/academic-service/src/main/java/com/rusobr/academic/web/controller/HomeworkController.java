@@ -32,4 +32,9 @@ public class HomeworkController {
     public HomeworkResponse createHomework(@RequestBody HomeworkRequest homeworkRequest) {
         return homeworkService.createHomework(homeworkRequest);
     }
+
+    @DeleteMapping("/{id}")
+    public void deleteHomework(@PathVariable Long id) {
+        homeworkService.deleteHomework(id);
+    }
 }
