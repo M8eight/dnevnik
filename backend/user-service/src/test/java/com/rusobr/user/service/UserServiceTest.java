@@ -76,10 +76,10 @@ class UserServiceTest {
 
             assertThatThrownBy(() -> userService.createUser(req))
                     .isInstanceOf(RuntimeException.class)
-                    .hasMessageContaining("Keycloack could not be created");
+                    .hasMessageContaining("Keycloak could not be created");
 
             // Проверяем компенсацию (удаление из KC)
-            verify(keycloakRestClient).deleteKeyCloackUser(KC_ID);
+            verify(keycloakRestClient).deleteKeyCloakUser(KC_ID);
         }
     }
 

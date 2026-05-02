@@ -1,6 +1,6 @@
 package com.rusobr.user.infrastructure.webClient;
 
-import com.rusobr.user.infrastructure.exception.KeycloackUserAlreadyExist;
+import com.rusobr.user.infrastructure.exception.KeycloakUserAlreadyExist;
 import com.rusobr.user.web.dto.keycloak.CreateUserRequest;
 import com.rusobr.user.web.dto.keycloak.KeycloakUserResponse;
 import com.rusobr.user.web.dto.keycloak.role.AssignRoleToUserRequest;
@@ -20,36 +20,26 @@ import java.util.*;
 @Slf4j
 public class KeycloakRestClient {
 
-    @Value("${keycloack.url}")
-    private String keycloackUrl;
+    @Value("${keycloak.url}")
+    private String keycloakUrl;
 
-    @Value("${keycloack.realm}")
-    private String keycloackRealm;
+    @Value("${keycloak.realm}")
+    private String keycloakRealm;
 
-    private final KeyCloackTokenProvider keyCloackTokenProvider;
+    private final KeyCloakTokenProvider keyCloakTokenProvider;
 
     private final WebClient webClient;
 
-    public KeycloakRestClient(KeyCloackTokenProvider keyCloackTokenProvider, WebClient.Builder webClientBuilder) {
-        this.keyCloackTokenProvider = keyCloackTokenProvider;
+    public KeycloakRestClient(KeyCloakTokenProvider keyCloakTokenProvider, WebClient.Builder webClientBuilder) {
+        this.keyCloakTokenProvider = keyCloakTokenProvider;
         this.webClient = webClientBuilder.build();
     }
 
-//    public KeycloackUserResponse getKeycloackUser(String keycloakId) {
-//        return webClient.get().uri(keycloackUrl + "/admin/realms/" + keycloackRealm + "/users/" + keycloakId)
-//                .accept(MediaType.APPLICATION_JSON)
-//                .retrieve()
-//                .bodyToMono(KeycloackUserResponse.class)
-//                .block();
-//    }
+    public KeycloakUserResponse getKeycloakUserByUsername(String username) throws KeycloakUserAlreadyExist {
 
-    public KeycloakUserResponse getKeycloakUserByUsername(String username) throws KeycloackUserAlreadyExist {
-
-//        log.info("Token {}", keyCloackTokenProvider.getAccessToken());
-
-        List<KeycloakUserResponse> userList = webClient.get().uri(keycloackUrl + "/admin/realms/" +
-                keycloackRealm + "/users" + "?username=" + username + "&exact=true")
-                .header("Authorization", "Bearer " + keyCloackTokenProvider.getAccessToken())
+        List<KeycloakUserResponse> userList = webClient.get().uri(keycloakUrl + "/admin/realms/" +
+                        keycloakRealm + "/users" + "?username=" + username + "&exact=true")
+                .header("Authorization", "Bearer " + keyCloakTokenProvider.getAccessToken())
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToFlux(KeycloakUserResponse.class)
@@ -72,9 +62,9 @@ public class KeycloakRestClient {
 
         try {
             return webClient.post()
-                    .uri(keycloackUrl + "/admin/realms/" + keycloackRealm + "/users")
+                    .uri(keycloakUrl + "/admin/realms/" + keycloakRealm + "/users")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .header("Authorization", "Bearer " + keyCloackTokenProvider.getAccessToken())
+                    .header("Authorization", "Bearer " + keyCloakTokenProvider.getAccessToken())
                     .bodyValue(user)
                     .retrieve()
                     // Вместо Mono.error просто логируем и обрабатываем ниже
@@ -99,11 +89,11 @@ public class KeycloakRestClient {
         }
     }
 
-    public void deleteKeyCloackUser(String userId)
+    public void deleteKeyCloakUser(String userId)
     {
         webClient.delete()
-                .uri(keycloackUrl + "/admin/realms/" + keycloackRealm + "/users/" + userId)
-                .header("Authorization", "Bearer " + keyCloackTokenProvider.getAccessToken())
+                .uri(keycloakUrl + "/admin/realms/" + keycloakRealm + "/users/" + userId)
+                .header("Authorization", "Bearer " + keyCloakTokenProvider.getAccessToken())
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, resp ->
                         resp.bodyToMono(String.class)
@@ -114,10 +104,10 @@ public class KeycloakRestClient {
 
     }
 
-    public List<KeycloakRole> getAllKeycloackRoles() {
+    public List<KeycloakRole> getAllKeycloakRoles() {
         return webClient.get()
-                .uri(keycloackUrl + "/admin/realms/" + keycloackRealm + "/roles")
-                .header("Authorization", "Bearer " + keyCloackTokenProvider.getAccessToken())
+                .uri(keycloakUrl + "/admin/realms/" + keycloakRealm + "/roles")
+                .header("Authorization", "Bearer " + keyCloakTokenProvider.getAccessToken())
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, response ->
                         response.bodyToMono(String.class)
@@ -135,13 +125,13 @@ public class KeycloakRestClient {
         );
 
         webClient.post()
-                .uri(keycloackUrl + "/admin/realms/" + keycloackRealm + "/users/" +  dto.keycloakId() + "/role-mappings/realm")
-                .header("Authorization", "Bearer " + keyCloackTokenProvider.getAccessToken())
+                .uri(keycloakUrl + "/admin/realms/" + keycloakRealm + "/users/" +  dto.keycloakId() + "/role-mappings/realm")
+                .header("Authorization", "Bearer " + keyCloakTokenProvider.getAccessToken())
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(List.of(role))
                 .retrieve()
                 .onStatus(status -> status.value() == 409,
-                        clientResponse -> Mono.error(new KeycloackUserAlreadyExist("Keycloack User role already assigned")))
+                        clientResponse -> Mono.error(new KeycloakUserAlreadyExist("Keycloak User role already assigned")))
                 .onStatus(HttpStatusCode::isError, resp ->
                         resp.bodyToMono(String.class)
                                 .flatMap(body -> Mono.error(new RuntimeException("Keycloak: " + body)))
@@ -159,8 +149,8 @@ public class KeycloakRestClient {
 
 
         webClient.method(HttpMethod.DELETE)
-                .uri(keycloackUrl + "/admin/realms/" + keycloackRealm + "/users/" +  dto.keycloakId() + "/role-mappings/realm")
-                .header("Authorization", "Bearer " + keyCloackTokenProvider.getAccessToken())
+                .uri(keycloakUrl + "/admin/realms/" + keycloakRealm + "/users/" +  dto.keycloakId() + "/role-mappings/realm")
+                .header("Authorization", "Bearer " + keyCloakTokenProvider.getAccessToken())
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(List.of(role))
                 .retrieve()
