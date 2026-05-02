@@ -27,4 +27,14 @@ subprojects {
 			mavenBom "org.springframework.cloud:spring-cloud-dependencies:2024.0.2"
 		}
 	}
+
+	tasks.withType(Test).configureEach {
+		testLogging {
+			events "passed", "skipped", "failed"
+			showExceptions true
+			exceptionFormat "full"
+			showCauses true
+			showStackTraces true
+		}
+	}
 }

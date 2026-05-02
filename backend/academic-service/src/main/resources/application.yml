@@ -15,13 +15,13 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${keycloack.url}/realms/${keycloack.realm}
+          issuer-uri: ${KC_URL:http://localhost:9090}/realms/${KC_REALM:dnevnik-realm}
   datasource:
-    url: ${PSQL_DB_URL:jdbc:postgresql://localhost:5432/academic_db}
-    username: school_user
-    password: school_pass
+    url: ${PSQL_URL:jdbc:postgresql://localhost:5432}/${PSQL_ACADEMIC_DB:academic_db}
+    username: ${PSQL_ACADEMIC_USER:school_user}
+    password: ${PSQL_ACADEMIC_PASS:school_pass}
     driver-class-name: org.postgresql.Driver
-
+    
 springdoc:
   api-docs:
     path: /v3/api-docs
@@ -29,11 +29,11 @@ springdoc:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${EUREKA_URL:http://localhost:8761}/eureka/
 
 logging:
   loki:
-    url: http://localhost:3100/loki/api/v1/push
+    url: ${LOKI_URL:http://localhost:3100}/loki/api/v1/push
   level:
     root: INFO
 
@@ -42,9 +42,9 @@ management:
     sampling:
       probability: 1.0
 
-keycloack:
-  url: ${KEYCLOACK_URL:http://localhost:9090}
-  realm: dnevnik-realm
+keycloak:
+  url: ${KC_URL:http://localhost:9090}
+  realm: ${KC_REALM:dnevnik-realm}
 
 server:
   port: 9002

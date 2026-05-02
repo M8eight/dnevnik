@@ -1,7 +1,7 @@
 package com.rusobr.user.infrastructure.exception.exceptionAdvice;
 
 import com.rusobr.user.infrastructure.exception.ErrorResponse;
-import com.rusobr.user.infrastructure.exception.KeycloackUserAlreadyExist;
+import com.rusobr.user.infrastructure.exception.KeycloakUserAlreadyExist;
 import com.rusobr.user.infrastructure.exception.NotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -25,8 +25,8 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(KeycloackUserAlreadyExist.class)
-    public ResponseEntity<ErrorResponse> handleUserExists(KeycloackUserAlreadyExist ex, HttpServletRequest req) {
+    @ExceptionHandler(KeycloakUserAlreadyExist.class)
+    public ResponseEntity<ErrorResponse> handleUserExists(KeycloakUserAlreadyExist ex, HttpServletRequest req) {
 
         ErrorResponse errorResponse = new ErrorResponse(
                 LocalDateTime.now(),
