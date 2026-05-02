@@ -9,8 +9,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:9090/realms/dnevnik-realm
-          jwk-set-uri: http://localhost:9090/realms/dnevnik-realm/protocol/openid-connect/certs
+          issuer-uri: ${KC_URL:http://localhost:9090}/realms/${KC_REALM:dnevnik-realm}
+          jwk-set-uri: ${KC_URL:http://localhost:9090}/realms/${KC_REALM:dnevnik-realm}/protocol/openid-connect/certs
 
   cloud:
     gateway:
@@ -45,14 +45,4 @@ springdoc:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
-
-#logging:
-#  level:
-#    org.springframework.cloud.gateway: DEBUG
-#    root: info
-#    org.springframework.security: DEBUG
-#    org.springframework.web.reactive: DEBUG
-#    reactor.netty: DEBUG
-
-
+      defaultZone: ${EUREKA_URL:http://localhost:8761}/eureka/

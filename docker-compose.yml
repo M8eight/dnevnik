@@ -11,7 +11,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-
     ports:
       - "5432:5432"
     networks:
@@ -26,6 +25,11 @@ services:
     ports:
       - '9090:8080'
     command: start-dev --import-realm
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: password
@@ -33,7 +37,6 @@ services:
       KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
       KC_DB_USERNAME: school_user
       KC_DB_PASSWORD: school_pass
-      KC_HOSTNAME: localhost
     volumes:
       - keycloak_data:/opt/keycloak/data
       - ./configs/dnevnik-realm-realm.json:/opt/keycloak/data/import/realm.json:ro
@@ -84,61 +87,111 @@ services:
     depends_on:
       - loki
 
-#  eureka-server:
-#    build: ./eureka-server
-#    container_name: eureka-server
-#    depends_on:
-#      - postgres
-#    ports:
-#      - "8761:8761"
-#    networks:
-#      - micro-net
-#
-#  api-gateway:
-#    build: ./api-gateway
-#    container_name: api-gateway
-#    ports:
-#      - "8080:8080"
-#    depends_on:
-#      - eureka-server
-#    environment:
-#      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
-#      - LOG_PATH=/var/log/spring
-#    volumes:
-#      - ./logs/gateway:/var/log/spring
-#    networks:
-#      - micro-net
+  eureka-server:
+    build:
+      context: ./backend
+      dockerfile: ./eureka-server/Dockerfile
+    container_name: eureka-server
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "8761:8761"
+    networks:
+      - micro-net
 
-#  grade-service:
-#    build: ./grade-service
-#    container_name: grade-service
-#    ports:
-#      - "9003:9003"
-#    depends_on:
-#      - eureka-server
-#    environment:
-#      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/school_db
-#      - SPRING_DATASOURCE_USERNAME=school_user
-#      - SPRING_DATASOURCE_PASSWORD=school_pass
-#      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
-#    networks:
-#      - micro-net
+  api-gateway:
+    build:
+      context: ./backend
+      dockerfile: ./api-gateway/Dockerfile
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    environment:
+      - KC_URL=http://keycloak:8080
+      - KC_REALM=dnevnik-realm
+      - EUREKA_URL=http://eureka-server:8761
+      - APP_NAME=api-gateway
+    volumes:
+      - ./logs/api-gateway:/app/logs
+    networks:
+      - micro-net
 
-#  user-service:
-#    build: ./user-service
-#    container_name: user-service
-#    ports:
-#      - "9001:9001"
-#    depends_on:
-#      - eureka-server
-#    environment:
-#      - SPRING_PROFILES_ACTIVE=docker
-#      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
-#      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/school_db
-#      - SPRING_DATASOURCE_USERNAME=school_user
-#      - SPRING_DATASOURCE_PASSWORD=school_pass
-#    networks:
-#      - micro-net
+  user-service:
+    build:
+      context: ./backend
+      dockerfile: ./user-service/Dockerfile
+    container_name: user-service
+    ports:
+      - "9001:9001"
+    depends_on:
+      - eureka-server
+      - postgres
+      - keycloak
+    environment:
+      - KC_URL=http://keycloak:8080
+      - KC_REALM=dnevnik-realm
+      - KC_CLIENT_SECRET=iz0AGFzsa5d05DhxdoQphGGkcPXCRlEV
+      - PSQL_URL=jdbc:postgresql://postgres:5432
+      - PSQL_USER_DB=user_db
+      - PSQL_USER_USERNAME=school_user
+      - PSQL_USER_PASSWORD=school_pass
+      - LOKI_URL=http://loki:3100
+      - EUREKA_URL=http://eureka-server:8761
+      - APP_NAME=user-service
+    volumes:
+      - ./logs/user-service:/app/logs
+    networks:
+      - micro-net
+
+  academic-service:
+    build:
+      context: ./backend
+      dockerfile: ./academic-service/Dockerfile
+    container_name: academic-service
+    ports:
+      - "9002:9002"
+    depends_on:
+      - eureka-server
+      - postgres
+      - keycloak
+    environment:
+      - KC_URL=http://keycloak:8080
+      - KC_REALM=dnevnik-realm
+      - KC_CLIENT_SECRET=iz0AGFzsa5d05DhxdoQphGGkcPXCRlEV
+      - PSQL_URL=jdbc:postgresql://postgres:5432
+      - PSQL_ACADEMIC_DB=academic_db
+      - PSQL_ACADEMIC_USERNAME=school_user
+      - PSQL_ACADEMIC_PASSWORD=school_pass
+      - LOKI_URL=http://loki:3100
+      - EUREKA_URL=http://eureka-server:8761
+      - APP_NAME=academic-service
+      # - SPRING_PROFILES_ACTIVE=docker
+    volumes:
+      - ./logs/academic-service:/app/logs
+    networks:
+      - micro-net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    environment:
+      - VITE_APP_NAME=dnevnik-frontend
+      - VITE_BACKEND_URL=http://localhost:8080
+    ports:
+      - "5173:80"
 
 volumes:
   school-db-data:
