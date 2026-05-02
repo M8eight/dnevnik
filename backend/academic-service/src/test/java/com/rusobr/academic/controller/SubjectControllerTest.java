@@ -22,7 +22,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -38,6 +37,9 @@ public class SubjectControllerTest {
     @MockitoBean SubjectService subjectService;
     @MockitoBean JpaMetamodelMappingContext jpaMetamodelMappingContext;
 
+    // ─────────────────────────────────────────────────────────────
+    // POST /api/v1/subjects
+    // ─────────────────────────────────────────────────────────────
     @Nested
     @DisplayName("POST /api/v1/subjects")
     class CreateSubject {
@@ -85,6 +87,9 @@ public class SubjectControllerTest {
         }
     }
 
+    // ─────────────────────────────────────────────────────────────
+    // GET /api/v1/subjects
+    // ─────────────────────────────────────────────────────────────
     @Nested
     @DisplayName("GET /api/v1/subjects")
     class GetSubjects {
@@ -118,80 +123,9 @@ public class SubjectControllerTest {
         }
     }
 
-    @Nested
-    @DisplayName("GET /api/v1/subjects/{id}")
-    class GetSubjectById {
-
-        @Test
-        @DisplayName("возвращает 200 и предмет")
-        void returns200WithSubject() throws Exception {
-            SubjectResponseDto dto = new SubjectResponseDto(1L, "Биология");
-
-            when(subjectService.getSubject(1L)).thenReturn(dto);
-
-            mockMvc.perform(get("/api/v1/subjects/1"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.id").value(1))
-                    .andExpect(jsonPath("$.name").value("Биология"));
-        }
-
-        @Test
-        @DisplayName("предмет не найден — возвращает 404")
-        void notFound_returns404() throws Exception {
-            when(subjectService.getSubject(99L)).thenThrow(new NotFoundException("Subject not found 99"));
-
-            mockMvc.perform(get("/api/v1/subjects/99"))
-                    .andExpect(status().isNotFound());
-        }
-    }
-
-    @Nested
-    @DisplayName("PUT /api/v1/subjects/{id}")
-    class UpdateSubject {
-
-        @Test
-        @DisplayName("возвращает 200 и обновлённый предмет")
-        void returns200WithUpdatedSubject() throws Exception {
-            SubjectRequestDto request = new SubjectRequestDto("Физика");
-            SubjectResponseDto response = new SubjectResponseDto(1L, "Физика");
-
-            when(subjectService.updateSubject(eq(1L), any(SubjectRequestDto.class))).thenReturn(response);
-
-            mockMvc.perform(put("/api/v1/subjects/1")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.id").value(1))
-                    .andExpect(jsonPath("$.name").value("Физика"));
-        }
-
-        @Test
-        @DisplayName("предмет не найден — возвращает 404")
-        void notFound_returns404() throws Exception {
-            SubjectRequestDto request = new SubjectRequestDto("Физика");
-
-            when(subjectService.updateSubject(eq(99L), any())).thenThrow(new NotFoundException("Subject not found 99"));
-
-            mockMvc.perform(put("/api/v1/subjects/99")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().isNotFound());
-        }
-
-        @Test
-        @DisplayName("пустое название — возвращает 400")
-        void blankName_returns400() throws Exception {
-            SubjectRequestDto request = new SubjectRequestDto("");
-
-            mockMvc.perform(put("/api/v1/subjects/1")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().isBadRequest());
-
-            verifyNoInteractions(subjectService);
-        }
-    }
-
+    // ─────────────────────────────────────────────────────────────
+    // DELETE /api/v1/subjects/{id}
+    // ─────────────────────────────────────────────────────────────
     @Nested
     @DisplayName("DELETE /api/v1/subjects/{id}")
     class DeleteSubject {

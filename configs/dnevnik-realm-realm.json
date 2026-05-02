@@ -2445,5 +2445,19 @@
   },
   "clientPolicies": {
     "policies": []
-  }
+  },
+  "users": [
+    {
+      "username": "service-account-dnevnik-backend",
+      "enabled": true,
+      "serviceAccountClientId": "dnevnik-backend",
+      "clientRoles": {
+        "realm-management": [
+          "manage-users",
+          "view-users",
+          "query-users"
+        ]
+      }
+    }
+  ]
 }

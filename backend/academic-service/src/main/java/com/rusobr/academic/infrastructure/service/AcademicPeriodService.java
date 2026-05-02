@@ -5,9 +5,12 @@ import com.rusobr.academic.infrastructure.exception.ConflictException;
 import com.rusobr.academic.infrastructure.exception.NotFoundException;
 import com.rusobr.academic.infrastructure.mapper.AcademicPeriodMapper;
 import com.rusobr.academic.infrastructure.persistence.repository.AcademicPeriodRepository;
+import com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodRequest;
 import com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,21 +24,30 @@ public class AcademicPeriodService {
     private final AcademicPeriodRepository academicPeriodRepository;
     private final AcademicPeriodMapper academicPeriodMapper;
 
+    @Transactional(readOnly = true)
     public List<AcademicPeriodResponse> getAcademicPeriods() {
-        return academicPeriodRepository.findAllOrder().stream().map(academicPeriodMapper::toDto).toList();
+        return academicPeriodRepository.findAllOrderAsc();
     }
 
+    @Transactional
     public void closePeriod(Long id) {
         AcademicPeriod academicPeriod = academicPeriodRepository.findById(id).orElseThrow(() -> new NotFoundException("Academic period with id " + id + " not found"));
         academicPeriod.setClosed(true);
     }
 
-
+    @Transactional
     public void openPeriod(Long id) {
         AcademicPeriod academicPeriod = academicPeriodRepository.findById(id).orElseThrow(() -> new NotFoundException("Academic period with id " + id + " not found"));
         academicPeriod.setClosed(false);
     }
 
+    @Transactional
+    public AcademicPeriodResponse createAcademicPeriod(AcademicPeriodRequest academicPeriodRequest) {
+        AcademicPeriod academicPeriod = academicPeriodMapper.toEntity(academicPeriodRequest);
+        return academicPeriodMapper.toDto(academicPeriodRepository.save(academicPeriod));
+    }
+
+    @Transactional
     public void setDateById(Long id, AcademicPeriodResponse req) {
         AcademicPeriod academicPeriod = academicPeriodRepository.findById(id).orElseThrow(() -> new NotFoundException("Academic period with id " + id + " not found"));
         if (academicPeriod.isClosed()) {
@@ -56,10 +68,12 @@ public class AcademicPeriodService {
         }
     }
 
+    @Transactional(readOnly = true)
     public AcademicPeriodResponse findById(Long id) {
         return academicPeriodMapper.toDto(academicPeriodRepository.findById(id).orElseThrow(() -> new NotFoundException("Academic period with id " + id + " not found!")));
     }
 
+    @Transactional
     public void deleteById(Long id) {
         AcademicPeriod academicPeriod = academicPeriodRepository.findById(id).orElseThrow(() -> new NotFoundException("Academic Period not found"));
         academicPeriodRepository.delete(academicPeriod);

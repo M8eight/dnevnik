@@ -10,8 +10,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Download, Loader2, CalendarDays, TrendingUp, BookOpen, Star, Award } from "lucide-react";
 import { useGradesLessonsByStudentId } from "@/hooks/use-grade";
-import { useAcademicPeriods } from "@/hooks/use-academic-period";
 import type { GradeLessonDto } from "@/services/grade-service";
+import { useGetAcademicPeriods } from "@/hooks/use-academic-period";
 
 // ─── Primitives ───────────────────────────────────────────────────────────────
 
@@ -91,7 +91,7 @@ const formatAvg = (val: number) => val === 0 ? "—" : parseFloat(val.toFixed(2)
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function GradesPage() {
-  const { data: periods, isLoading: isLoadingPeriods } = useAcademicPeriods();
+  const { data: periods, isLoading: isLoadingPeriods } = useGetAcademicPeriods();
   const [selectedPeriodId, setSelectedPeriodId] = useState<string>("");
 
   useEffect(() => {

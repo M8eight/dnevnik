@@ -6,6 +6,7 @@ import com.rusobr.academic.infrastructure.exception.NotFoundException;
 import com.rusobr.academic.infrastructure.mapper.AcademicPeriodMapper;
 import com.rusobr.academic.infrastructure.persistence.repository.AcademicPeriodRepository;
 import com.rusobr.academic.infrastructure.service.AcademicPeriodService;
+import com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodRequest;
 import com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -31,29 +32,33 @@ public class AcademicPeriodServiceTest {
 
     @InjectMocks AcademicPeriodService service;
 
+    // ─────────────────────────────────────────────────────────────
+    // getAcademicPeriods
+    // ─────────────────────────────────────────────────────────────
     @Nested
     @DisplayName("getAcademicPeriods")
     class GetAcademicPeriods {
 
         @Test
-        @DisplayName("возвращает список маппированных DTO")
+        @DisplayName("возвращает список DTO напрямую из репозитория")
         void returnsMappedList() {
-            AcademicPeriod period = AcademicPeriod.builder().build();
-            AcademicPeriodResponse dto = new AcademicPeriodResponse(1L, "Q1", "2025-2026", false, LocalDate.of(2025, 9, 1), LocalDate.of(2025, 11, 30));
+            AcademicPeriodResponse dto = new AcademicPeriodResponse(
+                    1L, "Q1", "2025-2026", false,
+                    LocalDate.of(2025, 9, 1), LocalDate.of(2025, 11, 30));
 
-            when(academicPeriodRepository.findAllOrder()).thenReturn(List.of(period));
-            when(academicPeriodMapper.toDto(period)).thenReturn(dto);
+            when(academicPeriodRepository.findAllOrderAsc()).thenReturn(List.of(dto));
 
             List<AcademicPeriodResponse> result = service.getAcademicPeriods();
 
             assertThat(result).hasSize(1);
             assertThat(result.get(0)).isEqualTo(dto);
+            verifyNoInteractions(academicPeriodMapper); // маппер не используется
         }
 
         @Test
         @DisplayName("нет периодов — возвращает пустой список")
         void emptyRepository_returnsEmpty() {
-            when(academicPeriodRepository.findAllOrder()).thenReturn(List.of());
+            when(academicPeriodRepository.findAllOrderAsc()).thenReturn(List.of());
 
             List<AcademicPeriodResponse> result = service.getAcademicPeriods();
 
@@ -62,6 +67,44 @@ public class AcademicPeriodServiceTest {
         }
     }
 
+    // ─────────────────────────────────────────────────────────────
+    // createAcademicPeriod
+    // ─────────────────────────────────────────────────────────────
+    @Nested
+    @DisplayName("createAcademicPeriod")
+    class CreateAcademicPeriod {
+
+        @Test
+        @DisplayName("успешно создаёт и возвращает DTO")
+        void success() {
+            AcademicPeriodRequest req = new AcademicPeriodRequest(
+                    "Q1", "2025-2026",
+                    LocalDate.of(2025, 9, 1), LocalDate.of(2025, 11, 30));
+
+            AcademicPeriod entity = AcademicPeriod.builder()
+                    .name("Q1").schoolYear("2025-2026")
+                    .startDate(LocalDate.of(2025, 9, 1))
+                    .endDate(LocalDate.of(2025, 11, 30))
+                    .build();
+
+            AcademicPeriodResponse dto = new AcademicPeriodResponse(
+                    1L, "Q1", "2025-2026", false,
+                    LocalDate.of(2025, 9, 1), LocalDate.of(2025, 11, 30));
+
+            when(academicPeriodMapper.toEntity(req)).thenReturn(entity);
+            when(academicPeriodRepository.save(entity)).thenReturn(entity);
+            when(academicPeriodMapper.toDto(entity)).thenReturn(dto);
+
+            AcademicPeriodResponse result = service.createAcademicPeriod(req);
+
+            assertThat(result).isEqualTo(dto);
+            verify(academicPeriodRepository).save(entity);
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // closePeriod
+    // ─────────────────────────────────────────────────────────────
     @Nested
     @DisplayName("closePeriod")
     class ClosePeriod {
@@ -89,6 +132,9 @@ public class AcademicPeriodServiceTest {
         }
     }
 
+    // ─────────────────────────────────────────────────────────────
+    // openPeriod
+    // ─────────────────────────────────────────────────────────────
     @Nested
     @DisplayName("openPeriod")
     class OpenPeriod {
@@ -116,6 +162,9 @@ public class AcademicPeriodServiceTest {
         }
     }
 
+    // ─────────────────────────────────────────────────────────────
+    // setDateById
+    // ─────────────────────────────────────────────────────────────
     @Nested
     @DisplayName("setDateById")
     class SetDateById {
@@ -128,7 +177,8 @@ public class AcademicPeriodServiceTest {
                     .startDate(LocalDate.of(2025, 9, 1))
                     .endDate(LocalDate.of(2025, 11, 30))
                     .build();
-            AcademicPeriodResponse req = new AcademicPeriodResponse(null, "Q1", "2025-2026", false,
+            AcademicPeriodResponse req = new AcademicPeriodResponse(
+                    null, "Q1", "2025-2026", false,
                     LocalDate.of(2025, 9, 1), LocalDate.of(2025, 11, 30));
 
             when(academicPeriodRepository.findById(1L)).thenReturn(Optional.of(period));
@@ -142,7 +192,8 @@ public class AcademicPeriodServiceTest {
         @Test
         @DisplayName("период не найден — бросает NotFoundException")
         void notFound_throwsNotFoundException() {
-            AcademicPeriodResponse req = new AcademicPeriodResponse(null, null, null, false, null, null);
+            AcademicPeriodResponse req = new AcademicPeriodResponse(
+                    null, null, null, false, null, null);
 
             when(academicPeriodRepository.findById(1L)).thenReturn(Optional.empty());
 
@@ -155,7 +206,8 @@ public class AcademicPeriodServiceTest {
         @DisplayName("период закрыт — бросает ConflictException")
         void periodClosed_throwsConflictException() {
             AcademicPeriod period = AcademicPeriod.builder().closed(true).build();
-            AcademicPeriodResponse req = new AcademicPeriodResponse(null, null, null, false, null, null);
+            AcademicPeriodResponse req = new AcademicPeriodResponse(
+                    null, null, null, false, null, null);
 
             when(academicPeriodRepository.findById(1L)).thenReturn(Optional.of(period));
 
@@ -173,7 +225,8 @@ public class AcademicPeriodServiceTest {
                     .endDate(LocalDate.of(2025, 11, 30))
                     .build();
             // новая startDate позже существующей endDate
-            AcademicPeriodResponse req = new AcademicPeriodResponse(null, null, null, false,
+            AcademicPeriodResponse req = new AcademicPeriodResponse(
+                    null, null, null, false,
                     LocalDate.of(2025, 12, 1), null);
 
             when(academicPeriodRepository.findById(1L)).thenReturn(Optional.of(period));
@@ -193,7 +246,8 @@ public class AcademicPeriodServiceTest {
                     .startDate(LocalDate.of(2025, 9, 1))
                     .endDate(LocalDate.of(2025, 11, 30))
                     .build();
-            AcademicPeriodResponse req = new AcademicPeriodResponse(null, null, null, false, null, null);
+            AcademicPeriodResponse req = new AcademicPeriodResponse(
+                    null, null, null, false, null, null);
 
             when(academicPeriodRepository.findById(1L)).thenReturn(Optional.of(period));
 
@@ -204,6 +258,9 @@ public class AcademicPeriodServiceTest {
         }
     }
 
+    // ─────────────────────────────────────────────────────────────
+    // findById
+    // ─────────────────────────────────────────────────────────────
     @Nested
     @DisplayName("findById")
     class FindById {
@@ -212,7 +269,8 @@ public class AcademicPeriodServiceTest {
         @DisplayName("возвращает маппированный DTO")
         void success() {
             AcademicPeriod period = AcademicPeriod.builder().build();
-            AcademicPeriodResponse dto = new AcademicPeriodResponse(1L, "Q1", "2025-2026", false,
+            AcademicPeriodResponse dto = new AcademicPeriodResponse(
+                    1L, "Q1", "2025-2026", false,
                     LocalDate.of(2025, 9, 1), LocalDate.of(2025, 11, 30));
 
             when(academicPeriodRepository.findById(1L)).thenReturn(Optional.of(period));
@@ -230,10 +288,13 @@ public class AcademicPeriodServiceTest {
 
             assertThatThrownBy(() -> service.findById(1L))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("Academic period with id 1 not found");
+                    .hasMessageContaining("Academic period with id 1 not found"); // покрывает "...not found!"
         }
     }
 
+    // ─────────────────────────────────────────────────────────────
+    // deleteById
+    // ─────────────────────────────────────────────────────────────
     @Nested
     @DisplayName("deleteById")
     class DeleteById {

@@ -21,7 +21,7 @@ public class SubjectService {
     private final SubjectMapper subjectMapper;
 
     public Page<SubjectResponseDto> getSubjects(Pageable pageable) {
-        return subjectRepository.findAll(pageable).map(subjectMapper::toSubjectResponseDto);
+        return subjectRepository.findAllByOrderByNameAsc(pageable);
     }
 
     public SubjectResponseDto getSubject(Long id) {
@@ -34,15 +34,6 @@ public class SubjectService {
         Subject subject = subjectMapper.toSubject(dto);
 
         return subjectMapper.toSubjectResponseDto(subjectRepository.save(subject));
-    }
-
-    @Transactional
-    public SubjectResponseDto updateSubject(Long id, SubjectRequestDto dto) {
-        Subject subject = subjectRepository.findById(id).orElseThrow(() -> new NotFoundException("Subject not found " + id));
-
-        subjectMapper.updateEntityFromDto(dto, subject);
-
-        return subjectMapper.toSubjectResponseDto(subject);
     }
 
     @Transactional

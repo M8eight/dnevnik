@@ -17,7 +17,7 @@ import java.util.Set;
 @ToString(exclude = "students")
 @Builder
 @SQLRestriction("deleted_at is NULL")
-@SQLDelete(sql = "update school_classes set deleted_at = now() where id = ?")
+@SQLDelete(sql = "update students set deleted_at = now() where id = ?")
 public class SchoolClass extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

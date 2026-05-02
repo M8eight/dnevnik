@@ -53,3 +53,8 @@ export const createHomeworks = async (request: HomeworkRequest): Promise<Homewor
     );
     return data;
 };
+
+export const deleteHomework = async (homeworkId: number): Promise<void> => {
+    const { data } = await api.delete(`/academic-service/api/v1/homeworks/${homeworkId}`);
+    return data;
+}

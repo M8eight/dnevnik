@@ -34,3 +34,5 @@
 ![maket3](./docs/img3.png)
 ![maket3](./docs/img4.png)
 ![maket3](./docs/img5.png)
+![maket3](./docs/img6.png)
+![maket3](./docs/img7.png)
