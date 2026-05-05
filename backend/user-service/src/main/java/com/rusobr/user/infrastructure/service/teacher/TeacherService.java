@@ -1,4 +1,4 @@
-package com.rusobr.user.infrastructure.service;
+package com.rusobr.user.infrastructure.service.teacher;
 
 import com.rusobr.user.domain.model.Teacher;
 import com.rusobr.user.infrastructure.exception.NotFoundException;

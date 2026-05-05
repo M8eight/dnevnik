@@ -1,15 +1,13 @@
 package com.rusobr.user.web.controller;
 
-import com.rusobr.user.infrastructure.service.UserService;
-import com.rusobr.user.web.dto.keycloak.CreateUserResponse;
+import com.rusobr.user.infrastructure.service.user.UserOrchestrator;
+import com.rusobr.user.infrastructure.service.user.UserService;
 import com.rusobr.user.web.dto.keycloak.role.AssignRoleToUserRequest;
-import com.rusobr.user.web.dto.keycloak.CreateUserRequest;
 import com.rusobr.user.web.dto.keycloak.role.KeycloakRole;
+import com.rusobr.user.web.dto.student.StudentDetails;
+import com.rusobr.user.web.dto.user.UserRequest;
 import com.rusobr.user.web.dto.user.UserResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,33 +18,12 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final UserOrchestrator studentOrchestrator;
 
-    @GetMapping("/{id}")
-    public UserResponse getUser(@PathVariable Long id) {
-        return userService.findUserDbById(id);
+    @PostMapping("/students")
+    public UserResponse createUser(@RequestBody UserRequest<StudentDetails> userRequest) {
+        return studentOrchestrator.create(userRequest);
     }
-
-    @GetMapping("")
-    public Page<UserResponse> getUsers(Pageable pageable) {
-        return userService.findAll(pageable);
-    }
-
-    @PostMapping("/batch")
-    public List<UserResponse> getBatchUsers(@RequestBody List<Long> ids) {
-        return userService.findBatchUsers(ids);
-    }
-
-    @PostMapping("/create")
-    @ResponseStatus(HttpStatus.CREATED)
-    public CreateUserResponse createUser(@RequestBody CreateUserRequest createUserRequest) {
-        return userService.createUser(createUserRequest);
-    }
-
-    @DeleteMapping("/delete")
-    public void deleteUser(@RequestParam String keycloakId) {
-        userService.deleteUser(keycloakId);
-    }
-
 
     @GetMapping("/roles")
     public List<KeycloakRole> getAllRolesForUser() {

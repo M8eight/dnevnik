@@ -4,14 +4,14 @@ import com.rusobr.user.domain.model.Parent;
 import com.rusobr.user.domain.model.Student;
 import com.rusobr.user.domain.model.Teacher;
 import com.rusobr.user.domain.model.User;
-import com.rusobr.user.infrastructure.enums.UserRoles;
+import com.rusobr.user.infrastructure.enums.UserRole;
 import com.rusobr.user.infrastructure.persistence.repository.ParentRepository;
 import com.rusobr.user.infrastructure.persistence.repository.StudentRepository;
 import com.rusobr.user.infrastructure.persistence.repository.TeacherRepository;
 import com.rusobr.user.infrastructure.persistence.repository.UserRepository;
 import com.rusobr.user.infrastructure.webClient.KeycloakRestClient;
-import com.rusobr.user.web.dto.keycloak.CreateUserRequest;
 import com.rusobr.user.web.dto.keycloak.role.AssignRoleToUserRequest;
+import com.rusobr.user.web.dto.user.UserCreateRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -211,24 +211,24 @@ public class DebugDataInitializer implements CommandLineRunner {
         }
 
         String roleId;
-        UserRoles userRole;
+        UserRole userRole;
 
         switch (role) {
             case "admin" -> {
                 roleId = "fb4ae346-9cbb-4c45-93ad-bd89bfe331a4";
-                userRole = UserRoles.ADMIN;
+                userRole = UserRole.ADMIN;
             }
             case "teacher" -> {
                 roleId = "12535b66-c65b-44fb-a686-49f460f3efba";
-                userRole = UserRoles.TEACHER;
+                userRole = UserRole.TEACHER;
             }
             case "student" -> {
                 roleId = "412fe55a-22e8-494e-98b9-ad47b98abc36";
-                userRole = UserRoles.STUDENT;
+                userRole = UserRole.STUDENT;
             }
             case "parent" -> {
                 roleId = "6696880e-db8e-40a1-9035-eb018ce682e4";
-                userRole = UserRoles.PARENT;
+                userRole = UserRole.PARENT;
             }
             default -> throw new IllegalArgumentException("Invalid role: " + role);
         }
@@ -236,7 +236,7 @@ public class DebugDataInitializer implements CommandLineRunner {
         String keycloakId;
         try {
             keycloakId = keycloakRestClient.createKeyCloakUser(
-                    new CreateUserRequest(username, password, firstName, lastName));
+                    new UserCreateRequest(username, password, firstName, lastName));
         } catch (Exception e) {
             if (e.getMessage().contains("Keycloak User already exists") || e.getMessage().contains("409")) {
                 keycloakId = keycloakRestClient.getKeycloakUserByUsername(username).id();

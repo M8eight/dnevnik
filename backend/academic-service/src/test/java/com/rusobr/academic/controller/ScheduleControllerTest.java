@@ -1,11 +1,8 @@
 package com.rusobr.academic.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rusobr.academic.domain.enums.AttendanceStatus;
-import com.rusobr.academic.domain.enums.GradeType;
 import com.rusobr.academic.infrastructure.service.ScheduleService;
 import com.rusobr.academic.web.controller.ScheduleController;
-import com.rusobr.academic.web.dto.lessonInstance.LessonWeekItemDto;
 import com.rusobr.academic.web.dto.scheduleLesson.ScheduleLessonResponse;
 import com.rusobr.academic.web.dto.scheduleLesson.SchoolLessonResponse;
 import org.junit.jupiter.api.DisplayName;

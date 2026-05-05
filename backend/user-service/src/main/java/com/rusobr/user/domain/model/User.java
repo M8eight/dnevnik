@@ -1,6 +1,6 @@
 package com.rusobr.user.domain.model;
 
-import com.rusobr.user.infrastructure.enums.UserRoles;
+import com.rusobr.user.infrastructure.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
@@ -8,7 +8,6 @@ import org.hibernate.annotations.SQLRestriction;
 
 import java.util.HashSet;
 import java.util.Set;
-
 
 @Builder
 @Entity
@@ -25,10 +24,13 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String username;
 
+    @Column(nullable = false)
     private String firstName;
 
+    @Column(nullable = false)
     private String lastName;
 
     @Column(nullable = false)
@@ -37,9 +39,9 @@ public class User extends BaseEntity {
     @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(name = "role_name")
-    @ElementCollection(fetch = FetchType.LAZY, targetClass = UserRoles.class)
+    @ElementCollection(fetch = FetchType.LAZY, targetClass = UserRole.class)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
-    private Set<UserRoles> roles = new HashSet<>();
+    private Set<UserRole> roles = new HashSet<>();
 
     @Override
     public int hashCode() {

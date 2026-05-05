@@ -2,10 +2,9 @@ package com.rusobr.user.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rusobr.user.infrastructure.exception.NotFoundException;
-import com.rusobr.user.infrastructure.service.StudentService;
+import com.rusobr.user.infrastructure.service.student.StudentService;
 import com.rusobr.user.web.controller.StudentController;
 import com.rusobr.user.web.dto.feign.SchoolClassResponse;
-import com.rusobr.user.web.dto.student.StudentResponse;
 import com.rusobr.user.web.dto.student.StudentResponseDetail;
 import com.rusobr.user.web.dto.teacher.TeacherResponse;
 import org.junit.jupiter.api.DisplayName;
@@ -22,7 +21,8 @@ import java.util.List;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = StudentController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -53,7 +53,7 @@ class StudentControllerTest {
                 new StudentResponse(2L, "Мария", "Петрова", "kc-2")
         );
 
-        when(studentService.findBatchStudents(ids)).thenReturn(response);
+        when(studentService.findSimpleBatchStudents(ids)).thenReturn(response);
 
         mockMvc.perform(post("/api/v1/students/batch")
                         .contentType(MediaType.APPLICATION_JSON)

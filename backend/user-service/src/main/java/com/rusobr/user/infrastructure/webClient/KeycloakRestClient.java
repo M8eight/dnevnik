@@ -1,10 +1,10 @@
 package com.rusobr.user.infrastructure.webClient;
 
 import com.rusobr.user.infrastructure.exception.KeycloakUserAlreadyExist;
-import com.rusobr.user.web.dto.keycloak.CreateUserRequest;
 import com.rusobr.user.web.dto.keycloak.KeycloakUserResponse;
 import com.rusobr.user.web.dto.keycloak.role.AssignRoleToUserRequest;
 import com.rusobr.user.web.dto.keycloak.role.KeycloakRole;
+import com.rusobr.user.web.dto.user.UserCreateRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
@@ -14,7 +14,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @Component
 @Slf4j
@@ -49,7 +52,7 @@ public class KeycloakRestClient {
         return Objects.requireNonNull(userList).get(0);
     }
 
-    public String createKeyCloakUser(CreateUserRequest createUserRequest) {
+    public String createKeyCloakUser(UserCreateRequest createUserRequest) {
         Map<String, Object> user = new HashMap<>();
         user.put("username", createUserRequest.username());
         user.put("enabled", true);
@@ -67,30 +70,22 @@ public class KeycloakRestClient {
                     .header("Authorization", "Bearer " + keyCloakTokenProvider.getAccessToken())
                     .bodyValue(user)
                     .retrieve()
-                    // Вместо Mono.error просто логируем и обрабатываем ниже
                     .onStatus(status -> status.value() == 409,
-                            clientResponse -> Mono.empty())
+                            clientResponse -> Mono.error(new KeycloakUserAlreadyExist(createUserRequest.username())
+                    ))
                     .toBodilessEntity()
                     .flatMap(res -> {
-                        if (res.getStatusCode().value() == 409) {
-                            return Mono.empty();
-                        }
                         String location = res.getHeaders().getFirst("Location");
-                        return Mono.just(location.substring(location.lastIndexOf("/") + 1));
+                        return Mono.just(Objects.requireNonNull(location).substring(location.lastIndexOf("/") + 1));
                     })
-                    .blockOptional() // Используем Optional, чтобы обработать пустоту
-                    .orElseGet(() -> {
-                        log.info("User {} already exists, fetching existing ID", createUserRequest.username());
-                        return getKeycloakUserByUsername(createUserRequest.username()).id();
-                    });
+                    .block();
         } catch (Exception e) {
             log.error("Failed to create/get Keycloak user: {}", e.getMessage());
             throw new RuntimeException(e);
         }
     }
 
-    public void deleteKeyCloakUser(String userId)
-    {
+    public void deleteKeyCloakUser(String userId) {
         webClient.delete()
                 .uri(keycloakUrl + "/admin/realms/" + keycloakRealm + "/users/" + userId)
                 .header("Authorization", "Bearer " + keyCloakTokenProvider.getAccessToken())
@@ -119,13 +114,13 @@ public class KeycloakRestClient {
     }
 
     public void assignRoleToUser(AssignRoleToUserRequest dto) {
-        Map<String,Object> role = Map.of(
+        Map<String, Object> role = Map.of(
                 "id", dto.roleId(),
-                    "name", dto.roleName()
+                "name", dto.roleName()
         );
 
         webClient.post()
-                .uri(keycloakUrl + "/admin/realms/" + keycloakRealm + "/users/" +  dto.keycloakId() + "/role-mappings/realm")
+                .uri(keycloakUrl + "/admin/realms/" + keycloakRealm + "/users/" + dto.keycloakId() + "/role-mappings/realm")
                 .header("Authorization", "Bearer " + keyCloakTokenProvider.getAccessToken())
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(List.of(role))
@@ -142,14 +137,14 @@ public class KeycloakRestClient {
     }
 
     public void deleteRoleFromUser(AssignRoleToUserRequest dto) {
-        Map<String,Object> role = Map.of(
+        Map<String, Object> role = Map.of(
                 "id", dto.roleId(),
                 "name", dto.roleName()
         );
 
 
         webClient.method(HttpMethod.DELETE)
-                .uri(keycloakUrl + "/admin/realms/" + keycloakRealm + "/users/" +  dto.keycloakId() + "/role-mappings/realm")
+                .uri(keycloakUrl + "/admin/realms/" + keycloakRealm + "/users/" + dto.keycloakId() + "/role-mappings/realm")
                 .header("Authorization", "Bearer " + keyCloakTokenProvider.getAccessToken())
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(List.of(role))

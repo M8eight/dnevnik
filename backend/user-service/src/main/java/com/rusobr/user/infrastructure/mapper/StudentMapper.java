@@ -1,7 +1,9 @@
 package com.rusobr.user.infrastructure.mapper;
 
 import com.rusobr.user.domain.model.Student;
+import com.rusobr.user.domain.model.User;
 import com.rusobr.user.web.dto.feign.SchoolClassResponse;
+import com.rusobr.user.web.dto.student.StudentDetails;
 import com.rusobr.user.web.dto.student.StudentResponseDetail;
 import com.rusobr.user.web.dto.teacher.TeacherResponse;
 import org.mapstruct.Mapper;
@@ -13,13 +15,17 @@ import org.mapstruct.ReportingPolicy;
 public interface StudentMapper {
 
     @Mapping(target = "id", source = "student.id")
-    @Mapping(target = "keycloakId", source = "student.user.keycloakId")
     @Mapping(target = "firstName", source = "student.user.firstName")
     @Mapping(target = "lastName", source = "student.user.lastName")
     @Mapping(target = "studyProfile", source = "student.studyProfile")
     @Mapping(target = "schoolClass", source = "schoolClass")
     @Mapping(target = "schoolClassTeacher", source = "schoolClassTeacher")
-    StudentResponseDetail toStudentResponse(Student student, SchoolClassResponse schoolClass,
-                                            TeacherResponse  schoolClassTeacher);
+    StudentResponseDetail toStudentDetailResponse(Student student, SchoolClassResponse schoolClass,
+                                                  TeacherResponse  schoolClassTeacher);
+
+    @Mapping(target = "user", source = "user")
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "studyProfile", source = "studentDetails.studyProfile")
+    Student toEntity(User user, StudentDetails studentDetails);
 
 }

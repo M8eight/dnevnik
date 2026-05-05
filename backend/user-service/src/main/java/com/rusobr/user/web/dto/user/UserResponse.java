@@ -1,9 +1,12 @@
 package com.rusobr.user.web.dto.user;
 
+import lombok.Builder;
+
+@Builder
 public record UserResponse(
-        String firstName,
-        String lastName,
-        String keycloakId,
-        Long id
-) {
-}
+    Long id,
+    String firstName,
+    String lastName,
+    String username,
+    String keycloakId
+) {}

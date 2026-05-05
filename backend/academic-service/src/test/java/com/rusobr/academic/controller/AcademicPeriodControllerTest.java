@@ -1,7 +1,6 @@
 package com.rusobr.academic.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rusobr.academic.infrastructure.exception.ConflictException;
 import com.rusobr.academic.infrastructure.exception.NotFoundException;
 import com.rusobr.academic.infrastructure.service.AcademicPeriodService;
 import com.rusobr.academic.web.controller.AcademicPeriodController;
