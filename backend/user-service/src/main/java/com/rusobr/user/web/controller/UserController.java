@@ -4,7 +4,9 @@ import com.rusobr.user.infrastructure.service.user.UserOrchestrator;
 import com.rusobr.user.infrastructure.service.user.UserService;
 import com.rusobr.user.web.dto.keycloak.role.AssignRoleToUserRequest;
 import com.rusobr.user.web.dto.keycloak.role.KeycloakRole;
+import com.rusobr.user.web.dto.parent.ParentDetails;
 import com.rusobr.user.web.dto.student.StudentDetails;
+import com.rusobr.user.web.dto.teacher.TeacherDetails;
 import com.rusobr.user.web.dto.user.UserRequest;
 import com.rusobr.user.web.dto.user.UserResponse;
 import lombok.RequiredArgsConstructor;
@@ -18,26 +20,26 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
-    private final UserOrchestrator studentOrchestrator;
+    private final UserOrchestrator userOrchestrator;
 
     @PostMapping("/students")
-    public UserResponse createUser(@RequestBody UserRequest<StudentDetails> userRequest) {
-        return studentOrchestrator.create(userRequest);
+    public UserResponse createStudent(@RequestBody UserRequest<StudentDetails> userRequest) {
+        return userOrchestrator.create(userRequest);
+    }
+
+    @PostMapping("/teachers")
+    public UserResponse createTeacher(@RequestBody UserRequest<TeacherDetails> userRequest) {
+        return userOrchestrator.create(userRequest);
+    }
+
+    @PostMapping("/parents")
+    public UserResponse createParent(@RequestBody UserRequest<ParentDetails> userRequest) {
+        return userOrchestrator.create(userRequest);
     }
 
     @GetMapping("/roles")
     public List<KeycloakRole> getAllRolesForUser() {
         return userService.getAllRoles();
-    }
-
-    @PostMapping("/roles")
-    public void assignRoleToUser(@RequestBody AssignRoleToUserRequest assignRoleToUserRequest) {
-        userService.assignRoleToUser(assignRoleToUserRequest);
-    }
-
-    @DeleteMapping("/roles")
-    public void deleteRoleFromUser(@RequestBody AssignRoleToUserRequest assignRoleToUserRequest) {
-        userService.deleteRoleFromUser(assignRoleToUserRequest);
     }
 
 }

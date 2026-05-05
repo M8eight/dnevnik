@@ -156,4 +156,17 @@ public class KeycloakRestClient {
                 .bodyToMono(Void.class)
                 .block();
     }
+
+    public KeycloakRole getRoleByName(String roleName) {
+        return webClient.get()
+                .uri(keycloakUrl + "/admin/realms/" + keycloakRealm + "/roles/" + roleName)
+                .header("Authorization", "Bearer " + keyCloakTokenProvider.getAccessToken())
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, resp ->
+                        resp.bodyToMono(String.class)
+                                .flatMap(body -> Mono.error(new RuntimeException("Keycloak: " + body)))
+                )
+                .bodyToMono(KeycloakRole.class)
+                .block();
+    }
 }

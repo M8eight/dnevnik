@@ -247,7 +247,7 @@ public class DebugDataInitializer implements CommandLineRunner {
         }
 
         try {
-            keycloakRestClient.assignRoleToUser(new AssignRoleToUserRequest(keycloakId, userRole, roleId));
+            keycloakRestClient.assignRoleToUser(new AssignRoleToUserRequest(keycloakId, userRole.toString(), roleId));
         } catch (Exception ignored) {}
 
         User user = userRepository.save(User.builder()

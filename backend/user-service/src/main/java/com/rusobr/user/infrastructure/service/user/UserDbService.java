@@ -2,6 +2,7 @@ package com.rusobr.user.infrastructure.service.user;
 
 import com.rusobr.user.infrastructure.enums.UserRole;
 import com.rusobr.user.infrastructure.exception.ConflictException;
+import com.rusobr.user.infrastructure.service.user.strategy.CreateUserStrategy;
 import com.rusobr.user.web.dto.user.UserRequest;
 import com.rusobr.user.web.dto.user.UserResponse;
 import jakarta.annotation.PostConstruct;
