@@ -1,8 +1,8 @@
-package com.rusobr.user.infrastructure.service.student;
+package com.rusobr.user.infrastructure.service.user.strategy;
 
 import com.rusobr.user.infrastructure.enums.UserRole;
 import com.rusobr.user.infrastructure.exception.ConflictException;
-import com.rusobr.user.infrastructure.service.user.CreateUserStrategy;
+import com.rusobr.user.infrastructure.service.student.StudentService;
 import com.rusobr.user.infrastructure.service.user.UserProfileDetails;
 import com.rusobr.user.web.dto.student.StudentDetails;
 import lombok.RequiredArgsConstructor;

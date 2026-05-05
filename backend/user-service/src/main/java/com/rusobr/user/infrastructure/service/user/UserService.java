@@ -41,31 +41,8 @@ public class UserService {
             return userMapper.toCreateUserResponse(userRepository.save(user));
     }
 
-//    @Transactional
-//    public void deleteUser(String keycloakUserId) {
-//        keycloakRestClient.deleteKeyCloakUser(keycloakUserId);
-//        User user = userRepository.findByKeycloakId(keycloakUserId).orElseThrow(() -> new NotFoundException("User not found"));
-//        userRepository.delete(user);
-//    }
-
     public List<KeycloakRole> getAllRoles() {
         return keycloakRestClient.getAllKeycloakRoles();
-    }
-
-    @Transactional
-    public void assignRoleToUser(AssignRoleToUserRequest assignRoleToUserRequestDto) {
-        keycloakRestClient.assignRoleToUser(assignRoleToUserRequestDto);
-        User userDb = userRepository.findByKeycloakId(assignRoleToUserRequestDto.keycloakId()).orElseThrow(() -> new NotFoundException("User not found"));
-        userDb.getRoles().add(assignRoleToUserRequestDto.roleName());
-        userRepository.save(userDb);
-    }
-
-    @Transactional
-    public void deleteRoleFromUser(AssignRoleToUserRequest assignRoleToUserRequestDto) {
-        keycloakRestClient.deleteRoleFromUser(assignRoleToUserRequestDto);
-        User userDb = userRepository.findByKeycloakId(assignRoleToUserRequestDto.keycloakId()).orElseThrow(() -> new RuntimeException("User not found"));
-        userDb.getRoles().remove(assignRoleToUserRequestDto.roleName());
-        userRepository.save(userDb);
     }
 
     //todo edit usr
