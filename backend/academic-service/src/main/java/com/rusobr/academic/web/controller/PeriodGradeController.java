@@ -3,7 +3,6 @@ package com.rusobr.academic.web.controller;
 import com.rusobr.academic.infrastructure.service.PeriodGradeService;
 import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeRequest;
 import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeResponse;
-import com.rusobr.academic.web.dto.grade.periodGrade.StudentPeriodGradeProjection;
 import com.rusobr.academic.web.dto.grade.periodGrade.StudentPeriodGradeResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

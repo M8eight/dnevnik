@@ -1,11 +1,8 @@
 package com.rusobr.academic.service;
 
-import com.rusobr.academic.domain.enums.AttendanceStatus;
-import com.rusobr.academic.domain.enums.GradeType;
 import com.rusobr.academic.infrastructure.persistence.repository.LessonInstanceRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.ScheduleLessonRepository;
 import com.rusobr.academic.infrastructure.service.ScheduleService;
-import com.rusobr.academic.web.dto.lessonInstance.LessonWeekItemDto;
 import com.rusobr.academic.web.dto.scheduleLesson.ScheduleLessonResponse;
 import com.rusobr.academic.web.dto.scheduleLesson.SchoolLessonResponse;
 import org.junit.jupiter.api.DisplayName;
@@ -22,7 +19,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ScheduleServiceTest {

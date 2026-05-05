@@ -1,7 +1,5 @@
 package com.rusobr.academic.web.dto.grade.periodGrade;
 
-import com.rusobr.academic.domain.model.TeachingAssignment;
-
 import java.time.LocalDate;
 
 public record PeriodGradeRequest(

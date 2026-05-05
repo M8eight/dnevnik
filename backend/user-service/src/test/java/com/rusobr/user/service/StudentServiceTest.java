@@ -6,10 +6,9 @@ import com.rusobr.user.infrastructure.exception.NotFoundException;
 import com.rusobr.user.infrastructure.feignClient.SchoolClassClient;
 import com.rusobr.user.infrastructure.mapper.StudentMapper;
 import com.rusobr.user.infrastructure.persistence.repository.StudentRepository;
-import com.rusobr.user.infrastructure.service.StudentService;
-import com.rusobr.user.infrastructure.service.TeacherService;
+import com.rusobr.user.infrastructure.service.student.StudentService;
+import com.rusobr.user.infrastructure.service.teacher.TeacherService;
 import com.rusobr.user.web.dto.feign.SchoolClassResponse;
-import com.rusobr.user.web.dto.student.StudentResponse;
 import com.rusobr.user.web.dto.student.StudentResponseDetail;
 import com.rusobr.user.web.dto.teacher.TeacherResponse;
 import org.junit.jupiter.api.DisplayName;
@@ -56,7 +55,7 @@ class StudentServiceTest {
 
             when(studentRepository.findAllStudentsByIds(ids)).thenReturn(expectedResponse);
 
-            List<StudentResponse> result = service.findBatchStudents(ids);
+            List<StudentResponse> result = service.findSimpleBatchStudents(ids);
 
             assertThat(result).hasSize(2).isEqualTo(expectedResponse);
         }
@@ -64,8 +63,8 @@ class StudentServiceTest {
         @Test
         @DisplayName("null или пустые ids — возвращает пустой список")
         void emptyIds_returnsEmptyList() {
-            assertThat(service.findBatchStudents(null)).isEmpty();
-            assertThat(service.findBatchStudents(List.of())).isEmpty();
+            assertThat(service.findSimpleBatchStudents(null)).isEmpty();
+            assertThat(service.findSimpleBatchStudents(List.of())).isEmpty();
 
             verifyNoInteractions(studentRepository);
         }
@@ -102,7 +101,7 @@ class StudentServiceTest {
             when(studentRepository.findWithUserById(STUDENT_ID)).thenReturn(Optional.of(student));
             when(schoolClassClient.getSchoolClassByStudentId(STUDENT_ID)).thenReturn(schoolClass);
             when(teacherService.findWithUserById(TEACHER_ID)).thenReturn(teacher);
-            when(studentMapper.toStudentResponse(student, schoolClass, teacher)).thenReturn(expectedDetail);
+            when(studentMapper.toStudentDetailResponse(student, schoolClass, teacher)).thenReturn(expectedDetail);
 
             // Вызов
             StudentResponseDetail result = service.findStudentDetailById(STUDENT_ID);

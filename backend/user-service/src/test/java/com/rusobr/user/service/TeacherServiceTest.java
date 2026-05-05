@@ -4,7 +4,7 @@ import com.rusobr.user.domain.model.Teacher;
 import com.rusobr.user.infrastructure.exception.NotFoundException;
 import com.rusobr.user.infrastructure.mapper.TeacherMapper;
 import com.rusobr.user.infrastructure.persistence.repository.TeacherRepository;
-import com.rusobr.user.infrastructure.service.TeacherService;
+import com.rusobr.user.infrastructure.service.teacher.TeacherService;
 import com.rusobr.user.web.dto.teacher.TeacherResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
