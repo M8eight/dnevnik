@@ -1,7 +1,7 @@
 package com.rusobr.user.infrastructure.persistence.repository;
 
 import com.rusobr.user.domain.model.Student;
-import com.rusobr.user.web.dto.student.StudentResponse;
+import com.rusobr.user.web.dto.user.UserResponse;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -15,11 +15,11 @@ import java.util.Optional;
 @Repository
 public interface StudentRepository extends JpaRepository<Student, Long> {
     @Query("""
-            select new com.rusobr.user.web.dto.student.StudentResponse(s.id, u.firstName, u.lastName, u.keycloakId)
+            select new com.rusobr.user.web.dto.user.UserResponse(s.id, u.firstName, u.lastName, u.username, u.keycloakId)
                         from Student s join s.user u where s.id in :studentIds
                             order by u.lastName
     """)
-    List<StudentResponse> findAllStudentsByIds(@Param("studentIds") Collection<Long> studentIds);
+    List<UserResponse> findAllStudentsByIds(@Param("studentIds") Collection<Long> studentIds);
 
     @EntityGraph(attributePaths = {"user"})
     Optional<Student> findWithUserById(Long userId);
