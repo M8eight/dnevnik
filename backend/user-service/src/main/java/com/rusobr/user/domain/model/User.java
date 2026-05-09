@@ -3,6 +3,7 @@ package com.rusobr.user.domain.model;
 import com.rusobr.user.infrastructure.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -41,6 +42,7 @@ public class User extends BaseEntity {
     @Column(name = "role_name")
     @ElementCollection(fetch = FetchType.LAZY, targetClass = UserRole.class)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @BatchSize(size = 20)
     private Set<UserRole> roles = new HashSet<>();
 
     @Override

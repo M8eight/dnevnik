@@ -1,4 +1,5 @@
-import { type Homework, type HomeworkRequest, type HomeworkResponse, type PageResponse, createHomeworks, deleteHomework, getHomeworkByDate, getHomeworksByTeachingAssignment } from "@/services/homework-service"
+import type { PageResponse } from "@/helpers/helper-interfaces"
+import { type Homework, type HomeworkRequest, type HomeworkResponse, createHomeworks, deleteHomework, getHomeworkByDate, getHomeworksByTeachingAssignment } from "@/services/homework-service"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 export const useHomeworkByDate = (date: string, studentId: number) => {

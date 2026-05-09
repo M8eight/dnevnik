@@ -1,4 +1,5 @@
-import { createSubject, deleteSubject, getSubjects, type PageResponse, type SubjectRequest, type SubjectResponse } from "@/services/subject-service";
+import type { PageResponse } from "@/helpers/helper-interfaces";
+import { createSubject, deleteSubject, getSubjects, type SubjectRequest, type SubjectResponse } from "@/services/subject-service";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export const useGetAllSubjects = (page: number, size: number) => {

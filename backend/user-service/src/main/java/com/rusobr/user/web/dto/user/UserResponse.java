@@ -1,6 +1,9 @@
 package com.rusobr.user.web.dto.user;
 
+import com.rusobr.user.infrastructure.enums.UserRole;
 import lombok.Builder;
+
+import java.util.Set;
 
 @Builder
 public record UserResponse(
@@ -8,5 +11,6 @@ public record UserResponse(
     String firstName,
     String lastName,
     String username,
-    String keycloakId
+    String keycloakId,
+    Set<UserRole> roles
 ) {}

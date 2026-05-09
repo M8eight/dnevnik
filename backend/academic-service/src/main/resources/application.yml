@@ -27,6 +27,9 @@ springdoc:
     path: /v3/api-docs
 
 eureka:
+  instance:
+    hostname: ${APP_NAME:localhost}
+    prefer-ip-address: false
   client:
     service-url:
       defaultZone: ${EUREKA_URL:http://localhost:8761}/eureka/
@@ -36,6 +39,8 @@ logging:
     url: ${LOKI_URL:http://localhost:3100}/loki/api/v1/push
   level:
     root: INFO
+    com.netflix.discovery: WARN
+    com.netflix.eureka: WARN
 
 management:
   tracing:

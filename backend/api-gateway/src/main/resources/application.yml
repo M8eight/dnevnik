@@ -46,3 +46,8 @@ eureka:
   client:
     service-url:
       defaultZone: ${EUREKA_URL:http://localhost:8761}/eureka/
+
+logging:
+  level:
+    io.netty.resolver.dns: DEBUG
+    reactor.netty.http.client: DEBUG
