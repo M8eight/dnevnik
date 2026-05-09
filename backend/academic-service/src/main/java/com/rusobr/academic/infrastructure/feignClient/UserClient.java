@@ -10,7 +10,7 @@ import java.util.List;
 @FeignClient(value = "user-service")
 public interface UserClient {
 
-    @PostMapping("/api/v1/users/batch")
+    @PostMapping("/api/v1/students/batch")
     List<UserResponse> getBatchUsers(@RequestBody List<Long> ids);
 
 

@@ -27,7 +27,7 @@ public class Parent extends BaseEntity {
     @JoinColumn(name = "id")
     private User user;
 
-    @OneToMany(mappedBy = "parent")
+    @OneToMany(mappedBy = "parent",  fetch = FetchType.LAZY)
     private List<Student> children = new ArrayList<>();
 
     @Override

@@ -35,7 +35,7 @@ public class UserDbService {
     @Transactional
     public UserResponse createUserDb(UserRequest<? extends UserProfileDetails> createUserRequest, String keycloakId) {
         //Создаем user в бд
-        UserResponse userResponse = userService.createUser(createUserRequest.user(), keycloakId);
+        UserResponse userResponse = userService.createUser(createUserRequest.user(), keycloakId, createUserRequest.role());
         //Выбираем конкретную реализацию пользователя по роли
         CreateUserStrategy strategy = savers.get(createUserRequest.role());
         if (strategy == null) {
