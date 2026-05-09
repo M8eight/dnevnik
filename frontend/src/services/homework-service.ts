@@ -1,4 +1,5 @@
 import api from "@/axios/axios";
+import { type PageResponse } from "@/helpers/helper-interfaces";
 
 export interface Homework {
     id: number;
@@ -13,17 +14,6 @@ export interface HomeworkResponse {
         id: number;
         lessonDate: string;
     };
-}
-
-export interface PageResponse<T> {
-    content: T[];
-    totalPages: number;
-    totalElements: number;
-    size: number;
-    number: number;
-    first: boolean;
-    last: boolean;
-    empty: boolean;
 }
 
 export interface HomeworkRequest {

@@ -1,19 +1,9 @@
 import api from "@/axios/axios";
+import type { PageResponse } from "@/helpers/helper-interfaces";
 
 export interface SubjectResponse {
     id: number;
     name: string;
-}
-
-export interface PageResponse<T> {
-    content: T[];
-    totalPages: number;
-    totalElements: number;
-    size: number;
-    number: number;
-    first: boolean;
-    last: boolean;
-    empty: boolean;
 }
 
 export interface SubjectRequest {

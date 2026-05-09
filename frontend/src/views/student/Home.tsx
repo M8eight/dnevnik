@@ -2,11 +2,11 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useUser } from "@/hooks/use-user";
 import { useAvgGrade, useGradesByDate } from "@/hooks/use-grade";
 import { useScheduleByDate, useScheduleByStudentId } from "@/hooks/use-schedule";
 import { useHomeworkByDate } from "@/hooks/use-homework";
-import type { User } from "@/services/user-service";
+import type { StudentDetailsResponse } from "@/services/student-service";
+import { useStudentDetails } from "@/hooks/use-student";
 
 const DAYS_MAP = [
   { key: "MONDAY",    label: "Пн" },
@@ -69,7 +69,7 @@ function subjectColor(name: string): string {
 
 // ─── Sub-cards ────────────────────────────────────────────────────────────────
 
-function UserCard({ user }: { user: User }) {
+function UserCard({ user }: { user: StudentDetailsResponse }) {
   return (
     <div className="col-span-12 md:col-span-6 glass-card rounded-[22px] p-7 relative overflow-hidden anim-in anim-delay-1">
       {/* Decorative circle */}
@@ -116,7 +116,7 @@ function RatingCard({ avgGrade }: { avgGrade?: number }) {
   );
 }
 
-function TeacherCard({ user }: { user?: User }) {
+function TeacherCard({ user }: { user?: StudentDetailsResponse }) {
   const teacher = user?.schoolClassTeacher;
   return (
     <div className="col-span-6 md:col-span-4 glass-card rounded-[22px] p-6 anim-in anim-delay-3">
@@ -259,7 +259,7 @@ function Home() {
     .format(today)
     .toUpperCase();
 
-  const { data: user, isLoading, isError } = useUser(studentId);
+  const { data: user, isLoading, isError } = useStudentDetails(studentId);
   const { data: avgGrade }      = useAvgGrade(studentId, 4);
   const { data: todayGrades }   = useGradesByDate(studentId, todayDateStr);
   const { data: todaySchedule } = useScheduleByDate(studentId, currentDayOfWeek, todayDateStr);

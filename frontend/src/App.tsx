@@ -7,6 +7,7 @@ import TeacherJournal from './views/teacher/TeacherJournal'
 import HomeworkJournal from './views/teacher/HomeworkJournal'
 import SubjectPage from './views/admin/SubjectPage'
 import PeriodPage from './views/admin/PeriodPage'
+import UserAdminPage from './views/admin/UserAdminPage'
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/teacher/homework" element={<HomeworkJournal />} />
         <Route path="/admin/subject" element={<SubjectPage />} />
         <Route path="/admin/period" element={<PeriodPage />} />
+        <Route path="/admin/user" element={<UserAdminPage />} />
       </Routes>
     </BrowserRouter>
   )
