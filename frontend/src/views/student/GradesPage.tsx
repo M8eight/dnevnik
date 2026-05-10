@@ -7,72 +7,15 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { Download, Loader2, CalendarDays, TrendingUp, BookOpen, Star, Award } from "lucide-react";
 import { useGradesLessonsByStudentId } from "@/hooks/use-grade";
 import type { GradeLessonDto } from "@/services/grade-service";
 import { useGetAcademicPeriods } from "@/hooks/use-academic-period";
+import StatCard from "@/components/student/grades-page/stat-card";
+import Chip from "@/components/student/grades-page/chip";
+import GradeBadge from "@/components/student/grades-page/grade-badge";
+import StudentNavbar from "@/templates/navbars/StudentNavbar";
 
-// ─── Primitives ───────────────────────────────────────────────────────────────
-
-function Chip({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return (
-    <Badge
-      variant="outline"
-      className={`text-[10px] px-3 py-1 font-extrabold tracking-[0.2em] uppercase rounded-full ${className}`}
-    >
-      {children}
-    </Badge>
-  );
-}
-
-function GradeBadge({ grade, size = "md" }: { grade?: number; size?: "sm" | "md" }) {
-  if (!grade) {
-    return (
-      <div className="w-full flex justify-center items-center h-[32px]">
-        <span className="text-black/10 font-serif text-lg">·</span>
-      </div>
-    );
-  }
-
-  const styles: Record<number, string> = {
-    5: "bg-emerald-50 text-emerald-600",
-    4: "bg-amber-50   text-amber-500",
-    3: "bg-red-50     text-red-500",
-    2: "bg-red-50     text-red-600",
-  };
-
-  const sizeClass = size === "md" ? "w-[36px] h-[36px] text-[17px]" : "w-[28px] h-[28px] text-[14px]";
-
-  return (
-    <span className={`${sizeClass} ${styles[grade] ?? "bg-gray-50 text-gray-500"} rounded-[10px] flex items-center justify-center font-serif font-bold flex-shrink-0 ring-1 ring-black/[0.06] transition-all duration-200 cursor-default active:scale-90`}>
-      {grade}
-    </span>
-  );
-}
-
-// ─── Bento Stat Card ──────────────────────────────────────────────────────────
-
-function StatCard({
-  icon: Icon, label, value, sub, accent, delay = "",
-}: {
-  icon: React.ElementType; label: string; value: string; sub?: string; accent: string; delay?: string;
-}) {
-  return (
-    <div className={`bento-stat glass-card rounded-[22px] p-5 flex flex-col gap-3 anim-in ${delay}`} style={{ color: accent }}>
-      <div className="w-9 h-9 rounded-[11px] flex items-center justify-center" style={{ background: `${accent}14` }}>
-        <Icon className="w-4 h-4" style={{ color: accent }} />
-      </div>
-      <div>
-        <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-black/30 mb-0.5">{label}</p>
-        <p className="font-serif font-black text-[28px] leading-none text-[var(--navy)]">{value}</p>
-        {sub && <p className="text-[11px] text-black/30 font-medium mt-1">{sub}</p>}
-      </div>
-    </div>
-  );
-}
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const formatDate = (dateStr: string) => {
   const [, month, day] = dateStr.split("-");
@@ -81,14 +24,12 @@ const formatDate = (dateStr: string) => {
 
 const calculateWeightedAvg = (grades: GradeLessonDto[]) => {
   if (grades.length === 0) return 0;
-  const totalValue  = grades.reduce((acc, g) => acc + g.value * g.weight, 0);
+  const totalValue = grades.reduce((acc, g) => acc + g.value * g.weight, 0);
   const totalWeight = grades.reduce((acc, g) => acc + g.weight, 0);
   return totalValue / totalWeight;
 };
 
 const formatAvg = (val: number) => val === 0 ? "—" : parseFloat(val.toFixed(2)).toString();
-
-// ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function GradesPage() {
   const { data: periods, isLoading: isLoadingPeriods } = useGetAcademicPeriods();
@@ -127,7 +68,7 @@ export default function GradesPage() {
     );
   }
 
-  // Date filtering
+  // Фильтруем даты: показываем только те, что не позже сегодняшнего дня, или если в них есть оценки
   const today = new Date();
   const localTodayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
   const filteredDates = response.dates.filter((date) => {
@@ -135,13 +76,15 @@ export default function GradesPage() {
     return response.subjects.some((sub) => sub.grades.some((g) => g.date === date));
   });
 
-  // Stats
-  const allGrades      = response.subjects.flatMap((s) => s.grades);
-  const overallAvg     = allGrades.length ? allGrades.reduce((a, g) => a + g.value, 0) / allGrades.length : 0;
+  // статистика 
+  const allGrades = response.subjects.flatMap((s) => s.grades);
+  const overallAvg = allGrades.length ? allGrades.reduce((a, g) => a + g.value, 0) / allGrades.length : 0;
   const excellentCount = allGrades.filter((g) => g.value === 5).length;
 
   return (
-    <div className="relative z-10 min-h-screen px-6 md:px-10 pt-28 pb-14 max-w-[1600px] mx-auto">
+    <div className="relative z-10 min-h-screen px-6 md:px-10 pt-2 pb-14 max-w-[1600px] mx-auto">
+
+      <StudentNavbar />
 
       {/* ── Header ── */}
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 pb-6 border-b border-black/[0.08] anim-in">
@@ -182,12 +125,12 @@ export default function GradesPage() {
         </div>
       </header>
 
-      {/* ── Bento Stats ── */}
+      {/* ── Статистика ── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        <StatCard icon={TrendingUp} label="Средний балл" value={overallAvg ? parseFloat(overallAvg.toFixed(2)).toString() : "—"} sub="за четверть"           accent="var(--red)"   delay="anim-delay-1" />
-        <StatCard icon={Star}       label="Пятёрок"      value={excellentCount.toString()}                                        sub={`из ${allGrades.length} оценок`} accent="var(--gold)"  delay="anim-delay-2" />
-        <StatCard icon={BookOpen}   label="Предметов"    value={response.subjects.length.toString()}                             sub="в этой четверти"      accent="var(--navy)"  delay="anim-delay-3" />
-        <StatCard icon={Award}      label="Дней занятий" value={filteredDates.length.toString()}                                  sub="в журнале"            accent="var(--green)" delay="anim-delay-4" />
+        <StatCard icon={TrendingUp} label="Средний балл" value={overallAvg ? parseFloat(overallAvg.toFixed(2)).toString() : "—"} sub="за четверть" accent="var(--red)" delay="anim-delay-1" />
+        <StatCard icon={Star} label="Пятёрок" value={excellentCount.toString()} sub={`из ${allGrades.length} оценок`} accent="var(--gold)" delay="anim-delay-2" />
+        <StatCard icon={BookOpen} label="Предметов" value={response.subjects.length.toString()} sub="в этой четверти" accent="var(--navy)" delay="anim-delay-3" />
+        <StatCard icon={Award} label="Дней занятий" value={filteredDates.length.toString()} sub="в журнале" accent="var(--green)" delay="anim-delay-4" />
       </div>
 
       {/* ── Table ── */}
@@ -225,9 +168,9 @@ export default function GradesPage() {
                 const avgNum = parseFloat(weightedAvg.toFixed(2));
                 const avgColor =
                   avgNum >= 4.5 ? "text-emerald-600"
-                  : avgNum >= 3.5 ? "text-amber-500"
-                  : avgNum > 0   ? "text-red-500"
-                  : "text-black/20";
+                    : avgNum >= 3.5 ? "text-amber-500"
+                      : avgNum > 0 ? "text-red-500"
+                        : "text-black/20";
 
                 return (
                   <TableRow key={sub.subject} className="border-black/[0.04] transition-colors group h-[58px] hover:bg-black/[0.015]">
@@ -270,17 +213,18 @@ export default function GradesPage() {
                 );
               })}
             </TableBody>
+
           </Table>
           <ScrollBar orientation="horizontal" className="h-2 mx-2 mb-2 rounded-full bg-black/[0.03]" />
         </ScrollArea>
       </div>
 
-      {/* ── Legend ── */}
+      {/* ── Легенда ── */}
       <div className="mt-6 flex flex-wrap gap-6 anim-in anim-delay-5">
         {[
           { color: "#16a34a", bg: "#f0fdf4", label: "Отлично (5)" },
-          { color: "#d97706", bg: "#fffbeb", label: "Хорошо (4)"  },
-          { color: "#dc2626", bg: "#fef2f2", label: "Удовл. (3)"  },
+          { color: "#d97706", bg: "#fffbeb", label: "Хорошо (4)" },
+          { color: "#dc2626", bg: "#fef2f2", label: "Удовл. (3)" },
         ].map((item) => (
           <div key={item.label} className="flex items-center gap-2 text-[9px] font-extrabold uppercase tracking-[0.22em] text-black/35">
             <span className="w-5 h-5 rounded-[6px] ring-1 ring-black/[0.06] flex items-center justify-center shrink-0" style={{ background: item.bg }}>
