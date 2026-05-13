@@ -1,10 +1,10 @@
 package com.rusobr.user.infrastructure.exception.exceptionAdvice;
 
+import com.rusobr.user.infrastructure.exception.ConflictException;
 import com.rusobr.user.infrastructure.exception.ErrorResponse;
 import com.rusobr.user.infrastructure.exception.KeycloakUserAlreadyExist;
 import com.rusobr.user.infrastructure.exception.NotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.boot.context.config.ConfigDataException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -39,8 +39,9 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }
 
-    @ExceptionHandler(ConfigDataException.class)
-    public ResponseEntity<ErrorResponse> handleConfigDataException(ConfigDataException ex, HttpServletRequest req) {
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<ErrorResponse> handleConflict(ConflictException ex, HttpServletRequest req) {
+
         ErrorResponse errorResponse = new ErrorResponse(
                 LocalDateTime.now(),
                 HttpStatus.CONFLICT.value(),

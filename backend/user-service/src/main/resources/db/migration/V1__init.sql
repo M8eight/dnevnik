@@ -56,6 +56,7 @@ create index idx_students_parent_id on students (parent_id) where deleted_at is 
 create index idx_user_roles_user_id on user_roles (user_id);
 
 create unique index uq_users_keycloak_id on users (keycloak_id) where deleted_at is null;
+create unique index uq_users_username on users (username) where deleted_at is null;
 
 CREATE INDEX idx_users_names_trgm_gin
     ON users USING gin (((first_name::text || ' '::text) || last_name::text) gin_trgm_ops);

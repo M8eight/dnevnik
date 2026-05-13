@@ -47,6 +47,8 @@ public class UserOrchestrator {
     public UserResponse update(Long userId, UserUpdateRequest userUpdateRequest) {
         User user = userService.findById(userId);
 
+        validUsername(userUpdateRequest.user().username(), userId);
+
         //Собираем старые данные пользователя на случай отката
         UserUpdateData oldUserResponse = getOldUserData(user);
 
@@ -73,6 +75,17 @@ public class UserOrchestrator {
         }
 
         return userResponse;
+    }
+
+    private void validUsername(String username, Long id) {
+
+        if (username == null) {
+            return;
+        }
+
+        if (userService.isAlreadyExistsByUsername(username, id)) {
+            throw new ConflictException("Username already exists");
+        }
     }
 
     private UserUpdateData getOldUserData(User user) {

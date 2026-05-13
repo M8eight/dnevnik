@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -44,6 +45,15 @@ public class StudentService {
         return studentRepository.findAllStudentsByIds(ids);
     }
 
+    public StudentDetails findById(Long id) {
+        Student student = studentRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Student not found: " + id));
+        return studentMapper.toStudentDetails(student);
+    }
+
+    public Optional<Student> findByIdWithDeleted(Long id) {
+        return studentRepository.findByIdWithDeleted(id);
+    }
 
     public StudentResponseDetail findStudentDetailById(Long id) {
         if (id == null) {

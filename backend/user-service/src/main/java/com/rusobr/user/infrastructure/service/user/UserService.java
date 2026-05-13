@@ -42,6 +42,10 @@ public class UserService {
                 .orElseThrow(() -> new NotFoundException("User not found with id: " + id));
     }
 
+    public boolean isAlreadyExistsByUsername(String username, Long id) {
+        return userRepository.existsByUsernameAndIdNot(username, id);
+    }
+
     @Transactional(readOnly = true)
     public Page<UserResponse> findAllByFilter(Pageable pageable, UserRole role, String fullNameSearch) {
         Specification<User> specification = UserSpecification.findByRole(role).and(UserSpecification.findByFullNameFuzzy(fullNameSearch));

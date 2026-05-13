@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @RequiredArgsConstructor
 @Component
 public class ParentService {
@@ -24,6 +26,16 @@ public class ParentService {
     public void createParent(Long userId, ParentDetails parentDetails) {
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found: " + userId));
         parentRepository.save(parentMapper.toEntity(user, parentDetails));
+    }
+
+    public ParentDetails findById(Long id) {
+        Parent parent = parentRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Parent not found: " + id));
+        return parentMapper.toParentDetails(parent);
+    }
+
+    public Optional<Parent> findByIdWithDeleted(Long id) {
+        return parentRepository.findByIdWithDeleted(id);
     }
 
     public ParentResponse getParent(Long userId) {

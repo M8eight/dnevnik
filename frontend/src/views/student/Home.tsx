@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAvgGrade, useGradesByDate } from "@/hooks/use-grade";
 import { useScheduleByDate, useScheduleByStudentId } from "@/hooks/use-schedule";
 import { useHomeworkByDate } from "@/hooks/use-homework";
-import { useStudentDetails } from "@/hooks/use-student";
+import { useStudentFullDetails } from "@/hooks/use-student";
 import { CurrentDate } from "@/helpers/student-helpers";
 import { UserCard, RatingCard, TeacherCard, TodayScheduleCard, TodayGradesCard, HomeworkCard, WeekScheduleCard } from "@/components/student/home/home-cards";
 import StudentNavbar from "@/templates/navbars/StudentNavbar";
@@ -17,7 +17,7 @@ function Home() {
     .format(today)
     .toUpperCase();
 
-  const { data: user, isLoading, isError } = useStudentDetails(studentId);
+  const { data: user, isLoading, isError } = useStudentFullDetails(studentId);
   const { data: avgGrade }      = useAvgGrade(studentId, 4);
   const { data: todayGrades }   = useGradesByDate(studentId, todayDateStr);
   const { data: todaySchedule } = useScheduleByDate(studentId, currentDayOfWeek, todayDateStr);

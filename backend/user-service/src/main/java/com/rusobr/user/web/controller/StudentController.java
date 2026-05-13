@@ -2,6 +2,7 @@ package com.rusobr.user.web.controller;
 
 import com.rusobr.user.infrastructure.service.student.StudentService;
 import com.rusobr.user.web.dto.feign.UserFeignResponse;
+import com.rusobr.user.web.dto.student.StudentDetails;
 import com.rusobr.user.web.dto.student.StudentResponseDetail;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,11 @@ import java.util.List;
 public class StudentController {
 
     private final StudentService studentService;
+
+    @GetMapping("/{id}/details")
+    public StudentDetails findById(@PathVariable Long id) {
+        return studentService.findById(id);
+    }
 
     @PostMapping("/batch")
     public List<UserFeignResponse> findBatchStudents(@RequestBody List<Long> ids) {
@@ -32,7 +38,7 @@ public class StudentController {
     }
 
     @GetMapping("/{id}")
-    public StudentResponseDetail findById(@PathVariable Long id) {
+    public StudentResponseDetail findDetailsById(@PathVariable Long id) {
         return studentService.findStudentDetailById(id);
     }
 

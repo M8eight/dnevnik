@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { deleteUser, findUsersByFilter, type UserResponse, type UserRole } from "../services/user-service"
+import { deleteUser, findUsersByFilter, getParentDetails, getStudentDetails, getTeacherDetails, updateUser, type ParentDetailsResponse, type StudentDetailsResponse, type TeacherDetailsResponse, type UserResponse, type UserRole, type UserUpdateRequest } from "../services/user-service"
 
 import {
     createStudent,
@@ -11,6 +11,7 @@ import {
 } from "@/services/user-service";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import  { type PageResponse } from "@/helpers/helper-interfaces";
+import { getStudentFullDetails, type StudentFullDetailsResponse } from "@/services/student-service";
 
 const QUERY_KEY = ["users"];
 
@@ -57,3 +58,34 @@ export const useDeleteUser = () => {
         onSuccess: () => queryClient.invalidateQueries({ queryKey: QUERY_KEY }),
     });
 }
+
+export const useUpdateUser = (userId: number) => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (request: UserUpdateRequest) => updateUser(userId, request),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+            queryClient.invalidateQueries({ queryKey: ["users", userId] })
+        },
+    });
+}
+
+export const useStudentDetails = (id: number | null) =>
+    useQuery<StudentDetailsResponse>({
+        queryKey: ["users", "details", "student", id],
+        queryFn: () => getStudentDetails(id!),
+        enabled: id !== null,
+    });
+
+export const useTeacherDetails = (id: number | null) =>
+    useQuery<TeacherDetailsResponse>({
+        queryKey: ["users", "details", "teacher", id],
+        queryFn: () => getTeacherDetails(id!),
+        enabled: id !== null,
+    });
+
+export const useParentDetails = (id: number) =>
+    useQuery<ParentDetailsResponse>({
+        queryKey: ["users", "details", "parent", id],
+        queryFn: () => getParentDetails(id),
+    });
