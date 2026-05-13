@@ -1,6 +1,6 @@
 import api from "../axios/axios";
 
-export interface StudentDetailsResponse {
+export interface StudentFullDetailsResponse {
     id: number;
     userId: number;
     keycloakId: string;
@@ -25,8 +25,8 @@ export interface StudentDetailsResponse {
 }
 
 
-export const getStudentDetails = async (studentId: number): Promise<StudentDetailsResponse> => {
-    const {data} = await api.get<StudentDetailsResponse>(`/user-service/api/v1/students/${studentId}`);
+export const getStudentFullDetails = async (studentId: number): Promise<StudentFullDetailsResponse> => {
+    const {data} = await api.get<StudentFullDetailsResponse>(`/user-service/api/v1/students/${studentId}`);
     return data;
 }
 

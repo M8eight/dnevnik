@@ -2,7 +2,7 @@ import type { PageResponse } from "@/helpers/helper-interfaces";
 import api from "../axios/axios";
 
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// ─── User create types ────────────────────────────────────────────────────────────────────
 
 export type UserRole = "STUDENT" | "PARENT" | "TEACHER";
 
@@ -56,8 +56,39 @@ export interface UserResponse {
     roles: UserRole[];
 }
 
+export interface StudentDetailsResponse {
+    studyProfile: string;
+}
 
+export interface TeacherDetailsResponse {
+    email: string;
+    phoneNumber: string;
+}
 
+export interface ParentDetailsResponse {}
+
+// ─── User update types ────────────────────────────────────────────────────────────────────
+
+export interface UserUpdateData {
+    username?: string;
+    firstName?: string;
+    lastName?: string;
+}
+
+export type UserProfileDetails = 
+    | {studyProfile: string} // For students
+    | {email: string; phoneNumber: string} // For teachers
+    | Record<string, never> // For parents
+
+export interface UserUpdateRequest {
+    userId: number;
+    user: UserUpdateData;
+    password?: string;
+    roles?: UserRole[];
+    details: Partial<Record<UserRole, UserProfileDetails>>;
+}
+
+// ─── User req ────────────────────────────────────────────────────────────────────
 
 export const createStudent = async (
     request: CreateStudentRequest
@@ -104,3 +135,23 @@ export const findUsersByFilter = async (
 export const deleteUser = async (userId: number): Promise<void> => {
     await api.delete(`/user-service/api/v1/users/${userId}`);
 }
+
+export const updateUser = async (userId: number, request: UserUpdateRequest): Promise<UserResponse> => {
+    const { data } = await api.put<UserResponse>(`/user-service/api/v1/users/${userId}`, request); 
+    return data;
+}
+
+export const getStudentDetails = async (id: number): Promise<StudentDetailsResponse> => {
+    const { data } = await api.get(`/user-service/api/v1/students/${id}/details`);
+    return data;
+};
+
+export const getTeacherDetails = async (id: number): Promise<TeacherDetailsResponse> => {
+    const { data } = await api.get(`/user-service/api/v1/teachers/${id}/details`);
+    return data;
+};
+
+export const getParentDetails = async (id: number): Promise<ParentDetailsResponse> => {
+    const { data } = await api.get(`/user-service/api/v1/parents/${id}/details`);
+    return data;
+};

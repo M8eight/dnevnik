@@ -1,5 +1,5 @@
 import { DAYS_MAP } from "@/constants/component-constants";
-import type { StudentDetailsResponse } from "@/services/student-service";
+import type { StudentFullDetailsResponse } from "@/services/student-service";
 import GradeBadge from "./grade-badge";
 import { subjectColor } from "@/helpers/student-helpers";
 import Chip from "@/components/teacher/teacher-journal/chip";
@@ -7,7 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 
-export function UserCard({ user }: { user: StudentDetailsResponse }) {
+export function UserCard({ user }: { user: StudentFullDetailsResponse }) {
   return (
     <div className="col-span-12 md:col-span-6 glass-card rounded-[22px] p-7 relative overflow-hidden anim-in anim-delay-1">
       {/* Decorative circle */}
@@ -54,7 +54,7 @@ export function RatingCard({ avgGrade }: { avgGrade?: number }) {
   );
 }
 
-export function TeacherCard({ user }: { user?: StudentDetailsResponse }) {
+export function TeacherCard({ user }: { user?: StudentFullDetailsResponse }) {
   const teacher = user?.schoolClassTeacher;
   return (
     <div className="col-span-6 md:col-span-4 glass-card rounded-[22px] p-6 anim-in anim-delay-3">

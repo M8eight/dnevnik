@@ -1,10 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { assignStudentToParent, getStudentDetails, unassignStudentFromParent, type StudentDetailsResponse } from "@/services/student-service";
+import { assignStudentToParent, getStudentFullDetails, unassignStudentFromParent, type StudentFullDetailsResponse } from "@/services/student-service";
 
-export const useStudentDetails = (id: number) => {
-    return useQuery<StudentDetailsResponse>({
+export const useStudentFullDetails = (id: number) => {
+    return useQuery<StudentFullDetailsResponse>({
         queryKey: ['student', id],
-        queryFn: () => getStudentDetails(id),
+        queryFn: () => getStudentFullDetails(id),
         enabled: !!id,
     })
 }

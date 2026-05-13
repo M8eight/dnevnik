@@ -11,6 +11,7 @@ import {
     Search,
     Trash2,
     Link2,
+    Pencil,
 } from "lucide-react";
 import {
     useDeleteUser,
@@ -23,6 +24,7 @@ import AdminNavbar from "@/templates/navbars/AdminNavbar";
 import { ROLES } from "@/constants/component-constants";
 import AssignStudentsModal from "@/components/admin/user-admin-page/assign-students-modal";
 import CreateUserForm from "@/components/admin/user-admin-page/create-user-form";
+import EditUserModal from "@/components/admin/user-admin-page/edit-user-modal";
 
 
 export default function UserAdminPage() {
@@ -34,6 +36,7 @@ export default function UserAdminPage() {
 
     // Модалка привязки
     const [assignParent, setAssignParent] = useState<UserResponse | null>(null);
+    const [editUser, setEditUser] = useState<UserResponse | null>(null);
 
     useEffect(() => {
         const timer = setTimeout(() => setDebouncedSearch(searchName), 500);
@@ -87,6 +90,10 @@ export default function UserAdminPage() {
                     parent={assignParent}
                     onClose={() => setAssignParent(null)}
                 />
+            )}
+
+            {editUser && (
+                <EditUserModal user={editUser} onClose={() => setEditUser(null)} />
             )}
 
             {/* ── Header ── */}
@@ -237,6 +244,14 @@ export default function UserAdminPage() {
                                                         )}
 
                                                         <button
+                                                            onClick={() => setEditUser(user)}
+                                                            className="w-8 h-8 shrink-0 rounded-xl flex items-center justify-center text-black/20 hover:text-[var(--navy)] hover:bg-black/5 transition-all"
+                                                            title="Редактировать"
+                                                        >
+                                                            <Pencil className="w-4 h-4" />
+                                                        </button>
+
+                                                        <button
                                                             onClick={() => handleDelete(user.id, `${user.firstName} ${user.lastName}`)}
                                                             disabled={deleteMutation.isPending}
                                                             className="w-8 h-8 shrink-0 rounded-xl flex items-center justify-center text-black/20 hover:text-red-500 hover:bg-red-50 transition-all disabled:opacity-50"
@@ -256,7 +271,7 @@ export default function UserAdminPage() {
                             <span className="text-xs font-bold text-black/30">Конец списка</span>
                             {renderPagination()}
                         </div>
-                        
+
                     </div>
 
                 </div>
