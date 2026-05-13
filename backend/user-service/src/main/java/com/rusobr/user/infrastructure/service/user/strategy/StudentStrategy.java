@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class StudentCreateStrategy implements CreateUserStrategy {
+public class StudentStrategy implements UserRoleStrategy {
 
     private final StudentService studentService;
 
@@ -22,6 +22,20 @@ public class StudentCreateStrategy implements CreateUserStrategy {
             studentService.createStudent(userId, studentDetails);
         } else {
             throw new ConflictException("Invalid user profile details");
+        }
+    }
+
+    @Override
+    public void delete(Long userId) {
+        studentService.deleteById(userId);
+    }
+
+    @Override
+    public void update(Long userId, UserProfileDetails userDetails) {
+        if (userDetails instanceof StudentDetails studentDetails) {
+            studentService.updateStudent(userId, studentDetails);
+        } else {
+            throw new ConflictException("Invalid user profile details for update");
         }
     }
 

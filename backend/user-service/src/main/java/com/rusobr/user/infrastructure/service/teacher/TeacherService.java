@@ -6,12 +6,12 @@ import com.rusobr.user.infrastructure.exception.NotFoundException;
 import com.rusobr.user.infrastructure.mapper.TeacherMapper;
 import com.rusobr.user.infrastructure.persistence.repository.TeacherRepository;
 import com.rusobr.user.infrastructure.persistence.repository.UserRepository;
-import com.rusobr.user.web.dto.student.StudentDetails;
 import com.rusobr.user.web.dto.teacher.TeacherDetails;
 import com.rusobr.user.web.dto.teacher.TeacherResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -32,8 +32,21 @@ public class TeacherService {
         teacherRepository.save(teacherMapper.toEntity(user, teacherDetails));
     }
 
+    @Transactional
+    public void updateTeacher(Long userId, TeacherDetails teacherDetails) {
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException("User not found: " + userId);
+        }
+        Teacher teacher = teacherRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Teacher not found: " + userId));
 
-    //todo crud сделать
+        if (teacherDetails.phoneNumber() != null) {
+            teacher.setPhoneNumber(teacherDetails.phoneNumber());
+        }
+        if (teacherDetails.email() != null) {
+            teacher.setEmail(teacherDetails.email());
+        }
+    }
 
     public void deleteById(Long id) {
         teacherRepository.deleteById(id);

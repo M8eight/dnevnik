@@ -4,7 +4,8 @@ import com.rusobr.user.infrastructure.exception.KeycloakUserAlreadyExist;
 import com.rusobr.user.web.dto.keycloak.KeycloakUserResponse;
 import com.rusobr.user.web.dto.keycloak.role.AssignRoleToUserRequest;
 import com.rusobr.user.web.dto.keycloak.role.KeycloakRole;
-import com.rusobr.user.web.dto.user.UserCreateRequest;
+import com.rusobr.user.web.dto.user.UserDataDto;
+import com.rusobr.user.web.dto.user.update.UserUpdateData;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
@@ -52,9 +53,11 @@ public class KeycloakRestClient {
         return Objects.requireNonNull(userList).get(0);
     }
 
-    public String createKeyCloakUser(UserCreateRequest createUserRequest) {
+    public String createKeyCloakUser(UserDataDto createUserRequest) {
         Map<String, Object> user = new HashMap<>();
         user.put("username", createUserRequest.username());
+        user.put("firstName", createUserRequest.firstName());
+        user.put("lastName", createUserRequest.lastName());
         user.put("enabled", true);
         user.put("emailVerified", true);
         user.put("credentials", List.of(Map.of(
@@ -97,6 +100,50 @@ public class KeycloakRestClient {
                 .bodyToMono(Void.class)
                 .block();
 
+    }
+
+    public void updateKeycloakUserProfile(String userId, UserUpdateData dto) {
+        Map<String, Object> userDto = new HashMap<>();
+        if (dto.username() != null) userDto.put("username", dto.username());
+        if (dto.firstName() != null) userDto.put("firstName", dto.firstName());
+        if (dto.lastName() != null) userDto.put("lastName", dto.lastName());
+
+        if (userDto.isEmpty()) return;
+
+        webClient.put()
+                .uri(keycloakUrl + "/admin/realms/" + keycloakRealm + "/users/" + userId)
+                .header("Authorization", "Bearer " + keyCloakTokenProvider.getAccessToken())
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(userDto)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, resp ->
+                    resp.bodyToMono(String.class)
+                            .flatMap(body -> Mono.error(new RuntimeException("Keycloak: " + body)))
+                )
+                .bodyToMono(Void.class)
+                .block();
+    }
+
+    public void resetKeycloakPassword(String userId, String newPassword) {
+        Map<String, Object> credentials = Map.of(
+                "type", "password",
+                "value", newPassword,
+                //TODO: Учесть в будущем про временный пароль
+                "temporary", false
+        );
+
+        webClient.put()
+                .uri(keycloakUrl + "/admin/realms/" + keycloakRealm + "/users/" + userId + "/reset-password")
+                .header("Authorization", "Bearer " + keyCloakTokenProvider.getAccessToken())
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(credentials)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, resp ->
+                        resp.bodyToMono(String.class)
+                                .flatMap(b -> Mono.error(new RuntimeException("Keycloak: " + b)))
+                )
+                .bodyToMono(Void.class)
+                .block();
     }
 
     public List<KeycloakRole> getAllKeycloakRoles() {

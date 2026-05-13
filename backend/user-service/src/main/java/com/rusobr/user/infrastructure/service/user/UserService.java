@@ -2,6 +2,7 @@ package com.rusobr.user.infrastructure.service.user;
 
 import com.rusobr.user.domain.model.User;
 import com.rusobr.user.infrastructure.enums.UserRole;
+import com.rusobr.user.infrastructure.exception.NotFoundException;
 import com.rusobr.user.infrastructure.mapper.UserMapper;
 import com.rusobr.user.infrastructure.persistence.repository.ParentRepository;
 import com.rusobr.user.infrastructure.persistence.repository.StudentRepository;
@@ -10,7 +11,7 @@ import com.rusobr.user.infrastructure.persistence.repository.UserRepository;
 import com.rusobr.user.infrastructure.specification.UserSpecification;
 import com.rusobr.user.infrastructure.webClient.KeycloakRestClient;
 import com.rusobr.user.web.dto.keycloak.role.KeycloakRole;
-import com.rusobr.user.web.dto.user.UserCreateRequest;
+import com.rusobr.user.web.dto.user.UserDataDto;
 import com.rusobr.user.web.dto.user.UserResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,12 +37,18 @@ public class UserService {
     private final ParentRepository parentRepository;
 
     @Transactional(readOnly = true)
+    public User findById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User not found with id: " + id));
+    }
+
+    @Transactional(readOnly = true)
     public Page<UserResponse> findAllByFilter(Pageable pageable, UserRole role, String fullNameSearch) {
         Specification<User> specification = UserSpecification.findByRole(role).and(UserSpecification.findByFullNameFuzzy(fullNameSearch));
         return userRepository.findAll(specification, pageable).map(userMapper::toUserResponse);
     }
 
-    public UserResponse createUser(UserCreateRequest reqDto, String keycloakUserId, UserRole role) {
+    public UserResponse createUser(UserDataDto reqDto, String keycloakUserId, UserRole role) {
             User user = userMapper.toUser(reqDto, keycloakUserId, Collections.singleton(role));
             return userMapper.toCreateUserResponse(userRepository.save(user));
     }
@@ -62,5 +69,4 @@ public class UserService {
         userRepository.delete(user);
     }
 
-    //todo edit usr
 }

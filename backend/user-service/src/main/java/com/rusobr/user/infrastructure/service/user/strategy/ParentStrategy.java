@@ -12,13 +12,27 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class ParentCreateStrategy implements CreateUserStrategy{
+public class ParentStrategy implements UserRoleStrategy {
     private final ParentService parentService;
 
     @Override
     public void save(Long userId, UserProfileDetails userDetails) {
         if (userDetails instanceof ParentDetails parentDetails) {
             parentService.createParent(userId, parentDetails);
+        } else {
+            throw new ConflictException("Invalid user profile details");
+        }
+    }
+
+    @Override
+    public void delete(Long userId) {
+        parentService.deleteById(userId);
+    }
+
+    @Override
+    public void update(Long userId, UserProfileDetails userDetails) {
+        if (userDetails instanceof ParentDetails parentDetails) {
+            parentService.updateParent(userId, parentDetails);
         } else {
             throw new ConflictException("Invalid user profile details");
         }

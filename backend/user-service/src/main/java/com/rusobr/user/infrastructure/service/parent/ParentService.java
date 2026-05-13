@@ -31,4 +31,18 @@ public class ParentService {
         return parentMapper.toResponse(parentFetch);
     }
 
+    @Transactional
+    public void updateParent(Long userId, ParentDetails parentDetails) {
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException("User not found: " + userId);
+        }
+        if (!parentRepository.existsById(userId)) {
+            throw new NotFoundException("Parent not found: " + userId);
+        }
+    }
+
+    public void deleteById(Long parentId) {
+        parentRepository.deleteById(parentId);
+    }
+
 }

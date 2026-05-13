@@ -64,6 +64,19 @@ public class StudentService {
     }
 
     @Transactional
+    public void updateStudent(Long userId, StudentDetails studentDetails) {
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException("User not found: " + userId);
+        }
+        Student student = studentRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Student not found: " + userId));
+
+        if (studentDetails.studyProfile() != null) {
+            student.setStudyProfile(studentDetails.studyProfile());
+        }
+    }
+
+    @Transactional
     public void assignStudentToParent(Long studentId, Long parentId) {
         Parent parent = parentRepository.findById(parentId)
                 .orElseThrow(() -> new NotFoundException("Parent not found: " + parentId));
@@ -92,6 +105,10 @@ public class StudentService {
 
         student.setParent(null);
         studentRepository.save(student);
+    }
+
+    public void deleteById(Long studentId) {
+        studentRepository.deleteById(studentId);
     }
 
 }

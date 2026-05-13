@@ -6,8 +6,9 @@ import com.rusobr.user.infrastructure.service.user.UserService;
 import com.rusobr.user.web.dto.parent.ParentDetails;
 import com.rusobr.user.web.dto.student.StudentDetails;
 import com.rusobr.user.web.dto.teacher.TeacherDetails;
-import com.rusobr.user.web.dto.user.UserRequest;
+import com.rusobr.user.web.dto.user.UserCreateRequest;
 import com.rusobr.user.web.dto.user.UserResponse;
+import com.rusobr.user.web.dto.user.update.UserUpdateRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,18 +30,23 @@ public class UserController {
     }
 
     @PostMapping("/students")
-    public UserResponse createStudent(@RequestBody UserRequest<StudentDetails> userRequest) {
+    public UserResponse createStudent(@RequestBody UserCreateRequest<StudentDetails> userRequest) {
         return userOrchestrator.create(userRequest);
     }
 
     @PostMapping("/teachers")
-    public UserResponse createTeacher(@RequestBody UserRequest<TeacherDetails> userRequest) {
+    public UserResponse createTeacher(@RequestBody UserCreateRequest<TeacherDetails> userRequest) {
         return userOrchestrator.create(userRequest);
     }
 
     @PostMapping("/parents")
-    public UserResponse createParent(@RequestBody UserRequest<ParentDetails> userRequest) {
+    public UserResponse createParent(@RequestBody UserCreateRequest<ParentDetails> userRequest) {
         return userOrchestrator.create(userRequest);
+    }
+
+    @PutMapping("/{id}")
+    public UserResponse updateUser(@PathVariable Long id, @RequestBody UserUpdateRequest userUpdateRequest) {
+        return userOrchestrator.update(id, userUpdateRequest);
     }
 
     @DeleteMapping("/{id}")
