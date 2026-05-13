@@ -34,7 +34,7 @@
   "loginWithEmailAllowed": false,
   "duplicateEmailsAllowed": false,
   "resetPasswordAllowed": false,
-  "editUsernameAllowed": false,
+  "editUsernameAllowed": true,
   "bruteForceProtected": false,
   "permanentLockout": false,
   "maxTemporaryLockouts": 0,
@@ -470,6 +470,7 @@
   "webAuthnPolicySignatureAlgorithms": [
     "ES256"
   ],
+  "webAuthnPolicyRpId": "",
   "webAuthnPolicyAttestationConveyancePreference": "not specified",
   "webAuthnPolicyAuthenticatorAttachment": "not specified",
   "webAuthnPolicyRequireResidentKey": "not specified",
@@ -491,6 +492,29 @@
   "webAuthnPolicyPasswordlessAvoidSameAuthenticatorRegister": false,
   "webAuthnPolicyPasswordlessAcceptableAaguids": [],
   "webAuthnPolicyPasswordlessExtraOrigins": [],
+  "users": [
+    {
+      "id": "7a66d521-ec11-4eb6-b8a1-06a5b0c07631",
+      "username": "service-account-dnevnik-backend",
+      "emailVerified": false,
+      "enabled": true,
+      "totp": false,
+      "serviceAccountClientId": "dnevnik-backend",
+      "disableableCredentialTypes": [],
+      "requiredActions": [],
+      "clientRoles": {
+        "realm-management": [
+          "manage-realm",
+          "manage-users",
+          "view-realm",
+          "view-users",
+          "query-users"
+        ]
+      },
+      "notBefore": 0,
+      "groups": []
+    }
+  ],
   "scopeMappings": [
     {
       "clientScope": "offline_access",
@@ -989,8 +1013,8 @@
           "protocolMapper": "oidc-allowed-origins-mapper",
           "consentRequired": false,
           "config": {
-            "introspection.token.claim": "true",
-            "access.token.claim": "true"
+            "access.token.claim": "true",
+            "introspection.token.claim": "true"
           }
         }
       ]
@@ -1122,8 +1146,8 @@
           "consentRequired": false,
           "config": {
             "id.token.claim": "true",
-            "introspection.token.claim": "true",
             "access.token.claim": "true",
+            "introspection.token.claim": "true",
             "userinfo.token.claim": "true"
           }
         }
@@ -1649,14 +1673,14 @@
         "subComponents": {},
         "config": {
           "allowed-protocol-mapper-types": [
-            "saml-user-property-mapper",
-            "saml-role-list-mapper",
+            "oidc-usermodel-attribute-mapper",
             "saml-user-attribute-mapper",
-            "oidc-sha256-pairwise-sub-mapper",
             "oidc-usermodel-property-mapper",
+            "saml-role-list-mapper",
+            "oidc-sha256-pairwise-sub-mapper",
             "oidc-address-mapper",
             "oidc-full-name-mapper",
-            "oidc-usermodel-attribute-mapper"
+            "saml-user-property-mapper"
           ]
         }
       },
@@ -1680,14 +1704,26 @@
         "subComponents": {},
         "config": {
           "allowed-protocol-mapper-types": [
-            "oidc-usermodel-property-mapper",
-            "saml-role-list-mapper",
             "oidc-address-mapper",
-            "saml-user-property-mapper",
             "oidc-usermodel-attribute-mapper",
-            "saml-user-attribute-mapper",
             "oidc-full-name-mapper",
-            "oidc-sha256-pairwise-sub-mapper"
+            "saml-role-list-mapper",
+            "saml-user-attribute-mapper",
+            "saml-user-property-mapper",
+            "oidc-sha256-pairwise-sub-mapper",
+            "oidc-usermodel-property-mapper"
+          ]
+        }
+      }
+    ],
+    "org.keycloak.userprofile.UserProfileProvider": [
+      {
+        "id": "bd6f6aed-395c-4940-afd3-c4c184562b4b",
+        "providerId": "declarative-user-profile",
+        "subComponents": {},
+        "config": {
+          "kc.user.profile.config": [
+            "{\"attributes\":[{\"name\":\"username\",\"displayName\":\"${username}\",\"validations\":{\"length\":{\"min\":3,\"max\":255},\"username-prohibited-characters\":{},\"up-username-not-idn-homograph\":{}},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"email\",\"displayName\":\"${email}\",\"validations\":{\"email\":{}},\"annotations\":{},\"permissions\":{\"view\":[\"admin\"],\"edit\":[\"admin\"]},\"multivalued\":false},{\"name\":\"firstName\",\"displayName\":\"${firstName}\",\"validations\":{\"length\":{\"max\":255},\"person-name-prohibited-characters\":{}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"lastName\",\"displayName\":\"${lastName}\",\"validations\":{\"length\":{\"max\":255},\"person-name-prohibited-characters\":{}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false}],\"groups\":[{\"name\":\"user-metadata\",\"displayHeader\":\"User metadata\",\"displayDescription\":\"Attributes, which refer to user metadata\"}]}"
           ]
         }
       }
@@ -1699,15 +1735,6 @@
         "providerId": "rsa-generated",
         "subComponents": {},
         "config": {
-          "privateKey": [
-            "MIIEowIBAAKCAQEAotKbsy2STpAJOeCyDlqkkrfPRkcV2GU2XG3Uy1blSiScz48a6Pd6pHsGcs5yHXgxXwranyIfejbFXdoECbUauz3tCp4lEvhUeOyHsue+oLGNeNo+Z+qol0kOEgR2qQ4KqQlDTNMuJ59/OLqNh4Ov+RB28wB+J3pe7vzsC+AU2eJw0zz8KsKKgtAVLG4IrQfxmF7z8/k/WX0LLd56RM7ktcPyR9xFyVNbslx10tRsQf8Ga1YzNTnv/2R8iQ/xvyEJa5zmH64j4p7hTswIMEYo9B9ho/ljXaBktbwvIO1KeH0sf1QaEDYAciAgwjJGvJ/OYr729uhW7z8BZwt2/782BwIDAQABAoIBAAckcPMKWo16sQTqb9/EUc15Ja0CB5nJ+s6m0hD8u1XQxwDYg12DzvacdPB1UOPXtrwMvawBswVz60gjfPjbX777R5onIh4zvtTdH1Nq6ghM3EADEX4SeO8bTnQzi5b9MtzZDKw34/brVAkuLxt/hykdnpzTQTVvH0ShhfiRYv4ZvbQNZmuICPKX7mzw3+iwZ+w0hD2fO1e+1k1+lYQkWYTt7UUSGdBaogtciexz+kSk+8/dF08bewmyyliRI98urQt0Wea5+k678zzvWOLGeslIAKd7CPG7CSrjvJ1UN7yDYPFf8UR/HjsWqC25Jj6kJMYGnSLzunS9l9tPHHICgUUCgYEA0VwIGZsy5FReXEB0r7ngLC9Lwf9sYwxmgJKVXPOZrmEVxwepKwTnlUV58u7awOFv/ysI64q2jgnWqg8iO2elKYvOJ81nPweEgEk7r7YvOW/IYrBiKjZ3UaQUTxVWECKuftQswDj+9uLISH6IO9NNjiRz+oBMu76TeM91rPDqmmMCgYEAxxiJ5jP6hjOXE5l5MK3oJpjerRUVynLq7tiIDl3ZkRsZsTmEhSecbzPi4vmIqW/aRz8IvdxHy9J0VeFYTxc+8ey2zV0ba5yzlvNvUxQcd0r7S+BPR1UkGMog6CDFAgVi2/dUh8uTG7UcGVrNcTtrU2N3Rf8tC7DlTXj4V+5r1Q0CgYBR2nCUSliIavAFk3HLrpmVzNwKuimPRC7jP+xDzj4crnqMOVOLrTw54VL/hyFh3gIiupmfNbmQKQqTrJ0OqsQpTS7J4wXl37OPUJKUbV9jTnADHcETjf3ynnsOPGJMprKghaYFdYNB1YLGzSnIciHVXC04GGdn0+fmiP4SIpMmzwKBgAILZXcgt4TjSLzhyZXPY1/qF/dNDSE8Ft+HB7amDhLoZVYlkg/P/VJDBSRxjY634FT098EDXxVfvuQW4VJGmdXgKWxodVygilOVgmInBbfP5E6+KfJAlJNQmA/qLju8FGzP2GVgmM0jCfvUq+Fqy8pabiIg4bSKB4DJKju07hSNAoGBAMhUZ5MeL3PookMoitWxewY5MCJIIifNmTXV7WWO1driTmT5b1es7UqyJ70KwuYDv0LYA7GcQZ1jnuKOkKTv7Lq5lqwB/HDHNpBwQAPrjj04H5EkYhdVXYud2Ot68sKjE2HtCUjXD8WjKQe/Q2Xd/3iNv9tsoATOkLK18Pi6i9Vv"
-          ],
-          "keyUse": [
-            "SIG"
-          ],
-          "certificate": [
-            "MIICqTCCAZECBgGcsUyyVjANBgkqhkiG9w0BAQsFADAYMRYwFAYDVQQDDA1kbmV2bmlrLXJlYWxtMB4XDTI2MDMwMzAxMjMzOVoXDTM2MDMwMzAxMjUxOVowGDEWMBQGA1UEAwwNZG5ldm5pay1yZWFsbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKLSm7Mtkk6QCTngsg5apJK3z0ZHFdhlNlxt1MtW5UoknM+PGuj3eqR7BnLOch14MV8K2p8iH3o2xV3aBAm1Grs97QqeJRL4VHjsh7LnvqCxjXjaPmfqqJdJDhIEdqkOCqkJQ0zTLieffzi6jYeDr/kQdvMAfid6Xu787AvgFNnicNM8/CrCioLQFSxuCK0H8Zhe8/P5P1l9Cy3eekTO5LXD8kfcRclTW7JcddLUbEH/BmtWMzU57/9kfIkP8b8hCWuc5h+uI+Ke4U7MCDBGKPQfYaP5Y12gZLW8LyDtSnh9LH9UGhA2AHIgIMIyRryfzmK+9vboVu8/AWcLdv+/NgcCAwEAATANBgkqhkiG9w0BAQsFAAOCAQEAjS9b5cf4RJ/396wU7IpgzYGTzKZfcFisI4rBeT8EVDpps7U0l78xQB278ddhrxCrlllD1vu7F/n6c/C8qwSdMzqJgbriXdusadnrKnlYi7f3ojQM3JzMWfOUOID2/v77xu8MXqo2TsRxF6Yv+AROrtkr+gtMvznll3Ab9TxKSpcOLz9jrNOCoWd4AwOHA5iH6/YvM8P/bk1X84I0u9EtrWy38QjkRAm6Cuj0bhyZ/BxY1zyY1l8MXLbzvpXfM1bXUJZI4I/KFB6TcT8bADaJ0dwrneUXNABDZb3mhkJcrp8YUvtUPX4JE8BlrqYwGOmHvKQjBBOA4JXKRqW3X0y+kg=="
-          ],
           "priority": [
             "100"
           ]
@@ -1719,12 +1746,6 @@
         "providerId": "hmac-generated",
         "subComponents": {},
         "config": {
-          "kid": [
-            "c44736d9-79d7-4eee-8dd7-3bde50fbfca7"
-          ],
-          "secret": [
-            "hy0Ulk-OHfXi34WyErxmDHL3tAbc72mcFpiivz66_eL1HbGfWdHN1d9UKooial0McBzmW2T0MmMjjJ2FKk24lWxouVLfhkT26oz0B32GY1_BiAK3ORsPqZnYx-SzkDD1TZiy-uRxc_Ygfloqe5BVPr0EQcQU-xCbcCLoDZh_wgw"
-          ],
           "priority": [
             "100"
           ],
@@ -1739,12 +1760,6 @@
         "providerId": "aes-generated",
         "subComponents": {},
         "config": {
-          "kid": [
-            "442e88f7-f5ff-4f70-a941-fb89f675425c"
-          ],
-          "secret": [
-            "SkgPg0_9iDQbvqu2pzD5HA"
-          ],
           "priority": [
             "100"
           ]
@@ -1756,15 +1771,6 @@
         "providerId": "rsa-enc-generated",
         "subComponents": {},
         "config": {
-          "privateKey": [
-            "MIIEpAIBAAKCAQEA6RLGyy8IA6VYhfQE4z8C/sWbIUmJu2efXcnmGoW7T5APbSuLhEuoE3w2SVuvpZ6HN0DKtwTKhBxsznrB7NcbdJ4IlUPizhvXQmudKu2Vdr6C5HZEs1Xgq07yhS1zBdvslZRbVe9cXz9Azkjcsm3qXEk2epV4MaGbEl3ZbYYud25gHPJtwIvtAmXStf3TdTLIzo3pm/eL9riyOxgaccXqE6YX/TvAYMwelZEIDqwiXK8Kyn57iC+xq2xK6ILLrBf2mzssSYTIPKGs17/VR8HCKpEr/LlY8wDZ5bLd0YWM4EaL6JxsqB7fzJSOflJQw8uY0Vz1Yn+CYG+PwqKB0QiWwwIDAQABAoIBABybfWL7BtTLuq3WYbMyzL9QqdXQHOOvuFPesCuZNoBxgjM4IQu/7YVWvaMLaee+KYKSpU8Je4Hzqzc8wgi77lbF/u+zQWdi62zvoH7gYnQMtiwsiAorBESCkCnghjm14LgLWZqWopPeQ6oOL2iHLTjek51AM1yEJXB/rGxRB+sImTQNUQuY6tZO6KzmXgjF86Wy7oRXa+gy1WX9RyCUh/5z8ZlmfnsoxeY5XAt5AWWbSDjeDzqFVcwF7mubrt7HPEAC/lgu11nP7NUdKLHCyOC8FAgf75WQAdtcKIBufD8q33o4qB9rbmX2YQA0c27xdxLsEyYu9laTd8dwzhrGIcECgYEA9pq2LLXTUhjj2G7bHr0zmG1QpfEWbCw7R088rZMVbP5nGMLfA8Eu4j7PRWysWthIW/vYV6aZzBH1rCxiet7W/EBQakkYdjiGSBZ4QZmzTTa99hJYXI5lfEFdMkh7zKIwjzd4KccYoC9aDfCnq0LkCz6T0Ra3Mjr5YPwAwKTxXesCgYEA8fQWqmrFIV2MtAOydh1T9RG43ZidI14SDZWXB5t8Z5oFlUWPya7JYAPH7P9GyPYvgPl59sxvkcr93K5Pl6EkHJ9trKQ4ZZlz6PyJtxqIU3zlhHP9s4egmoLq/0ejYVn+GQuFMGsIGaJsTzTD3QaKbsEmYvukx6HGsEZLhf2+/IkCgYEA5jmJ2jPmFb8m9+iGqSv5/1QO9t0dEeA5d1mCTIoEdr0LgxJrIhY4rv/0gdvzDNzesQFt+GaRLvOVaCgHyK5CBz4D1TZon/YlZyeTHatgubVho1l9JOvL0zUyzL7e1SyWKR6gEGDPnLyYVmtWHY1VWSoS1iFe5oYoS2L5UOCsdgECgYEAjCHHwtnl5IYvCM+fW8NureCexlEuqZ5BLHb4KyLFsadGFodcWP4PibmG4F+VWq0jJDrZhbQv5ivATkDyvipJJP69YaEXPNjchhNFm7QVQu1ybP1U8dbakMLEYifWm3qorU67zCghX99vhYxU6D1yjeT2W5vNewXacpu0AB3PsKkCgYBwQFY9hWmnVATb5Wh3218WzhrjP3HOYihHGaLj1H0MLIS+Bomfgc/CN+QE/qtNuySppVy5MHRsqKSePgiUmUv8GOxF08ILd5magVImmAbAL1SDL9sL+qR6pGJBegveDfRWJEiApoCFh2XJOEbDry7EjAFZiCHtIiM8HUK7ivK4VA=="
-          ],
-          "keyUse": [
-            "ENC"
-          ],
-          "certificate": [
-            "MIICqTCCAZECBgGcsUyy6jANBgkqhkiG9w0BAQsFADAYMRYwFAYDVQQDDA1kbmV2bmlrLXJlYWxtMB4XDTI2MDMwMzAxMjMzOVoXDTM2MDMwMzAxMjUxOVowGDEWMBQGA1UEAwwNZG5ldm5pay1yZWFsbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAOkSxssvCAOlWIX0BOM/Av7FmyFJibtnn13J5hqFu0+QD20ri4RLqBN8Nklbr6WehzdAyrcEyoQcbM56wezXG3SeCJVD4s4b10JrnSrtlXa+guR2RLNV4KtO8oUtcwXb7JWUW1XvXF8/QM5I3LJt6lxJNnqVeDGhmxJd2W2GLnduYBzybcCL7QJl0rX903UyyM6N6Zv3i/a4sjsYGnHF6hOmF/07wGDMHpWRCA6sIlyvCsp+e4gvsatsSuiCy6wX9ps7LEmEyDyhrNe/1UfBwiqRK/y5WPMA2eWy3dGFjOBGi+icbKge38yUjn5SUMPLmNFc9WJ/gmBvj8KigdEIlsMCAwEAATANBgkqhkiG9w0BAQsFAAOCAQEAclFJw2q5kC2Um+264BvMMcKvEdujhHWUMZADFWxXdsFoXCgSQs6+NPp/y3xD0zyQuimFW8GSeB3YGFieYL2rbVMDsX+By4h9Xpd0kvLoI4dqLV1kmYwudSmYAYost0EKLKR3ZhfL1BCG6M+wUlbpot7uDuOycTDjOF/qobRNGgnae8ihcQRjYDhKerMNgEYcrRh4Wk+hYwpPld7JhK4/gfew73XR/36jDI8A41KGs9M3IRHJXIsTEcWkFqbrUxdRgtNIj6IWbZPSFJRbnHyDwIbhrn1butLe1kXKXEeh2KREnty9wt6cdbrEZF+1anJfy2z3RPLLT6UeaXg8wDorOw=="
-          ],
           "priority": [
             "100"
           ],
@@ -2445,21 +2451,5 @@
   },
   "clientPolicies": {
     "policies": []
-  },
-  "users": [
-    {
-      "username": "service-account-dnevnik-backend",
-      "enabled": true,
-      "serviceAccountClientId": "dnevnik-backend",
-      "clientRoles": {
-        "realm-management": [
-          "manage-users",
-          "view-users",
-          "query-users",
-          "view-realm",
-          "manage-realm"
-        ]
-      }
-    }
-  ]
+  }
 }
