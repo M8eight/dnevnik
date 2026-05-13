@@ -23,4 +23,7 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
 
     @EntityGraph(attributePaths = {"user"})
     Optional<Student> findWithUserById(Long userId);
+
+    @Query(value = "select * from students where id = :id", nativeQuery = true)
+    Optional<Student> findByIdWithDeleted(@Param("id") Long id);
 }

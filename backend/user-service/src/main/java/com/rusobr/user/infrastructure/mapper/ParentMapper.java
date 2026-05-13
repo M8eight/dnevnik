@@ -27,4 +27,6 @@ public interface ParentMapper {
     @Mapping(target = "keycloakId", source = "student.user.keycloakId")
     @Mapping(target = "roles", source = "student.user.roles")
     UserResponse toUserResponse(Student student);
+
+    ParentDetails toParentDetails(Parent parent);
 }

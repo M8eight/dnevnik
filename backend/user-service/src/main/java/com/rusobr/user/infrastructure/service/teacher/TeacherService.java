@@ -13,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -25,6 +27,16 @@ public class TeacherService {
     public TeacherResponse findWithUserById(Long id) {
         Teacher teacher = teacherRepository.findWithUserById(id).orElseThrow(() -> new NotFoundException("Teacher with id " + id + " not found"));
         return teacherMapper.toTeacherResponse(teacher);
+    }
+
+    public TeacherDetails findById(Long id) {
+        Teacher teacher = teacherRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Teacher not found: " + id));
+        return teacherMapper.toTeacherDetails(teacher);
+    }
+
+    public Optional<Teacher> findByIdWithDeleted(Long id) {
+        return teacherRepository.findByIdWithDeleted(id);
     }
 
     public void createTeacher(Long userId, TeacherDetails teacherDetails) {

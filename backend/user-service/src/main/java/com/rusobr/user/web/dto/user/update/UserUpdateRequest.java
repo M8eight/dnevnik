@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Set;
 
 public record UserUpdateRequest(
-        @NotNull(message = "ID пользователя обязателен")
         Long userId,
         @Valid
         @NotNull(message = "Данные пользователя не могут быть пустыми")

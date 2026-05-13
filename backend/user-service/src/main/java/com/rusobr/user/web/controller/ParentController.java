@@ -1,6 +1,7 @@
 package com.rusobr.user.web.controller;
 
 import com.rusobr.user.infrastructure.service.parent.ParentService;
+import com.rusobr.user.web.dto.parent.ParentDetails;
 import com.rusobr.user.web.dto.parent.ParentResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +19,11 @@ public class ParentController {
     @GetMapping("/{id}")
     public ParentResponse getParent(@PathVariable Long id) {
         return parentService.getParent(id);
+    }
+
+    @GetMapping("/{id}/details")
+    public ParentDetails findById(@PathVariable Long id) {
+        return parentService.findById(id);
     }
 
 }

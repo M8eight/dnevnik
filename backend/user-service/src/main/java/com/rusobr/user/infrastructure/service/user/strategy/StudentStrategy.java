@@ -1,5 +1,6 @@
 package com.rusobr.user.infrastructure.service.user.strategy;
 
+import com.rusobr.user.domain.model.Student;
 import com.rusobr.user.infrastructure.enums.UserRole;
 import com.rusobr.user.infrastructure.exception.ConflictException;
 import com.rusobr.user.infrastructure.service.student.StudentService;
@@ -8,6 +9,8 @@ import com.rusobr.user.web.dto.student.StudentDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -19,7 +22,14 @@ public class StudentStrategy implements UserRoleStrategy {
     @Override
     public void save(Long userId, UserProfileDetails userDetails) {
         if (userDetails instanceof StudentDetails studentDetails) {
-            studentService.createStudent(userId, studentDetails);
+            Optional<Student> studentOptional = studentService.findByIdWithDeleted(userId);
+            if (studentOptional.isPresent()) {
+                Student student = studentOptional.get();
+                student.setDeletedAt(null);
+                student.setStudyProfile(studentDetails.studyProfile());
+            } else {
+                studentService.createStudent(userId, studentDetails);
+            }
         } else {
             throw new ConflictException("Invalid user profile details");
         }

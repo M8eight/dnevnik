@@ -24,4 +24,6 @@ public interface TeacherMapper {
     @Mapping(target = "phoneNumber", source = "teacherDetails.phoneNumber")
     @Mapping(target = "email", source = "teacherDetails.email")
     Teacher toEntity(User user, TeacherDetails teacherDetails);
+
+    TeacherDetails toTeacherDetails(Teacher teacher);
 }

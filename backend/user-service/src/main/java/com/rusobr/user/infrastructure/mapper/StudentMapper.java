@@ -28,4 +28,5 @@ public interface StudentMapper {
     @Mapping(target = "studyProfile", source = "studentDetails.studyProfile")
     Student toEntity(User user, StudentDetails studentDetails);
 
+    StudentDetails toStudentDetails(Student student);
 }
