@@ -11,7 +11,7 @@ import com.rusobr.user.infrastructure.persistence.repository.TeacherRepository;
 import com.rusobr.user.infrastructure.persistence.repository.UserRepository;
 import com.rusobr.user.infrastructure.webClient.KeycloakRestClient;
 import com.rusobr.user.web.dto.keycloak.role.AssignRoleToUserRequest;
-import com.rusobr.user.web.dto.user.UserCreateRequest;
+import com.rusobr.user.web.dto.user.UserDataDto;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,34 +44,40 @@ public class DebugDataInitializer implements CommandLineRunner {
 
         // ── Учителя (20 чел.) ─────────────────────────────────────────────────
         // Математика / физика / информатика
-        createUser("teacher_math1",    "12345678", "Ирина",       "Николаевна (Алгебра)",           "teacher");
-        createUser("teacher_math2",    "12345678", "Геннадий",    "Борисович (Алгебра)",            "teacher");
-        createUser("teacher_geom",     "12345678", "Светлана",    "Юрьевна (Геометрия)",            "teacher");
-        createUser("teacher_phys1",    "12345678", "Виктор",      "Степанович (Физика)",            "teacher");
-        createUser("teacher_phys2",    "12345678", "Людмила",     "Фёдоровна (Физика)",             "teacher");
-        createUser("teacher_it1",      "12345678", "Александр",   "Сергеевич (Информатика)",        "teacher");
-        createUser("teacher_it2",      "12345678", "Роман",       "Игоревич (Информатика)",         "teacher");
-        // Гуманитарные
-        createUser("teacher_rus1",     "12345678", "Оксана",      "Дмитриевна (Русский)",           "teacher");
-        createUser("teacher_rus2",     "12345678", "Надежда",     "Петровна (Русский)",             "teacher");
-        createUser("teacher_lit",      "12345678", "Марина",      "Олеговна (Литература)",          "teacher");
-        createUser("teacher_hist1",    "12345678", "Игорь",       "Анатольевич (История)",          "teacher");
-        createUser("teacher_hist2",    "12345678", "Зинаида",     "Константиновна (История)",       "teacher");
-        createUser("teacher_soc",      "12345678", "Артём",       "Владиленович (Обществознание)",  "teacher");
-        // Иностранные языки
-        createUser("teacher_eng1",     "12345678", "Анна",        "Павловна (Английский)",          "teacher");
-        createUser("teacher_eng2",     "12345678", "Дарья",       "Александровна (Английский)",     "teacher");
-        createUser("teacher_de",       "12345678", "Ульрике",     "Вернер (Немецкий)",              "teacher");
-        // Естественные науки
-        createUser("teacher_chem",     "12345678", "Татьяна",     "Васильевна (Химия)",             "teacher");
-        createUser("teacher_bio",      "12345678", "Евгения",     "Романовна (Биология)",           "teacher");
-        createUser("teacher_geo",      "12345678", "Николай",     "Львович (География)",            "teacher");
-        // Прочее
-        createUser("teacher_pe1",      "12345678", "Евгений",     "Владимирович (Физра)",           "teacher");
-        createUser("teacher_pe2",      "12345678", "Карина",      "Эдуардовна (Физра)",             "teacher");
-        createUser("teacher_art",      "12345678", "Полина",      "Юрьевна (Изо)",                  "teacher");
-        createUser("teacher_music",    "12345678", "Борис",       "Семёнович (Музыка)",             "teacher");
-        createUser("teacher_tech",     "12345678", "Михаил",      "Захарович (Технология)",         "teacher");
+        // Математика и физика
+        createUser("teacher_math1",    "12345678", "Ирина",       "Николаевна",           "teacher");
+        createUser("teacher_math2",    "12345678", "Геннадий",    "Борисович",            "teacher");
+        createUser("teacher_geom",     "12345678", "Светлана",    "Юрьевна",              "teacher");
+        createUser("teacher_phys1",    "12345678", "Виктор",      "Степанович",           "teacher");
+        createUser("teacher_phys2",    "12345678", "Людмила",     "Фёдоровна",            "teacher");
+        createUser("teacher_it1",      "12345678", "Александр",   "Сергеевич",            "teacher");
+        createUser("teacher_it2",      "12345678", "Роман",       "Игоревич",             "teacher");
+
+// Гуманитарные
+        createUser("teacher_rus1",     "12345678", "Оксана",      "Дмитриевна",           "teacher");
+        createUser("teacher_rus2",     "12345678", "Надежда",     "Петровна",             "teacher");
+        createUser("teacher_lit",      "12345678", "Марина",      "Олеговна",             "teacher");
+        createUser("teacher_hist1",    "12345678", "Игорь",       "Анатольевич",          "teacher");
+        createUser("teacher_hist2",    "12345678", "Зинаида",     "Константиновна",       "teacher");
+        createUser("teacher_soc",      "12345678", "Артём",       "Владиленович",         "teacher");
+
+// Иностранные языки
+        createUser("teacher_eng1",     "12345678", "Анна",        "Павловна",             "teacher");
+        createUser("teacher_eng2",     "12345678", "Дарья",       "Александровна",        "teacher");
+        createUser("teacher_de",       "12345678", "Ульрике",     "Вернер",               "teacher");
+
+// Естественные науки
+        createUser("teacher_chem",     "12345678", "Татьяна",     "Васильевна",           "teacher");
+        createUser("teacher_bio",      "12345678", "Евгения",     "Романовна",            "teacher");
+        createUser("teacher_geo",      "12345678", "Николай",     "Львович",              "teacher");
+
+// Прочее
+        createUser("teacher_pe1",      "12345678", "Евгений",     "Владимирович",         "teacher");
+        createUser("teacher_pe2",      "12345678", "Карина",      "Эдуардовна",           "teacher");
+        createUser("teacher_art",      "12345678", "Полина",      "Юрьевна",              "teacher");
+        createUser("teacher_music",    "12345678", "Борис",       "Семёнович",            "teacher");
+        createUser("teacher_tech",     "12345678", "Михаил",      "Захарович",            "teacher");
+        createUser("teacher_tech",     "12345678", "Михаил",      "Захарович",            "teacher");
 
         // ── 8А класс (28 учеников) ────────────────────────────────────────────
         createUser("ivanov_i",         "12345678", "Иван",        "Иванов",        "student");
@@ -236,7 +242,7 @@ public class DebugDataInitializer implements CommandLineRunner {
         String keycloakId;
         try {
             keycloakId = keycloakRestClient.createKeyCloakUser(
-                    new UserCreateRequest(username, password, firstName, lastName));
+                    new UserDataDto(username, password, firstName, lastName));
         } catch (Exception e) {
             if (e.getMessage().contains("Keycloak User already exists") || e.getMessage().contains("409")) {
                 keycloakId = keycloakRestClient.getKeycloakUserByUsername(username).id();

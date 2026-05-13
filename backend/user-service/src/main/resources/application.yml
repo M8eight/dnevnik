@@ -39,6 +39,7 @@ logging:
     url: ${LOKI_URL:http://localhost:3100}/loki/api/v1/push
   level:
     root: INFO
+    org.springframework.web.client.RestTemplate: INFO
     com.netflix.discovery: WARN
     com.netflix.eureka: WARN
 

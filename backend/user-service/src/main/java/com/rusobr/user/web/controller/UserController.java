@@ -9,6 +9,7 @@ import com.rusobr.user.web.dto.teacher.TeacherDetails;
 import com.rusobr.user.web.dto.user.UserCreateRequest;
 import com.rusobr.user.web.dto.user.UserResponse;
 import com.rusobr.user.web.dto.user.update.UserUpdateRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -40,12 +41,12 @@ public class UserController {
     }
 
     @PostMapping("/parents")
-    public UserResponse createParent(@RequestBody UserCreateRequest<ParentDetails> userRequest) {
+    public UserResponse createParent(@RequestBody @Valid UserCreateRequest<ParentDetails> userRequest) {
         return userOrchestrator.create(userRequest);
     }
 
     @PutMapping("/{id}")
-    public UserResponse updateUser(@PathVariable Long id, @RequestBody UserUpdateRequest userUpdateRequest) {
+    public UserResponse updateUser(@PathVariable Long id, @RequestBody @Valid UserUpdateRequest userUpdateRequest) {
         return userOrchestrator.update(id, userUpdateRequest);
     }
 
