@@ -11,14 +11,6 @@ import org.mapstruct.ReportingPolicy;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface TeacherMapper {
-    @Mapping(target = "id", source = "id")
-    @Mapping(target = "firstName", source = "user.firstName")
-    @Mapping(target = "lastName", source = "user.lastName")
-    @Mapping(target = "keycloakId", source = "user.keycloakId")
-    @Mapping(target = "phoneNumber", source = "phoneNumber")
-    @Mapping(target = "email", source = "email")
-    TeacherResponse toTeacherResponse(Teacher teacher);
-
     @Mapping(target = "user", source = "user")
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "phoneNumber", source = "teacherDetails.phoneNumber")
@@ -26,4 +18,8 @@ public interface TeacherMapper {
     Teacher toEntity(User user, TeacherDetails teacherDetails);
 
     TeacherDetails toTeacherDetails(Teacher teacher);
+
+    @Mapping(target = "details.email", source = "email")
+    @Mapping(target = "details.phoneNumber", source = "phoneNumber")
+    TeacherResponse toTeacherResponse(Teacher teacher);
 }

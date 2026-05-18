@@ -3,7 +3,7 @@ package com.rusobr.user.web.dto.student;
 import com.rusobr.user.web.dto.feign.SchoolClassResponse;
 import com.rusobr.user.web.dto.teacher.TeacherResponse;
 
-public record StudentResponseDetail(
+public record StudentWithClassResponse(
         Long id,
         String firstName,
         String lastName,

@@ -2,7 +2,7 @@ package com.rusobr.academic.web.dto.lessonInstance.teacher;
 
 import com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodResponse;
 import com.rusobr.academic.web.dto.lessonInstance.LessonInstanceDto;
-import com.rusobr.academic.web.dto.userService.UserResponse;
+import com.rusobr.academic.web.dto.feign.UserResponse;
 
 import java.util.List;
 

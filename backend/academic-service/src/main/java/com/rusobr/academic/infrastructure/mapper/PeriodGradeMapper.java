@@ -4,7 +4,7 @@ import com.rusobr.academic.domain.model.PeriodGrade;
 import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeResponse;
 import com.rusobr.academic.web.dto.grade.periodGrade.StudentPeriodGradeProjection;
 import com.rusobr.academic.web.dto.grade.periodGrade.StudentPeriodGradeResponse;
-import com.rusobr.academic.web.dto.userService.UserResponse;
+import com.rusobr.academic.web.dto.feign.UserResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
@@ -12,6 +12,7 @@ import org.mapstruct.ReportingPolicy;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface PeriodGradeMapper {
+
     PeriodGradeResponse toPeriodGradeResponse(PeriodGrade periodGrade);
 
     @Mapping(source = "studentPeriodGradeProjection.studentId", target = "studentId")

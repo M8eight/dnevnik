@@ -4,7 +4,7 @@ import com.rusobr.user.domain.model.Student;
 import com.rusobr.user.domain.model.User;
 import com.rusobr.user.web.dto.feign.SchoolClassResponse;
 import com.rusobr.user.web.dto.student.StudentDetails;
-import com.rusobr.user.web.dto.student.StudentResponseDetail;
+import com.rusobr.user.web.dto.student.StudentWithClassResponse;
 import com.rusobr.user.web.dto.teacher.TeacherResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -20,8 +20,8 @@ public interface StudentMapper {
     @Mapping(target = "studyProfile", source = "student.studyProfile")
     @Mapping(target = "schoolClass", source = "schoolClass")
     @Mapping(target = "schoolClassTeacher", source = "schoolClassTeacher")
-    StudentResponseDetail toStudentDetailResponse(Student student, SchoolClassResponse schoolClass,
-                                                  TeacherResponse  schoolClassTeacher);
+    StudentWithClassResponse toStudentDetailResponse(Student student, SchoolClassResponse schoolClass,
+                                                     TeacherResponse schoolClassTeacher);
 
     @Mapping(target = "user", source = "user")
     @Mapping(target = "id", ignore = true)
