@@ -1,11 +1,9 @@
 package com.rusobr.user.web.dto.teacher;
 
+import com.rusobr.user.web.dto.user.UserResponse;
+
 public record TeacherResponse(
-        Long id,
-        String keycloakId,
-        String firstName,
-        String lastName,
-        String phoneNumber,
-        String email
+        UserResponse user,
+        TeacherDetails details
 ) {
 }

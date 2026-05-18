@@ -37,7 +37,7 @@ export default function AdminNavbar() {
                         <nav className="hidden lg:flex items-center gap-2">
                             <NavItem to="/admin/subject" label="Предмет" />
                             <NavItem to="/admin/period" label="Четверть" />
-                            {/* <NavItem to="/admin/class" label="Класс" /> */}
+                            <NavItem to="/admin/school-class" label="Класс" />
                             <NavItem to="/admin/user" label="Пользователь" />
                             {/* <NavItem to="/admin/schedule" label="Расписание" /> */}
                         </nav>

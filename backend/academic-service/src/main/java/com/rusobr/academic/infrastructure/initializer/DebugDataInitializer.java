@@ -20,9 +20,7 @@ import java.util.*;
 @Slf4j
 public class DebugDataInitializer implements CommandLineRunner {
 
-    // Первый понедельник 4-й четверти
     private static final LocalDate ANCHOR_DATE = LocalDate.of(2026, 4, 6);
-    // Генерируем 6 недель данных
     private static final int WEEKS = 6;
 
     private final SubjectRepository              subjectRepository;
@@ -37,27 +35,22 @@ public class DebugDataInitializer implements CommandLineRunner {
 
     private final Random rng = new Random(42);
 
-    // ── Вспомогательные структуры ─────────────────────────────────────────────
-
-    /** ID учителей из user-service (порядок соответствует порядку createUser в DebugDataInitializer) */
     private enum Teachers {
-        MATH1(17), MATH2(18), GEOM(19),
-        PHYS1(20), PHYS2(21),
-        IT1(22),   IT2(23),
-        RUS1(24),  RUS2(25), LIT(26),
-        HIST1(27), HIST2(28), SOC(29),
-        ENG1(30),  ENG2(31), DE(32),
-        CHEM(33),  BIO(34),  GEO(35),
-        PE1(36),   PE2(37),  ART(38),
-        MUSIC(39), TECH(40);
+        MATH1(3), MATH2(4), GEOM(5),
+        PHYS1(6), PHYS2(7),
+        IT1(8),   IT2(9),
+        RUS1(10), RUS2(11), LIT(12),
+        HIST1(13), HIST2(14), SOC(15),
+        ENG1(16),  ENG2(17), DE(18),
+        CHEM(19),  BIO(20),  GEO(21),
+        PE1(22),   PE2(23),  ART(24),
+        MUSIC(25), TECH(26);
 
         final long id;
         Teachers(long id) { this.id = id; }
     }
 
     private record Slot(int number, String room, TeachingAssignment ta) {}
-
-    // ── Entry point ───────────────────────────────────────────────────────────
 
     @Override
     public void run(String... args) {
@@ -68,7 +61,6 @@ public class DebugDataInitializer implements CommandLineRunner {
 
         log.info("=== Полная инициализация академических данных (8А, 8Б, 9А) ===");
 
-        // ── Предметы ──────────────────────────────────────────────────────────
         Map<String, Subject> S = new LinkedHashMap<>();
         List.of(
                 "Алгебра", "Геометрия", "Русский язык", "Литература",
@@ -77,19 +69,14 @@ public class DebugDataInitializer implements CommandLineRunner {
                 "Физкультура", "Изо", "Музыка", "Технология"
         ).forEach(n -> S.put(n, subjectRepository.save(Subject.builder().name(n).build())));
 
-        // ── Классы + учебные назначения ───────────────────────────────────────
-        ClassBundle c8a  = buildClass("8А",  "2025", 17L, range(1L,  28L),  S);
-        ClassBundle c8b  = buildClass("8Б",  "2025", 26L, range(29L, 55L),  S);
-        ClassBundle c9a  = buildClass("9А",  "2025", 27L, range(56L, 81L),  S);
+        ClassBundle c8a = buildClass("8А", "2025", 24L, range(27L, 54L), S);
+        ClassBundle c8b = buildClass("8Б", "2025", 26L, range(55L, 81L), S);
+        ClassBundle c9a = buildClass("9А", "2025", 25L, range(82L, 107L), S);
 
-        // ── Расписание 8А ─────────────────────────────────────────────────────
         Map<DayOfWeek, List<ScheduleLesson>> sched8a = buildSchedule8A(c8a.ta());
-        // ── Расписание 8Б ─────────────────────────────────────────────────────
         Map<DayOfWeek, List<ScheduleLesson>> sched8b = buildSchedule8B(c8b.ta());
-        // ── Расписание 9А ─────────────────────────────────────────────────────
         Map<DayOfWeek, List<ScheduleLesson>> sched9a = buildSchedule9A(c9a.ta());
 
-        // ── Генерация занятий и оценок ────────────────────────────────────────
         for (int week = 0; week < WEEKS; week++) {
             LocalDate monday = ANCHOR_DATE.plusWeeks(week);
             generateWeek(monday, sched8a, c8a.schoolClass());
@@ -102,23 +89,26 @@ public class DebugDataInitializer implements CommandLineRunner {
         log.info("=== Инициализация завершена успешно ===");
     }
 
-    // ── Классы ────────────────────────────────────────────────────────────────
-
     private record ClassBundle(SchoolClass schoolClass, Map<String, TeachingAssignment> ta) {}
 
     private ClassBundle buildClass(String name, String year, Long classTeacherId,
                                    List<Long> studentIds, Map<String, Subject> S) {
+
+        // ШАГ 1: сохраняем класс без студентов — получаем ID
         SchoolClass sc = SchoolClass.builder()
                 .name(name).year(year)
                 .classTeacherId(classTeacherId)
                 .students(new HashSet<>()).build();
+        schoolClassRepository.save(sc);
+
+        // ШАГ 2: добавляем студентов (sc.id уже != null) и сохраняем повторно с каскадом
         studentIds.forEach(sid ->
-                sc.getStudents().add(ClassStudent.builder().schoolClass(sc).studentId(sid).build()));
+                sc.getStudents().add(
+                        ClassStudent.builder().schoolClass(sc).studentId(sid).build()
+                ));
         schoolClassRepository.save(sc);
 
         Map<String, TeachingAssignment> ta = new HashMap<>();
-
-        // Общие назначения для всех трёх классов (разные учителя у разных классов)
         boolean is9 = name.startsWith("9");
         ta.put("Алг",   saveTA(Teachers.MATH1.id, sc, S.get("Алгебра")));
         ta.put("Гео",   saveTA(Teachers.GEOM.id,  sc, S.get("Геометрия")));
@@ -140,8 +130,6 @@ public class DebugDataInitializer implements CommandLineRunner {
 
         return new ClassBundle(sc, ta);
     }
-
-    // ── Расписания ────────────────────────────────────────────────────────────
 
     private Map<DayOfWeek, List<ScheduleLesson>> buildSchedule8A(Map<String, TeachingAssignment> ta) {
         Map<DayOfWeek, List<ScheduleLesson>> map = new LinkedHashMap<>();
@@ -233,8 +221,6 @@ public class DebugDataInitializer implements CommandLineRunner {
         return map;
     }
 
-    // ── Генерация занятий ─────────────────────────────────────────────────────
-
     private void generateWeek(LocalDate monday,
                               Map<DayOfWeek, List<ScheduleLesson>> schedule,
                               SchoolClass schoolClass) {
@@ -256,14 +242,12 @@ public class DebugDataInitializer implements CommandLineRunner {
 
             for (ClassStudent cs : schoolClass.getStudents()) {
                 Long sid = cs.getStudentId();
-                // ~35% шанс оценки
                 if (rng.nextInt(100) < 35) {
                     gradeRepository.save(Grade.builder()
                             .lessonInstance(li).studentId(sid)
                             .value(generateRealisticGrade()).weight(1)
                             .type(GradeType.HOMEWORK).build());
                 }
-                // ~6% шанс пропуска / опоздания
                 if (rng.nextInt(100) < 6) {
                     AttendanceStatus status = switch (rng.nextInt(3)) {
                         case 0 -> AttendanceStatus.ABSENT;
@@ -276,8 +260,6 @@ public class DebugDataInitializer implements CommandLineRunner {
             }
         }
     }
-
-    // ── Периоды ───────────────────────────────────────────────────────────────
 
     private void savePeriods() {
         academicPeriodRepository.saveAll(List.of(
@@ -295,8 +277,6 @@ public class DebugDataInitializer implements CommandLineRunner {
                         .closed(false).build()
         ));
     }
-
-    // ── Утилиты ───────────────────────────────────────────────────────────────
 
     private TeachingAssignment saveTA(long tid, SchoolClass sc, Subject sub) {
         return teachingAssignmentRepository.save(
@@ -322,17 +302,17 @@ public class DebugDataInitializer implements CommandLineRunner {
 
     private String randomHomework(String subject) {
         List<String> tasks = switch (subject) {
-            case "Алгебра"       -> List.of("§12, задачи 1–8", "Контрольные вопросы к §14", "Решить уравнения из упр. 234");
-            case "Геометрия"     -> List.of("Доказать теорему §8", "Упр. 115–120, чертежи", "Построить треугольник по условию");
-            case "Физика"        -> List.of("§18 читать, вопросы 1–5", "Решить задачи 14.3–14.7", "Написать конспект §19");
-            case "Химия"         -> List.of("Выучить валентности элементов", "§21 читать, задачи 3–6", "Составить уравнения реакций");
-            case "Биология"      -> List.of("§11 читать, заполнить таблицу", "Нарисовать схему клетки", "Выучить термины §12");
-            case "История"       -> List.of("§15 читать, вопросы на с. 98", "Составить хронологию событий", "Написать эссе по теме");
-            case "Русский язык"  -> List.of("Упр. 341, диктант", "Правила §18 выучить наизусть", "Сочинение-миниатюра");
-            case "Литература"    -> List.of("Прочитать гл. 5–7", "Ответить на вопросы с. 78", "Выучить наизусть стихотворение");
+            case "Алгебра"         -> List.of("§12, задачи 1–8", "Контрольные вопросы к §14", "Решить уравнения из упр. 234");
+            case "Геометрия"       -> List.of("Доказать теорему §8", "Упр. 115–120, чертежи", "Построить треугольник по условию");
+            case "Физика"          -> List.of("§18 читать, вопросы 1–5", "Решить задачи 14.3–14.7", "Написать конспект §19");
+            case "Химия"           -> List.of("Выучить валентности элементов", "§21 читать, задачи 3–6", "Составить уравнения реакций");
+            case "Биология"        -> List.of("§11 читать, заполнить таблицу", "Нарисовать схему клетки", "Выучить термины §12");
+            case "История"         -> List.of("§15 читать, вопросы на с. 98", "Составить хронологию событий", "Написать эссе по теме");
+            case "Русский язык"    -> List.of("Упр. 341, диктант", "Правила §18 выучить наизусть", "Сочинение-миниатюра");
+            case "Литература"      -> List.of("Прочитать гл. 5–7", "Ответить на вопросы с. 78", "Выучить наизусть стихотворение");
             case "Английский язык" -> List.of("WB p.45 ex.3–5", "Vocabulary unit 7", "Прочитать текст, ответить на вопросы");
-            case "Информатика"   -> List.of("Задание в Moodle (тема 9)", "Написать программу сортировки", "Презентация по теме ИИ");
-            default              -> List.of("Изучить тему и выполнить упражнения в тетради");
+            case "Информатика"     -> List.of("Задание в Moodle (тема 9)", "Написать программу сортировки", "Презентация по теме ИИ");
+            default                -> List.of("Изучить тему и выполнить упражнения в тетради");
         };
         return tasks.get(rng.nextInt(tasks.size()));
     }

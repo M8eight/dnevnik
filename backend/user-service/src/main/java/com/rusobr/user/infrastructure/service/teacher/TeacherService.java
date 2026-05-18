@@ -29,7 +29,7 @@ public class TeacherService {
         return teacherMapper.toTeacherResponse(teacher);
     }
 
-    public TeacherDetails findById(Long id) {
+    public TeacherDetails findDetailsById(Long id) {
         Teacher teacher = teacherRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Teacher not found: " + id));
         return teacherMapper.toTeacherDetails(teacher);

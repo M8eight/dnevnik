@@ -15,7 +15,7 @@ import com.rusobr.academic.web.dto.lessonInstance.teacher.GradeStudentProjection
 import com.rusobr.academic.web.dto.lessonInstance.teacher.StudentJournalDto;
 import com.rusobr.academic.web.dto.lessonInstance.teacher.TeacherJournalResponse;
 import com.rusobr.academic.web.dto.scheduleLesson.DiaryLessonResponse;
-import com.rusobr.academic.web.dto.userService.UserResponse;
+import com.rusobr.academic.web.dto.feign.UserResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

@@ -3,7 +3,7 @@ package com.rusobr.academic.web.controller;
 import com.rusobr.academic.infrastructure.service.TeacherService;
 import com.rusobr.academic.web.dto.grade.GradeJournalResponse;
 import com.rusobr.academic.web.dto.teachingAssignment.TeachingAssignmentWithSubjectProjection;
-import com.rusobr.academic.web.dto.userService.UserResponse;
+import com.rusobr.academic.web.dto.feign.UserResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;

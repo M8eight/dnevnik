@@ -11,7 +11,6 @@ import {
 } from "@/services/user-service";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import  { type PageResponse } from "@/helpers/helper-interfaces";
-import { getStudentFullDetails, type StudentFullDetailsResponse } from "@/services/student-service";
 
 const QUERY_KEY = ["users"];
 

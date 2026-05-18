@@ -21,6 +21,24 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     """)
     List<UserFeignResponse> findAllStudentsByIds(@Param("studentIds") Collection<Long> studentIds);
 
+    @Query("""
+            select new com.rusobr.user.web.dto.feign.UserFeignResponse(
+                s.id, u.firstName, u.lastName, u.username, u.keycloakId
+                )
+            from Student s join s.user u where u.id not in :studentIds
+            order by u.lastName
+    """)
+    List<UserFeignResponse> findAllStudentsExcludeAssigned(@Param("studentIds") Collection<Long> studentIds);
+
+    @Query("""
+            select new com.rusobr.user.web.dto.feign.UserFeignResponse(
+                s.id, u.firstName, u.lastName, u.username, u.keycloakId
+                )
+            from Student s join s.user u
+            order by u.lastName
+    """)
+    List<UserFeignResponse> findWithUserAllStudents();
+
     @EntityGraph(attributePaths = {"user"})
     Optional<Student> findWithUserById(Long userId);
 

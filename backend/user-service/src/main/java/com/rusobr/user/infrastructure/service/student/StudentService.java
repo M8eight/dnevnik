@@ -7,6 +7,7 @@ import com.rusobr.user.infrastructure.exception.ConflictException;
 import com.rusobr.user.infrastructure.exception.NotFoundException;
 import com.rusobr.user.infrastructure.feignClient.SchoolClassClient;
 import com.rusobr.user.infrastructure.mapper.StudentMapper;
+import com.rusobr.user.infrastructure.mapper.UserMapper;
 import com.rusobr.user.infrastructure.persistence.repository.ParentRepository;
 import com.rusobr.user.infrastructure.persistence.repository.StudentRepository;
 import com.rusobr.user.infrastructure.persistence.repository.UserRepository;
@@ -14,7 +15,7 @@ import com.rusobr.user.infrastructure.service.teacher.TeacherService;
 import com.rusobr.user.web.dto.feign.SchoolClassResponse;
 import com.rusobr.user.web.dto.feign.UserFeignResponse;
 import com.rusobr.user.web.dto.student.StudentDetails;
-import com.rusobr.user.web.dto.student.StudentResponseDetail;
+import com.rusobr.user.web.dto.student.StudentWithClassResponse;
 import com.rusobr.user.web.dto.teacher.TeacherResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -35,6 +37,7 @@ public class StudentService {
     private final SchoolClassClient schoolClassClient;
     private final TeacherService teacherService;
     private final ParentRepository parentRepository;
+    private final UserMapper userMapper;
 
 
     public List<UserFeignResponse> findSimpleBatchStudents(List<Long> ids) {
@@ -45,27 +48,31 @@ public class StudentService {
         return studentRepository.findAllStudentsByIds(ids);
     }
 
+    public List<UserFeignResponse> getStudentsExcludingIds(Set<Long> ids) {
+        if (ids.isEmpty()) {
+            return studentRepository.findWithUserAllStudents();
+        }
+
+        return studentRepository.findAllStudentsExcludeAssigned(ids);
+    }
+
     public StudentDetails findById(Long id) {
         Student student = studentRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Student not found: " + id));
         return studentMapper.toStudentDetails(student);
     }
 
-    public Optional<Student> findByIdWithDeleted(Long id) {
-        return studentRepository.findByIdWithDeleted(id);
-    }
-
-    public StudentResponseDetail findStudentDetailById(Long id) {
-        if (id == null) {
-            return null;
-        }
-
+    public StudentWithClassResponse findStudentDetailById(Long id) {
         Student student = studentRepository.findWithUserById(id)
                 .orElseThrow(() -> new NotFoundException("Student not found"));
         SchoolClassResponse schoolClass = schoolClassClient.getSchoolClassByStudentId(student.getId());
         TeacherResponse teacher = teacherService.findWithUserById(schoolClass.classTeacherId());
 
         return studentMapper.toStudentDetailResponse(student, schoolClass, teacher);
+    }
+
+    public Optional<Student> findByIdWithDeleted(Long id) {
+        return studentRepository.findByIdWithDeleted(id);
     }
 
     public void createStudent(Long userId, StudentDetails studentDetails) {

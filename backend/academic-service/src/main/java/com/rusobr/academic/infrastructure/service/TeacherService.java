@@ -8,7 +8,7 @@ import com.rusobr.academic.infrastructure.persistence.repository.TeachingAssignm
 import com.rusobr.academic.web.dto.grade.GetGradeDataDto;
 import com.rusobr.academic.web.dto.grade.GradeJournalResponse;
 import com.rusobr.academic.web.dto.teachingAssignment.TeachingAssignmentWithSubjectProjection;
-import com.rusobr.academic.web.dto.userService.UserResponse;
+import com.rusobr.academic.web.dto.feign.UserResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

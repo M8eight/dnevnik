@@ -14,7 +14,7 @@ import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeRequest;
 import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeResponse;
 import com.rusobr.academic.web.dto.grade.periodGrade.StudentPeriodGradeProjection;
 import com.rusobr.academic.web.dto.grade.periodGrade.StudentPeriodGradeResponse;
-import com.rusobr.academic.web.dto.userService.UserResponse;
+import com.rusobr.academic.web.dto.feign.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

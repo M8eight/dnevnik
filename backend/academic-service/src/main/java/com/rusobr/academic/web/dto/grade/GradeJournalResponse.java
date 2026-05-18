@@ -1,7 +1,7 @@
 package com.rusobr.academic.web.dto.grade;
 
 import com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodResponse;
-import com.rusobr.academic.web.dto.userService.UserResponse;
+import com.rusobr.academic.web.dto.feign.UserResponse;
 
 import java.util.List;
 
