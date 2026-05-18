@@ -11,9 +11,9 @@
 
     <!-- File Appender для Alloy -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>./logs/${appName}.log</file>
+        <file>/app/logs/${appName}.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>./logs/${appName}-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>/app/logs/${appName}-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <maxFileSize>100MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
@@ -39,7 +39,10 @@
     </root>
 
     <!-- Настройка уровней -->
-    <logger name="com.rusobr" level="DEBUG"/>
-    <logger name="org.springframework.web" level="DEBUG"/>
+    <logger name="org.springframework.web.client.RestTemplate" level="INFO"/>
+    <logger name="com.netflix.discovery" level="WARN"/>
+    <logger name="com.netflix.eureka" level="WARN"/>
+    <logger name="org.springframework.web" level="INFO"/>
+    <logger name="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping" level="DEBUG"/>
     <logger name="org.springframework" level="INFO"/>
 </configuration>
