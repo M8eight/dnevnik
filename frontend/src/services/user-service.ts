@@ -56,6 +56,14 @@ export interface UserResponse {
     roles: UserRole[];
 }
 
+export interface UserSimpleResponse {
+    id: number;
+    username: string;
+    firstName: string;
+    lastName: string;
+    keycloakId: string;
+}
+
 export interface StudentDetailsResponse {
     studyProfile: string;
 }
