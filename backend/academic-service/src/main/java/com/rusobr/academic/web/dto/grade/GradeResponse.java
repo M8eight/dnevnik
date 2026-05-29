@@ -6,5 +6,6 @@ public record GradeResponse(
         Long gradeId,
         Long studentId,
         int value,
+        int weight,
         GradeType gradeType
 ) {}

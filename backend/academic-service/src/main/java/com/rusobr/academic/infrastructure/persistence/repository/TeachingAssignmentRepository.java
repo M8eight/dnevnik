@@ -30,4 +30,6 @@ public interface TeachingAssignmentRepository  extends JpaRepository<TeachingAss
     order by s.id asc, sc.name asc
 """)
     List<TeachingAssignmentWithSubjectProjection> findTeachingAssignmentDetailByTeacherId(@Param("teacherId") Long teacherId);
+
+    Optional<TeachingAssignment> findBySubjectIdAndSchoolClassIdAndTeacherId(Long subjectId, Long schoolClassId, Long teacherId);
 }

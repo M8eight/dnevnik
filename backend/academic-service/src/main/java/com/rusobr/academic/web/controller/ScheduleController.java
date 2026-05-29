@@ -1,14 +1,11 @@
 package com.rusobr.academic.web.controller;
 
 import com.rusobr.academic.infrastructure.service.ScheduleService;
-import com.rusobr.academic.web.dto.scheduleLesson.ScheduleLessonResponse;
-import com.rusobr.academic.web.dto.scheduleLesson.SchoolLessonResponse;
+import com.rusobr.academic.web.dto.scheduleLesson.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -30,8 +27,37 @@ public class ScheduleController {
         return scheduleService.getScheduleByDate(studentId, dayOfWeek, date);
     }
 
+    @GetMapping("/schedules/diary")
+    public List<DiaryScheduleDto> getDiaryScheduleByStudentId(@RequestParam Long studentId,
+                                                              @RequestParam LocalDate startDate,
+                                                              @RequestParam LocalDate endDate) {
+        return scheduleService.getDiaryScheduleByStudentId(studentId, startDate, endDate);
+    }
+
     @GetMapping("/schedules/by-student")
     public Map<DayOfWeek, List<SchoolLessonResponse>> getWeekSchedule(@RequestParam Long studentId) {
         return scheduleService.getWeekSchedule(studentId);
     }
+
+    @GetMapping("/schedules/by-class")
+    public Map<DayOfWeek, List<ScheduleLessonDto>> getClassSchedule(@RequestParam Long classId,
+                                                                    @RequestParam LocalDate date) {
+        return scheduleService.getClassSchedule(classId, date);
+    }
+
+    @PostMapping("/schedules")
+    public void create(@RequestBody ScheduleLessonRequest scheduleLessonRequest) {
+        scheduleService.create(scheduleLessonRequest);
+    }
+
+    @PatchMapping("/schedules/{scheduleId}/close")
+    public void close(@PathVariable Long scheduleId, @RequestParam @NotNull LocalDate closeDate) {
+        scheduleService.close(scheduleId, closeDate);
+    }
+
+    @PatchMapping("/schedules/load")
+    public void load(@RequestParam Long classId, @RequestParam LocalDate fromDate, @RequestParam LocalDate toDate) {
+        scheduleService.load(classId, fromDate, toDate);
+    }
+
 }

@@ -2,26 +2,27 @@ package com.rusobr.academic.infrastructure.service;
 
 import com.rusobr.academic.domain.model.AcademicPeriod;
 import com.rusobr.academic.domain.model.LessonInstance;
+import com.rusobr.academic.domain.model.ScheduleLesson;
 import com.rusobr.academic.infrastructure.exception.NotFoundException;
 import com.rusobr.academic.infrastructure.feignClient.UserClient;
 import com.rusobr.academic.infrastructure.mapper.AcademicPeriodMapper;
-import com.rusobr.academic.infrastructure.mapper.LessonInstanceMapper;
 import com.rusobr.academic.infrastructure.persistence.repository.AcademicPeriodRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.LessonInstanceRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.SchoolClassRepository;
+import com.rusobr.academic.web.dto.feign.UserFeignResponse;
 import com.rusobr.academic.web.dto.lessonInstance.*;
 import com.rusobr.academic.web.dto.lessonInstance.teacher.AttendanceStudentProjection;
 import com.rusobr.academic.web.dto.lessonInstance.teacher.GradeStudentProjection;
 import com.rusobr.academic.web.dto.lessonInstance.teacher.StudentJournalDto;
 import com.rusobr.academic.web.dto.lessonInstance.teacher.TeacherJournalResponse;
-import com.rusobr.academic.web.dto.scheduleLesson.DiaryLessonResponse;
-import com.rusobr.academic.web.dto.feign.UserResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -31,26 +32,10 @@ import java.util.stream.Collectors;
 public class LessonInstanceService {
 
     private final LessonInstanceRepository lessonInstanceRepository;
-    private final LessonInstanceMapper lessonInstanceMapper;
     private final AcademicPeriodRepository academicPeriodRepository;
     private final AcademicPeriodMapper academicPeriodMapper;
     private final SchoolClassRepository schoolClassRepository;
     private final UserClient userClient;
-
-    public Map<LocalDate, List<DiaryLessonResponse>> getDiaryLessonsByStudentIdAndDateRange(Long studentId,
-                                                                                            LocalDate startDate,
-                                                                                            LocalDate endDate) {
-        List<LessonInstance> lis = lessonInstanceRepository.findDiaryLessonsByStudentIdAndDateRange(studentId, startDate, endDate);
-
-        List<DiaryLessonResponse> schedule = lessonInstanceMapper.toDiaryLessonResponseList(lis, studentId);
-
-        return schedule.stream()
-                .collect(Collectors.groupingBy(
-                        DiaryLessonResponse::lessonDate,
-                        TreeMap::new,
-                        Collectors.toList()
-                ));
-    }
 
     @Transactional(readOnly = true)
     public GradesLessonsResponse getGradesLessonsByStudentId(Long studentId, Long academicPeriodId) {
@@ -102,7 +87,7 @@ public class LessonInstanceService {
 
         //Получаем список учеников с именами
         List<Long> studentsIds = schoolClassRepository.findStudentsIdsByTeachingAssignment(teachingAssignmentId);
-        List<UserResponse> studentNames = userClient.getBatchUsers(studentsIds);
+        List<UserFeignResponse> studentNames = userClient.getBatchUsers(studentsIds);
 
         //Получаем оценки и посещаемость из базы данных
         List<GradeStudentProjection> grades = lessonInstanceRepository.findGradesByTeachingAssignment(teachingAssignmentId,
@@ -153,6 +138,38 @@ public class LessonInstanceService {
 
         return lessonInstanceRepository.findLessonInstanceByTeachingAssignmentId(teachingAssignmentId,
                 academicPeriod.getStartDate(), academicPeriod.getEndDate());
+    }
+
+    public void generateForLesson(ScheduleLesson scheduleLesson) {
+        LocalDate from = scheduleLesson.getValidFrom();
+        LocalDate to = from.plusWeeks(2);
+
+        if (scheduleLesson.getValidTo() != null && scheduleLesson.getValidTo().isBefore(to)) {
+            to = scheduleLesson.getValidTo();
+        }
+
+        generateBetween(scheduleLesson, from, to);
+    }
+
+    public void generateBetween(ScheduleLesson scheduleLesson, LocalDate from, LocalDate to) {
+        DayOfWeek dayOfWeek = scheduleLesson.getDayOfWeek();
+
+        // начинаем с первого подходящего дня недели в периоде
+        LocalDate current = from.with(TemporalAdjusters.nextOrSame(
+                DayOfWeek.valueOf(dayOfWeek.name())
+        ));
+
+        while (!current.isAfter(to)) {
+            if (!lessonInstanceRepository.existsByScheduleLessonAndLessonDate(scheduleLesson, current)) {
+                LessonInstance li = LessonInstance.builder()
+                        .scheduleLesson(scheduleLesson)
+                        .lessonDate(current)
+                        .build();
+
+                lessonInstanceRepository.save(li);
+            }
+            current = current.plusWeeks(1);
+        }
     }
 
 }
