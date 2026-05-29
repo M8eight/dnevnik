@@ -6,7 +6,7 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Set;
 
 @Entity
 @NoArgsConstructor
@@ -31,12 +31,12 @@ public class LessonInstance extends BaseEntity {
     private LocalDate lessonDate;
 
     @OneToMany(mappedBy = "lessonInstance")
-    private List<Homework> homeworks;
+    private Set<Homework> homeworks;
 
     @OneToMany(mappedBy = "lessonInstance")
-    private List<Grade> grades;
+    private Set<Grade> grades;
 
     @OneToMany(mappedBy = "lessonInstance")
-    private List<Attendance> attendances;
+    private Set<Attendance> attendances;
 
 }

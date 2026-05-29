@@ -1,10 +1,10 @@
 package com.rusobr.academic.infrastructure.mapper;
 
 import com.rusobr.academic.domain.model.PeriodGrade;
+import com.rusobr.academic.web.dto.feign.UserFeignResponse;
 import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeResponse;
 import com.rusobr.academic.web.dto.grade.periodGrade.StudentPeriodGradeProjection;
 import com.rusobr.academic.web.dto.grade.periodGrade.StudentPeriodGradeResponse;
-import com.rusobr.academic.web.dto.feign.UserResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
@@ -22,5 +22,5 @@ public interface PeriodGradeMapper {
     @Mapping(source = "studentPeriodGradeProjection.description", target = "description")
     @Mapping(source = "studentPeriodGradeProjection.gradeId", target = "gradeId")
     StudentPeriodGradeResponse toStudentPeriodGradeResponse(StudentPeriodGradeProjection studentPeriodGradeProjection,
-                                                     UserResponse userResponse);
+                                                     UserFeignResponse userResponse);
 }

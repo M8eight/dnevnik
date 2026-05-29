@@ -2,8 +2,6 @@ package com.rusobr.academic.infrastructure.persistence.repository;
 
 import com.rusobr.academic.domain.model.SchoolClass;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassResponse;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -45,7 +43,7 @@ public interface SchoolClassRepository extends JpaRepository<SchoolClass, Long> 
 """)
     List<Long> findStudentsIdsByTeachingAssignment(@Param("teachingAssignmentId") Long teachingAssignmentId);
 
-    Page<SchoolClassResponse> findAllByOrderByNameAsc(Pageable pageable);
+    List<SchoolClassResponse> findAllByOrderByNameAsc();
 
     boolean existsByName(String name);
 

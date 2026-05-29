@@ -1,7 +1,7 @@
 package com.rusobr.user.infrastructure.persistence.repository;
 
 import com.rusobr.user.domain.model.Student;
-import com.rusobr.user.web.dto.feign.UserFeignResponse;
+import com.rusobr.user.web.dto.feign.UserResponse;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -15,29 +15,29 @@ import java.util.Optional;
 @Repository
 public interface StudentRepository extends JpaRepository<Student, Long> {
     @Query("""
-            select new com.rusobr.user.web.dto.feign.UserFeignResponse(s.id, u.firstName, u.lastName, u.username, u.keycloakId)
+            select new com.rusobr.user.web.dto.feign.UserResponse(s.id, u.firstName, u.lastName, u.username, u.keycloakId)
                         from Student s join s.user u where s.id in :studentIds
                             order by u.lastName
     """)
-    List<UserFeignResponse> findAllStudentsByIds(@Param("studentIds") Collection<Long> studentIds);
+    List<UserResponse> findAllStudentsByIds(@Param("studentIds") Collection<Long> studentIds);
 
     @Query("""
-            select new com.rusobr.user.web.dto.feign.UserFeignResponse(
+            select new com.rusobr.user.web.dto.feign.UserResponse(
                 s.id, u.firstName, u.lastName, u.username, u.keycloakId
                 )
             from Student s join s.user u where u.id not in :studentIds
             order by u.lastName
     """)
-    List<UserFeignResponse> findAllStudentsExcludeAssigned(@Param("studentIds") Collection<Long> studentIds);
+    List<UserResponse> findAllStudentsExcludeAssigned(@Param("studentIds") Collection<Long> studentIds);
 
     @Query("""
-            select new com.rusobr.user.web.dto.feign.UserFeignResponse(
+            select new com.rusobr.user.web.dto.feign.UserResponse(
                 s.id, u.firstName, u.lastName, u.username, u.keycloakId
                 )
             from Student s join s.user u
             order by u.lastName
     """)
-    List<UserFeignResponse> findWithUserAllStudents();
+    List<UserResponse> findWithUserAllStudents();
 
     @EntityGraph(attributePaths = {"user"})
     Optional<Student> findWithUserById(Long userId);

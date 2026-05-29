@@ -37,7 +37,7 @@ public class UserService {
     private final ParentRepository parentRepository;
 
     @Transactional(readOnly = true)
-    public User findById(Long id) {
+    public User findByIdInternal(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found with id: " + id));
     }

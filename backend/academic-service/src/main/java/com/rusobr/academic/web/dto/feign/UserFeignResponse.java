@@ -1,4 +1,4 @@
-package com.rusobr.user.web.dto.feign;
+package com.rusobr.academic.web.dto.feign;
 
 public record UserFeignResponse(
         Long id,

@@ -10,11 +10,11 @@ import com.rusobr.academic.infrastructure.mapper.PeriodGradeMapper;
 import com.rusobr.academic.infrastructure.persistence.repository.AcademicPeriodRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.PeriodGradeRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.TeachingAssignmentRepository;
+import com.rusobr.academic.web.dto.feign.UserFeignResponse;
 import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeRequest;
 import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeResponse;
 import com.rusobr.academic.web.dto.grade.periodGrade.StudentPeriodGradeProjection;
 import com.rusobr.academic.web.dto.grade.periodGrade.StudentPeriodGradeResponse;
-import com.rusobr.academic.web.dto.feign.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,8 +38,8 @@ public class PeriodGradeService {
 
         List<Long> studentIds = studentPeriodGrades.stream().map(StudentPeriodGradeProjection::studentId).toList();
 
-        Map<Long, UserResponse> students = userClient.getBatchUsers(studentIds).stream()
-                .collect(Collectors.toMap(UserResponse::id, g -> g));
+        Map<Long, UserFeignResponse> students = userClient.getBatchUsers(studentIds).stream()
+                .collect(Collectors.toMap(UserFeignResponse::id, g -> g));
 
         return studentPeriodGrades.stream().map(g ->
                         periodGradeMapper.toStudentPeriodGradeResponse(g, students.get(g.studentId())))

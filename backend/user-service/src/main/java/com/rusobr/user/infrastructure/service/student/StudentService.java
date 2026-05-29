@@ -13,7 +13,7 @@ import com.rusobr.user.infrastructure.persistence.repository.StudentRepository;
 import com.rusobr.user.infrastructure.persistence.repository.UserRepository;
 import com.rusobr.user.infrastructure.service.teacher.TeacherService;
 import com.rusobr.user.web.dto.feign.SchoolClassResponse;
-import com.rusobr.user.web.dto.feign.UserFeignResponse;
+import com.rusobr.user.web.dto.feign.UserResponse;
 import com.rusobr.user.web.dto.student.StudentDetails;
 import com.rusobr.user.web.dto.student.StudentWithClassResponse;
 import com.rusobr.user.web.dto.teacher.TeacherResponse;
@@ -40,7 +40,7 @@ public class StudentService {
     private final UserMapper userMapper;
 
 
-    public List<UserFeignResponse> findSimpleBatchStudents(List<Long> ids) {
+    public List<UserResponse> findSimpleBatchStudents(List<Long> ids) {
         if (ids == null || ids.isEmpty()) {
             return List.of();
         }
@@ -48,7 +48,7 @@ public class StudentService {
         return studentRepository.findAllStudentsByIds(ids);
     }
 
-    public List<UserFeignResponse> getStudentsExcludingIds(Set<Long> ids) {
+    public List<UserResponse> getStudentsExcludingIds(Set<Long> ids) {
         if (ids.isEmpty()) {
             return studentRepository.findWithUserAllStudents();
         }

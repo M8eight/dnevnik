@@ -7,7 +7,7 @@ import com.rusobr.academic.infrastructure.exception.NotFoundException;
 import com.rusobr.academic.infrastructure.feignClient.UserClient;
 import com.rusobr.academic.infrastructure.persistence.repository.ClassStudentRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.SchoolClassRepository;
-import com.rusobr.academic.web.dto.feign.UserResponse;
+import com.rusobr.academic.web.dto.feign.UserFeignResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,7 @@ public class ClassStudentService {
     @Autowired
     private ClassStudentService self;
 
-    public List<UserResponse> getUnassignedStudents() {
+    public List<UserFeignResponse> getUnassignedStudents() {
         Set<Long> ids = classStudentRepository.findAllStudentIds();
         return userClient.getBatchUsersExcludeAssigned(ids);
     }

@@ -8,15 +8,13 @@ import com.rusobr.academic.infrastructure.feignClient.UserClient;
 import com.rusobr.academic.infrastructure.mapper.SchoolClassMapper;
 import com.rusobr.academic.infrastructure.persistence.repository.SchoolClassRepository;
 import com.rusobr.academic.web.dto.feign.TeacherResponse;
-import com.rusobr.academic.web.dto.feign.UserResponse;
+import com.rusobr.academic.web.dto.feign.UserFeignResponse;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassFullResponse;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassRequest;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,7 +44,7 @@ public class SchoolClassService {
         SchoolClass schoolClass = schoolClassRepository.findWithClassStudentById(id)
                 .orElseThrow(() -> new NotFoundException("SchoolClass Not Found by id: " + id));
 
-        List<UserResponse> users = userClient.getBatchUsers(schoolClass.getStudents()
+        List<UserFeignResponse> users = userClient.getBatchUsers(schoolClass.getStudents()
                 .stream().map(ClassStudent::getStudentId).toList());
 
         TeacherResponse teacher = userClient.getTeacherById(schoolClass.getClassTeacherId());
@@ -59,8 +57,8 @@ public class SchoolClassService {
                 .orElseThrow(() -> new NotFoundException("SchoolClass not found for student: " + studentId));
     }
 
-    public Page<SchoolClassResponse> findAllClasses(Pageable pageable) {
-        return schoolClassRepository.findAllByOrderByNameAsc(pageable);
+    public List<SchoolClassResponse> findAllClasses() {
+        return schoolClassRepository.findAllByOrderByNameAsc();
     }
 
     public SchoolClassResponse saveClass(SchoolClassRequest schoolClassReq) {

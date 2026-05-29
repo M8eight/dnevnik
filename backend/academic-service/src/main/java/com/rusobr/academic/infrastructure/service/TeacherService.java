@@ -5,10 +5,10 @@ import com.rusobr.academic.infrastructure.feignClient.UserClient;
 import com.rusobr.academic.infrastructure.mapper.GradeMapper;
 import com.rusobr.academic.infrastructure.persistence.repository.SchoolClassRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.TeachingAssignmentRepository;
+import com.rusobr.academic.web.dto.feign.UserFeignResponse;
 import com.rusobr.academic.web.dto.grade.GetGradeDataDto;
 import com.rusobr.academic.web.dto.grade.GradeJournalResponse;
 import com.rusobr.academic.web.dto.teachingAssignment.TeachingAssignmentWithSubjectProjection;
-import com.rusobr.academic.web.dto.feign.UserResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,7 +28,7 @@ public class TeacherService {
 
     private final GradeDataService gradeDataService;
 
-    public List<UserResponse> getUsersIdFromClass(Long classId) {
+    public List<UserFeignResponse> getUsersIdFromClass(Long classId) {
         List<Long> userIds = schoolClassRepository.getStudentIdsFromSchoolClasses(classId);
         log.info("userIds: {}", userIds);
         return userClient.getBatchUsers(userIds);
@@ -46,7 +46,7 @@ public class TeacherService {
                 .orElseThrow(() -> new NotFoundException("Not Found ClassId in findByIdWithClassId"));
 
         //Получаем список учеников feign, левая колонка (переиспользуем метод getUsersIdFromClass)
-        List<UserResponse> classStudents = getUsersIdFromClass(classId);
+        List<UserFeignResponse> classStudents = getUsersIdFromClass(classId);
         log.info("classStudents: {}", classStudents);
 
         GetGradeDataDto journalData = gradeDataService.getGradeData(teachingAssignmentId, date);
