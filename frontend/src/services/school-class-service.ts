@@ -1,6 +1,5 @@
 import api from "@/axios/axios";
-import type { PageResponse } from "@/helpers/helper-interfaces";
-import type { TeacherDetails, UserResponse, UserSimpleResponse } from "./user-service";
+import type { TeacherDetails, UserSimpleResponse } from "./user-service";
 
 export interface SchoolClassResponse {
     id: number;
@@ -14,7 +13,6 @@ export interface SchoolClassRequest {
     classTeacherId: number;
 }
 
-
 export interface SchoolClassFullResponse {
     id: number;
     name: string;
@@ -26,8 +24,8 @@ export interface SchoolClassFullResponse {
     students: UserSimpleResponse[];
 }
 
-export const getSchoolClasses = async (page: number, size: number): Promise<PageResponse<SchoolClassResponse>> => {
-    const { data } = await api.get<PageResponse<SchoolClassResponse>>(`/academic-service/api/v1/school-classes?page=${page}&size=${size}`);
+export const getSchoolClasses = async (): Promise<SchoolClassResponse[]> => {
+    const { data } = await api.get<SchoolClassResponse[]>(`/academic-service/api/v1/school-classes`);
     return data;
 };
 

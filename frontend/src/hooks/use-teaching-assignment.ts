@@ -1,4 +1,4 @@
-import { getTeachingAssignmentDetail, type TeachingAssignmentDetail } from "@/services/teaching-assignment";
+import { getTeachingAssignmentDetail, type TeachingAssignmentDetail } from "@/services/teaching-assignment-service";
 import { useQuery } from "@tanstack/react-query"
 
 export const useTeachingAssignmentDetail = (teacherId: number) => {

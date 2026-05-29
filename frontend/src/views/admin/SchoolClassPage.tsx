@@ -16,11 +16,9 @@ import ClassDetailModal from "@/components/admin/school-class-page/class-detail-
 
 export default function SchoolClassPage() {
     const [search, setSearch] = useState("");
-    const [page] = useState(0);
     const [selectedClassId, setSelectedClassId] = useState<number | null>(null);
 
-    const { data: pageData, isLoading } = useGetAllClasses(page, 20);
-    const classes = pageData?.content ?? [];
+    const { data: classes = [], isLoading } = useGetAllClasses();
 
     const deleteMutation = useDeleteClass();
     const updateMutation = useUpdateClass();

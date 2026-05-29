@@ -39,7 +39,7 @@ export function UserCard({ user }: { user: StudentFullDetailsResponse }) {
 export function RatingCard({ avgGrade }: { avgGrade?: number }) {
   return (
     <div className="col-span-6 md:col-span-2 glass-card rounded-[22px] p-6 flex flex-col items-center justify-center text-center anim-in anim-delay-2">
-      <Chip className="border-[var(--gold)]/30 text-[var(--gold)] bg-amber-50">Рейтинг</Chip>
+      <Chip className="border-[var(--gold)]/30 text-[var(--gold)] bg-amber-50 mb-2">Рейтинг</Chip>
       <span className="font-serif text-[3.2rem] font-black text-[var(--navy)] leading-none">
         {avgGrade ? avgGrade.toFixed(1) : "—"}
       </span>
@@ -58,7 +58,7 @@ export function TeacherCard({ user }: { user?: StudentFullDetailsResponse }) {
   const teacher = user?.schoolClassTeacher;
   return (
     <div className="col-span-6 md:col-span-4 glass-card rounded-[22px] p-6 anim-in anim-delay-3">
-      <Chip className="border-[var(--brown)]/30 text-[var(--brown)] bg-[var(--brown-light)]/60">
+      <Chip className="border-[var(--brown)]/30 text-[var(--brown)] bg-[var(--brown-light)]/60 mb-2">
         классный руководитель
       </Chip>
       <div className="flex items-center gap-3 mb-4">
@@ -127,7 +127,7 @@ export function TodayGradesCard({ grades }: { grades?: any[] }) {
 export function HomeworkCard({ homework }: { homework?: any[] }) {
   return (
     <div className="col-span-12 md:col-span-4 glass-card rounded-[22px] p-6 anim-in anim-delay-4">
-      <Chip className="border-[var(--brown)]/30 text-[var(--brown)] bg-[var(--brown-light)]/60">ДЗ на завтра</Chip>
+      <Chip className="border-[var(--brown)]/30 text-[var(--brown)] bg-[var(--brown-light)]/60 mb-2">ДЗ на завтра</Chip>
       <div className="flex flex-col gap-2">
         {homework && homework.length > 0
           ? homework.map((hw) => (
