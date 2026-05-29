@@ -39,14 +39,10 @@ public interface GradeRepository extends JpaRepository<Grade, Long> {
     Optional<Grade> findWithLessonInstanceById(Long id);
 
     @Query("""
-            select avg(g.value * g.weight)
+            select sum(g.value * g.weight) / sum(g.weight)
             from Grade g
             join g.lessonInstance li
-            join li.scheduleLesson sl
-            join sl.teachingAssignment ta
-            join ta.schoolClass sc
-            join sc.students cs
-            where cs.studentId = :studentId
+            where g.studentId = :studentId
             and li.lessonDate between :startDate and :endDate
             """)
     Double getAverageGrade(@Param("studentId") Long studentId,
