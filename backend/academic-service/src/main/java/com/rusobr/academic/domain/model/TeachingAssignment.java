@@ -20,6 +20,7 @@ public class TeachingAssignment extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private Long teacherId;
 
     @ManyToOne(fetch = FetchType.LAZY)

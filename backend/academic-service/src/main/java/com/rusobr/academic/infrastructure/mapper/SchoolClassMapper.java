@@ -2,7 +2,7 @@ package com.rusobr.academic.infrastructure.mapper;
 
 import com.rusobr.academic.domain.model.SchoolClass;
 import com.rusobr.academic.web.dto.feign.TeacherResponse;
-import com.rusobr.academic.web.dto.feign.UserResponse;
+import com.rusobr.academic.web.dto.feign.UserFeignResponse;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassFullResponse;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassRequest;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassResponse;
@@ -20,6 +20,7 @@ public interface SchoolClassMapper {
     void updateSchoolClass(@MappingTarget SchoolClass schoolClass, SchoolClassRequest request);
     @Mapping(target = "teacher", source = "teacher")
     @Mapping(target = "students", source = "users")
-    SchoolClassFullResponse toSchoolClassFullResponse(SchoolClass schoolClass, List<UserResponse> users, TeacherResponse teacher);
+    SchoolClassFullResponse toSchoolClassFullResponse(SchoolClass schoolClass, List<UserFeignResponse> users,
+                                                      TeacherResponse teacher);
 
 }

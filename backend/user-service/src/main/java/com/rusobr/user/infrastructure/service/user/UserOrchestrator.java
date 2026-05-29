@@ -45,7 +45,7 @@ public class UserOrchestrator {
     }
 
     public UserResponse update(Long userId, UserUpdateRequest userUpdateRequest) {
-        User user = userService.findById(userId);
+        User user = userService.findByIdInternal(userId);
 
         validUsername(userUpdateRequest.user().username(), userId);
 

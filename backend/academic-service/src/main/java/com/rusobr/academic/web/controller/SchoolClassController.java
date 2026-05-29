@@ -2,15 +2,13 @@ package com.rusobr.academic.web.controller;
 
 import com.rusobr.academic.infrastructure.service.ClassStudentService;
 import com.rusobr.academic.infrastructure.service.SchoolClassService;
-import com.rusobr.academic.web.dto.feign.UserResponse;
+import com.rusobr.academic.web.dto.feign.UserFeignResponse;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassFullResponse;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassRequest;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -40,12 +38,12 @@ public class SchoolClassController {
     }
 
     @GetMapping
-    public Page<SchoolClassResponse> findAllClasses(Pageable pageable) {
-        return schoolClassService.findAllClasses(pageable);
+    public List<SchoolClassResponse> findAllClasses() {
+        return schoolClassService.findAllClasses();
     }
 
     @GetMapping("/unassigned")
-    public List<UserResponse> getAllUnassignedStudents() {
+    public List<UserFeignResponse> getAllUnassignedStudents() {
         return classStudentService.getUnassignedStudents();
     }
 

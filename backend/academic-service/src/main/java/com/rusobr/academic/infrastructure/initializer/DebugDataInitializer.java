@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 
 @Component
@@ -20,28 +21,31 @@ import java.util.*;
 @Slf4j
 public class DebugDataInitializer implements CommandLineRunner {
 
-    private static final LocalDate ANCHOR_DATE = LocalDate.of(2026, 4, 6);
-    private static final int WEEKS = 6;
+    // Опорная дата — прошлый понедельник от сегодня
+    private static final LocalDate ANCHOR = LocalDate.now()
+            .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+    private static final int PAST_WEEKS = 4;
 
-    private final SubjectRepository              subjectRepository;
-    private final SchoolClassRepository          schoolClassRepository;
-    private final TeachingAssignmentRepository   teachingAssignmentRepository;
-    private final ScheduleLessonRepository       scheduleLessonRepository;
-    private final LessonInstanceRepository       lessonInstanceRepository;
-    private final GradeRepository                gradeRepository;
-    private final AttendanceRepository           attendanceRepository;
-    private final AcademicPeriodRepository       academicPeriodRepository;
-    private final HomeworkRepository             homeworkRepository;
+    private final SubjectRepository            subjectRepository;
+    private final SchoolClassRepository        schoolClassRepository;
+    private final TeachingAssignmentRepository teachingAssignmentRepository;
+    private final ScheduleLessonRepository     scheduleLessonRepository;
+    private final LessonInstanceRepository     lessonInstanceRepository;
+    private final GradeRepository              gradeRepository;
+    private final AttendanceRepository         attendanceRepository;
+    private final AcademicPeriodRepository     academicPeriodRepository;
+    private final HomeworkRepository           homeworkRepository;
+    private final TeacherSubjectRepository     teacherSubjectRepository;
 
     private final Random rng = new Random(42);
 
     private enum Teachers {
-        MATH1(3), MATH2(4), GEOM(5),
-        PHYS1(6), PHYS2(7),
-        IT1(8),   IT2(9),
-        RUS1(10), RUS2(11), LIT(12),
+        MATH1(17), MATH2(4), GEOM(5),
+        PHYS1(6),  PHYS2(7),
+        IT1(8),    IT2(9),
+        RUS1(10),  RUS2(11), LIT(12),
         HIST1(13), HIST2(14), SOC(15),
-        ENG1(16),  ENG2(17), DE(18),
+        ENG1(16),  ENG2(3),  DE(18),
         CHEM(19),  BIO(20),  GEO(21),
         PE1(22),   PE2(23),  ART(24),
         MUSIC(25), TECH(26);
@@ -59,7 +63,8 @@ public class DebugDataInitializer implements CommandLineRunner {
             return;
         }
 
-        log.info("=== Полная инициализация академических данных (8А, 8Б, 9А) ===");
+        LocalDate from = ANCHOR.minusWeeks(PAST_WEEKS);
+        log.info("=== Инициализация: {} недель начиная с {} ===", PAST_WEEKS, from);
 
         Map<String, Subject> S = new LinkedHashMap<>();
         List.of(
@@ -77,8 +82,9 @@ public class DebugDataInitializer implements CommandLineRunner {
         Map<DayOfWeek, List<ScheduleLesson>> sched8b = buildSchedule8B(c8b.ta());
         Map<DayOfWeek, List<ScheduleLesson>> sched9a = buildSchedule9A(c9a.ta());
 
-        for (int week = 0; week < WEEKS; week++) {
-            LocalDate monday = ANCHOR_DATE.plusWeeks(week);
+        // Только прошлые недели включая текущую (anchor)
+        for (int week = 0; week <= PAST_WEEKS; week++) {
+            LocalDate monday = from.plusWeeks(week);
             generateWeek(monday, sched8a, c8a.schoolClass());
             generateWeek(monday, sched8b, c8b.schoolClass());
             generateWeek(monday, sched9a, c9a.schoolClass());
@@ -86,22 +92,21 @@ public class DebugDataInitializer implements CommandLineRunner {
 
         savePeriods();
 
-        log.info("=== Инициализация завершена успешно ===");
+        saveTeacherSubjects(S);
+
+        log.info("=== Инициализация завершена ===");
     }
 
     private record ClassBundle(SchoolClass schoolClass, Map<String, TeachingAssignment> ta) {}
 
     private ClassBundle buildClass(String name, String year, Long classTeacherId,
                                    List<Long> studentIds, Map<String, Subject> S) {
-
-        // ШАГ 1: сохраняем класс без студентов — получаем ID
         SchoolClass sc = SchoolClass.builder()
                 .name(name).year(year)
                 .classTeacherId(classTeacherId)
                 .students(new HashSet<>()).build();
         schoolClassRepository.save(sc);
 
-        // ШАГ 2: добавляем студентов (sc.id уже != null) и сохраняем повторно с каскадом
         studentIds.forEach(sid ->
                 sc.getStudents().add(
                         ClassStudent.builder().schoolClass(sc).studentId(sid).build()
@@ -225,8 +230,10 @@ public class DebugDataInitializer implements CommandLineRunner {
                               Map<DayOfWeek, List<ScheduleLesson>> schedule,
                               SchoolClass schoolClass) {
         schedule.forEach((day, lessons) -> {
-            LocalDate date = monday.plusDays(day.getValue() - 1);
-            buildDay(date, lessons, schoolClass);
+            LocalDate date = monday.with(TemporalAdjusters.nextOrSame(day));
+            if (!date.isAfter(LocalDate.now())) {
+                buildDay(date, lessons, schoolClass);
+            }
         });
     }
 
@@ -236,23 +243,36 @@ public class DebugDataInitializer implements CommandLineRunner {
             LessonInstance li = lessonInstanceRepository.save(
                     LessonInstance.builder().lessonDate(date).scheduleLesson(slot).build());
 
-            homeworkRepository.save(Homework.builder()
-                    .text(randomHomework(slot.getTeachingAssignment().getSubject().getName()))
-                    .lessonInstance(li).build());
+            if (rng.nextInt(100) < 40) {
+                homeworkRepository.save(Homework.builder()
+                        .text(randomHomework(slot.getTeachingAssignment().getSubject().getName()))
+                        .lessonInstance(li).build());
+            }
 
             for (ClassStudent cs : schoolClass.getStudents()) {
                 Long sid = cs.getStudentId();
-                if (rng.nextInt(100) < 35) {
+
+                if (rng.nextInt(100) < 25) {
+                    GradeType type = switch (rng.nextInt(10)) {
+                        case 0, 1 -> GradeType.TEST;       // 20% — контрольная
+                        case 2    -> GradeType.CONTROL;    // 10% — проверочная
+                        default   -> GradeType.HOMEWORK;   // 70% — за ДЗ
+                    };
+                    int weight = type == GradeType.TEST ? 3
+                            : type == GradeType.CONTROL ? 2
+                              : 1;
                     gradeRepository.save(Grade.builder()
                             .lessonInstance(li).studentId(sid)
-                            .value(generateRealisticGrade()).weight(1)
-                            .type(GradeType.HOMEWORK).build());
+                            .value(generateRealisticGrade())
+                            .weight(weight)
+                            .type(type).build());
                 }
-                if (rng.nextInt(100) < 6) {
-                    AttendanceStatus status = switch (rng.nextInt(3)) {
-                        case 0 -> AttendanceStatus.ABSENT;
-                        case 1 -> AttendanceStatus.LATE;
-                        default -> AttendanceStatus.EXCUSED;
+
+                if (rng.nextInt(100) < 8) {
+                    AttendanceStatus status = switch (rng.nextInt(10)) {
+                        case 0, 1, 2 -> AttendanceStatus.EXCUSED; // 30% уважительная
+                        case 3       -> AttendanceStatus.LATE;    // 10% опоздал
+                        default      -> AttendanceStatus.ABSENT;  // 60% просто прогул
                     };
                     attendanceRepository.save(Attendance.builder()
                             .lessonInstance(li).studentId(sid).status(status).build());
@@ -273,9 +293,79 @@ public class DebugDataInitializer implements CommandLineRunner {
                         .startDate(LocalDate.of(2026, 1, 9)).endDate(LocalDate.of(2026, 3, 31))
                         .closed(true).build(),
                 AcademicPeriod.builder().name("Четвертая четверть").schoolYear("2025-2026")
-                        .startDate(LocalDate.of(2026, 4, 6)).endDate(LocalDate.of(2026, 5, 25))
+                        .startDate(LocalDate.of(2026, 4, 6)).endDate(LocalDate.of(2026, 6, 25))
                         .closed(false).build()
         ));
+    }
+
+    private void saveTeacherSubjects(Map<String, Subject> S) {
+        Map<Long, Set<String>> teacherToSubjects = new LinkedHashMap<>();
+
+        // Математика / геометрия
+        addTS(teacherToSubjects, Teachers.MATH1.id, "Алгебра");
+        addTS(teacherToSubjects, Teachers.MATH2.id, "Алгебра");
+        addTS(teacherToSubjects, Teachers.GEOM.id,  "Геометрия");
+
+        // Физика
+        addTS(teacherToSubjects, Teachers.PHYS1.id, "Физика");
+        addTS(teacherToSubjects, Teachers.PHYS2.id, "Физика");
+
+        // Информатика
+        addTS(teacherToSubjects, Teachers.IT1.id, "Информатика");
+        addTS(teacherToSubjects, Teachers.IT2.id, "Информатика");
+
+        // Русский / литература
+        addTS(teacherToSubjects, Teachers.RUS1.id, "Русский язык");
+        addTS(teacherToSubjects, Teachers.RUS2.id, "Русский язык");
+        addTS(teacherToSubjects, Teachers.LIT.id,  "Литература");
+
+        // История / обществознание
+        addTS(teacherToSubjects, Teachers.HIST1.id, "История");
+        addTS(teacherToSubjects, Teachers.HIST2.id, "История");
+        addTS(teacherToSubjects, Teachers.SOC.id,   "Обществознание");
+
+        // Иностранные языки
+        addTS(teacherToSubjects, Teachers.ENG1.id, "Английский язык");
+        addTS(teacherToSubjects, Teachers.ENG2.id, "Английский язык");
+        addTS(teacherToSubjects, Teachers.DE.id,   "Немецкий язык");
+
+        // Естественные науки
+        addTS(teacherToSubjects, Teachers.CHEM.id, "Химия");
+        addTS(teacherToSubjects, Teachers.BIO.id,  "Биология");
+        addTS(teacherToSubjects, Teachers.GEO.id,  "География");
+
+        // Физкультура
+        addTS(teacherToSubjects, Teachers.PE1.id, "Физкультура");
+        addTS(teacherToSubjects, Teachers.PE2.id, "Физкультура");
+
+        // Творческие
+        addTS(teacherToSubjects, Teachers.ART.id,   "Изо");
+        addTS(teacherToSubjects, Teachers.MUSIC.id, "Музыка");
+        addTS(teacherToSubjects, Teachers.TECH.id,  "Технология");
+
+        teacherToSubjects.forEach((teacherId, subjects) ->
+                subjects.forEach(subjectName -> {
+                    Subject subject = S.get(subjectName);
+                    if (subject == null) return;
+                    TeacherSubjectId tsId = TeacherSubjectId.builder()
+                            .teacherId(teacherId)
+                            .subjectId(subject.getId())
+                            .build();
+                    teacherSubjectRepository.save(
+                            TeacherSubject.builder()
+                                    .id(tsId)
+                                    .subject(subject)
+                                    .build()
+                    );
+                })
+        );
+
+        log.info("Создано teacher_subject связок: {}",
+                teacherToSubjects.values().stream().mapToInt(Set::size).sum());
+    }
+
+    private void addTS(Map<Long, Set<String>> map, long teacherId, String subject) {
+        map.computeIfAbsent(teacherId, k -> new LinkedHashSet<>()).add(subject);
     }
 
     private TeachingAssignment saveTA(long tid, SchoolClass sc, Subject sub) {
@@ -288,7 +378,8 @@ public class DebugDataInitializer implements CommandLineRunner {
                 ScheduleLesson.builder()
                         .dayOfWeek(day).lessonNumber(s.number())
                         .classRoom(s.room()).teachingAssignment(s.ta())
-                        .validFrom(ANCHOR_DATE.minusMonths(1)).build()
+                        .validFrom(ANCHOR.minusWeeks(PAST_WEEKS))
+                        .build()
         )).toList();
     }
 

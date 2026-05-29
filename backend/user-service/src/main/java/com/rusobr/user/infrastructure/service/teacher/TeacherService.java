@@ -6,6 +6,7 @@ import com.rusobr.user.infrastructure.exception.NotFoundException;
 import com.rusobr.user.infrastructure.mapper.TeacherMapper;
 import com.rusobr.user.infrastructure.persistence.repository.TeacherRepository;
 import com.rusobr.user.infrastructure.persistence.repository.UserRepository;
+import com.rusobr.user.web.dto.feign.UserResponse;
 import com.rusobr.user.web.dto.teacher.TeacherDetails;
 import com.rusobr.user.web.dto.teacher.TeacherResponse;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -33,6 +35,14 @@ public class TeacherService {
         Teacher teacher = teacherRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Teacher not found: " + id));
         return teacherMapper.toTeacherDetails(teacher);
+    }
+
+    public List<UserResponse> getSimpleBatchTeachers(List<Long> ids) {
+        return teacherRepository.findAllTeachersByIds(ids);
+    }
+
+    public UserResponse getTeacherSimpleById(Long id) {
+        return teacherRepository.getTeacherSimpleById(id);
     }
 
     public Optional<Teacher> findByIdWithDeleted(Long id) {

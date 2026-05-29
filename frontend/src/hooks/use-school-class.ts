@@ -12,15 +12,14 @@ import {
     getAllUnassignedStudents,
     assignTeacherToClass,
 } from "@/services/school-class-service";
-import type { PageResponse } from "@/helpers/helper-interfaces";
 import type { UserSimpleResponse } from "@/services/user-service";
 
 const CLASS_QUERY_KEY = ["classes"];
 
-export const useGetAllClasses = (page: number = 0, size: number = 20) => {
-    return useQuery<PageResponse<SchoolClassResponse>>({
-        queryKey: [...CLASS_QUERY_KEY, page, size],
-        queryFn: () => getSchoolClasses(page, size),
+export const useGetAllClasses = () => {
+    return useQuery<SchoolClassResponse[]>({
+        queryKey: [...CLASS_QUERY_KEY],
+        queryFn: () => getSchoolClasses(),
         staleTime: 1000 * 60 * 5,
     });
 };

@@ -1,18 +1,19 @@
 package com.rusobr.academic.infrastructure.persistence.repository;
 
 import com.rusobr.academic.domain.model.LessonInstance;
+import com.rusobr.academic.domain.model.ScheduleLesson;
 import com.rusobr.academic.web.dto.lessonInstance.GradeJournalProjection;
 import com.rusobr.academic.web.dto.lessonInstance.LessonInstanceDto;
 import com.rusobr.academic.web.dto.lessonInstance.teacher.AttendanceStudentProjection;
 import com.rusobr.academic.web.dto.lessonInstance.teacher.GradeStudentProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface LessonInstanceRepository extends JpaRepository<LessonInstance, Long> {
@@ -35,10 +36,8 @@ public interface LessonInstanceRepository extends JpaRepository<LessonInstance, 
                 order by li.lessonDate
             """)
     List<LessonInstance> findDiaryLessonsByStudentIdAndDateRange(@Param("studentId") Long studentId,
-                                                                      @Param("startDate") LocalDate startDate,
-                                                                      @Param("endDate") LocalDate endDate);
-
-    Optional<LessonInstance> findByLessonDateAndScheduleLessonId(LocalDate date, Long scheduleLessonId);
+                                                                 @Param("startDate") LocalDate startDate,
+                                                                 @Param("endDate") LocalDate endDate);
 
     @Query("""
                 select new com.rusobr.academic.web.dto.lessonInstance.GradeJournalProjection(
@@ -131,4 +130,47 @@ public interface LessonInstanceRepository extends JpaRepository<LessonInstance, 
     List<AttendanceStudentProjection> findAttendancesByTeachingAssignment(@Param("teachingAssignmentId") Long teachingAssignmentId,
                                                                           @Param("startDate") LocalDate startDate,
                                                                           @Param("endDate") LocalDate endDate);
+
+    List<LessonInstance> findByScheduleLessonId(Long scheduleLessonId);
+
+    @Modifying
+    @Query("""
+        update LessonInstance li
+        set li.deletedAt = current_timestamp()
+        where li.scheduleLesson.id = :scheduleId
+            and li.lessonDate > :closeDate
+            and li.deletedAt is null
+            and not exists (
+                select 1 from Grade g where g.lessonInstance.id = li.id and g.deletedAt is null
+            )
+            and not exists (
+                select 1 from Attendance a where a.lessonInstance.id = li.id and a.deletedAt is null
+            )
+            and not exists (
+                select 1 from Homework h where h.lessonInstance.id = li.id and h.deletedAt is null
+            )
+    """)
+    void softDeleteFutureEmptyAfterDate(@Param("scheduleId") Long scheduleId, @Param("closeDate") LocalDate closeDate);
+
+    boolean existsByScheduleLessonAndLessonDate(ScheduleLesson scheduleLesson, LocalDate lessonDate);
+
+    @Query("""
+        select distinct li
+        from LessonInstance li
+            join fetch li.scheduleLesson sl
+            left join fetch li.attendances a
+            left join fetch li.grades g
+            left join fetch li.homeworks h
+        where sl.id in :scheduleLessonIds
+            and (a.studentId = :studentId
+                or g.studentId = :studentId
+                or h.id is not null)
+            and li.lessonDate between :startDate and :endDate
+        order by li.lessonDate asc
+    """)
+    List<LessonInstance> findDiaryAcademicPerformanceByStudentId(@Param("scheduleLessonIds") List<Long> scheduleLessonIds,
+                                                                 @Param("startDate") LocalDate startDate,
+                                                                 @Param("endDate") LocalDate endDate,
+                                                                 @Param("studentId") Long studentId);
+
 }
