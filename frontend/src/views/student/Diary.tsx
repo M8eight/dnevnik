@@ -89,14 +89,21 @@ function DayCard({
           return (
             <div key={idx} className="py-3 first:pt-0 last:pb-0">
               <div className="flex items-start gap-3">
-                <div className="flex flex-col items-center min-w-[52px] pt-0.5">
-                  <span className="font-serif text-[12px] font-black text-black/15 leading-none">
-                    {lesson.lessonNumber}
+
+                {/* Время урока */}
+                <div className="flex flex-col justify-center items-end min-w-[56px] pt-1 shrink-0">
+                  <span className="text-[13px] font-extrabold text-black/30 leading-none tabular-nums">
+                    {LESSON_TIMES[lesson.lessonNumber]?.split("–")[0] ?? "—"}
                   </span>
-                  <span className="text-[10px] font-bold text-black/15 tracking-tight whitespace-nowrap mt-0.5">
-                    {LESSON_TIMES[lesson.lessonNumber] ?? "—"}
+                  <span className="text-[12px] font-medium text-black/15 leading-none tabular-nums">
+                    {LESSON_TIMES[lesson.lessonNumber]?.split("–")[1] ?? ""}
                   </span>
                 </div>
+
+                {/* Разделитель */}
+                <div className="w-[2px] self-stretch rounded-full bg-black/[0.06] shrink-0" />
+
+                {/* Контент урока */}
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-start gap-2">
                     <div className="min-w-0">
@@ -118,6 +125,7 @@ function DayCard({
                     </div>
                   </div>
                 </div>
+
               </div>
             </div>
           );

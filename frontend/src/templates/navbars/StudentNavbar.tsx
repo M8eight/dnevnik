@@ -37,7 +37,7 @@ export default function StudentNavbar() {
                     <nav className="hidden lg:flex items-center gap-2">
                         <NavItem to="/student/home" label="Главная" />
                         <NavItem to="/student/diary" label="Дневник" />
-                        <NavItem to="/student/grades" label="Оценки" />
+                        <NavItem to="/student/grade" label="Оценки" />
                     </nav>
                     <div className="flex items-center gap-4">
                         <div className="text-right hidden sm:block">
