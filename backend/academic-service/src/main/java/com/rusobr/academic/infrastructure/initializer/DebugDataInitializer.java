@@ -38,6 +38,7 @@ public class DebugDataInitializer implements CommandLineRunner {
     private final TeacherSubjectRepository     teacherSubjectRepository;
 
     private final Random rng = new Random(42);
+    private final PeriodGradeRepository periodGradeRepository;
 
     private enum Teachers {
         MATH1(17), MATH2(4), GEOM(5),
@@ -51,7 +52,10 @@ public class DebugDataInitializer implements CommandLineRunner {
         MUSIC(25), TECH(26);
 
         final long id;
-        Teachers(long id) { this.id = id; }
+
+        Teachers(long id) {
+            this.id = id;
+        }
     }
 
     private record Slot(int number, String room, TeachingAssignment ta) {}
@@ -93,6 +97,8 @@ public class DebugDataInitializer implements CommandLineRunner {
         savePeriods();
 
         saveTeacherSubjects(S);
+
+        savePeriodGrades(c8a, c8b, c9a);
 
         log.info("=== Инициализация завершена ===");
     }
@@ -304,7 +310,7 @@ public class DebugDataInitializer implements CommandLineRunner {
         // Математика / геометрия
         addTS(teacherToSubjects, Teachers.MATH1.id, "Алгебра");
         addTS(teacherToSubjects, Teachers.MATH2.id, "Алгебра");
-        addTS(teacherToSubjects, Teachers.GEOM.id,  "Геометрия");
+        addTS(teacherToSubjects, Teachers.GEOM.id, "Геометрия");
 
         // Физика
         addTS(teacherToSubjects, Teachers.PHYS1.id, "Физика");
@@ -391,19 +397,69 @@ public class DebugDataInitializer implements CommandLineRunner {
         return 2;
     }
 
+    private void savePeriodGrades(ClassBundle... bundles) {
+        List<AcademicPeriod> closedPeriods = academicPeriodRepository.findAll()
+                .stream()
+                .filter(AcademicPeriod::isClosed)
+                .toList();
+
+        List<PeriodGrade> toSave = new ArrayList<>();
+
+        for (ClassBundle bundle : bundles) {
+            for (ClassStudent cs : bundle.schoolClass().getStudents()) {
+                Long studentId = cs.getStudentId();
+
+                for (TeachingAssignment ta : bundle.ta().values()) {
+                    for (AcademicPeriod period : closedPeriods) {
+                        int value = generateRealisticGrade();
+
+                        toSave.add(PeriodGrade.builder()
+                                .studentId(studentId)
+                                .teachingAssignment(ta)
+                                .academicPeriod(period)
+                                .value(value)
+                                .description(generatePeriodGradeDescription(value))
+                                .build());
+                    }
+                }
+            }
+        }
+
+
+        periodGradeRepository.saveAll(toSave);
+        log.info("Создано period_grades: {}", toSave.size());
+    }
+
+    private String generatePeriodGradeDescription(int value) {
+        return switch (value) {
+            case 5 -> rng.nextBoolean() ? "Отличная работа в четверти" : null;
+            case 4 -> rng.nextBoolean() ? "Хорошая успеваемость" : null;
+            case 3 -> rng.nextBoolean() ? "Удовлетворительно, есть пробелы" : null;
+            case 2 -> "Неудовлетворительно, необходима доработка";
+            default -> null;
+        };
+    }
+
     private String randomHomework(String subject) {
         List<String> tasks = switch (subject) {
-            case "Алгебра"         -> List.of("§12, задачи 1–8", "Контрольные вопросы к §14", "Решить уравнения из упр. 234");
-            case "Геометрия"       -> List.of("Доказать теорему §8", "Упр. 115–120, чертежи", "Построить треугольник по условию");
-            case "Физика"          -> List.of("§18 читать, вопросы 1–5", "Решить задачи 14.3–14.7", "Написать конспект §19");
-            case "Химия"           -> List.of("Выучить валентности элементов", "§21 читать, задачи 3–6", "Составить уравнения реакций");
-            case "Биология"        -> List.of("§11 читать, заполнить таблицу", "Нарисовать схему клетки", "Выучить термины §12");
-            case "История"         -> List.of("§15 читать, вопросы на с. 98", "Составить хронологию событий", "Написать эссе по теме");
-            case "Русский язык"    -> List.of("Упр. 341, диктант", "Правила §18 выучить наизусть", "Сочинение-миниатюра");
-            case "Литература"      -> List.of("Прочитать гл. 5–7", "Ответить на вопросы с. 78", "Выучить наизусть стихотворение");
-            case "Английский язык" -> List.of("WB p.45 ex.3–5", "Vocabulary unit 7", "Прочитать текст, ответить на вопросы");
-            case "Информатика"     -> List.of("Задание в Moodle (тема 9)", "Написать программу сортировки", "Презентация по теме ИИ");
-            default                -> List.of("Изучить тему и выполнить упражнения в тетради");
+            case "Алгебра" -> List.of("§12, задачи 1–8", "Контрольные вопросы к §14", "Решить уравнения из упр. 234");
+            case "Геометрия" ->
+                    List.of("Доказать теорему §8", "Упр. 115–120, чертежи", "Построить треугольник по условию");
+            case "Физика" -> List.of("§18 читать, вопросы 1–5", "Решить задачи 14.3–14.7", "Написать конспект §19");
+            case "Химия" ->
+                    List.of("Выучить валентности элементов", "§21 читать, задачи 3–6", "Составить уравнения реакций");
+            case "Биология" ->
+                    List.of("§11 читать, заполнить таблицу", "Нарисовать схему клетки", "Выучить термины §12");
+            case "История" ->
+                    List.of("§15 читать, вопросы на с. 98", "Составить хронологию событий", "Написать эссе по теме");
+            case "Русский язык" -> List.of("Упр. 341, диктант", "Правила §18 выучить наизусть", "Сочинение-миниатюра");
+            case "Литература" ->
+                    List.of("Прочитать гл. 5–7", "Ответить на вопросы с. 78", "Выучить наизусть стихотворение");
+            case "Английский язык" ->
+                    List.of("WB p.45 ex.3–5", "Vocabulary unit 7", "Прочитать текст, ответить на вопросы");
+            case "Информатика" ->
+                    List.of("Задание в Moodle (тема 9)", "Написать программу сортировки", "Презентация по теме ИИ");
+            default -> List.of("Изучить тему и выполнить упражнения в тетради");
         };
         return tasks.get(rng.nextInt(tasks.size()));
     }

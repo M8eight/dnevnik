@@ -32,4 +32,13 @@ public interface TeachingAssignmentRepository  extends JpaRepository<TeachingAss
     List<TeachingAssignmentWithSubjectProjection> findTeachingAssignmentDetailByTeacherId(@Param("teacherId") Long teacherId);
 
     Optional<TeachingAssignment> findBySubjectIdAndSchoolClassIdAndTeacherId(Long subjectId, Long schoolClassId, Long teacherId);
+
+    @Query("""
+        select s.studentId
+        from TeachingAssignment ta
+        join ta.schoolClass sc
+        join sc.students s
+        where ta.id = :teachingAssignmentId
+    """)
+    List<Long> findStudentIdsByTeachingAssignmentId(Long teachingAssignmentId);
 }

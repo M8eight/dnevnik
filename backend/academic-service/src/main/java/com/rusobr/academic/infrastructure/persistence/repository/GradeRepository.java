@@ -3,6 +3,7 @@ package com.rusobr.academic.infrastructure.persistence.repository;
 import com.rusobr.academic.domain.model.Grade;
 import com.rusobr.academic.web.dto.grade.GradeJournalItemDto;
 import com.rusobr.academic.web.dto.grade.GradeWithSubjectNameResponse;
+import com.rusobr.academic.web.dto.grade.StudentAverageProjection;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -64,4 +65,23 @@ public interface GradeRepository extends JpaRepository<Grade, Long> {
        and g.studentId = :studentId
 """)
     List<GradeWithSubjectNameResponse> findAllGradesByDate(@Param("studentId") Long studentId, @Param("date")  LocalDate date);
+
+    //группируем по studentId, а среднее число учитывая вес округляем до 2 знаков после запятой
+    @Query(value = """
+        select g.student_id as studentId,
+            round((
+                    sum(g.value * g.weight)::float / sum(g.weight)
+            )::numeric, 2) as average
+        from grades g
+            join lesson_instances li on li.id = g.lesson_instance_id
+            join schedule_lessons sl on sl.id = li.schedule_lesson_id
+            join teaching_assignments ta on ta.id = sl.teaching_assignment_id
+        where li.lesson_date between :from and :to
+            and ta.id = :teachingAssignmentId
+            and g.deleted_at is null
+            and li.deleted_at is null
+        group by g.student_id
+    """, nativeQuery = true)
+    List<StudentAverageProjection> findAverageStudentsByTeachingAssignment(@Param("teachingAssignmentId") Long teachingAssignmentId,
+                                                                           @Param("from") LocalDate from, @Param("to") LocalDate to);
 }

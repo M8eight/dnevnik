@@ -1,12 +1,10 @@
 package com.rusobr.academic.web.dto.grade.periodGrade;
 
-import java.time.LocalDate;
-
 public record PeriodGradeRequest(
-        int value,
+        Integer value,
         String description,
         Long teachingAssignmentId,
         Long studentId,
-        LocalDate date
+        Long academicPeriodId
 ) {
 }

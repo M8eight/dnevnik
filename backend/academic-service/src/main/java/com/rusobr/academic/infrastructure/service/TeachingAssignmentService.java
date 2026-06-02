@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class TeachingAssignmentService {
@@ -31,6 +33,10 @@ public class TeachingAssignmentService {
                     .build();
             return teachingAssignmentRepository.save(assignment);
         });
+    }
+
+    public List<Long> getStudentIdsByTeachingAssignmentId(Long teachingAssignmentId) {
+        return teachingAssignmentRepository.findStudentIdsByTeachingAssignmentId(teachingAssignmentId);
     }
 
 }
