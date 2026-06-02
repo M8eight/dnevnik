@@ -25,7 +25,7 @@ public class PeriodGrade extends BaseEntity {
     @Max(5)
     @Min(1)
     @Column(nullable = false)
-    private int value;
+    private Integer value;
 
     private String description;
 

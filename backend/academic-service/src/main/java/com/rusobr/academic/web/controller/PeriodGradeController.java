@@ -1,14 +1,16 @@
 package com.rusobr.academic.web.controller;
 
 import com.rusobr.academic.infrastructure.service.PeriodGradeService;
+import com.rusobr.academic.web.dto.grade.StudentAverageResponse;
 import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeRequest;
 import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeResponse;
-import com.rusobr.academic.web.dto.grade.periodGrade.StudentPeriodGradeResponse;
+import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeStudentResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -17,8 +19,14 @@ public class PeriodGradeController {
     private final PeriodGradeService periodGradeService;
 
     @GetMapping("/class")
-    public List<StudentPeriodGradeResponse> findBySchoolClassId(@RequestParam Long teachingAssignmentId, @RequestParam Long academicPeriodId) {
-        return periodGradeService.findBySchoolClassId(teachingAssignmentId, academicPeriodId);
+    public Map<String, List<PeriodGradeStudentResponse>> getBySchoolClassId(@RequestParam Long studentId) {
+        return periodGradeService.findBySchoolClassId(studentId);
+    }
+
+    @GetMapping("/by-teaching-assignment/with-avg")
+    public List<StudentAverageResponse> getAverageGradesByClass(@RequestParam Long teachingAssignmentId,
+                                                                @RequestParam Long academicPeriodId) {
+        return periodGradeService.getStudentPeriodGradesWithAverage(teachingAssignmentId, academicPeriodId);
     }
 
     @PostMapping
