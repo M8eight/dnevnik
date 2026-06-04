@@ -31,6 +31,7 @@ export interface AttendanceJournalDto {
 export interface StudentJournalEntry {
     studentId: number;
     grades: GradeJournalDto[];
+    gradesAverage : number | null;
     attendances: AttendanceJournalDto[];
 }
 

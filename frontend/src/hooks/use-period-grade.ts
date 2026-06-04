@@ -1,26 +1,27 @@
 import {
   createPeriodGrade,
   deletePeriodGrade,
-  getStudentPeriodGrades,
-  getStudentPeriodGradesWithAverage,
+  getPeriodGradesByAssignment,
+  getPeriodGradesByStudent,
   type PeriodGradeRequest,
   type PeriodGradesStudentResponse,
+  type PeriodGradeTeacherResponse,
 } from "@/services/period-grade-service";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
  
-export const useStudentPeriodGrades = (studentId: number) => {
+export const usePeriodGradesByStudent = (studentId: number, schoolYear: string) => {
   return useQuery<PeriodGradesStudentResponse>({
-    queryKey: ["studentPeriodGrades", studentId],
-    queryFn: () => getStudentPeriodGrades(studentId),
-    enabled: !!studentId,
+    queryKey: ["studentPeriodGrades", studentId, schoolYear],
+    queryFn: () => getPeriodGradesByStudent(studentId, schoolYear),
+    enabled: !!studentId && !!schoolYear,
   });
 };
 
-export const useStudentPeriodGradesWithAverage = (teachingAssignmentId: number, academicPeriodId: number) => {
-  return useQuery({
-    queryKey: ["periodGrades", teachingAssignmentId, academicPeriodId],
-    queryFn: () => getStudentPeriodGradesWithAverage(teachingAssignmentId, academicPeriodId),
-    enabled: !!teachingAssignmentId && !!academicPeriodId,
+export const usePeriodGradesByAssignment = (teachingAssignmentId: number, currentAcademicPeriodId: number, schoolYear: string) => {
+  return useQuery<PeriodGradeTeacherResponse[]>({
+    queryKey: ["periodGrades", teachingAssignmentId, currentAcademicPeriodId, schoolYear],
+    queryFn: () => getPeriodGradesByAssignment(teachingAssignmentId, currentAcademicPeriodId, schoolYear),
+    enabled: !!teachingAssignmentId && !!currentAcademicPeriodId && !!schoolYear,
   });
 };
 
