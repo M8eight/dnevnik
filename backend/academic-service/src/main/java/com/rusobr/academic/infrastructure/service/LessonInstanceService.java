@@ -20,6 +20,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
@@ -120,12 +122,26 @@ public class LessonInstanceService {
         allStudentIds.addAll(attendanceJournal.keySet());
 
         //Преобразуем в dto с studentId и списком оценок и посещаемости
-        List<StudentJournalDto> studentJournal = allStudentIds.stream()
-                .map(studentId -> new StudentJournalDto(
-                        studentId,
-                        gradeJournal.getOrDefault(studentId, List.of()),
-                        attendanceJournal.getOrDefault(studentId, List.of())
-                ))
+        List <StudentJournalDto > studentJournal = allStudentIds.stream()
+                .map(studentId -> {
+
+                    var studentGrades = gradeJournal.getOrDefault(studentId, List.of());
+                    double gradeTop = studentGrades.stream()
+                            .mapToDouble(g -> g.value() * g.weight()).sum();
+                    double gradeBottom = studentGrades.stream().mapToDouble(StudentJournalDto.GradeLessonTeacherDto::weight).sum();
+                    double average = (gradeBottom > 0)
+                            ? BigDecimal.valueOf(gradeTop / gradeBottom)
+                              .setScale(2, RoundingMode.HALF_UP)
+                              .doubleValue()
+                            : 0.0;
+
+                    return new StudentJournalDto(
+                            studentId,
+                            gradeJournal.getOrDefault(studentId, List.of()),
+                            average,
+                            attendanceJournal.getOrDefault(studentId, List.of())
+                    );
+                })
                 .toList();
 
         return new TeacherJournalResponse(academicPeriodMapper.toDto(academicPeriod),

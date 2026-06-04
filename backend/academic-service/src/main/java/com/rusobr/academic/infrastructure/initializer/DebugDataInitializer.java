@@ -36,6 +36,7 @@ public class DebugDataInitializer implements CommandLineRunner {
     private final AcademicPeriodRepository     academicPeriodRepository;
     private final HomeworkRepository           homeworkRepository;
     private final TeacherSubjectRepository     teacherSubjectRepository;
+    private final FinalGradeRepository         finalGradeRepository;
 
     private final Random rng = new Random(42);
     private final PeriodGradeRepository periodGradeRepository;
@@ -99,6 +100,8 @@ public class DebugDataInitializer implements CommandLineRunner {
         saveTeacherSubjects(S);
 
         savePeriodGrades(c8a, c8b, c9a);
+
+        saveFinalGrades(c8a, c8b, c9a);
 
         log.info("=== Инициализация завершена ===");
     }
@@ -428,6 +431,43 @@ public class DebugDataInitializer implements CommandLineRunner {
 
         periodGradeRepository.saveAll(toSave);
         log.info("Создано period_grades: {}", toSave.size());
+    }
+
+    private void saveFinalGrades(ClassBundle... bundles) {
+        String schoolYear = "2025-2026";
+
+        List<FinalGrade> toSave = new ArrayList<>();
+
+        for (ClassBundle bundle : bundles) {
+            for (ClassStudent cs : bundle.schoolClass().getStudents()) {
+                Long studentId = cs.getStudentId();
+
+                for (TeachingAssignment ta : bundle.ta().values()) {
+                    int value = generateRealisticGrade();
+
+                    toSave.add(FinalGrade.builder()
+                            .studentId(studentId)
+                            .teachingAssignment(ta)
+                            .schoolYear(schoolYear)
+                            .value(value)
+                            .description(generateFinalGradeDescription(value))
+                            .build());
+                }
+            }
+        }
+
+        finalGradeRepository.saveAll(toSave);
+        log.info("Создано final_grades: {}", toSave.size());
+    }
+
+    private String generateFinalGradeDescription(int value) {
+        return switch (value) {
+            case 5 -> rng.nextBoolean() ? "Отличный результат за год" : null;
+            case 4 -> rng.nextBoolean() ? "Хорошая успеваемость за год" : null;
+            case 3 -> rng.nextBoolean() ? "Удовлетворительно, рекомендуется подтянуть" : null;
+            case 2 -> "Неудовлетворительно, необходима пересдача";
+            default -> null;
+        };
     }
 
     private String generatePeriodGradeDescription(int value) {

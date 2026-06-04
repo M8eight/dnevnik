@@ -13,19 +13,19 @@ import com.rusobr.academic.infrastructure.persistence.repository.PeriodGradeRepo
 import com.rusobr.academic.infrastructure.persistence.repository.TeachingAssignmentRepository;
 import com.rusobr.academic.web.dto.feign.UserFeignResponse;
 import com.rusobr.academic.web.dto.grade.StudentAverageProjection;
-import com.rusobr.academic.web.dto.grade.StudentAverageResponse;
-import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeRequest;
-import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeResponse;
-import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeStudentResponse;
+import com.rusobr.academic.web.dto.grade.periodGrade.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PeriodGradeService {
@@ -38,8 +38,8 @@ public class PeriodGradeService {
     private final TeachingAssignmentService teachingAssignmentService;
     private final GradeRepository gradeRepository;
 
-    public Map<String, List<PeriodGradeStudentResponse>> findBySchoolClassId(Long studentId) {
-        List<PeriodGradeStudentResponse> periodGrades = periodGradeRepository.findPeriodGradeByStudentId(studentId)
+    public Map<String, List<PeriodGradeStudentResponse>> getByStudentId(Long studentId, String schoolYear) {
+        List<PeriodGradeStudentResponse> periodGrades = periodGradeRepository.findPeriodGradeByStudentId(studentId, schoolYear)
                 .stream().map(periodGradeMapper::toPeriodGradeStudentResponse)
                 .toList();
 
@@ -53,36 +53,38 @@ public class PeriodGradeService {
     }
 
     @Transactional
-    public List<StudentAverageResponse> getStudentPeriodGradesWithAverage(Long teachingAssignmentId, Long academicPeriodId) {
-        AcademicPeriod academicPeriod = academicPeriodRepository.findById(academicPeriodId)
-                .orElseThrow(() -> new NotFoundException("Academic period not found academicPeriodId: " + academicPeriodId));
+    public List<PeriodGradeTeacherResponse> getByTeachingAssignmentWithAverage(Long teachingAssignmentId, Long currentAcademicPeriodId, String schoolYear) {
+        AcademicPeriod academicPeriod = academicPeriodRepository.findById(currentAcademicPeriodId)
+                .orElseThrow(() -> new NotFoundException("Academic period not found academicPeriodId: " + currentAcademicPeriodId));
         List<Long> studentIds = teachingAssignmentService.getStudentIdsByTeachingAssignmentId(teachingAssignmentId);
         List<UserFeignResponse> students = userClient.getBatchUsers(studentIds);
 
+        log.info("Reqeest: {}", schoolYear);
         List<PeriodGradeResponse> periodGrades = periodGradeRepository
-                .findPeriodGradesByTeachingAssignmentId(teachingAssignmentId, academicPeriodId);
-        Map<Long, PeriodGradeResponse> periodGradesMap = periodGrades.stream().collect(Collectors.toMap(
+                .findPeriodGradesByTeachingAssignmentId(teachingAssignmentId, schoolYear);
+        log.info("PeriodGrades: {}", periodGrades);
+        Map<Long, List<PeriodGradeResponse>> periodGradesMap = periodGrades.stream().collect(Collectors.groupingBy(
                 PeriodGradeResponse::studentId,
-                o -> o
+                HashMap::new,
+                Collectors.toList()
         ));
 
-        List<StudentAverageProjection> averageGrades = gradeRepository
-                .findAverageStudentsByTeachingAssignment(teachingAssignmentId,
-                        academicPeriod.getStartDate(),
-                        academicPeriod.getEndDate());
-
+        List<StudentAverageProjection> averageGrades = gradeRepository.findAverageStudentsByTeachingAssignment(
+                teachingAssignmentId,
+                academicPeriod.getStartDate(),
+                academicPeriod.getEndDate());
         Map<Long, Double> averageGradesMap = averageGrades.stream().collect(Collectors.toMap(
                         StudentAverageProjection::getStudentId,
                         StudentAverageProjection::getAverage
         ));
 
         return students.stream().map(user ->
-                new StudentAverageResponse(user, periodGradesMap.get(user.id()), averageGradesMap.get(user.id()))
+                new PeriodGradeTeacherResponse(user, periodGradesMap.get(user.id()), averageGradesMap.get(user.id()))
         ).toList();
     }
 
     @Transactional
-    public PeriodGradeResponse createGrade(PeriodGradeRequest dto) {
+    public PeriodGradeResponse create(PeriodGradeRequest dto) {
         AcademicPeriod academicPeriod = academicPeriodRepository.findById(dto.academicPeriodId())
                 .orElseThrow(() -> new NotFoundException("Academic period not found academicPeriodId: " + dto.academicPeriodId()));
         if (academicPeriod.isClosed()) {
@@ -105,7 +107,7 @@ public class PeriodGradeService {
     }
 
     @Transactional
-    public void deletePeriodGrade(Long periodGradeId) {
+    public void delete(Long periodGradeId) {
         PeriodGrade periodGrade = periodGradeRepository.findWithAcademicPeriodById(periodGradeId)
                 .orElseThrow(() -> new NotFoundException("Period grade not found"));
 
