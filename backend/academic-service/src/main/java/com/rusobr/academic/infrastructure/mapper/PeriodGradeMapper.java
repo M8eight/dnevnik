@@ -11,9 +11,12 @@ import org.mapstruct.ReportingPolicy;
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface PeriodGradeMapper {
 
+    @Mapping(target = "id", source = "id")
+    @Mapping(target = "academicPeriodId", source = "academicPeriod.id")
     PeriodGradeResponse toPeriodGradeResponse(PeriodGrade periodGrade);
 
     @Mapping(target = "id", source = "id")
     @Mapping(target = "subjectName", source = "teachingAssignment.subject.name")
+    @Mapping(target = "academicPeriodId", source = "academicPeriod.id")
     PeriodGradeStudentResponse toPeriodGradeStudentResponse(PeriodGrade periodGrade);
 }

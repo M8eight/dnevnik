@@ -1,11 +1,14 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { BookOpen, Users, BookCheck, Scale, TrendingUp, Star } from "lucide-react";
+import { BookOpen, Users, BookCheck, Scale, Star, TrendingUp } from "lucide-react";
 import { useTeacherJournal } from "@/hooks/use-teacher-journal";
 import { useTeachingAssignmentDetail } from "@/hooks/use-teaching-assignment";
-import { useStudentPeriodGradesWithAverage } from "@/hooks/use-period-grade";
-import type { StudentAverageResponse } from "@/services/period-grade-service";
+import { useFinalGradesByAssignment } from "@/hooks/use-final-grade";
+import { usePeriodGradesByAssignment } from "@/hooks/use-period-grade";
+import { useGetAcademicPeriods } from "@/hooks/use-academic-period";
 import type { StudentJournalEntry } from "@/services/teacher-journal-service";
+import type { FinalGradeResponse } from "@/services/final-grade-service";
+import type { PeriodGradeResponse } from "@/services/period-grade-service";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -18,22 +21,28 @@ import JournalTable from "@/components/teacher/teacher-journal/journal-table";
 import Legend from "@/components/teacher/teacher-journal/legent";
 import Chip from "@/components/teacher/teacher-journal/chip";
 import PeriodGradePopover from "@/components/teacher/teacher-journal/period-grade-popover";
+import FinalGradePopover from "@/components/teacher/teacher-journal/final-grade-popover";
 
 const TEACHER_ID = 17;
-const ACADEMIC_PERIOD_ID = 4;
+const CURRENT_ACADEMIC_PERIOD_ID = 4;
 const DEFAULT_GRADE_TYPE = "TEST";
 const DEFAULT_GRADE_WEIGHT = 1;
+const SCHOOL_YEAR = "2025-2026";
 
 type Tab = "journal" | "period" | "final";
 
+// ---------------------------------------------------------------------------
+
 function TabSwitcher({ active, onChange }: { active: Tab; onChange: (t: Tab) => void }) {
+  const tabs = [
+    { id: "journal" as Tab, label: "Журнал" },
+    { id: "period" as Tab, label: "Четвертные" },
+    { id: "final" as Tab, label: "Итоговые" },
+  ];
+
   return (
     <div className="flex items-center gap-1 glass-pill rounded-2xl p-1 w-fit mb-6">
-      {([
-        { id: "journal" as Tab, label: "Журнал" },
-        { id: "period"  as Tab, label: "Четвертные" },
-        { id: "final"   as Tab, label: "Итоговые" },
-      ] as const).map((tab) => (
+      {tabs.map((tab) => (
         <button
           key={tab.id}
           onClick={() => onChange(tab.id)}
@@ -51,45 +60,78 @@ function TabSwitcher({ active, onChange }: { active: Tab; onChange: (t: Tab) => 
   );
 }
 
-function PeriodGradesView({
-  teachingAssignmentId,
-  academicPeriodId,
-}: {
+// ---------------------------------------------------------------------------
+
+interface Student {
+  id: number;
+  firstName: string;
+  lastName: string;
+}
+
+// ---------------------------------------------------------------------------
+
+interface PeriodGradesViewProps {
   teachingAssignmentId: number;
   academicPeriodId: number;
-}) {
-  const { data, isLoading } = useStudentPeriodGradesWithAverage(teachingAssignmentId, academicPeriodId);
-  const entries: StudentAverageResponse[] = Array.isArray(data) ? data : [];
+  schoolYear: string;
+}
 
-  const graded = entries.filter((e) => e.periodGrade !== null).length;
-  const withAvg = entries.filter((e) => e.average !== null);
-  const avgAll = withAvg.length
-    ? withAvg.reduce((s, e) => s + (e.average ?? 0), 0) / withAvg.length
-    : 0;
+const getAvgColorClass = (avg: number | null): string => {
+  if (avg === null) return "text-black/25";
+  if (avg >= 4.5) return "text-emerald-600";
+  if (avg >= 3.5) return "text-amber-500";
+  if (avg >= 2.5) return "text-orange-500";
+  return "text-red-600";
+};
 
-  const avgColor = (avg: number | null) => {
-    if (!avg) return "text-black/25";
-    if (avg >= 4.5) return "text-emerald-600";
-    if (avg >= 3.5) return "text-amber-500";
-    if (avg >= 2.5) return "text-orange-500";
-    return "text-red-600";
-  };
+export function PeriodGradesView({
+  teachingAssignmentId,
+  academicPeriodId, // ID текущей активной четверти для фильтрации статистики
+  schoolYear,
+}: PeriodGradesViewProps) {
+  const { data: entries = [], isLoading: isEntriesLoading } = usePeriodGradesByAssignment(
+    teachingAssignmentId,
+    academicPeriodId,
+    schoolYear
+  );
+
+  // Подтягиваем все периоды, чтобы построить динамические колонки (как в FinalGradesView)
+  const { data: academicPeriods = [], isLoading: isPeriodsLoading } = useGetAcademicPeriods();
+
+  const isLoading = isEntriesLoading || isPeriodsLoading;
+  const totalCols = 3 + academicPeriods.length;
+
+  // Мемоизируем расчеты статистики для текущей выбранной четверти
+  const { gradedCount, classAverage } = useMemo(() => {
+    const graded = entries.filter((e) =>
+      e.periodGrades.some((pg) => pg.academicPeriodId === academicPeriodId)
+    ).length;
+
+    const studentsWithAvg = entries.filter((e) => e.currentAverage !== null);
+    const avg = studentsWithAvg.length > 0
+      ? studentsWithAvg.reduce((sum, e) => sum + (e.currentAverage ?? 0), 0) / studentsWithAvg.length
+      : null;
+
+    return { gradedCount: graded, classAverage: avg };
+  }, [entries, academicPeriodId]);
+
+  const stats = [
+    { icon: Users, label: "Учеников", value: entries.length, sub: "в классе" },
+    { icon: Star, label: "Выставлено", value: `${gradedCount} / ${entries.length}`, sub: "четвертных оценок" },
+    { icon: TrendingUp, label: "Средний балл", value: classAverage?.toFixed(2) ?? "—", sub: "по классу" },
+  ];
 
   return (
     <>
       <div className="grid grid-cols-3 gap-4 mb-6">
-        {[
-          { icon: Users,      label: "Учеников",    val: entries.length,                   sub: "в классе" },
-          { icon: Star,       label: "Выставлено",   val: `${graded} / ${entries.length}`,  sub: "четвертных оценок" },
-          { icon: TrendingUp, label: "Средний балл", val: avgAll ? avgAll.toFixed(2) : "—", sub: "по классу" },
-        ].map(({ icon: Icon, label, val, sub }) => (
+        {stats.map(({ icon: Icon, label, value, sub }) => (
           <div key={label} className="glass-card rounded-[22px] p-5 flex items-center gap-4">
             <div className="w-11 h-11 rounded-[13px] bg-[var(--navy-light)]/40 flex items-center justify-center flex-shrink-0">
               <Icon className="w-5 h-5 text-[var(--navy)]" />
             </div>
             <div>
               <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-black/30 mb-0.5">{label}</p>
-              <p className="font-serif text-[1.6rem] font-black text-[var(--navy)] leading-none">{val}</p>
+              <p className="font-serif text-[1.6rem] font-black text-[var(--navy)] leading-none">{value}</p>
               <p className="text-[11px] font-medium text-black/40 mt-0.5">{sub}</p>
             </div>
           </div>
@@ -100,98 +142,305 @@ function PeriodGradesView({
         <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-black/[0.05]">
           <Chip className="border-[var(--navy)]/20 text-[var(--navy)]">Четвертные оценки</Chip>
           <span className="text-[10px] font-bold text-black/20 uppercase tracking-widest">
-            {graded} / {entries.length} выставлено
+            {gradedCount} / {entries.length} выставлено в текущем периоде
           </span>
         </div>
 
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="bg-slate-50/80 border-b border-black/[0.05]">
-              <th className="text-left px-6 py-4 border-r border-black/[0.05]">
-                <Chip className="border-[var(--navy)]/20 text-[var(--navy)]">Ученик</Chip>
-              </th>
-              <th className="text-center px-4 py-4 border-r border-black/[0.05] w-[120px]">
-                <span className="text-[9px] font-extrabold uppercase tracking-[0.2em] text-black/30">Ср. балл</span>
-              </th>
-              <th className="text-center px-4 py-4 border-r border-black/[0.05] w-[130px]">
-                <span className="text-[9px] font-extrabold uppercase tracking-[0.2em] text-black/30">Рекомендация</span>
-              </th>
-              <th className="text-center px-4 py-4 w-[120px]">
-                <Chip className="border-amber-200 text-amber-600 bg-amber-50/50">Четвертная</Chip>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading ? (
-              <tr>
-                <td colSpan={4} className="p-10">
-                  <Skeleton className="h-20 w-full" />
-                </td>
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="bg-slate-50/80 border-b border-black/[0.05]">
+                <th className="text-left px-6 py-4 border-r border-black/[0.05] min-w-[200px]">
+                  <Chip className="border-[var(--navy)]/20 text-[var(--navy)]">Ученик</Chip>
+                </th>
+
+                {/* Динамические колонки для каждой четверти */}
+                {academicPeriods.map((period) => (
+                  <th key={period.id} className="text-center px-2 py-4 border-r border-black/[0.05] w-[100px] last:border-r-0">
+                    <Chip className={cn(
+                      "border-black/[0.08] text-black/60 bg-black/[0.01]",
+                      period.id === academicPeriodId && "border-amber-200 text-amber-600 bg-amber-50/50"
+                    )}>
+                      {period.name}
+                    </Chip>
+                  </th>
+                ))}
+
+                <th className="text-center px-4 py-4 border-r border-black/[0.05] w-[100px]">
+                  <span className="text-[9px] font-extrabold uppercase tracking-[0.2em] text-black/30"> за тек. период </span>
+                </th>
               </tr>
-            ) : entries.length === 0 ? (
-              <tr>
-                <td colSpan={4} className="p-10 text-center text-black/30 font-bold text-sm">
-                  Нет данных
-                </td>
-              </tr>
-            ) : (
-              entries.map((entry) => {
-                const avg = entry.average;
-                const recommended = avg ? Math.round(avg) : null;
-                return (
-                  <tr
-                    key={entry.user.id}
-                    className="group hover:bg-slate-50/80 transition-colors border-b border-black/[0.03]"
-                  >
-                    <td className="px-6 py-4 border-r border-black/[0.05]">
-                      <p className="text-[13px] font-bold text-[var(--navy)] leading-tight">
-                        {entry.user.lastName} {entry.user.firstName}
-                      </p>
-                    </td>
-                    <td className="text-center px-4 border-r border-black/[0.05]">
-                      <span className={`font-serif text-[18px] font-black ${avgColor(avg)}`}>
-                        {avg ? avg.toFixed(2) : "—"}
-                      </span>
-                    </td>
-                    <td className="text-center px-4 border-r border-black/[0.05]">
-                      {recommended ? (
-                        <span className={cn(
-                          "inline-flex w-9 h-9 rounded-[10px] items-center justify-center font-serif text-[16px] font-black ring-1 ring-black/[0.06]",
-                          GRADE_STYLE[recommended]
-                        )}>
-                          {recommended}
+            </thead>
+            <tbody>
+              {isLoading ? (
+                <tr>
+                  <td colSpan={totalCols} className="p-10">
+                    <Skeleton className="h-20 w-full" />
+                  </td>
+                </tr>
+              ) : entries.length === 0 ? (
+                <tr>
+                  <td colSpan={totalCols} className="p-10 text-center text-black/30 font-bold text-sm">
+                    Нет данных
+                  </td>
+                </tr>
+              ) : (
+                entries.map((entry) => {
+                  const avg = entry.currentAverage;
+
+                  return (
+                    <tr
+                      key={entry.user.id}
+                      className="group hover:bg-slate-50/80 transition-colors border-b border-black/[0.03]"
+                    >
+                      <td className="px-6 py-4 border-r border-black/[0.05]">
+                        <p className="text-[13px] font-bold text-[var(--navy)] leading-tight">
+                          {entry.user.lastName} {entry.user.firstName}
+                        </p>
+                      </td>
+
+
+
+                      {/* Рендерим поповер для каждого периода индивидуально */}
+                      {academicPeriods.map((period) => {
+                        const targetGrade = entry.periodGrades.find(
+                          (pg) => pg.academicPeriodId === period.id
+                        ) || null;
+
+                        return (
+                          <td
+                            key={period.id}
+                            className="p-0 h-[64px] text-center border-r border-black/[0.05] last:border-r-0 w-[100px]"
+                          >
+                            <PeriodGradePopover
+                              periodGrade={targetGrade}
+                              studentId={entry.user.id}
+                              teachingAssignmentId={teachingAssignmentId}
+                              academicPeriodId={period.id}
+                            />
+                          </td>
+                        );
+                      })}
+
+                      <td className="text-center px-4 border-r border-black/[0.05]">
+                        <span className={`font-serif text-[18px] font-black ${getAvgColorClass(avg)}`}>
+                          {avg !== null ? avg.toFixed(2) : "—"}
                         </span>
-                      ) : (
-                        <span className="text-black/20 font-bold text-sm">—</span>
-                      )}
-                    </td>
-                    <td className="p-0 h-[64px] text-center">
-                      <PeriodGradePopover
-                        periodGrade={entry.periodGrade}
-                        studentId={entry.user.id}
-                        teachingAssignmentId={teachingAssignmentId}
-                        academicPeriodId={academicPeriodId}
-                      />
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </>
   );
 }
 
-function FinalGradesView() {
+// ---------------------------------------------------------------------------
+
+function FinalGradesView({
+  teachingAssignmentId,
+  schoolYear,
+  students,
+  currentAcademicPeriodId,
+}: {
+  teachingAssignmentId: number;
+  schoolYear: string;
+  students: Student[];
+  currentAcademicPeriodId: number;
+}) {
+  // finalGradesData теперь имеет тип FinalGradeTeacherResponse[]
+  const { data: finalGradesData = [], isLoading: isFinalLoading } =
+    useFinalGradesByAssignment(teachingAssignmentId, schoolYear);
+
+  const { data: periodEntries = [], isLoading: isPeriodLoading } =
+    usePeriodGradesByAssignment(teachingAssignmentId, currentAcademicPeriodId, schoolYear);
+
+  const { data: academicPeriods = [] } = useGetAcademicPeriods();
+
+  const isLoading = isFinalLoading || isPeriodLoading;
+  const totalCols = 1 + academicPeriods.length + 1 + 1;
+
+  // ИСПРАВЛЕНИЕ: Правильно собираем Map из вложенной структуры
+  // studentId → итоговая оценка
+  const finalGradeByStudentId = new Map<number, FinalGradeResponse>();
+  finalGradesData.forEach((item) => {
+    // Берем первую итоговую оценку из массива (обычно она одна за год по предмету)
+    if (item.finalGrades && item.finalGrades.length > 0) {
+      finalGradeByStudentId.set(item.user.id, item.finalGrades[0]);
+    }
+  });
+
+  // studentId → (academicPeriodId → PeriodGradeResponse)
+  const periodGradeMap = new Map<number, Map<number, PeriodGradeResponse>>();
+  periodEntries.forEach((entry) => {
+    const byPeriod = new Map<number, PeriodGradeResponse>();
+    entry.periodGrades.forEach((pg) => {
+      if (!byPeriod.has(pg.academicPeriodId)) {
+        byPeriod.set(pg.academicPeriodId, pg);
+      }
+    });
+    periodGradeMap.set(entry.user.id, byPeriod);
+  });
+
+  const getPeriodAverage = (studentId: number): number | null => {
+    const byPeriod = periodGradeMap.get(studentId);
+    if (!byPeriod || byPeriod.size === 0) return null;
+    const values = [...byPeriod.values()].map((pg) => pg.value);
+    return values.reduce((sum, v) => sum + v, 0) / values.length;
+  };
+
+  const avgColor = (avg: number | null): string => {
+    if (avg === null) return "text-black/25";
+    if (avg >= 4.5) return "text-emerald-600";
+    if (avg >= 3.5) return "text-amber-500";
+    if (avg >= 2.5) return "text-orange-500";
+    return "text-red-600";
+  };
+
+  // ИСПРАВЛЕНИЕ: Считаем реальное количество выставленных оценок из Map
+  const gradedCount = finalGradeByStudentId.size;
+
+  const stats = [
+    { icon: Users, label: "Учеников", value: students.length, sub: "в классе" },
+    { icon: Star, label: "Выставлено", value: `${gradedCount} / ${students.length}`, sub: "итоговых оценок" },
+  ];
+
   return (
-    <div className="glass-card rounded-[22px] p-10 text-center border-none shadow-xl">
-      <p className="font-serif text-2xl font-black text-[var(--navy)] mb-2">Итоговые оценки</p>
-      <p className="text-sm text-black/30 font-medium">Будет доступно после закрытия всех четвертей</p>
-    </div>
+    <>
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        {stats.map(({ icon: Icon, label, value, sub }) => (
+          <div key={label} className="glass-card rounded-[22px] p-5 flex items-center gap-4">
+            <div className="w-11 h-11 rounded-[13px] bg-[var(--navy-light)]/40 flex items-center justify-center flex-shrink-0">
+              <Icon className="w-5 h-5 text-[var(--navy)]" />
+            </div>
+            <div>
+              <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-black/30 mb-0.5">{label}</p>
+              <p className="font-serif text-[1.6rem] font-black text-[var(--navy)] leading-none">{value}</p>
+              <p className="text-[11px] font-medium text-black/40 mt-0.5">{sub}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="glass-card rounded-[22px] overflow-hidden border-none shadow-xl">
+        <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-black/[0.05]">
+          <Chip className="border-[var(--navy)]/20 text-[var(--navy)]">
+            Годовые результаты и история периодов
+          </Chip>
+          <span className="text-[10px] font-bold text-black/20 uppercase tracking-widest">
+            {gradedCount} / {students.length} заполнено
+          </span>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="bg-slate-50/80 border-b border-black/[0.05]">
+                <th className="text-left px-6 py-4 border-r border-black/[0.05] min-w-[200px]">
+                  <Chip className="border-[var(--navy)]/20 text-[var(--navy)]">Ученик</Chip>
+                </th>
+                {academicPeriods.map((period) => (
+                  <th key={period.id} className="text-center px-2 py-4 border-r border-black/[0.05] w-[60px]">
+                    <span className="text-[9px] font-extrabold uppercase tracking-wider text-black/40">
+                      {period.name}
+                    </span>
+                  </th>
+                ))}
+                <th className="text-center px-4 py-4 border-r border-black/[0.05] w-[100px]">
+                  <span className="text-[9px] font-extrabold uppercase tracking-[0.15em] text-black/40">
+                    Ср. четвертей
+                  </span>
+                </th>
+                <th className="text-center px-4 py-4 w-[130px]">
+                  <Chip className="border-red-200 text-red-600 bg-red-50/50">Итоговая</Chip>
+                </th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {isLoading ? (
+                <tr>
+                  <td colSpan={totalCols} className="p-10">
+                    <Skeleton className="h-20 w-full" />
+                  </td>
+                </tr>
+              ) : students.length === 0 ? (
+                <tr>
+                  <td colSpan={totalCols} className="p-10 text-center text-black/30 font-bold text-sm">
+                    Нет учеников в выбранной группе
+                  </td>
+                </tr>
+              ) : (
+                students.map((student) => {
+                  const finalGrade = finalGradeByStudentId.get(student.id) ?? null;
+                  const periodAvg = getPeriodAverage(student.id);
+                  const periodsByPeriodId = periodGradeMap.get(student.id);
+
+                  return (
+                    <tr
+                      key={student.id}
+                      className="group hover:bg-slate-50/80 transition-colors border-b border-b-black/[0.03]"
+                    >
+                      <td className="px-6 py-4 border-r border-black/[0.05]">
+                        <p className="text-[13px] font-bold text-[var(--navy)] leading-tight">
+                          {student.lastName} {student.firstName}
+                        </p>
+                      </td>
+
+                      {academicPeriods.map((period) => {
+                        const grade = periodsByPeriodId?.get(period.id) ?? null;
+
+                        if (grade !== null) {
+                          return (
+                            <td key={period.id} className="text-center px-2 border-r border-black/[0.05] h-[64px]">
+                              <span className={cn(
+                                "inline-flex w-[28px] h-[28px] rounded-lg items-center justify-center font-serif text-[13px] font-bold ring-1 ring-black/[0.04] shadow-sm",
+                                GRADE_STYLE[grade.value]
+                              )}>
+                                {grade.value}
+                              </span>
+                            </td>
+                          );
+                        }
+
+                        return (
+                          <td key={period.id} className="text-center px-2 border-r border-black/[0.05] h-[64px]">
+                            <span className="text-black/15 text-[12px] font-bold">—</span>
+                          </td>
+                        );
+                      })}
+
+                      <td className="text-center px-4 border-r border-black/[0.05]">
+                        <span className={`font-serif text-[15px] font-black ${avgColor(periodAvg)}`}>
+                          {periodAvg !== null ? periodAvg.toFixed(2) : "—"}
+                        </span>
+                      </td>
+
+                      <td className="p-0 h-[64px] text-center">
+                        <FinalGradePopover
+                          finalGrade={finalGrade}
+                          studentId={student.id}
+                          teachingAssignmentId={teachingAssignmentId}
+                          schoolYear={schoolYear}
+                        />
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </>
   );
 }
+
+// ---------------------------------------------------------------------------
 
 export default function TeacherJournal() {
   const { data: assignments } = useTeachingAssignmentDetail(TEACHER_ID);
@@ -203,14 +452,24 @@ export default function TeacherJournal() {
   const [viewMode, setViewMode] = useState<ViewMode>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
-    if (assignments?.length) {
-      setSelectedAssignmentId((prev) => prev || assignments[0].teachingAssignmentId.toString());
-    }
-  }, [assignments]);
+  const assignmentId = selectedAssignmentId ? parseInt(selectedAssignmentId) : (assignments?.[0]?.teachingAssignmentId ?? 0);
 
-  const assignmentId = selectedAssignmentId ? parseInt(selectedAssignmentId) : 0;
-  const { data, isLoading } = useTeacherJournal(assignmentId, ACADEMIC_PERIOD_ID);
+  const { data, isLoading } = useTeacherJournal(assignmentId, CURRENT_ACADEMIC_PERIOD_ID);
+  // Инициализируем первый assignment при загрузке
+  // useState(() => {
+  //   if (assignments?.length) {
+  //     setSelectedAssignmentId((prev) => prev || assignments[0].teachingAssignmentId.toString());
+  //   }
+  // });
+
+  // useEffect(() => {
+  //   if (assignments?.length && !selectedAssignmentId) {
+  //     setSelectedAssignmentId(assignments[0].teachingAssignmentId.toString());
+  //   }
+  // }, [assignments, selectedAssignmentId]);
+
+  // const assignmentId = selectedAssignmentId ? parseInt(selectedAssignmentId) : 0;
+  // const { data, isLoading } = useTeacherJournal(assignmentId, CURRENT_ACADEMIC_PERIOD_ID);
 
   const sortedLessons = useMemo(() => {
     if (!data?.lessonInstances) return [];
@@ -257,7 +516,7 @@ export default function TeacherJournal() {
             </div>
             <div className="truncate">
               <div className="flex items-center gap-2 text-[10px] font-extrabold tracking-[0.2em] text-[var(--red)] uppercase mb-0.5">
-                <span>{data?.academicPeriod?.schoolYear ?? "2025–2026"}</span>
+                <span>{data?.academicPeriod?.schoolYear ?? SCHOOL_YEAR}</span>
                 <span className="w-1 h-1 rounded-full bg-[var(--red)]" />
                 <span className="truncate">{currentAssignment?.schoolClassName ?? "..."}</span>
               </div>
@@ -302,7 +561,10 @@ export default function TeacherJournal() {
               </>
             )}
 
-            <Select value={selectedAssignmentId} onValueChange={setSelectedAssignmentId}>
+            <Select
+              value={selectedAssignmentId || assignments?.[0]?.teachingAssignmentId.toString() || ""}
+              onValueChange={setSelectedAssignmentId}
+            >
               <SelectTrigger className="glass-pill h-10 px-5 text-[12px] font-bold rounded-2xl text-[var(--navy)] border-0 shadow-sm gap-2 min-w-[180px]">
                 <Users className="w-4 h-4 text-[var(--red)]" />
                 <SelectValue placeholder="Выберите группу" />
@@ -345,7 +607,7 @@ export default function TeacherJournal() {
               isLoading={isLoading}
               gradeType={selectedGradeType}
               gradeWeight={selectedWeight}
-              academicPeriodId={ACADEMIC_PERIOD_ID}
+              academicPeriodId={CURRENT_ACADEMIC_PERIOD_ID}
               viewMode={viewMode}
             />
             <Legend />
@@ -355,11 +617,19 @@ export default function TeacherJournal() {
         {activeTab === "period" && (
           <PeriodGradesView
             teachingAssignmentId={assignmentId}
-            academicPeriodId={ACADEMIC_PERIOD_ID}
+            academicPeriodId={CURRENT_ACADEMIC_PERIOD_ID}
+            schoolYear={SCHOOL_YEAR}
           />
         )}
 
-        {activeTab === "final" && <FinalGradesView />}
+        {activeTab === "final" && (
+          <FinalGradesView
+            teachingAssignmentId={assignmentId}
+            schoolYear={SCHOOL_YEAR}
+            students={sortedStudents}
+            currentAcademicPeriodId={CURRENT_ACADEMIC_PERIOD_ID}
+          />
+        )}
       </div>
     </div>
   );

@@ -9,18 +9,17 @@ export const formatColDate = (dateStr: string) =>
 export const formatColDay = (dateStr: string) =>
   format(new Date(dateStr), "EEEEEE", { locale: ru }).toUpperCase();
 
-export const calcAvg = (grades: GradeJournalDto[]): string => {
-  if (!grades.length) return "—";
+export const calcAvg = (grades: GradeJournalDto[]): number | null => {
+  if (!grades.length) return null;
   const avg = grades.reduce((s, g) => s + g.value, 0) / grades.length;
-  return parseFloat(avg.toFixed(1)).toString();
+  return parseFloat(avg.toFixed(1));
 };
 
-export const avgStyle = (avg: string): string => {
-  if (avg === "—") return "text-black/25";
-  const n = parseFloat(avg);
-  if (n >= 4.5) return "text-emerald-600 font-black";
-  if (n >= 3.5) return "text-amber-500 font-black";
-  if (n >= 2.5) return "text-orange-500 font-bold";
+export const avgStyle = (avg: number | null): string => {
+  if (avg === null || avg === undefined) return "text-black/25";
+  if (avg >= 4.5) return "text-emerald-600 font-black";
+  if (avg >= 3.5) return "text-amber-500 font-black";
+  if (avg >= 2.5) return "text-orange-500 font-bold";
   return "text-red-600 font-bold";
 };
 

@@ -8,6 +8,7 @@ import java.util.List;
 public record StudentJournalDto(
         Long studentId,
         List<GradeLessonTeacherDto> grades,
+        Double gradesAverage,
         List<AttendanceLessonTeacherDto> attendances
 ) {
 

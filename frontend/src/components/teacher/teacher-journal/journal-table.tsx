@@ -1,7 +1,7 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRef } from "react";
 import type { ViewMode } from "@/constants/component-constants";
-import { formatColDay, formatColDate, calcAvg, avgStyle, useHorizontalScrollDrag } from "@/helpers/teacher-helpers";
+import { formatColDay, formatColDate, avgStyle, useHorizontalScrollDrag } from "@/helpers/teacher-helpers";
 import type { StudentJournalEntry } from "@/services/teacher-journal-service";
 import GradePopover from "./grade-popover";
 import Chip from "./chip";
@@ -82,7 +82,6 @@ export default function JournalTable({
             ) : (
               sortedStudents.map((student) => {
                 const entry = journalMap[student.id];
-                const avg = calcAvg(entry?.grades ?? []);
                 return (
                   <tr
                     key={student.id}
@@ -108,7 +107,7 @@ export default function JournalTable({
                       </td>
                     ))}
                     <td className="sticky right-0 z-10 bg-white/95 group-hover:bg-slate-50/95 transition-colors text-center border-l border-black/[0.05]">
-                      <span className={`font-serif text-[16px] ${avgStyle(avg)}`}>{avg}</span>
+                      <span className={`font-serif text-[16px] ${avgStyle(entry.gradesAverage)}`}>{entry.gradesAverage}</span>
                     </td>
                   </tr>
                 );

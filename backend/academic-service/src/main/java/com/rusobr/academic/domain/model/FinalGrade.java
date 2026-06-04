@@ -27,9 +27,6 @@ public class FinalGrade extends BaseEntity {
 
     private String schoolYear;
 
-    @Builder.Default
-    private boolean closed = false;
-
     @Max(5)
     @Min(1)
     @Column(nullable = false)

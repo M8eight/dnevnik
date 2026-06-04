@@ -127,7 +127,6 @@ create table final_grades
     teaching_assignment_id bigint  not null
         constraint fk_final_grades_teaching_assignment
             references teaching_assignments,
-    closed                 boolean not null,
     description            varchar(255),
     created_at             timestamptz,
     updated_at             timestamptz,

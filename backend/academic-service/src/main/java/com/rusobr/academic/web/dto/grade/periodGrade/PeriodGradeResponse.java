@@ -4,6 +4,7 @@ public record PeriodGradeResponse(
     Long id,
     Integer value,
     String description,
-    Long studentId
+    Long studentId,
+    Long academicPeriodId
 ) {
 }

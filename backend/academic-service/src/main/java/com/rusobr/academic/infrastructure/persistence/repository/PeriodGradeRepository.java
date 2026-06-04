@@ -2,7 +2,6 @@ package com.rusobr.academic.infrastructure.persistence.repository;
 
 import com.rusobr.academic.domain.model.PeriodGrade;
 import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeResponse;
-import com.rusobr.academic.web.dto.grade.periodGrade.StudentPeriodGradeProjection;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -24,23 +23,26 @@ public interface PeriodGradeRepository extends CrudRepository<PeriodGrade, Long>
             join fetch pg.teachingAssignment ta
             join fetch ta.subject su
             where pg.studentId = :studentId
+                and ap.schoolYear = :schoolYear
             order by ap.startDate asc, su.name asc
     """)
-    List<PeriodGrade> findPeriodGradeByStudentId(@Param("studentId") Long studentId);
+    List<PeriodGrade> findPeriodGradeByStudentId(@Param("studentId") Long studentId, @Param("schoolYear") String schoolYear);
 
     @Query("""
         select new com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeResponse(
             per.id,
             per.value,
             per.description,
-            per.studentId
+            per.studentId,
+            ap.id
         )
         from PeriodGrade per
         join per.teachingAssignment ta
         join per.academicPeriod ap
         where ta.id = :teachingAssignmentId
-        and ap.id = :academicPeriodId
+            and ap.schoolYear = :schoolYear
+        order by ap.id asc
 """)
     List<PeriodGradeResponse> findPeriodGradesByTeachingAssignmentId(@Param("teachingAssignmentId") Long teachingAssignmentId,
-                                                                     @Param("academicPeriodId") Long academicPeriodId);
+                                                                     @Param("schoolYear") String schoolYear);
 }

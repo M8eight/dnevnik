@@ -1,61 +1,67 @@
 import api from "@/axios/axios";
-import type { AcademicPeriodResponse } from "./grade-service";
 import type { UserSimpleResponse } from "./user-service";
 
-export interface PeriodGradeStudentDto {
+export interface PeriodGradeStudentResponse {
     id: number;
     value: number;
     description: string | null;
     subjectName: string;
-    academicPeriod: AcademicPeriodResponse;
+    academicPeriodId: number;
+}
+
+export interface PeriodGradeTeacherResponse {
+    user: UserSimpleResponse;
+    periodGrades: PeriodGradeResponse[];
+    currentAverage: number | null;
 }
 
 export interface PeriodGradeResponse {
     id: number;
     value: number;
-    description: string | null;
     studentId: number;
-}
-
-export interface StudentAverageResponse {
-    user: UserSimpleResponse;
-    periodGrade: PeriodGradeResponse | null;
-    average: number | null;
+    description: string | null;
+    academicPeriodId: number;
 }
 
 export interface PeriodGradeRequest {
-        value: number;
-        description: string | null;
-        teachingAssignmentId: number;
-        studentId: number;
-        academicPeriodId: number;
+    value: number;
+    description: string | null;
+    teachingAssignmentId: number;
+    studentId: number;
+    academicPeriodId: number;
 }
-    
-export type PeriodGradesStudentResponse = Record<string, PeriodGradeStudentDto[]>;
 
-export const getStudentPeriodGrades = async ( studentId: number ): Promise<PeriodGradesStudentResponse> => {
+export type PeriodGradesStudentResponse = Record<string, PeriodGradeStudentResponse[]>;
+
+export const getPeriodGradesByStudent = async (studentId: number, schoolYear: string): Promise<PeriodGradesStudentResponse> => {
     const { data } = await api.get<PeriodGradesStudentResponse>(
-        `/academic-service/api/v1/period/grades/class?studentId=${studentId}`
+        `/academic-service/api/v1/period-grades/by-student`, {
+        params: {
+            studentId,
+            schoolYear,
+        }
+    }
     );
     return data;
 };
 
-export const getStudentPeriodGradesWithAverage = async ( teachingAssignmentId: number, academicPeriodId: number ): Promise<StudentAverageResponse> => {
-    const { data } = await api.get<StudentAverageResponse>(
-        `/academic-service/api/v1/period/grades/by-teaching-assignment/with-avg`, {
+export const getPeriodGradesByAssignment = async (teachingAssignmentId: number, currentAcademicPeriodId: number, schoolYear: string): Promise<PeriodGradeTeacherResponse[]> => {
+    const { data } = await api.get<PeriodGradeTeacherResponse[]>(
+        `/academic-service/api/v1/period-grades/by-assignment`, {
         params: {
             teachingAssignmentId,
-            academicPeriodId,
+            currentAcademicPeriodId,
+            schoolYear,
         }
     });
     return data;
 };
 
 export const createPeriodGrade = async (periodGradeReq: PeriodGradeRequest): Promise<PeriodGradeRequest> => {
-    const { data } = await api.post<PeriodGradeRequest>(`/academic-service/api/v1/period/grades`, periodGradeReq);
+    const { data } = await api.post<PeriodGradeRequest>(`/academic-service/api/v1/period-grades`, periodGradeReq);
     return data;
 };
 
 export const deletePeriodGrade = async (periodGradeId: number): Promise<void> => {
-    await api.delete(`/academic-service/api/v1/period/grades/${periodGradeId}`);
+    await api.delete(`/academic-service/api/v1/period-grades/${periodGradeId}`);
 };

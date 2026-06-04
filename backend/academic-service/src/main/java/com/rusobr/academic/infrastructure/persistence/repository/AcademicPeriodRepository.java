@@ -31,4 +31,6 @@ public interface AcademicPeriodRepository extends JpaRepository<AcademicPeriod,L
 """)
     List<AcademicPeriodResponse> findAllOrderAsc();
 
+    List<AcademicPeriod> findAcademicPeriodsBySchoolYear(String schoolYear);
+
 }
