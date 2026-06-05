@@ -122,7 +122,7 @@ export const createTeacher = async (
     request: CreateTeacherRequest
 ): Promise<UserResponse> => {
     const { data } = await api.post<UserResponse>(
-        `/user-service/api/v1/users/teacher`,
+        `/user-service/api/v1/users/teachers`,
         request
     );
     return data;

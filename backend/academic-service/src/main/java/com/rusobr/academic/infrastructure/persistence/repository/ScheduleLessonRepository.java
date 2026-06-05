@@ -1,8 +1,8 @@
 package com.rusobr.academic.infrastructure.persistence.repository;
 
 import com.rusobr.academic.domain.model.ScheduleLesson;
-import com.rusobr.academic.web.dto.scheduleLesson.ScheduleLessonResponse;
-import com.rusobr.academic.web.dto.scheduleLesson.SchoolLessonResponse;
+import com.rusobr.academic.infrastructure.persistence.projection.ScheduleLessonProjection;
+import com.rusobr.academic.infrastructure.persistence.projection.SchoolLessonProjection;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,46 +16,41 @@ import java.util.Optional;
 
 @Repository
 public interface ScheduleLessonRepository extends JpaRepository<ScheduleLesson, Long> {
-    @Query("select sl.dayOfWeek from ScheduleLesson sl where sl.teachingAssignment.id = :teachingAssignmentId")
-    List<DayOfWeek> findDaysOfWeeksByTeachingAssignmentId(@Param("teachingAssignmentId") Long teachingAssignmentId);
-
     @Query("""
-        select new com.rusobr.academic.web.dto.scheduleLesson.ScheduleLessonResponse(
-            sl.id,
-            sl.lessonNumber,
-            su.name,
-            sl.classRoom
-        )
+        select
+            sl.id id,
+            sl.lessonNumber lessonNumber,
+            su.name subjectName,
+            sl.classRoom classRoom
         from ScheduleLesson sl
-        join sl.teachingAssignment ta
-        join ta.schoolClass sc
-        join sc.students st
-        join ta.subject su
-        where st.studentId = :studentId
-        and sl.dayOfWeek = :dayOfWeek
-        and sl.validFrom <= :date
-        and (sl.validTo is null or sl.validTo >= :date)
-""")
-    List<ScheduleLessonResponse> getScheduleByDate(@Param("studentId") Long studentId,
-                                                   @Param("dayOfWeek") DayOfWeek dayOfWeek,
-                                                   @Param("date") LocalDate date);
-
-    @Query("""
-            select new com.rusobr.academic.web.dto.scheduleLesson.SchoolLessonResponse(
-                sl.id,
-                sl.lessonNumber,
-                su.name,
-                sl.classRoom,
-                sl.dayOfWeek
-            )
-            from ScheduleLesson sl
             join sl.teachingAssignment ta
             join ta.schoolClass sc
             join sc.students st
             join ta.subject su
-            where st.studentId = :studentId
-            """)
-    List<SchoolLessonResponse> findAllByStudentId(@Param("studentId") Long studentId);
+        where st.studentId = :studentId
+            and sl.dayOfWeek = :dayOfWeek
+            and sl.validFrom <= :date
+            and (sl.validTo is null or sl.validTo >= :date)
+    """)
+    List<ScheduleLessonProjection> getScheduleByDate(@Param("studentId") Long studentId,
+                                                     @Param("dayOfWeek") DayOfWeek dayOfWeek,
+                                                     @Param("date") LocalDate date);
+
+    @Query("""
+        select
+            sl.id id,
+            sl.lessonNumber lessonNumber,
+            su.name subjectName,
+            sl.classRoom classRoom,
+            sl.dayOfWeek dayOfWeek
+        from ScheduleLesson sl
+            join sl.teachingAssignment ta
+            join ta.schoolClass sc
+            join sc.students st
+            join ta.subject su
+        where st.studentId = :studentId
+    """)
+    List<SchoolLessonProjection> findAllByStudentId(@Param("studentId") Long studentId);
 
     List<ScheduleLesson> findByTeachingAssignmentId(Long teachingAssignmentId);
 

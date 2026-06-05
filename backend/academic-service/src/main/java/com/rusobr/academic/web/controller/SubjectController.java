@@ -1,6 +1,6 @@
 package com.rusobr.academic.web.controller;
 
-import com.rusobr.academic.infrastructure.service.SubjectService;
+import com.rusobr.academic.application.service.SubjectService;
 import com.rusobr.academic.web.dto.subject.SubjectRequestDto;
 import com.rusobr.academic.web.dto.subject.SubjectResponseDto;
 import jakarta.validation.Valid;
@@ -13,20 +13,22 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/subjects")
 @RequiredArgsConstructor
 public class SubjectController {
+
     private final SubjectService subjectService;
 
-    @PostMapping
-    public SubjectResponseDto createSubject(@RequestBody @Valid SubjectRequestDto createSubjectRequestDto) {
-        return subjectService.createSubject(createSubjectRequestDto);
+    @GetMapping
+    public Page<SubjectResponseDto> getAll(Pageable pageable) {
+        return subjectService.getAll(pageable);
     }
 
-    @GetMapping
-    public Page<SubjectResponseDto> getSubjects(Pageable pageable) {
-        return subjectService.getSubjects(pageable);
+    @PostMapping
+    public SubjectResponseDto create(@RequestBody @Valid SubjectRequestDto createSubjectRequestDto) {
+        return subjectService.create(createSubjectRequestDto);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteSubjectById(@PathVariable Long id) {
-        subjectService.deleteSubject(id);
+    public void delete(@PathVariable Long id) {
+        subjectService.delete(id);
     }
+
 }

@@ -67,7 +67,7 @@ export default function HomeworkCalendar({
     };
 
     return (
-        <div className="glass-card rounded-[32px] p-6 backdrop-blur-md h-full flex flex-col">
+        <div className="glass-card rounded-[32px] p-6 h-full flex flex-col">
             {/* Month nav */}
             <div className="flex items-center justify-between mb-6">
                 <button

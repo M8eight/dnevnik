@@ -1,7 +1,7 @@
 package com.rusobr.user.web.controller;
 
-import com.rusobr.user.infrastructure.service.student.StudentService;
-import com.rusobr.user.web.dto.feign.UserResponse;
+import com.rusobr.user.application.service.student.StudentService;
+import com.rusobr.user.web.dto.feign.UserFeignResponse;
 import com.rusobr.user.web.dto.student.StudentDetails;
 import com.rusobr.user.web.dto.student.StudentWithClassResponse;
 import jakarta.validation.constraints.NotNull;
@@ -19,34 +19,34 @@ public class StudentController {
     private final StudentService studentService;
 
     @GetMapping("/{id}/details")
-    public StudentDetails findDetailsById(@PathVariable Long id) {
-        return studentService.findById(id);
+    public StudentDetails getDetailsById(@PathVariable Long id) {
+        return studentService.getDetailsById(id);
     }
 
     @PostMapping("/batch")
-    public List<UserResponse> findBatchStudents(@RequestBody List<Long> ids) {
-        return studentService.findSimpleBatchStudents(ids);
+    public List<UserFeignResponse> getBatch(@RequestBody List<Long> ids) {
+        return studentService.getBatch(ids);
     }
 
     @PostMapping("/exclude-assigned")
-    public List<UserResponse> findAllStudentsExcludeAssigned(@RequestBody Set<Long> ids) {
-        return studentService.getStudentsExcludingIds(ids);
+    public List<UserFeignResponse> getBatchWithExcludingIds(@RequestBody @NotNull Set<Long> ids) {
+        return studentService.getBatchWithExcludingIds(ids);
     }
 
     @PatchMapping("/{studentId}/assign/{teacherId}")
-    public void assignStudentToParent(@PathVariable Long studentId,
+    public void assignToParent(@PathVariable Long studentId,
                                       @PathVariable Long teacherId) {
-        studentService.assignStudentToParent(studentId, teacherId);
+        studentService.assignToParent(studentId, teacherId);
     }
 
     @PatchMapping("/{studentId}/unassign")
-    public void assignStudentToParent(@PathVariable Long studentId) {
-        studentService.unassignStudentFromParent(studentId);
+    public void unassignFromParent(@PathVariable Long studentId) {
+        studentService.unassignFromParent(studentId);
     }
 
     @GetMapping("/{id}/with-class")
-    public StudentWithClassResponse findFullById(@PathVariable @NotNull Long id) {
-        return studentService.findStudentDetailById(id);
+    public StudentWithClassResponse getWithClassById(@PathVariable Long id) {
+        return studentService.getWithClassById(id);
     }
 
 }

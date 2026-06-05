@@ -1,7 +1,7 @@
 package com.rusobr.academic.web.controller;
 
-import com.rusobr.academic.infrastructure.service.ClassStudentService;
-import com.rusobr.academic.infrastructure.service.SchoolClassService;
+import com.rusobr.academic.application.service.ClassStudentService;
+import com.rusobr.academic.application.service.SchoolClassService;
 import com.rusobr.academic.web.dto.feign.UserFeignResponse;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassFullResponse;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassRequest;
@@ -23,22 +23,22 @@ public class SchoolClassController {
 
     // GET
     @GetMapping("/{id}")
-    public SchoolClassResponse getSchoolClassById(@PathVariable @NotNull Long id){
+    public SchoolClassResponse getById(@PathVariable Long id){
         return schoolClassService.findById(id);
     }
 
     @GetMapping("/{id}/details")
-    public SchoolClassFullResponse getSchoolClassWithStudentsById(@PathVariable @NotNull Long id){
+    public SchoolClassFullResponse getWithDetailsById(@PathVariable Long id){
         return schoolClassService.findWithClassStudentById(id);
     }
 
     @GetMapping("/search/by-student")
-    public SchoolClassResponse getSchoolClassByStudentId(@RequestParam("studentId") @NotNull Long studentId) {
-        return schoolClassService.findClassByStudentId(studentId);
+    public SchoolClassResponse getByStudentId(@RequestParam("studentId") @NotNull Long studentId) {
+        return schoolClassService.findByStudentId(studentId);
     }
 
     @GetMapping
-    public List<SchoolClassResponse> findAllClasses() {
+    public List<SchoolClassResponse> findAll() {
         return schoolClassService.findAllClasses();
     }
 
@@ -49,11 +49,16 @@ public class SchoolClassController {
 
     // POST
     @PostMapping
-    public SchoolClassResponse saveClass(@RequestBody @Valid SchoolClassRequest schoolClassReq) {
-        return schoolClassService.saveClass(schoolClassReq);
+    public SchoolClassResponse create(@RequestBody @Valid SchoolClassRequest schoolClassReq) {
+        return schoolClassService.create(schoolClassReq);
     }
 
     // PATCH
+    @PatchMapping("/{id}")
+    public void update(@PathVariable @NotNull Long id, @RequestBody SchoolClassRequest schoolClassReq) {
+        schoolClassService.update(id, schoolClassReq);
+    }
+
     @PatchMapping("/{classId}/add/{studentId}")
     public void addStudentToClass(@PathVariable Long classId, @PathVariable Long studentId) {
         classStudentService.addStudent(classId, studentId);
@@ -69,15 +74,10 @@ public class SchoolClassController {
         schoolClassService.assignTeacher(classId, teacherId);
     }
 
-    @PatchMapping("/{id}")
-    public void update(@PathVariable @NotNull Long id, @RequestBody SchoolClassRequest schoolClassReq) {
-        schoolClassService.update(id, schoolClassReq);
-    }
-
     // DELETE
     @DeleteMapping("/{id}")
-    public void deleteClass(@PathVariable @NotNull Long id) {
-        schoolClassService.deleteClass(id);
+    public void delete(@PathVariable @NotNull Long id) {
+        schoolClassService.delete(id);
     }
 
 }

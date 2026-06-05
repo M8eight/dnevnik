@@ -27,7 +27,7 @@ export default function ClassCard({
 }: ClassCardProps) {
     const [editing, setEditing] = useState(false);
     const [name, setName] = useState(schoolClass.name);
-    const [year, setYear] = useState(schoolClass.year);
+    const [year, setYear] = useState(schoolClass.schoolYear);
 
     const handleSave = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -39,7 +39,7 @@ export default function ClassCard({
     const handleCancel = (e: React.MouseEvent) => {
         e.stopPropagation();
         setName(schoolClass.name);
-        setYear(schoolClass.year);
+        setYear(schoolClass.schoolYear);
         setEditing(false);
     };
 
@@ -96,7 +96,7 @@ export default function ClassCard({
                         </p>
                         <p className="text-xs text-black/40 mt-0.5 flex items-center gap-1">
                             <GraduationCap className="w-3 h-3" />
-                            {schoolClass.year}
+                            {schoolClass.schoolYear}
                         </p>
                     </div>
                 )}

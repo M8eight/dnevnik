@@ -1,6 +1,6 @@
 package com.rusobr.academic.web.controller;
 
-import com.rusobr.academic.infrastructure.service.PeriodGradeService;
+import com.rusobr.academic.application.service.PeriodGradeService;
 import com.rusobr.academic.web.dto.grade.periodGrade.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,7 +25,7 @@ public class PeriodGradeController {
     public List<PeriodGradeTeacherResponse> getGradesByAssignment(@RequestParam Long teachingAssignmentId,
                                                                   @RequestParam Long currentAcademicPeriodId,
                                                                   @RequestParam String schoolYear) {
-        return periodGradeService.getByTeachingAssignmentWithAverage(teachingAssignmentId, currentAcademicPeriodId, schoolYear);
+        return periodGradeService.getByAssignmentWithAverage(teachingAssignmentId, currentAcademicPeriodId, schoolYear);
     }
 
     @PostMapping

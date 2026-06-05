@@ -1,6 +1,6 @@
 package com.rusobr.academic.web.controller;
 
-import com.rusobr.academic.infrastructure.service.LessonInstanceService;
+import com.rusobr.academic.application.service.JournalService;
 import com.rusobr.academic.web.dto.lessonInstance.GradesLessonsResponse;
 import com.rusobr.academic.web.dto.lessonInstance.LessonInstanceDto;
 import com.rusobr.academic.web.dto.lessonInstance.teacher.TeacherJournalResponse;
@@ -17,25 +17,25 @@ import java.util.List;
 @RequiredArgsConstructor
 public class LessonInstanceController {
 
-    private final LessonInstanceService lessonInstanceService;
+    private final JournalService lessonInstanceService;
 
     @GetMapping("/grades/by-student")
-    public GradesLessonsResponse getGradesLessonsByStudentId(@RequestParam("studentId") Long studentId,
-                                                             @RequestParam("academicPeriodId") Long academicPeriodId) {
+    public GradesLessonsResponse getGradesByStudentId(@RequestParam("studentId") Long studentId,
+                                                      @RequestParam("academicPeriodId") Long academicPeriodId) {
         return lessonInstanceService.getGradesLessonsByStudentId(studentId, academicPeriodId);
     }
 
-    @GetMapping("/grades/by-teaching-assignment")
-    public TeacherJournalResponse getGradesByTeachingAssignment(
+    @GetMapping("/journal/by-assignment")
+    public TeacherJournalResponse getByAssignment(
             @RequestParam("teachingAssignmentId") Long teachingAssignmentId,
             @RequestParam("academicPeriodId") Long academicPeriodId) {
-        return lessonInstanceService.getGradesAttendancesByTeachingAssignment(teachingAssignmentId, academicPeriodId);
+        return lessonInstanceService.getJournalByAssignment(teachingAssignmentId, academicPeriodId);
     }
 
-    @GetMapping("/lesson-instances/by-teaching-assignment")
-    public List<LessonInstanceDto> getLessonInstanceByTeachingAssignment(@RequestParam("teachingAssignmentId") Long teachingAssignmentId,
-                                                                         @RequestParam("academicPeriodId") Long academicPeriodId) {
-        return lessonInstanceService.getLessonInstanceByTeachingAssignmentId(teachingAssignmentId, academicPeriodId);
+    @GetMapping("/lesson-instances/by-assignment")
+    public List<LessonInstanceDto> getInstanceByAssignment(@RequestParam("teachingAssignmentId") Long teachingAssignmentId,
+                                                           @RequestParam("academicPeriodId") Long academicPeriodId) {
+        return lessonInstanceService.getInstancesByAssignment(teachingAssignmentId, academicPeriodId);
     }
 
 }

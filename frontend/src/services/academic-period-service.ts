@@ -27,11 +27,11 @@ export const createAcademicPeriod = async (request: AcademicPeriodRequest): Prom
 }
 
 export const openAcademicPeriod = async (id: number): Promise<void> => {
-    await api.post(`/academic-service/api/v1/academic-periods/${id}/open`);
+    await api.patch(`/academic-service/api/v1/academic-periods/${id}/open`);
 }
 
 export const closeAcademicPeriod = async (id: number): Promise<void> => {
-    await api.post(`/academic-service/api/v1/academic-periods/${id}/close`);
+    await api.patch(`/academic-service/api/v1/academic-periods/${id}/close`);
 }
 
 export const deleteAcademicPeriod = async (id: number): Promise<void> => {

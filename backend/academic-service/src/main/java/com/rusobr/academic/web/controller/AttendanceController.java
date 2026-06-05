@@ -1,6 +1,6 @@
 package com.rusobr.academic.web.controller;
 
-import com.rusobr.academic.infrastructure.service.AttendanceService;
+import com.rusobr.academic.application.service.AttendanceService;
 import com.rusobr.academic.web.dto.attendances.AttendanceRequest;
 import com.rusobr.academic.web.dto.attendances.AttendanceResponse;
 import lombok.RequiredArgsConstructor;
@@ -15,12 +15,12 @@ public class AttendanceController {
 
     @PostMapping
     public AttendanceResponse createAttendance(@RequestBody AttendanceRequest attendanceRequest) {
-        return attendanceService.createAttendance(attendanceRequest);
+        return attendanceService.create(attendanceRequest);
     }
 
     @DeleteMapping("/{id}")
     public void deleteAttendance(@PathVariable Long id) {
-        attendanceService.deleteAttendance(id);
+        attendanceService.delete(id);
     }
 
 }

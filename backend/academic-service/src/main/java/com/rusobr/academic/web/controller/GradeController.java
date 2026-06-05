@@ -1,6 +1,6 @@
 package com.rusobr.academic.web.controller;
 
-import com.rusobr.academic.infrastructure.service.GradeService;
+import com.rusobr.academic.application.service.GradeService;
 import com.rusobr.academic.web.dto.grade.GradeResponse;
 import com.rusobr.academic.web.dto.grade.GradeWithSubjectNameResponse;
 import com.rusobr.academic.web.dto.grade.createGrade.CreateGradeRequest;
@@ -23,28 +23,28 @@ public class GradeController {
     private final GradeService gradeService;
 
     @GetMapping("/{id}")
-    public GradeResponse getGradeById(@PathVariable Long id) {
-        return gradeService.getGradeById(id);
+    public GradeResponse getById(@PathVariable Long id) {
+        return gradeService.getById(id);
     }
 
     @GetMapping("/avg/by-student/{id}")
-    public Double getAverageGrade(@PathVariable Long id, @RequestParam @NotNull Long academicPeriodId) {
-        log.info("getAverageGrade {} {}", id, academicPeriodId);
-        return gradeService.getAverageGrade(id, academicPeriodId);
+    public Double getAverageByPeriod(@PathVariable Long id, @RequestParam @NotNull Long academicPeriodId) {
+        return gradeService.getAverageByPeriod(id, academicPeriodId);
     }
 
     @GetMapping("/by-date")
-    public List<GradeWithSubjectNameResponse> findAllGradesByDate(@RequestParam @NotNull Long studentId, @RequestParam @NotNull LocalDate date) {
-        return gradeService.findAllGradesByDate(studentId, date);
+    public List<GradeWithSubjectNameResponse> findAllByDate(@RequestParam @NotNull Long studentId,
+                                                            @RequestParam @NotNull LocalDate date) {
+        return gradeService.findAllByDate(studentId, date);
     }
 
     @PostMapping
-    public CreateGradeResponse createGrade(@RequestBody @Valid CreateGradeRequest createGradeRequest) {
-        return gradeService.createGrade(createGradeRequest);
+    public CreateGradeResponse create(@RequestBody @Valid CreateGradeRequest createGradeRequest) {
+        return gradeService.create(createGradeRequest);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteGradeById(@PathVariable Long id) {
-        gradeService.deleteGrade(id);
+    public void delete(@PathVariable Long id) {
+        gradeService.delete(id);
     }
 }

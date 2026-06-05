@@ -1,6 +1,6 @@
 package com.rusobr.user.web.controller;
 
-import com.rusobr.user.infrastructure.service.parent.ParentService;
+import com.rusobr.user.application.service.parent.ParentService;
 import com.rusobr.user.web.dto.parent.ParentDetails;
 import com.rusobr.user.web.dto.parent.ParentResponse;
 import lombok.RequiredArgsConstructor;
@@ -17,13 +17,13 @@ public class ParentController {
     private final ParentService parentService;
 
     @GetMapping("/{id}")
-    public ParentResponse getParent(@PathVariable Long id) {
-        return parentService.getParent(id);
+    public ParentResponse getWithUserById(@PathVariable Long id) {
+        return parentService.getWithUserById(id);
     }
 
     @GetMapping("/{id}/details")
-    public ParentDetails findById(@PathVariable Long id) {
-        return parentService.findById(id);
+    public ParentDetails getDetailsById(@PathVariable Long id) {
+        return parentService.getDetailsById(id);
     }
 
 }

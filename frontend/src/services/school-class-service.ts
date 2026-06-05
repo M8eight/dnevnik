@@ -4,19 +4,19 @@ import type { TeacherDetails, UserSimpleResponse } from "./user-service";
 export interface SchoolClassResponse {
     id: number;
     name: string;
-    year: string;
+    schoolYear: string;
     classTeacherId: number;
 }
 export interface SchoolClassRequest {
     name: string;
-    year: string;
+    schoolYear: string;
     classTeacherId: number;
 }
 
 export interface SchoolClassFullResponse {
     id: number;
     name: string;
-    year: string;
+    schoolYear: string;
     teacher: {
         user: UserSimpleResponse;
         teacherDetails: TeacherDetails

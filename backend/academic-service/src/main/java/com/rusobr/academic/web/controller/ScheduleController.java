@@ -1,6 +1,6 @@
 package com.rusobr.academic.web.controller;
 
-import com.rusobr.academic.infrastructure.service.ScheduleService;
+import com.rusobr.academic.application.service.ScheduleService;
 import com.rusobr.academic.web.dto.scheduleLesson.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -24,14 +24,14 @@ public class ScheduleController {
     public List<ScheduleLessonResponse> getScheduleByDate(@RequestParam Long studentId,
                                                           @RequestParam DayOfWeek dayOfWeek,
                                                           @RequestParam LocalDate date) {
-        return scheduleService.getScheduleByDate(studentId, dayOfWeek, date);
+        return scheduleService.getByDate(studentId, dayOfWeek, date);
     }
 
     @GetMapping("/schedules/diary")
     public List<DiaryScheduleDto> getDiaryScheduleByStudentId(@RequestParam Long studentId,
                                                               @RequestParam LocalDate startDate,
                                                               @RequestParam LocalDate endDate) {
-        return scheduleService.getDiaryScheduleByStudentId(studentId, startDate, endDate);
+        return scheduleService.getByStudentId(studentId, startDate, endDate);
     }
 
     @GetMapping("/schedules/by-student")
@@ -42,7 +42,7 @@ public class ScheduleController {
     @GetMapping("/schedules/by-class")
     public Map<DayOfWeek, List<ScheduleLessonDto>> getClassSchedule(@RequestParam Long classId,
                                                                     @RequestParam LocalDate date) {
-        return scheduleService.getClassSchedule(classId, date);
+        return scheduleService.getByClass(classId, date);
     }
 
     @PostMapping("/schedules")

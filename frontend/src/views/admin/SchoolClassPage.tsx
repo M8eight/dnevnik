@@ -26,7 +26,7 @@ export default function SchoolClassPage() {
     const filtered = classes.filter(
         (c) =>
             c.name?.toLowerCase().includes(search.toLowerCase()) ||
-            c.year?.toLowerCase().includes(search.toLowerCase())
+            c.schoolYear?.toLowerCase().includes(search.toLowerCase())
     );
 
     const selectedClass = classes.find((c) => c.id === selectedClassId);

@@ -1,6 +1,6 @@
 package com.rusobr.academic.web.controller;
 
-import com.rusobr.academic.infrastructure.service.FinalGradeService;
+import com.rusobr.academic.application.service.FinalGradeService;
 import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeCreateResponse;
 import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeRequest;
 import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeResponse;
@@ -24,9 +24,9 @@ public class FinalGradeController {
     }
 
     @GetMapping("/by-assignment")
-    public List<FinalGradeTeacherResponse> getTeachingAssignmentId(@RequestParam Long teachingAssignmentId,
-                                                                   @RequestParam String schoolYear) {
-        return finalGradeService.getByTeachingAssignmentId(teachingAssignmentId, schoolYear);
+    public List<FinalGradeTeacherResponse> getByAssignmentId(@RequestParam Long teachingAssignmentId,
+                                                             @RequestParam String schoolYear) {
+        return finalGradeService.getByAssignmentId(teachingAssignmentId, schoolYear);
     }
 
     @PostMapping

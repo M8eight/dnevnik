@@ -1,6 +1,6 @@
 package com.rusobr.user.domain.model;
 
-import com.rusobr.user.infrastructure.enums.UserRole;
+import com.rusobr.user.domain.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.BatchSize;
