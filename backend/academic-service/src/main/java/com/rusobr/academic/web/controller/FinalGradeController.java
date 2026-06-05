@@ -1,6 +1,6 @@
 package com.rusobr.academic.web.controller;
 
-import com.rusobr.academic.infrastructure.service.FinalGradeService;
+import com.rusobr.academic.application.service.FinalGradeService;
 import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeCreateResponse;
 import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeRequest;
 import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeResponse;

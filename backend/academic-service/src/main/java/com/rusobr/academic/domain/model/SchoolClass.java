@@ -25,7 +25,7 @@ public class SchoolClass extends BaseEntity {
 
     private String name;
 
-    private String year;
+    private String schoolYear;
 
     private Long classTeacherId;
 

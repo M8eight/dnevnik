@@ -1,6 +1,6 @@
 package com.rusobr.academic.web.controller;
 
-import com.rusobr.academic.infrastructure.service.TeachingAssignmentService;
+import com.rusobr.academic.application.service.TeachingAssignmentService;
 import com.rusobr.academic.web.dto.teachingAssignment.TeachingAssignmentDetailsDto;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;

@@ -10,9 +10,12 @@ import java.util.Set;
 
 @Repository
 public interface ClassStudentRepository extends CrudRepository<ClassStudent, Long> {
-    Optional<ClassStudent> findByStudentId(Long studentId);
+
     boolean existsByStudentId(Long studentId);
+
     Optional<ClassStudent> findBySchoolClassIdAndStudentId(Long classId, Long studentId);
+
     @Query("select cs.studentId from ClassStudent cs")
     Set<Long> findAllStudentIds();
+
 }

@@ -1,7 +1,7 @@
 package com.rusobr.user.web.controller;
 
-import com.rusobr.user.infrastructure.service.student.StudentService;
-import com.rusobr.user.web.dto.feign.UserResponse;
+import com.rusobr.user.application.service.student.StudentService;
+import com.rusobr.user.web.dto.feign.UserFeignResponse;
 import com.rusobr.user.web.dto.student.StudentDetails;
 import com.rusobr.user.web.dto.student.StudentWithClassResponse;
 import jakarta.validation.constraints.NotNull;
@@ -24,12 +24,12 @@ public class StudentController {
     }
 
     @PostMapping("/batch")
-    public List<UserResponse> getBatch(@RequestBody List<Long> ids) {
+    public List<UserFeignResponse> getBatch(@RequestBody List<Long> ids) {
         return studentService.getBatch(ids);
     }
 
     @PostMapping("/exclude-assigned")
-    public List<UserResponse> getBatchWithExcludingIds(@RequestBody @NotNull Set<Long> ids) {
+    public List<UserFeignResponse> getBatchWithExcludingIds(@RequestBody @NotNull Set<Long> ids) {
         return studentService.getBatchWithExcludingIds(ids);
     }
 

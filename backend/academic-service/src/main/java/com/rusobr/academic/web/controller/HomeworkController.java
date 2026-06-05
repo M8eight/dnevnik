@@ -1,7 +1,7 @@
 package com.rusobr.academic.web.controller;
 
-import com.rusobr.academic.infrastructure.service.HomeworkService;
-import com.rusobr.academic.web.dto.homework.HomeworkHomePageResponse;
+import com.rusobr.academic.application.service.HomeworkService;
+import com.rusobr.academic.web.dto.homework.HomeworkWithSubjectResponse;
 import com.rusobr.academic.web.dto.homework.HomeworkRequest;
 import com.rusobr.academic.web.dto.homework.HomeworkResponse;
 import jakarta.validation.Valid;
@@ -22,8 +22,8 @@ public class HomeworkController {
     private final HomeworkService homeworkService;
 
     @GetMapping("/by-date")
-    public List<HomeworkHomePageResponse> getByDate(@RequestParam @NotNull LocalDate date,
-                                                    @RequestParam @NotNull Long studentId) {
+    public List<HomeworkWithSubjectResponse> getByDate(@RequestParam @NotNull LocalDate date,
+                                                       @RequestParam @NotNull Long studentId) {
         return homeworkService.getByDate(date, studentId);
     }
 

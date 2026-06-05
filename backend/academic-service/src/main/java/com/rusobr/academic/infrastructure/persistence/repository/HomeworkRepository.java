@@ -1,7 +1,7 @@
 package com.rusobr.academic.infrastructure.persistence.repository;
 
 import com.rusobr.academic.domain.model.Homework;
-import com.rusobr.academic.web.dto.homework.HomeworkHomePageResponse;
+import com.rusobr.academic.infrastructure.persistence.projection.HomeworkWithSubjectProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -17,29 +17,28 @@ import java.util.Optional;
 @Repository
 public interface HomeworkRepository extends CrudRepository<Homework, Long> {
     @Query("""
-        select distinct new com.rusobr.academic.web.dto.homework.HomeworkHomePageResponse(
-            h.id,
-            h.text,
-            su.name
-        )
+        select
+            h.id id,
+            h.text text,
+            su.name subjectName
         from Homework h
-        join h.lessonInstance li
-        join li.scheduleLesson sl
-        join sl.teachingAssignment ta
-        join ta.subject su
-        join ta.schoolClass sc
-        join sc.students s
+            join h.lessonInstance li
+            join li.scheduleLesson sl
+            join sl.teachingAssignment ta
+            join ta.subject su
+            join ta.schoolClass sc
+            join sc.students s
         where li.lessonDate = :date
         and s.studentId = :studentId
 """)
-    List<HomeworkHomePageResponse> findHomeworksByDate(@Param("date") LocalDate date, @Param("studentId") Long studentId);
+    List<HomeworkWithSubjectProjection> findHomeworksByDate(@Param("date") LocalDate date, @Param("studentId") Long studentId);
 
     @Query("""
     select h
     from Homework h
-    join h.lessonInstance li
-    join li.scheduleLesson sl
-    join sl.teachingAssignment ta
+        join h.lessonInstance li
+        join li.scheduleLesson sl
+        join sl.teachingAssignment ta
     where ta.id = :teachingAssignmentId
     order by li.lessonDate asc
 """)

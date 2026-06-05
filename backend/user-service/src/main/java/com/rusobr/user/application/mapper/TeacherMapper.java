@@ -1,0 +1,25 @@
+package com.rusobr.user.application.mapper;
+
+import com.rusobr.user.domain.model.Teacher;
+import com.rusobr.user.domain.model.User;
+import com.rusobr.user.web.dto.teacher.TeacherDetails;
+import com.rusobr.user.web.dto.teacher.TeacherResponse;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingConstants;
+import org.mapstruct.ReportingPolicy;
+
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, unmappedTargetPolicy = ReportingPolicy.IGNORE)
+public interface TeacherMapper {
+    @Mapping(target = "user", source = "user")
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "phoneNumber", source = "teacherDetails.phoneNumber")
+    @Mapping(target = "email", source = "teacherDetails.email")
+    Teacher toEntity(User user, TeacherDetails teacherDetails);
+
+    TeacherDetails toTeacherDetails(Teacher teacher);
+
+    @Mapping(target = "details.email", source = "email")
+    @Mapping(target = "details.phoneNumber", source = "phoneNumber")
+    TeacherResponse toTeacherResponse(Teacher teacher);
+}

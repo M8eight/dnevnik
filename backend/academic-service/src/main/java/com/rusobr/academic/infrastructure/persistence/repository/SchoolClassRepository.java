@@ -1,6 +1,7 @@
 package com.rusobr.academic.infrastructure.persistence.repository;
 
 import com.rusobr.academic.domain.model.SchoolClass;
+import com.rusobr.academic.infrastructure.persistence.projection.SchoolClassProjection;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassResponse;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,6 +14,7 @@ import java.util.Optional;
 
 @Repository
 public interface SchoolClassRepository extends JpaRepository<SchoolClass, Long> {
+
     @Query("""
                 select s.id
                 from SchoolClass sc
@@ -22,17 +24,16 @@ public interface SchoolClassRepository extends JpaRepository<SchoolClass, Long> 
     List<Long> getStudentIdsFromSchoolClasses(@Param("classId") Long classId);
 
     @Query("""
-            select new com.rusobr.academic.web.dto.schoolClass.SchoolClassResponse(
-                 sc.id,
-                 sc.name,
-                 sc.year,
-                 sc.classTeacherId
-            )
+            select
+                 sc.id id,
+                 sc.name name,
+                 sc.schoolYear schoolYear,
+                 sc.classTeacherId classTeacherId
             from ClassStudent cs
             join cs.schoolClass sc
             where cs.studentId = :studentId
             """)
-    Optional<SchoolClassResponse> getSchoolClassByStudentId(@Param("studentId") Long studentId);
+    Optional<SchoolClassProjection> getSchoolClassByStudentId(@Param("studentId") Long studentId);
 
     @Query("""
             select cs.studentId
@@ -43,7 +44,7 @@ public interface SchoolClassRepository extends JpaRepository<SchoolClass, Long> 
 """)
     List<Long> findStudentsIdsByTeachingAssignment(@Param("teachingAssignmentId") Long teachingAssignmentId);
 
-    List<SchoolClassResponse> findAllByOrderByNameAsc();
+    List<SchoolClassProjection> findAllByOrderByNameAsc();
 
     boolean existsByName(String name);
 

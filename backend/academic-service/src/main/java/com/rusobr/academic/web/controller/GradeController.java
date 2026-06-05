@@ -1,6 +1,6 @@
 package com.rusobr.academic.web.controller;
 
-import com.rusobr.academic.infrastructure.service.GradeService;
+import com.rusobr.academic.application.service.GradeService;
 import com.rusobr.academic.web.dto.grade.GradeResponse;
 import com.rusobr.academic.web.dto.grade.GradeWithSubjectNameResponse;
 import com.rusobr.academic.web.dto.grade.createGrade.CreateGradeRequest;

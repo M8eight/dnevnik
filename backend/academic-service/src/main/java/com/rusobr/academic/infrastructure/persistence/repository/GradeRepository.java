@@ -1,9 +1,9 @@
 package com.rusobr.academic.infrastructure.persistence.repository;
 
 import com.rusobr.academic.domain.model.Grade;
-import com.rusobr.academic.web.dto.grade.GradeJournalItemDto;
-import com.rusobr.academic.web.dto.grade.GradeWithSubjectNameResponse;
-import com.rusobr.academic.web.dto.grade.StudentAverageProjection;
+import com.rusobr.academic.infrastructure.persistence.projection.GradeJournalItemProjection;
+import com.rusobr.academic.infrastructure.persistence.projection.GradeWithSubjectNameProjection;
+import com.rusobr.academic.infrastructure.persistence.projection.StudentAverageProjection;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -18,23 +18,22 @@ import java.util.Optional;
 public interface GradeRepository extends JpaRepository<Grade, Long> {
     //Запрос берет из schoolClass ученика и сопоставляет оценками и ограничивает данные по teachingAssignmentId
     @Query("""
-            select new com.rusobr.academic.web.dto.grade.GradeJournalItemDto(
-                s.id,
-                g.id,
-                g.value,
-                g.type,
-                li.lessonDate
-            )
-            from Grade g
-            join g.lessonInstance li
-            join li.scheduleLesson sl
-            join sl.teachingAssignment ta
-            join ta.schoolClass sc
-            join sc.students s on s.id = g.studentId
-            where ta.id = :assignmentId
-            order by s.id asc, g.createdAt
-            """)
-    List<GradeJournalItemDto> getClassGrades(@Param("assignmentId") Long assignmentId);
+        select
+            s.id studentId,
+            g.id gradeId,
+            g.value value,
+            g.type type,
+            li.lessonDate lessonDate
+        from Grade g
+        join g.lessonInstance li
+        join li.scheduleLesson sl
+        join sl.teachingAssignment ta
+        join ta.schoolClass sc
+        join sc.students s on s.id = g.studentId
+        where ta.id = :assignmentId
+        order by s.id asc, g.createdAt
+    """)
+    List<GradeJournalItemProjection> getClassGrades(@Param("assignmentId") Long assignmentId);
 
     @EntityGraph(attributePaths = {"lessonInstance"})
     Optional<Grade> findWithLessonInstanceById(Long id);
@@ -50,21 +49,20 @@ public interface GradeRepository extends JpaRepository<Grade, Long> {
                             @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
     @Query("""
-       select new com.rusobr.academic.web.dto.grade.GradeWithSubjectNameResponse(
-            g.id,
-            g.value,
-            g.type,
-            s.name
-       )
+       select
+            g.id id,
+            g.value value,
+            g.type gradeType,
+            s.name subjectName
        from Grade g
-       join g.lessonInstance li
-       join li.scheduleLesson sl
-       join sl.teachingAssignment ta
-       join ta.subject s
+           join g.lessonInstance li
+           join li.scheduleLesson sl
+           join sl.teachingAssignment ta
+           join ta.subject s
        where li.lessonDate = :date
        and g.studentId = :studentId
 """)
-    List<GradeWithSubjectNameResponse> findAllGradesByDate(@Param("studentId") Long studentId, @Param("date")  LocalDate date);
+    List<GradeWithSubjectNameProjection> findAllByDateAndStudentId(@Param("studentId") Long studentId, @Param("date")  LocalDate date);
 
     //группируем по studentId, а среднее число учитывая вес округляем до 2 знаков после запятой
     @Query(value = """

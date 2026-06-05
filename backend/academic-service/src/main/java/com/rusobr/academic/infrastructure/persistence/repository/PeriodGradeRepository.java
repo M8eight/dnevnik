@@ -1,7 +1,7 @@
 package com.rusobr.academic.infrastructure.persistence.repository;
 
 import com.rusobr.academic.domain.model.PeriodGrade;
-import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeResponse;
+import com.rusobr.academic.infrastructure.persistence.projection.PeriodGradeProjection;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -13,6 +13,7 @@ import java.util.Optional;
 
 @Repository
 public interface PeriodGradeRepository extends CrudRepository<PeriodGrade, Long> {
+
     @EntityGraph(attributePaths = {"academicPeriod"})
     Optional<PeriodGrade> findWithAcademicPeriodById(Long id);
 
@@ -29,13 +30,12 @@ public interface PeriodGradeRepository extends CrudRepository<PeriodGrade, Long>
     List<PeriodGrade> findPeriodGradeByStudentId(@Param("studentId") Long studentId, @Param("schoolYear") String schoolYear);
 
     @Query("""
-        select new com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeResponse(
-            per.id,
-            per.value,
-            per.description,
-            per.studentId,
-            ap.id
-        )
+        select
+            per.id id,
+            per.value value,
+            per.description description,
+            per.studentId studentId,
+            ap.id academicPeriodId
         from PeriodGrade per
         join per.teachingAssignment ta
         join per.academicPeriod ap
@@ -43,6 +43,6 @@ public interface PeriodGradeRepository extends CrudRepository<PeriodGrade, Long>
             and ap.schoolYear = :schoolYear
         order by ap.id asc
 """)
-    List<PeriodGradeResponse> findPeriodGradesByTeachingAssignmentId(@Param("teachingAssignmentId") Long teachingAssignmentId,
-                                                                     @Param("schoolYear") String schoolYear);
+    List<PeriodGradeProjection> findPeriodGradesByTeachingAssignmentId(@Param("teachingAssignmentId") Long teachingAssignmentId, @Param("schoolYear") String schoolYear);
+
 }

@@ -111,7 +111,7 @@ public class DebugDataInitializer implements CommandLineRunner {
     private ClassBundle buildClass(String name, String year, Long classTeacherId,
                                    List<Long> studentIds, Map<String, Subject> S) {
         SchoolClass sc = SchoolClass.builder()
-                .name(name).year(year)
+                .name(name).schoolYear(year)
                 .classTeacherId(classTeacherId)
                 .students(new HashSet<>()).build();
         schoolClassRepository.save(sc);

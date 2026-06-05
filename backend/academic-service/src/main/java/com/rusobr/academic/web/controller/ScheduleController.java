@@ -1,6 +1,6 @@
 package com.rusobr.academic.web.controller;
 
-import com.rusobr.academic.infrastructure.service.ScheduleService;
+import com.rusobr.academic.application.service.ScheduleService;
 import com.rusobr.academic.web.dto.scheduleLesson.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;

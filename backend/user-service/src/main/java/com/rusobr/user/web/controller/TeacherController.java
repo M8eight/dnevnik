@@ -1,7 +1,7 @@
 package com.rusobr.user.web.controller;
 
-import com.rusobr.user.infrastructure.service.teacher.TeacherService;
-import com.rusobr.user.web.dto.feign.UserResponse;
+import com.rusobr.user.application.service.teacher.TeacherService;
+import com.rusobr.user.web.dto.feign.UserFeignResponse;
 import com.rusobr.user.web.dto.teacher.TeacherDetails;
 import com.rusobr.user.web.dto.teacher.TeacherResponse;
 import lombok.RequiredArgsConstructor;
@@ -27,12 +27,12 @@ public class TeacherController {
     }
 
     @PostMapping("/batch")
-    public List<UserResponse> findBatchTeachers(@RequestBody List<Long> ids) {
+    public List<UserFeignResponse> findBatchTeachers(@RequestBody List<Long> ids) {
         return teacherService.getBatch(ids);
     }
 
     @GetMapping("/{id}/simple")
-    public UserResponse getTeacherSimpleById(@PathVariable Long id) {
+    public UserFeignResponse getTeacherSimpleById(@PathVariable Long id) {
         return teacherService.getSimpleById(id);
     }
 

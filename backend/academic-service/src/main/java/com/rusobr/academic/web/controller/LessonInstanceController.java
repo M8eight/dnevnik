@@ -1,6 +1,6 @@
 package com.rusobr.academic.web.controller;
 
-import com.rusobr.academic.infrastructure.service.JournalService;
+import com.rusobr.academic.application.service.JournalService;
 import com.rusobr.academic.web.dto.lessonInstance.GradesLessonsResponse;
 import com.rusobr.academic.web.dto.lessonInstance.LessonInstanceDto;
 import com.rusobr.academic.web.dto.lessonInstance.teacher.TeacherJournalResponse;

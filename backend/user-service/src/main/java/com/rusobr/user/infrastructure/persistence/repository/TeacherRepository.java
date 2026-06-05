@@ -1,7 +1,8 @@
 package com.rusobr.user.infrastructure.persistence.repository;
 
 import com.rusobr.user.domain.model.Teacher;
-import com.rusobr.user.web.dto.feign.UserResponse;
+import com.rusobr.user.infrastructure.persistence.repository.projection.UserProjection;
+import com.rusobr.user.web.dto.feign.UserFeignResponse;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -21,18 +22,28 @@ public interface TeacherRepository extends JpaRepository<Teacher, Long> {
     Optional<Teacher> findByIdWithDeleted(@Param("id") Long id);
 
     @Query("""
-                    select new com.rusobr.user.web.dto.feign.UserResponse(t.id, u.firstName, u.lastName, u.username, u.keycloakId)
-                        from Teacher t
-                        join t.user u where t.id in :teacherIds
-                        order by u.lastName
-            """)
-    List<UserResponse> findAllTeachersByIds(@Param("teacherIds") Collection<Long> teacherIds);
+        select
+            t.id id,
+            u.firstName firstName,
+            u.lastName lastName,
+            u.username username,
+            u.keycloakId keycloakId
+        from Teacher t
+        join t.user u where t.id in :teacherIds
+        order by u.lastName
+    """)
+    List<UserProjection> findAllTeachersByIds(@Param("teacherIds") Collection<Long> teacherIds);
 
     @Query("""
-                    select new com.rusobr.user.web.dto.feign.UserResponse(t.id, u.firstName, u.lastName, u.username, u.keycloakId)
-                        from Teacher t
-                        join t.user u where t.id = :id
-                        order by u.lastName
-""")
-    UserResponse getTeacherSimpleById(Long id);
+        select
+            t.id id,
+            u.firstName firstName,
+            u.lastName lastName,
+            u.username username,
+            u.keycloakId keycloakId
+        from Teacher t
+        join t.user u where t.id = :id
+        order by u.lastName
+    """)
+    UserProjection getTeacherSimpleById(Long id);
 }

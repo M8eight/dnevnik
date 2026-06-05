@@ -1,6 +1,6 @@
 package com.rusobr.academic.web.controller;
 
-import com.rusobr.academic.infrastructure.service.AcademicPeriodService;
+import com.rusobr.academic.application.service.AcademicPeriodService;
 import com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodRequest;
 import com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodResponse;
 import lombok.RequiredArgsConstructor;

@@ -1,6 +1,6 @@
 package com.rusobr.user.web.controller;
 
-import com.rusobr.user.infrastructure.service.parent.ParentService;
+import com.rusobr.user.application.service.parent.ParentService;
 import com.rusobr.user.web.dto.parent.ParentDetails;
 import com.rusobr.user.web.dto.parent.ParentResponse;
 import lombok.RequiredArgsConstructor;

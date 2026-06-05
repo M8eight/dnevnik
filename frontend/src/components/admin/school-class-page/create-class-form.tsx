@@ -109,7 +109,7 @@ export default function CreateClassForm() {
     const handleSubmit = () => {
         if (!name.trim() || !year.trim() || !teacher) return;
         createMutation.mutate(
-            { name: name.trim(), year: year.trim(), classTeacherId: teacher.id },
+            { name: name.trim(), schoolYear: year.trim(), classTeacherId: teacher.id },
             {
                 onSuccess: () => {
                     setName("");
