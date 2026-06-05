@@ -12,11 +12,9 @@ import com.rusobr.academic.infrastructure.persistence.repository.LessonInstanceR
 import com.rusobr.academic.web.dto.attendances.AttendanceRequest;
 import com.rusobr.academic.web.dto.attendances.AttendanceResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AttendanceService {
@@ -27,8 +25,7 @@ public class AttendanceService {
     private final AcademicPeriodRepository academicPeriodRepository;
 
     @Transactional
-    public AttendanceResponse createAttendance(AttendanceRequest attendanceRequest) {
-
+    public AttendanceResponse create(AttendanceRequest attendanceRequest) {
         LessonInstance lessonInstance = lessonInstanceRepository.findById(attendanceRequest.lessonInstanceId())
                 .orElseThrow(() -> new NotFoundException("Lesson Instance Not Found" + attendanceRequest.lessonInstanceId()));
 
@@ -52,7 +49,7 @@ public class AttendanceService {
     }
 
     @Transactional
-    public void deleteAttendance(Long id) {
+    public void delete(Long id) {
         attendanceRepository.deleteById(id);
     }
 

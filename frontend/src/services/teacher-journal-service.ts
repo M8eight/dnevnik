@@ -54,7 +54,7 @@ export const getTeacherJournal = async (
     academicPeriodId: number
 ): Promise<TeacherJournalResponse> => {
     const { data } = await api.get<TeacherJournalResponse>(
-        `/academic-service/api/v1/grades/by-teaching-assignment`, 
+        `/academic-service/api/v1/journal/by-assignment`, 
         { params: { teachingAssignmentId, academicPeriodId } }
     );
     return data;

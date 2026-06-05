@@ -16,7 +16,6 @@ import com.rusobr.academic.web.dto.lessonInstance.teacher.GradeStudentProjection
 import com.rusobr.academic.web.dto.lessonInstance.teacher.StudentJournalDto;
 import com.rusobr.academic.web.dto.lessonInstance.teacher.TeacherJournalResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,8 +29,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
-public class LessonInstanceService {
+public class JournalService {
 
     private final LessonInstanceRepository lessonInstanceRepository;
     private final AcademicPeriodRepository academicPeriodRepository;
@@ -77,8 +75,8 @@ public class LessonInstanceService {
         return new GradesLessonsResponse(academicPeriodMapper.toDto(academicPeriod), dates, subjects);
     }
 
-    public TeacherJournalResponse getGradesAttendancesByTeachingAssignment(Long teachingAssignmentId,
-                                                                           Long academicPeriodId) {
+    public TeacherJournalResponse getJournalByAssignment(Long teachingAssignmentId,
+                                                         Long academicPeriodId) {
         //Получаем Academic period
         AcademicPeriod academicPeriod = academicPeriodRepository.findById(academicPeriodId)
                 .orElseThrow(() -> new NotFoundException("Academic period not found: " + academicPeriodId));
@@ -105,16 +103,14 @@ public class LessonInstanceService {
                         p -> new StudentJournalDto.GradeLessonTeacherDto(
                                 p.gradeId(), p.value(), p.weight(), p.gradeType(), p.lessonInstanceId()
                         ),
-                        Collectors.toList()
-                )));
+                Collectors.toList())));
 
         var attendanceJournal = attendances.stream()
                 .collect(Collectors.groupingBy(AttendanceStudentProjection::studentId, LinkedHashMap::new, Collectors.mapping(
                         p -> new StudentJournalDto.AttendanceLessonTeacherDto(
                                 p.attendanceId(), p.attendanceStatus(), p.lessonInstanceId()
                         ),
-                        Collectors.toList()
-                )));
+                Collectors.toList())));
 
         //Собираем все в один список
         Set<Long> allStudentIds = new LinkedHashSet<>();
@@ -122,12 +118,10 @@ public class LessonInstanceService {
         allStudentIds.addAll(attendanceJournal.keySet());
 
         //Преобразуем в dto с studentId и списком оценок и посещаемости
-        List <StudentJournalDto > studentJournal = allStudentIds.stream()
-                .map(studentId -> {
-
+        List <StudentJournalDto > studentJournal = allStudentIds.stream().map(studentId -> {
                     var studentGrades = gradeJournal.getOrDefault(studentId, List.of());
-                    double gradeTop = studentGrades.stream()
-                            .mapToDouble(g -> g.value() * g.weight()).sum();
+                    //считаем среднее взвешенное и округляем до 2-х знаков
+                    double gradeTop = studentGrades.stream().mapToDouble(g -> g.value() * g.weight()).sum();
                     double gradeBottom = studentGrades.stream().mapToDouble(StudentJournalDto.GradeLessonTeacherDto::weight).sum();
                     double average = (gradeBottom > 0)
                             ? BigDecimal.valueOf(gradeTop / gradeBottom)
@@ -136,19 +130,15 @@ public class LessonInstanceService {
                             : 0.0;
 
                     return new StudentJournalDto(
-                            studentId,
-                            gradeJournal.getOrDefault(studentId, List.of()),
-                            average,
-                            attendanceJournal.getOrDefault(studentId, List.of())
+                            studentId, gradeJournal.getOrDefault(studentId, List.of()),
+                            average, attendanceJournal.getOrDefault(studentId, List.of())
                     );
-                })
-                .toList();
+        }).toList();
 
-        return new TeacherJournalResponse(academicPeriodMapper.toDto(academicPeriod),
-                studentNames, lessonInstances, studentJournal);
+        return new TeacherJournalResponse(academicPeriodMapper.toDto(academicPeriod), studentNames, lessonInstances, studentJournal);
     }
 
-    public List<LessonInstanceDto> getLessonInstanceByTeachingAssignmentId(Long teachingAssignmentId, Long academicPeriodId) {
+    public List<LessonInstanceDto> getInstancesByAssignment(Long teachingAssignmentId, Long academicPeriodId) {
         AcademicPeriod academicPeriod = academicPeriodRepository.findById(academicPeriodId)
                 .orElseThrow(() -> new NotFoundException("Academic period not found: " + academicPeriodId));
 
@@ -156,7 +146,7 @@ public class LessonInstanceService {
                 academicPeriod.getStartDate(), academicPeriod.getEndDate());
     }
 
-    public void generateForLesson(ScheduleLesson scheduleLesson) {
+    public void generateInstanceForLesson(ScheduleLesson scheduleLesson) {
         LocalDate from = scheduleLesson.getValidFrom();
         LocalDate to = from.plusWeeks(2);
 
@@ -164,10 +154,10 @@ public class LessonInstanceService {
             to = scheduleLesson.getValidTo();
         }
 
-        generateBetween(scheduleLesson, from, to);
+        generateInstanceBetween(scheduleLesson, from, to);
     }
 
-    public void generateBetween(ScheduleLesson scheduleLesson, LocalDate from, LocalDate to) {
+    public void generateInstanceBetween(ScheduleLesson scheduleLesson, LocalDate from, LocalDate to) {
         DayOfWeek dayOfWeek = scheduleLesson.getDayOfWeek();
 
         // начинаем с первого подходящего дня недели в периоде

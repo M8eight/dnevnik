@@ -1,7 +1,9 @@
 package com.rusobr.user.infrastructure.service.parent;
 
+import com.rusobr.user.domain.event.UserDeletedEvent;
 import com.rusobr.user.domain.model.Parent;
 import com.rusobr.user.domain.model.User;
+import com.rusobr.user.infrastructure.enums.UserRole;
 import com.rusobr.user.infrastructure.exception.NotFoundException;
 import com.rusobr.user.infrastructure.mapper.ParentMapper;
 import com.rusobr.user.infrastructure.persistence.repository.ParentRepository;
@@ -9,6 +11,7 @@ import com.rusobr.user.infrastructure.persistence.repository.UserRepository;
 import com.rusobr.user.web.dto.parent.ParentDetails;
 import com.rusobr.user.web.dto.parent.ParentResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,13 +25,12 @@ public class ParentService {
     private final ParentMapper parentMapper;
     private final UserRepository userRepository;
 
-    @Transactional
-    public void createParent(Long userId, ParentDetails parentDetails) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found: " + userId));
-        parentRepository.save(parentMapper.toEntity(user, parentDetails));
+    public ParentResponse getWithUserById(Long userId) {
+        Parent parentFetch = parentRepository.findWithUserById(userId).orElseThrow(() -> new NotFoundException("Parent not found: " + userId));
+        return parentMapper.toResponse(parentFetch);
     }
 
-    public ParentDetails findById(Long id) {
+    public ParentDetails getDetailsById(Long id) {
         Parent parent = parentRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Parent not found: " + id));
         return parentMapper.toParentDetails(parent);
@@ -38,13 +40,14 @@ public class ParentService {
         return parentRepository.findByIdWithDeleted(id);
     }
 
-    public ParentResponse getParent(Long userId) {
-        Parent parentFetch = parentRepository.findWithUserById(userId).orElseThrow(() -> new NotFoundException("Parent not found: " + userId));
-        return parentMapper.toResponse(parentFetch);
+    @Transactional
+    public void create(Long userId, ParentDetails parentDetails) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found: " + userId));
+        parentRepository.save(parentMapper.toEntity(user, parentDetails));
     }
 
     @Transactional
-    public void updateParent(Long userId, ParentDetails parentDetails) {
+    public void update(Long userId, ParentDetails parentDetails) {
         if (!userRepository.existsById(userId)) {
             throw new NotFoundException("User not found: " + userId);
         }
@@ -53,8 +56,15 @@ public class ParentService {
         }
     }
 
-    public void deleteById(Long parentId) {
+    public void delete(Long parentId) {
         parentRepository.deleteById(parentId);
+    }
+
+    @EventListener
+    public void handleUserDelete(UserDeletedEvent event) {
+        if (event.roles().contains(UserRole.PARENT)) {
+            this.delete(event.id());
+        }
     }
 
 }

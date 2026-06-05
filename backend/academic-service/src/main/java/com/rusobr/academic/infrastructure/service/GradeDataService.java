@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class GradeDataService {
 
     private final ScheduleLessonRepository scheduleLessonRepository;
@@ -37,7 +36,6 @@ public class GradeDataService {
         //Получаем период из бд по дате
         AcademicPeriod academicPeriod = academicPeriodRepository.findByDate(date)
                 .orElseThrow(() -> new NotFoundException("Current academic period not found"));
-        log.info("academicPeriod: {}", academicPeriod);
 
 
         List<ScheduleLesson> scheduleLessons = scheduleLessonRepository.findByTeachingAssignmentId(teachingAssignmentId);

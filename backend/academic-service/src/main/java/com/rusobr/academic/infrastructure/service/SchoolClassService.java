@@ -52,17 +52,13 @@ public class SchoolClassService {
         return schoolClassMapper.toSchoolClassFullResponse(schoolClass, users, teacher);
     }
 
-    public SchoolClassResponse findClassByStudentId(Long studentId) {
+    public SchoolClassResponse findByStudentId(Long studentId) {
         return schoolClassRepository.getSchoolClassByStudentId(studentId)
                 .orElseThrow(() -> new NotFoundException("SchoolClass not found for student: " + studentId));
     }
 
     public List<SchoolClassResponse> findAllClasses() {
         return schoolClassRepository.findAllByOrderByNameAsc();
-    }
-
-    public SchoolClassResponse saveClass(SchoolClassRequest schoolClassReq) {
-        return self.createTransactional(schoolClassReq);
     }
 
     public void assignTeacher(Long classId, Long teacherId) {
@@ -75,6 +71,10 @@ public class SchoolClassService {
         SchoolClass schoolClass = schoolClassRepository.findWithClassStudentById(classId)
                 .orElseThrow(() -> new NotFoundException("SchoolClass Not Found by id: " + classId));
         schoolClass.setClassTeacherId(teacherId);
+    }
+
+    public SchoolClassResponse create(SchoolClassRequest schoolClassReq) {
+        return self.createTransactional(schoolClassReq);
     }
 
     @Transactional
@@ -104,7 +104,7 @@ public class SchoolClassService {
     }
 
     @Transactional
-    public void deleteClass(Long id) {
+    public void delete(Long id) {
         if (!schoolClassRepository.existsById(id)) {
             throw new NotFoundException("SchoolClass not found " + id);
         }

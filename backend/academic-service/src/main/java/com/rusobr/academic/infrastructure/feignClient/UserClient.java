@@ -27,7 +27,7 @@ public interface UserClient {
     void getStudentById(@PathVariable Long id);
 
     @PostMapping("/api/v1/students/exclude-assigned")
-    List<UserFeignResponse> getBatchUsersExcludeAssigned(@RequestBody Set<Long> ids);
+    List<UserFeignResponse> getBatchStudentsExcludeAssigned(@RequestBody Set<Long> ids);
 
     @PostMapping("/api/v1/students/batch")
     List<UserFeignResponse> getBatchUsers(@RequestBody List<Long> ids);

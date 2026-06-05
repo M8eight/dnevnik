@@ -4,8 +4,9 @@ import com.rusobr.user.domain.model.Teacher;
 import com.rusobr.user.infrastructure.enums.UserRole;
 import com.rusobr.user.infrastructure.exception.ConflictException;
 import com.rusobr.user.infrastructure.service.teacher.TeacherService;
-import com.rusobr.user.infrastructure.service.user.UserProfileDetails;
+import com.rusobr.user.web.dto.user.UserProfileDetails;
 import com.rusobr.user.web.dto.teacher.TeacherDetails;
+import com.rusobr.user.web.dto.user.UserRoleStrategy;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +28,7 @@ public class TeacherStrategy implements UserRoleStrategy {
                 teacher.setPhoneNumber(teacherDetails.phoneNumber());
                 teacher.setEmail(teacherDetails.email());
             } else {
-                teacherService.createTeacher(userId, teacherDetails);
+                teacherService.create(userId, teacherDetails);
             }
         } else {
             throw new ConflictException("Invalid user profile details");
@@ -36,13 +37,13 @@ public class TeacherStrategy implements UserRoleStrategy {
 
     @Override
     public void delete(Long userId) {
-        teacherService.deleteById(userId);
+        teacherService.delete(userId);
     }
 
     @Override
     public void update(Long userId, UserProfileDetails userDetails) {
         if (userDetails instanceof TeacherDetails teacherDetails) {
-            teacherService.updateTeacher(userId, teacherDetails);
+            teacherService.update(userId, teacherDetails);
         } else {
             throw new ConflictException("Invalid user profile details");
         }

@@ -15,7 +15,6 @@ import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeCreateResponse;
 import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeRequest;
 import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeResponse;
 import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeTeacherResponse;
-import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,7 +47,7 @@ public class FinalGradeService {
     }
 
     @Transactional(readOnly = true)
-    public List<FinalGradeTeacherResponse> getByTeachingAssignmentId(Long teachingAssignmentId, String schoolYear) {
+    public List<FinalGradeTeacherResponse> getByAssignmentId(Long teachingAssignmentId, String schoolYear) {
         List<FinalGrade> finalGrades = finalGradeRepository.findFinalGradesByTeachingAssignmentId(teachingAssignmentId, schoolYear);
         List<FinalGradeResponse> mappedFinalGrades = finalGrades.stream().map(finalGradeMapper::toFinalGradeResponse).toList();
         Map<Long, List<FinalGradeResponse>> finalGradesMap = mappedFinalGrades.stream().collect(Collectors.groupingBy(

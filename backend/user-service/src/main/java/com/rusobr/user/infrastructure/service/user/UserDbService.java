@@ -5,7 +5,8 @@ import com.rusobr.user.infrastructure.enums.UserRole;
 import com.rusobr.user.infrastructure.exception.ConflictException;
 import com.rusobr.user.infrastructure.mapper.UserMapper;
 import com.rusobr.user.infrastructure.persistence.repository.UserRepository;
-import com.rusobr.user.infrastructure.service.user.strategy.UserRoleStrategy;
+import com.rusobr.user.web.dto.user.UserProfileDetails;
+import com.rusobr.user.web.dto.user.UserRoleStrategy;
 import com.rusobr.user.web.dto.user.UserCreateRequest;
 import com.rusobr.user.web.dto.user.UserResponse;
 import com.rusobr.user.web.dto.user.update.UserUpdateData;
@@ -27,25 +28,25 @@ import java.util.stream.Collectors;
 public class UserDbService {
 
     private final UserService userService;
-    private final List<UserRoleStrategy> saversList;
+    private final List<UserRoleStrategy> strategies;
     private final UserMapper userMapper;
     private final UserRepository userRepository;
 
-    private Map<UserRole, UserRoleStrategy> savers;
+    private Map<UserRole, UserRoleStrategy> roleStrategies;
 
     //Выполняем паттерн strategy, собираем все реализации обработки всех видов пользователей (parent, student, teacher...)
     //Превращаем в map, где key это роль, а body это details для каждого типа
     @PostConstruct
     public void init() {
-        this.savers = saversList.stream().collect(Collectors.toMap(UserRoleStrategy::getRole, s -> s));
+        this.roleStrategies = strategies.stream().collect(Collectors.toMap(UserRoleStrategy::getRole, s -> s));
     }
 
     @Transactional
-    public UserResponse createUserDb(UserCreateRequest<? extends UserProfileDetails> createUserRequest, String keycloakId) {
+    public UserResponse create(UserCreateRequest<? extends UserProfileDetails> createUserRequest, String keycloakId) {
         //Создаем user в бд
-        UserResponse userResponse = userService.createUser(createUserRequest.user(), keycloakId, createUserRequest.role());
+        UserResponse userResponse = userService.create(createUserRequest.user(), keycloakId, createUserRequest.role());
         //Выбираем конкретную реализацию пользователя по роли
-        UserRoleStrategy strategy = savers.get(createUserRequest.role());
+        UserRoleStrategy strategy = roleStrategies.get(createUserRequest.role());
         if (strategy == null) {
             throw new ConflictException("Invalid user role");
         }
@@ -55,8 +56,8 @@ public class UserDbService {
     }
 
     @Transactional
-    public UserResponse updateUserDb(User user, UserUpdateData newUserData, Set<UserRole> newRoles,
-                                     Map<UserRole, UserProfileDetails> details) {
+    public UserResponse update(User user, UserUpdateData newUserData, Set<UserRole> newRoles,
+                               Map<UserRole, UserProfileDetails> details) {
         if (newUserData.username() != null) user.setUsername(newUserData.username());
         if (newUserData.firstName() != null) user.setFirstName(newUserData.firstName());
         if (newUserData.lastName() != null) user.setLastName(newUserData.lastName());
@@ -66,19 +67,20 @@ public class UserDbService {
         //Удаляем старую роль если она не найдена среди новых DELETE
         currentRoles.stream()
                 .filter(currentRole -> !newRoles.contains(currentRole))
-                .forEach(role -> savers.get(role).delete(user.getId()));
+                .forEach(role -> roleStrategies.get(role).delete(user.getId()));
 
         //Добавляем новую роль если она не найдена среди старых SAVE
         newRoles.stream()
                 .filter(newRole -> !currentRoles.contains(newRole))
-                .forEach(role -> savers.get(role).save(user.getId(), details.get(role)));
+                .forEach(role -> roleStrategies.get(role).save(user.getId(), details.get(role)));
 
         //Обновляем роль если она найдена среди старых UPDATE
         currentRoles.stream()
                 .filter(newRoles::contains)
-                .forEach(role -> savers.get(role).update(user.getId(), details.get(role)));
+                .forEach(role -> roleStrategies.get(role).update(user.getId(), details.get(role)));
 
-        user.setRoles(newRoles);
+        user.getRoles().clear();
+        user.getRoles().addAll(newRoles);
 
         return userMapper.toUserResponse(userRepository.save(user));
     }

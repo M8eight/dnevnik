@@ -3,6 +3,7 @@ package com.rusobr.academic.web.controller;
 import com.rusobr.academic.infrastructure.service.TeacherSubjectService;
 import com.rusobr.academic.web.dto.teacherSubject.TeacherSubjectRequest;
 import com.rusobr.academic.web.dto.teacherSubject.TeacherSubjectResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,12 +22,12 @@ public class TeacherSubjectController {
     }
 
     @PostMapping
-    public TeacherSubjectResponse create(@RequestBody TeacherSubjectRequest request) {
+    public TeacherSubjectResponse create(@RequestBody @Valid TeacherSubjectRequest request) {
         return teacherSubjectService.create(request);
     }
 
     @DeleteMapping
-    public void delete(@RequestBody TeacherSubjectRequest request) {
+    public void delete(@RequestBody @Valid TeacherSubjectRequest request) {
         teacherSubjectService.delete(request);
     }
 

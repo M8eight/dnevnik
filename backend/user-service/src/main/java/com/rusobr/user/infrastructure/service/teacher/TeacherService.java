@@ -1,7 +1,9 @@
 package com.rusobr.user.infrastructure.service.teacher;
 
+import com.rusobr.user.domain.event.UserDeletedEvent;
 import com.rusobr.user.domain.model.Teacher;
 import com.rusobr.user.domain.model.User;
+import com.rusobr.user.infrastructure.enums.UserRole;
 import com.rusobr.user.infrastructure.exception.NotFoundException;
 import com.rusobr.user.infrastructure.mapper.TeacherMapper;
 import com.rusobr.user.infrastructure.persistence.repository.TeacherRepository;
@@ -11,6 +13,7 @@ import com.rusobr.user.web.dto.teacher.TeacherDetails;
 import com.rusobr.user.web.dto.teacher.TeacherResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,22 +29,22 @@ public class TeacherService {
     private final TeacherMapper teacherMapper;
     private final UserRepository userRepository;
 
-    public TeacherResponse findWithUserById(Long id) {
+    public TeacherResponse getWithUserById(Long id) {
         Teacher teacher = teacherRepository.findWithUserById(id).orElseThrow(() -> new NotFoundException("Teacher with id " + id + " not found"));
         return teacherMapper.toTeacherResponse(teacher);
     }
 
-    public TeacherDetails findDetailsById(Long id) {
+    public TeacherDetails getDetailsById(Long id) {
         Teacher teacher = teacherRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Teacher not found: " + id));
         return teacherMapper.toTeacherDetails(teacher);
     }
 
-    public List<UserResponse> getSimpleBatchTeachers(List<Long> ids) {
+    public List<UserResponse> getBatch(List<Long> ids) {
         return teacherRepository.findAllTeachersByIds(ids);
     }
 
-    public UserResponse getTeacherSimpleById(Long id) {
+    public UserResponse getSimpleById(Long id) {
         return teacherRepository.getTeacherSimpleById(id);
     }
 
@@ -49,13 +52,13 @@ public class TeacherService {
         return teacherRepository.findByIdWithDeleted(id);
     }
 
-    public void createTeacher(Long userId, TeacherDetails teacherDetails) {
+    public void create(Long userId, TeacherDetails teacherDetails) {
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found: " + userId));
         teacherRepository.save(teacherMapper.toEntity(user, teacherDetails));
     }
 
     @Transactional
-    public void updateTeacher(Long userId, TeacherDetails teacherDetails) {
+    public void update(Long userId, TeacherDetails teacherDetails) {
         if (!userRepository.existsById(userId)) {
             throw new NotFoundException("User not found: " + userId);
         }
@@ -70,8 +73,15 @@ public class TeacherService {
         }
     }
 
-    public void deleteById(Long id) {
+    public void delete(Long id) {
         teacherRepository.deleteById(id);
+    }
+
+    @EventListener
+    public void handleUserDelete(UserDeletedEvent event) {
+        if (event.roles().contains(UserRole.TEACHER)) {
+            this.delete(event.id());
+        }
     }
 
 

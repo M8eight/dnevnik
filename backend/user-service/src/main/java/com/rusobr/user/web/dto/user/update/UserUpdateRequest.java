@@ -2,7 +2,7 @@ package com.rusobr.user.web.dto.user.update;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.rusobr.user.infrastructure.enums.UserRole;
-import com.rusobr.user.infrastructure.service.user.UserProfileDetails;
+import com.rusobr.user.web.dto.user.UserProfileDetails;
 import com.rusobr.user.web.deserializer.UserProfileDetailsDeserializer;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;

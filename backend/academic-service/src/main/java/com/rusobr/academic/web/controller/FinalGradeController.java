@@ -24,9 +24,9 @@ public class FinalGradeController {
     }
 
     @GetMapping("/by-assignment")
-    public List<FinalGradeTeacherResponse> getTeachingAssignmentId(@RequestParam Long teachingAssignmentId,
-                                                                   @RequestParam String schoolYear) {
-        return finalGradeService.getByTeachingAssignmentId(teachingAssignmentId, schoolYear);
+    public List<FinalGradeTeacherResponse> getByAssignmentId(@RequestParam Long teachingAssignmentId,
+                                                             @RequestParam String schoolYear) {
+        return finalGradeService.getByAssignmentId(teachingAssignmentId, schoolYear);
     }
 
     @PostMapping

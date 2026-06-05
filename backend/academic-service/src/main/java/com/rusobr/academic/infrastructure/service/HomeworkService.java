@@ -24,31 +24,31 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class HomeworkService {
+
     private final HomeworkRepository homeworkRepository;
     private final LessonInstanceRepository lessonInstanceRepository;
     private final HomeworkMapper homeworkMapper;
     private final AcademicPeriodRepository academicPeriodRepository;
 
     @Transactional(readOnly = true)
-    public List<HomeworkHomePageResponse> getHomeworksByDate(LocalDate date, Long studentId) {
+    public List<HomeworkHomePageResponse> getByDate(LocalDate date, Long studentId) {
         return homeworkRepository.findHomeworksByDate(date, studentId);
     }
 
     @Transactional(readOnly = true)
-    public Page<HomeworkResponse> getHomeworksByTeachingAssignment(Long teachingAssignmentId, Pageable pageable) {
+    public Page<HomeworkResponse> getByAssignment(Long teachingAssignmentId, Pageable pageable) {
         Page<Homework> homeworkPage = homeworkRepository.findHomeworksByTeachingAssignmentId(teachingAssignmentId, pageable);
         return homeworkPage.map(homeworkMapper::toHomeworkResponse);
     }
 
     @Transactional
-    public HomeworkResponse createHomework(HomeworkRequest homeworkRequest) {
+    public HomeworkResponse create(HomeworkRequest homeworkRequest) {
         LessonInstance lessonInstance = lessonInstanceRepository.findById(homeworkRequest.lessonInstanceId())
                 .orElseThrow(() -> new NotFoundException("Lesson Instance Not Found"));
 
         AcademicPeriod academicPeriod = academicPeriodRepository.findByDate(
                         lessonInstance.getLessonDate())
                 .orElseThrow(() -> new NotFoundException("Academic Period Not Found"));
-
         if (academicPeriod.isClosed()) {
             throw new ConflictException("Academic Period is closed");
         }
@@ -62,14 +62,13 @@ public class HomeworkService {
     }
 
     @Transactional
-    public void deleteHomework(Long id) {
+    public void delete(Long id) {
         Homework homework = homeworkRepository.findWithLessonInstanceById(id)
                 .orElseThrow(() -> new NotFoundException("Homework Not Found"));
 
         AcademicPeriod academicPeriod = academicPeriodRepository.findByDate(
                 homework.getLessonInstance().getLessonDate())
                         .orElseThrow(() -> new NotFoundException("Academic Period Not Found"));
-
         if (academicPeriod.isClosed()) {
             throw new ConflictException("Academic Period is closed");
         }

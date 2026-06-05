@@ -13,7 +13,6 @@ import java.util.Set;
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface UserMapper {
     User toUser(UserDataDto createUserDtoRequest, String keycloakId, Set<UserRole> roles);
-    UserDataDto toRequestUserDto(User user);
     UserResponse toCreateUserResponse(User user);
     UserResponse toUserResponse(User user);
 }

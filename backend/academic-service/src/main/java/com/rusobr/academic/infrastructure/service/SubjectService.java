@@ -14,30 +14,30 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class SubjectService {
 
     private final SubjectRepository subjectRepository;
     private final SubjectMapper subjectMapper;
 
-    public Page<SubjectResponseDto> getSubjects(Pageable pageable) {
-        return subjectRepository.findAllByOrderByNameAsc(pageable);
-    }
-
-    public SubjectResponseDto getSubject(Long id) {
+    @Transactional(readOnly = true)
+    public SubjectResponseDto getById(Long id) {
         Subject subject = subjectRepository.findById(id).orElseThrow(() -> new NotFoundException("Subject not found " + id));
         return subjectMapper.toSubjectResponseDto(subject);
     }
 
-    @Transactional
-    public SubjectResponseDto createSubject(SubjectRequestDto dto) {
-        Subject subject = subjectMapper.toSubject(dto);
+    @Transactional(readOnly = true)
+    public Page<SubjectResponseDto> getAll(Pageable pageable) {
+        return subjectRepository.findAllByOrderByNameAsc(pageable);
+    }
 
+    @Transactional
+    public SubjectResponseDto create(SubjectRequestDto dto) {
+        Subject subject = subjectMapper.toSubject(dto);
         return subjectMapper.toSubjectResponseDto(subjectRepository.save(subject));
     }
 
     @Transactional
-    public void deleteSubject(Long id) {
+    public void delete(Long id) {
         if (!subjectRepository.existsById(id)) {
             throw new NotFoundException("Subject not found " + id);
         }

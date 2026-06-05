@@ -5,6 +5,7 @@ import com.rusobr.academic.infrastructure.persistence.repository.SchoolClassRepo
 import com.rusobr.academic.infrastructure.persistence.repository.SubjectRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.TeachingAssignmentRepository;
 import com.rusobr.academic.web.dto.teachingAssignment.TeachingAssignmentRequest;
+import com.rusobr.academic.web.dto.teachingAssignment.TeachingAssignmentDetailsDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +38,10 @@ public class TeachingAssignmentService {
 
     public List<Long> getStudentIdsByTeachingAssignmentId(Long teachingAssignmentId) {
         return teachingAssignmentRepository.findStudentIdsByTeachingAssignmentId(teachingAssignmentId);
+    }
+
+    public List<TeachingAssignmentDetailsDto> getByTeacherId(Long teacherId) {
+        return teachingAssignmentRepository.findTeachingAssignmentDetailByTeacherId(teacherId);
     }
 
 }

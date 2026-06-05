@@ -4,8 +4,9 @@ import com.rusobr.user.domain.model.Parent;
 import com.rusobr.user.infrastructure.enums.UserRole;
 import com.rusobr.user.infrastructure.exception.ConflictException;
 import com.rusobr.user.infrastructure.service.parent.ParentService;
-import com.rusobr.user.infrastructure.service.user.UserProfileDetails;
+import com.rusobr.user.web.dto.user.UserProfileDetails;
 import com.rusobr.user.web.dto.parent.ParentDetails;
+import com.rusobr.user.web.dto.user.UserRoleStrategy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -26,7 +27,7 @@ public class ParentStrategy implements UserRoleStrategy {
                 Parent parent = parentOptional.get();
                 parent.setDeletedAt(null);
             } else {
-                parentService.createParent(userId, parentDetails);
+                parentService.create(userId, parentDetails);
             }
         } else {
             throw new ConflictException("Invalid user profile details");
@@ -35,13 +36,13 @@ public class ParentStrategy implements UserRoleStrategy {
 
     @Override
     public void delete(Long userId) {
-        parentService.deleteById(userId);
+        parentService.delete(userId);
     }
 
     @Override
     public void update(Long userId, UserProfileDetails userDetails) {
         if (userDetails instanceof ParentDetails parentDetails) {
-            parentService.updateParent(userId, parentDetails);
+            parentService.update(userId, parentDetails);
         } else {
             throw new ConflictException("Invalid user profile details");
         }

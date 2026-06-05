@@ -15,7 +15,6 @@ import com.rusobr.academic.web.dto.lessonInstance.DiaryLessonInstanceDto;
 import com.rusobr.academic.web.dto.scheduleLesson.*;
 import com.rusobr.academic.web.dto.teachingAssignment.TeachingAssignmentRequest;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -28,7 +27,6 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class ScheduleService {
 
     private final ScheduleLessonRepository scheduleLessonRepository;
@@ -36,19 +34,19 @@ public class ScheduleService {
     private final ScheduleLessonMapper scheduleLessonMapper;
     private final TeachingAssignmentService teachingAssignmentService;
     private final LessonInstanceRepository lessonInstanceRepository;
-    private final LessonInstanceService lessonInstanceService;
+    private final JournalService lessonInstanceService;
     private final LessonInstanceMapper lessonInstanceMapper;
 
     @Lazy
     @Autowired
     private ScheduleService self;
 
-    public List<ScheduleLessonResponse> getScheduleByDate(Long studentId, DayOfWeek dayOfWeek, LocalDate date) {
+    public List<ScheduleLessonResponse> getByDate(Long studentId, DayOfWeek dayOfWeek, LocalDate date) {
         return scheduleLessonRepository.getScheduleByDate(studentId, dayOfWeek, date);
     }
 
     @Transactional(readOnly = true)
-    public List<DiaryScheduleDto> getDiaryScheduleByStudentId(Long studentId, LocalDate startDate, LocalDate endDate) {
+    public List<DiaryScheduleDto> getByStudentId(Long studentId, LocalDate startDate, LocalDate endDate) {
         //Получаем шаблон расписания по периоду и собираем их id в отдельный List
         List<ScheduleLesson> scheduleLessons = scheduleLessonRepository
                 .findDiaryScheduleByStudentId(studentId, startDate, endDate);
@@ -58,7 +56,7 @@ public class ScheduleService {
         List<LessonInstance> lessonInstances = lessonInstanceRepository
                 .findDiaryAcademicPerformanceByStudentId(ids, startDate, endDate, studentId);
         List<DiaryLessonInstanceDto> diaryLessonInstances = lessonInstances.stream()
-                .map(lessonInstance -> lessonInstanceMapper.toDiaryLessonInstance(lessonInstance)).toList();
+                .map(lessonInstanceMapper::toDiaryLessonInstance).toList();
         //Упаковываем в map, где key это scheduleId, а тело фильтруем отсекая лишние записи
         // в связи с join fetch собираются все записи класса, а не только ученика
         Map<Long, DiaryLessonInstanceDto> mappedDiaryLessonInstances = diaryLessonInstances.stream().collect(
@@ -109,7 +107,7 @@ public class ScheduleService {
                 );
     }
 
-    public Map<DayOfWeek, List<ScheduleLessonDto>> getClassSchedule(Long classId, LocalDate date) {
+    public Map<DayOfWeek, List<ScheduleLessonDto>> getByClass(Long classId, LocalDate date) {
         List<ScheduleLesson> scheduleLessons = scheduleLessonRepository.findClassSchedule(classId, date);
 
         List<Long> teacherIds = scheduleLessons.stream().map(scheduleLesson ->
@@ -173,7 +171,7 @@ public class ScheduleService {
         scheduleLessonRepository.save(scheduleLesson);
 
         // Создаем lessonInstance наперед
-        lessonInstanceService.generateForLesson(scheduleLesson);
+        lessonInstanceService.generateInstanceForLesson(scheduleLesson);
     }
 
     @Transactional
@@ -201,7 +199,7 @@ public class ScheduleService {
         );
 
         for (ScheduleLesson sl : scheduleLessons) {
-            lessonInstanceService.generateBetween(sl, fromDate, toDate);
+            lessonInstanceService.generateInstanceBetween(sl, fromDate, toDate);
         }
 
     }

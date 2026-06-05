@@ -4,6 +4,8 @@ import com.rusobr.academic.infrastructure.service.HomeworkService;
 import com.rusobr.academic.web.dto.homework.HomeworkHomePageResponse;
 import com.rusobr.academic.web.dto.homework.HomeworkRequest;
 import com.rusobr.academic.web.dto.homework.HomeworkResponse;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,25 +18,28 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/homeworks")
 public class HomeworkController {
+
     private final HomeworkService homeworkService;
 
     @GetMapping("/by-date")
-    public List<HomeworkHomePageResponse> getHomeworksByDate(@RequestParam LocalDate date, @RequestParam Long studentId) {
-        return homeworkService.getHomeworksByDate(date, studentId);
+    public List<HomeworkHomePageResponse> getByDate(@RequestParam @NotNull LocalDate date,
+                                                    @RequestParam @NotNull Long studentId) {
+        return homeworkService.getByDate(date, studentId);
     }
 
     @GetMapping("/by-assignment")
-    public Page<HomeworkResponse> getHomeworksByAssignment(@RequestParam Long teachingAssignmentId, Pageable pageable) {
-        return homeworkService.getHomeworksByTeachingAssignment(teachingAssignmentId, pageable);
+    public Page<HomeworkResponse> getByAssignment(@RequestParam Long teachingAssignmentId, Pageable pageable) {
+        return homeworkService.getByAssignment(teachingAssignmentId, pageable);
     }
 
     @PostMapping
-    public HomeworkResponse createHomework(@RequestBody HomeworkRequest homeworkRequest) {
-        return homeworkService.createHomework(homeworkRequest);
+    public HomeworkResponse create(@RequestBody @Valid HomeworkRequest homeworkRequest) {
+        return homeworkService.create(homeworkRequest);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteHomework(@PathVariable Long id) {
-        homeworkService.deleteHomework(id);
+    public void delete(@PathVariable Long id) {
+        homeworkService.delete(id);
     }
+
 }

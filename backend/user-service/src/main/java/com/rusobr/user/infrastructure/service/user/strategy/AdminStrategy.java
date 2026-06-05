@@ -1,7 +1,8 @@
 package com.rusobr.user.infrastructure.service.user.strategy;
 
 import com.rusobr.user.infrastructure.enums.UserRole;
-import com.rusobr.user.infrastructure.service.user.UserProfileDetails;
+import com.rusobr.user.web.dto.user.UserProfileDetails;
+import com.rusobr.user.web.dto.user.UserRoleStrategy;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

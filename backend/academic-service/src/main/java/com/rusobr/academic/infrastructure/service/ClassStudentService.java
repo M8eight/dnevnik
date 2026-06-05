@@ -9,7 +9,6 @@ import com.rusobr.academic.infrastructure.persistence.repository.ClassStudentRep
 import com.rusobr.academic.infrastructure.persistence.repository.SchoolClassRepository;
 import com.rusobr.academic.web.dto.feign.UserFeignResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -20,7 +19,6 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class ClassStudentService {
 
     private final SchoolClassRepository schoolClassRepository;
@@ -33,7 +31,7 @@ public class ClassStudentService {
 
     public List<UserFeignResponse> getUnassignedStudents() {
         Set<Long> ids = classStudentRepository.findAllStudentIds();
-        return userClient.getBatchUsersExcludeAssigned(ids);
+        return userClient.getBatchStudentsExcludeAssigned(ids);
     }
 
     public void addStudent(Long classId, Long studentId) {
@@ -50,8 +48,10 @@ public class ClassStudentService {
             throw new ConflictException("Student already exists in class");
         }
 
+        SchoolClass schoolClass = schoolClassRepository.getReferenceById(classId);
+
         classStudentRepository.save(ClassStudent.builder()
-                .schoolClass(SchoolClass.builder().id(classId).build())
+                .schoolClass(schoolClass)
                 .studentId(studentId)
                 .build());
     }

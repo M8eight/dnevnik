@@ -17,23 +17,23 @@ public class TeacherController {
     private final TeacherService teacherService;
 
     @GetMapping("/{id}")
-    public TeacherResponse findById(@PathVariable Long id) {
-        return teacherService.findWithUserById(id);
+    public TeacherResponse getWithUserById(@PathVariable Long id) {
+        return teacherService.getWithUserById(id);
     }
 
     @GetMapping("/{id}/details")
-    public TeacherDetails findDetailsById(@PathVariable Long id) {
-        return teacherService.findDetailsById(id);
+    public TeacherDetails getDetailsById(@PathVariable Long id) {
+        return teacherService.getDetailsById(id);
     }
 
     @PostMapping("/batch")
     public List<UserResponse> findBatchTeachers(@RequestBody List<Long> ids) {
-        return teacherService.getSimpleBatchTeachers(ids);
+        return teacherService.getBatch(ids);
     }
 
     @GetMapping("/{id}/simple")
     public UserResponse getTeacherSimpleById(@PathVariable Long id) {
-        return teacherService.getTeacherSimpleById(id);
+        return teacherService.getSimpleById(id);
     }
 
 }

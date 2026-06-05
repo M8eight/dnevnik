@@ -13,7 +13,6 @@ import org.mapstruct.ReportingPolicy;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface StudentMapper {
-
     @Mapping(target = "id", source = "student.id")
     @Mapping(target = "firstName", source = "student.user.firstName")
     @Mapping(target = "lastName", source = "student.user.lastName")

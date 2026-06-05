@@ -4,8 +4,9 @@ import com.rusobr.user.domain.model.Student;
 import com.rusobr.user.infrastructure.enums.UserRole;
 import com.rusobr.user.infrastructure.exception.ConflictException;
 import com.rusobr.user.infrastructure.service.student.StudentService;
-import com.rusobr.user.infrastructure.service.user.UserProfileDetails;
+import com.rusobr.user.web.dto.user.UserProfileDetails;
 import com.rusobr.user.web.dto.student.StudentDetails;
+import com.rusobr.user.web.dto.user.UserRoleStrategy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -28,7 +29,7 @@ public class StudentStrategy implements UserRoleStrategy {
                 student.setDeletedAt(null);
                 student.setStudyProfile(studentDetails.studyProfile());
             } else {
-                studentService.createStudent(userId, studentDetails);
+                studentService.create(userId, studentDetails);
             }
         } else {
             throw new ConflictException("Invalid user profile details");
@@ -37,13 +38,13 @@ public class StudentStrategy implements UserRoleStrategy {
 
     @Override
     public void delete(Long userId) {
-        studentService.deleteById(userId);
+        studentService.delete(userId);
     }
 
     @Override
     public void update(Long userId, UserProfileDetails userDetails) {
         if (userDetails instanceof StudentDetails studentDetails) {
-            studentService.updateStudent(userId, studentDetails);
+            studentService.update(userId, studentDetails);
         } else {
             throw new ConflictException("Invalid user profile details for update");
         }

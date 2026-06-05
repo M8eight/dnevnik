@@ -9,7 +9,7 @@ export interface TeachingAssignmentDetail {
 }
 
 export const getTeachingAssignmentDetail = async (teacherId: number): Promise<TeachingAssignmentDetail[]> => {
-    const {data} = await api.get<TeachingAssignmentDetail[]>(`/academic-service/api/v1/teacher/assignments`,
+    const {data} = await api.get<TeachingAssignmentDetail[]>(`/academic-service/api/v1/teaching-assignments`,
         { params: { teacherId } });
     return data;
 }

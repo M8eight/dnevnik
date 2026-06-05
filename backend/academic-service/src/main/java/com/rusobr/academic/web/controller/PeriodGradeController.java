@@ -25,7 +25,7 @@ public class PeriodGradeController {
     public List<PeriodGradeTeacherResponse> getGradesByAssignment(@RequestParam Long teachingAssignmentId,
                                                                   @RequestParam Long currentAcademicPeriodId,
                                                                   @RequestParam String schoolYear) {
-        return periodGradeService.getByTeachingAssignmentWithAverage(teachingAssignmentId, currentAcademicPeriodId, schoolYear);
+        return periodGradeService.getByAssignmentWithAverage(teachingAssignmentId, currentAcademicPeriodId, schoolYear);
     }
 
     @PostMapping

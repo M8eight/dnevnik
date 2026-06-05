@@ -15,7 +15,6 @@ import com.rusobr.academic.web.dto.grade.GradeWithSubjectNameResponse;
 import com.rusobr.academic.web.dto.grade.createGrade.CreateGradeRequest;
 import com.rusobr.academic.web.dto.grade.createGrade.CreateGradeResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,10 +23,8 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class GradeService {
 
     private final GradeRepository gradeRepository;
@@ -36,12 +33,14 @@ public class GradeService {
     private final LessonInstanceRepository lessonInstanceRepository;
     private final LessonInstanceMapper lessonInstanceMapper;
 
-    public GradeResponse getGradeById(Long gradeId) {
+    @Transactional(readOnly = true)
+    public GradeResponse getById(Long gradeId) {
         Grade grade = gradeRepository.findById(gradeId).orElseThrow(() -> new NotFoundException("Grade not found gradeId: " + gradeId));
         return gradeMapper.toGradeResponseDto(grade);
     }
 
-    public Double getAverageGrade(Long studentId, Long academicPeriodId) {
+    @Transactional(readOnly = true)
+    public Double getAverageByPeriod(Long studentId, Long academicPeriodId) {
         AcademicPeriod academicPeriod = academicPeriodRepository.findById(academicPeriodId)
                 .orElseThrow(() -> new NotFoundException("Academic period not found academicPeriodId: " + academicPeriodId));
         Double avg = gradeRepository.getAverageGrade(studentId, academicPeriod.getStartDate(), academicPeriod.getEndDate());
@@ -52,13 +51,13 @@ public class GradeService {
                 .doubleValue();
     }
 
-    public List<GradeWithSubjectNameResponse> findAllGradesByDate(Long studentId, LocalDate date) {
+    @Transactional(readOnly = true)
+    public List<GradeWithSubjectNameResponse> findAllByDate(Long studentId, LocalDate date) {
         return gradeRepository.findAllGradesByDate(studentId, date);
     }
 
     @Transactional
-    public CreateGradeResponse createGrade(CreateGradeRequest gradeDto) {
-
+    public CreateGradeResponse create(CreateGradeRequest gradeDto) {
         LessonInstance lessonInstance = lessonInstanceRepository.findById(gradeDto.lessonInstanceId())
                 .orElseThrow(() -> new NotFoundException("Lesson instance not found"));
         AcademicPeriod academicPeriod = academicPeriodRepository.findByDate(lessonInstance.getLessonDate())
@@ -72,12 +71,10 @@ public class GradeService {
 
         return gradeMapper.toCreateGradeResponseDto(
                 gradeRepository.save(grade), lessonInstanceMapper.toLessonInstanceDto(lessonInstance));
-
     }
 
     @Transactional
-    public void deleteGrade(Long id) {
-
+    public void delete(Long id) {
         Grade grade = gradeRepository.findWithLessonInstanceById(id)
                 .orElseThrow(() -> new NotFoundException("Grade not found gradeId: " + id));
 
@@ -88,7 +85,6 @@ public class GradeService {
         }
 
         gradeRepository.delete(grade);
-
     }
 
 }

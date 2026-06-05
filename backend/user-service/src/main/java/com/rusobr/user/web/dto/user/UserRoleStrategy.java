@@ -1,7 +1,6 @@
-package com.rusobr.user.infrastructure.service.user.strategy;
+package com.rusobr.user.web.dto.user;
 
 import com.rusobr.user.infrastructure.enums.UserRole;
-import com.rusobr.user.infrastructure.service.user.UserProfileDetails;
 
 public interface UserRoleStrategy {
     void save(Long userId, UserProfileDetails userDetails);

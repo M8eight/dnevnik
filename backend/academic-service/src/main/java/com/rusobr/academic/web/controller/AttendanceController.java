@@ -15,12 +15,12 @@ public class AttendanceController {
 
     @PostMapping
     public AttendanceResponse createAttendance(@RequestBody AttendanceRequest attendanceRequest) {
-        return attendanceService.createAttendance(attendanceRequest);
+        return attendanceService.create(attendanceRequest);
     }
 
     @DeleteMapping("/{id}")
     public void deleteAttendance(@PathVariable Long id) {
-        attendanceService.deleteAttendance(id);
+        attendanceService.delete(id);
     }
 
 }
