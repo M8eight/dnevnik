@@ -12,7 +12,7 @@ import org.mapstruct.ReportingPolicy;
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface AcademicPeriodMapper {
     @Mapping(source = "closed", target = "isClosed")
-    AcademicPeriodResponse toDto(AcademicPeriod academicPeriod);
+    AcademicPeriodResponse toResponse(AcademicPeriod academicPeriod);
     AcademicPeriod toEntity(AcademicPeriodRequest academicPeriodRequest);
     AcademicPeriodResponse toResponse(AcademicPeriodProjection academicPeriodProjection);
 }

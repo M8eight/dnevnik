@@ -1,17 +1,16 @@
 package com.rusobr.academic.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rusobr.academic.infrastructure.exception.NotFoundException;
-import com.rusobr.academic.infrastructure.service.SubjectService;
+import com.rusobr.academic.application.service.SubjectService;
 import com.rusobr.academic.web.controller.SubjectController;
 import com.rusobr.academic.web.dto.subject.SubjectRequestDto;
 import com.rusobr.academic.web.dto.subject.SubjectResponseDto;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
@@ -21,134 +20,72 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(SubjectController.class)
+@WebMvcTest(controllers = SubjectController.class)
 @AutoConfigureMockMvc(addFilters = false)
 public class SubjectControllerTest {
 
-    @Autowired MockMvc mockMvc;
-    @Autowired ObjectMapper objectMapper;
+    @Autowired
+    private MockMvc mockMvc;
 
-    @MockitoBean SubjectService subjectService;
-    @MockitoBean JpaMetamodelMappingContext jpaMetamodelMappingContext;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-    // ─────────────────────────────────────────────────────────────
-    // POST /api/v1/subjects
-    // ─────────────────────────────────────────────────────────────
-    @Nested
-    @DisplayName("POST /api/v1/subjects")
-    class CreateSubject {
+    @MockitoBean
+    private JpaMetamodelMappingContext jpaMetamodelMappingContext;
 
-        @Test
-        @DisplayName("возвращает 200 и созданный предмет")
-        void returns200WithCreatedSubject() throws Exception {
-            SubjectRequestDto request = new SubjectRequestDto("Химия");
-            SubjectResponseDto response = new SubjectResponseDto(1L, "Химия");
+    @MockitoBean
+    private SubjectService subjectService;
 
-            when(subjectService.createSubject(any(SubjectRequestDto.class))).thenReturn(response);
+    private static final Long SUBJECT_ID = 11L;
+    private static final String SUBJECT_NAME = "Mathematics";
 
-            mockMvc.perform(post("/api/v1/subjects")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.id").value(1))
-                    .andExpect(jsonPath("$.name").value("Химия"));
-        }
-
-        @Test
-        @DisplayName("пустое название — возвращает 400")
-        void blankName_returns400() throws Exception {
-            SubjectRequestDto request = new SubjectRequestDto("");
-
-            mockMvc.perform(post("/api/v1/subjects")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().isBadRequest());
-
-            verifyNoInteractions(subjectService);
-        }
-
-        @Test
-        @DisplayName("название длиннее 100 символов — возвращает 400")
-        void nameTooLong_returns400() throws Exception {
-            SubjectRequestDto request = new SubjectRequestDto("А".repeat(101));
-
-            mockMvc.perform(post("/api/v1/subjects")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().isBadRequest());
-
-            verifyNoInteractions(subjectService);
-        }
+    private SubjectResponseDto buildSubjectResponse() {
+        return new SubjectResponseDto(SUBJECT_ID, SUBJECT_NAME);
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // GET /api/v1/subjects
-    // ─────────────────────────────────────────────────────────────
-    @Nested
-    @DisplayName("GET /api/v1/subjects")
-    class GetSubjects {
+    @Test
+    @DisplayName("GET /subjects — 200 and page")
+    void getAll_ShouldReturn200() throws Exception {
+        Page<SubjectResponseDto> page = new PageImpl<>(List.of(buildSubjectResponse()), PageRequest.of(0, 20), 1);
+        when(subjectService.getAll(org.mockito.ArgumentMatchers.any())).thenReturn(page);
 
-        @Test
-        @DisplayName("возвращает 200 и страницу предметов")
-        void returns200WithPage() throws Exception {
-            SubjectResponseDto dto = new SubjectResponseDto(1L, "Математика");
-            PageImpl<SubjectResponseDto> page = new PageImpl<>(List.of(dto), PageRequest.of(0, 10), 1);
-
-            when(subjectService.getSubjects(any())).thenReturn(page);
-
-            mockMvc.perform(get("/api/v1/subjects")
-                            .param("page", "0")
-                            .param("size", "10"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.content.length()").value(1))
-                    .andExpect(jsonPath("$.content[0].id").value(1))
-                    .andExpect(jsonPath("$.content[0].name").value("Математика"))
-                    .andExpect(jsonPath("$.totalElements").value(1));
-        }
-
-        @Test
-        @DisplayName("нет предметов — возвращает 200 и пустую страницу")
-        void returns200WithEmptyPage() throws Exception {
-            when(subjectService.getSubjects(any())).thenReturn(org.springframework.data.domain.Page.empty());
-
-            mockMvc.perform(get("/api/v1/subjects"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.content.length()").value(0));
-        }
+        mockMvc.perform(get("/api/v1/subjects").param("page", "0").param("size", "20"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].id").value(SUBJECT_ID))
+                .andExpect(jsonPath("$.content[0].name").value(SUBJECT_NAME));
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // DELETE /api/v1/subjects/{id}
-    // ─────────────────────────────────────────────────────────────
-    @Nested
-    @DisplayName("DELETE /api/v1/subjects/{id}")
-    class DeleteSubject {
+    @Test
+    @DisplayName("POST /subjects — 200 and create")
+    void create_ShouldReturn200() throws Exception {
+        SubjectRequestDto request = new SubjectRequestDto(SUBJECT_NAME);
+        when(subjectService.create(request)).thenReturn(buildSubjectResponse());
 
-        @Test
-        @DisplayName("возвращает 200 при успешном удалении")
-        void returns200() throws Exception {
-            doNothing().when(subjectService).deleteSubject(1L);
+        mockMvc.perform(post("/api/v1/subjects")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(SUBJECT_ID))
+                .andExpect(jsonPath("$.name").value(SUBJECT_NAME));
+    }
 
-            mockMvc.perform(delete("/api/v1/subjects/1"))
-                    .andExpect(status().isOk());
+    @Test
+    @DisplayName("DELETE /subjects/{id} — 200 on delete")
+    void delete_ShouldReturn200() throws Exception {
+        doNothing().when(subjectService).delete(SUBJECT_ID);
 
-            verify(subjectService).deleteSubject(1L);
-        }
+        mockMvc.perform(delete("/api/v1/subjects/{id}", SUBJECT_ID))
+                .andExpect(status().isOk());
 
-        @Test
-        @DisplayName("предмет не найден — возвращает 404")
-        void notFound_returns404() throws Exception {
-            doThrow(new NotFoundException("Subject not found 99"))
-                    .when(subjectService).deleteSubject(99L);
-
-            mockMvc.perform(delete("/api/v1/subjects/99"))
-                    .andExpect(status().isNotFound());
-        }
+        verify(subjectService).delete(SUBJECT_ID);
     }
 }

@@ -15,7 +15,6 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class AcademicPeriodService {
 
     private final AcademicPeriodRepository academicPeriodRepository;
@@ -23,55 +22,77 @@ public class AcademicPeriodService {
 
     @Transactional(readOnly = true)
     public List<AcademicPeriodResponse> getAll() {
-        return academicPeriodRepository.findAllOrderAsc().stream().map(academicPeriodMapper::toResponse).toList();
+        return academicPeriodRepository.findAllOrderAsc().stream()
+                .map(academicPeriodMapper::toResponse)
+                .toList();
     }
 
     @Transactional(readOnly = true)
     public AcademicPeriodResponse findById(Long id) {
-        return academicPeriodMapper.toDto(academicPeriodRepository.findById(id).orElseThrow(() -> new NotFoundException("Academic period with id " + id + " not found!")));
-    }
-
-    @Transactional
-    public void closePeriod(Long id) {
-        AcademicPeriod academicPeriod = academicPeriodRepository.findById(id).orElseThrow(() -> new NotFoundException("Academic period with id " + id + " not found"));
-        academicPeriod.setClosed(true);
+        return academicPeriodMapper.toResponse(findOrThrow(id));
     }
 
     @Transactional
     public void openPeriod(Long id) {
-        AcademicPeriod academicPeriod = academicPeriodRepository.findById(id).orElseThrow(() -> new NotFoundException("Academic period with id " + id + " not found"));
-        academicPeriod.setClosed(false);
+        AcademicPeriod period = findOrThrow(id);
+        if (!period.isClosed()) {
+            throw new ConflictException("Academic period is already open");
+        }
+        period.setClosed(false);
     }
 
     @Transactional
-    public AcademicPeriodResponse create(AcademicPeriodRequest academicPeriodRequest) {
-        AcademicPeriod academicPeriod = academicPeriodMapper.toEntity(academicPeriodRequest);
-        return academicPeriodMapper.toDto(academicPeriodRepository.save(academicPeriod));
+    public void closePeriod(Long id) {
+        AcademicPeriod period = findOrThrow(id);
+        if (period.isClosed()) {
+            throw new ConflictException("Academic period is already closed");
+        }
+        period.setClosed(true);
     }
 
     @Transactional
-    public void update(Long id, AcademicPeriodResponse req) {
-        AcademicPeriod academicPeriod = academicPeriodRepository.findById(id).orElseThrow(() -> new NotFoundException("Academic period with id " + id + " not found"));
-        if (academicPeriod.isClosed()) {
+    public AcademicPeriodResponse create(AcademicPeriodRequest request) {
+        validateDates(request.startDate(), request.endDate());
+        AcademicPeriod period = academicPeriodMapper.toEntity(request);
+        return academicPeriodMapper.toResponse(academicPeriodRepository.save(period));
+    }
+
+    @Transactional
+    public AcademicPeriodResponse update(Long id, AcademicPeriodRequest request) {
+        AcademicPeriod period = findOrThrow(id);
+        if (period.isClosed()) {
             throw new ConflictException("Academic period is closed");
         }
 
-        if (req.startDate() != null) academicPeriod.setStartDate(req.startDate());
-        if (req.endDate() != null) academicPeriod.setEndDate(req.endDate());
-        if (req.name() != null) academicPeriod.setName(req.name());
-        if (req.schoolYear() != null) academicPeriod.setSchoolYear(req.schoolYear());
+        if (request.startDate() != null) period.setStartDate(request.startDate());
+        if (request.endDate() != null)   period.setEndDate(request.endDate());
+        if (request.name() != null)      period.setName(request.name());
+        if (request.schoolYear() != null) period.setSchoolYear(request.schoolYear());
 
-        if (academicPeriod.getStartDate() != null && academicPeriod.getEndDate() != null) {
-            if (academicPeriod.getStartDate().isAfter(academicPeriod.getEndDate())) {
-                throw new ConflictException("Final start date cannot be after end date");
-            }
-        }
+        validateDates(period.getStartDate(), period.getEndDate());
+
+        return academicPeriodMapper.toResponse(period);
     }
 
     @Transactional
     public void delete(Long id) {
-        AcademicPeriod academicPeriod = academicPeriodRepository.findById(id).orElseThrow(() -> new NotFoundException("Academic Period not found"));
-        academicPeriodRepository.delete(academicPeriod);
+        AcademicPeriod period = findOrThrow(id);
+        if (!period.isClosed()) {
+            throw new ConflictException("Cannot delete an open academic period");
+        }
+        academicPeriodRepository.delete(period);
     }
 
+    // ─── private helpers ───────────────────────────────────────────────────────
+
+    private AcademicPeriod findOrThrow(Long id) {
+        return academicPeriodRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Academic period with id " + id + " not found"));
+    }
+
+    private void validateDates(java.time.LocalDate start, java.time.LocalDate end) {
+        if (start != null && end != null && start.isAfter(end)) {
+            throw new ConflictException("Start date cannot be after end date");
+        }
+    }
 }

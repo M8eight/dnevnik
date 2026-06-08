@@ -1,21 +1,26 @@
 package com.rusobr.academic.service;
 
+import com.rusobr.academic.application.mapper.GradeMapper;
+import com.rusobr.academic.application.mapper.PeriodGradeMapper;
+import com.rusobr.academic.application.service.PeriodGradeService;
+import com.rusobr.academic.application.service.TeachingAssignmentService;
 import com.rusobr.academic.domain.model.AcademicPeriod;
 import com.rusobr.academic.domain.model.PeriodGrade;
 import com.rusobr.academic.domain.model.TeachingAssignment;
-import com.rusobr.academic.infrastructure.exception.ConflictException;
-import com.rusobr.academic.infrastructure.exception.NotFoundException;
-import com.rusobr.academic.infrastructure.feignClient.UserClient;
-import com.rusobr.academic.infrastructure.mapper.PeriodGradeMapper;
+import com.rusobr.academic.infrastructure.client.UserClient;
+import com.rusobr.academic.infrastructure.persistence.projection.PeriodGradeProjection;
+import com.rusobr.academic.infrastructure.persistence.projection.StudentAverageProjection;
 import com.rusobr.academic.infrastructure.persistence.repository.AcademicPeriodRepository;
+import com.rusobr.academic.infrastructure.persistence.repository.GradeRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.PeriodGradeRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.TeachingAssignmentRepository;
-import com.rusobr.academic.infrastructure.service.PeriodGradeService;
+import com.rusobr.academic.web.dto.feign.UserFeignResponse;
+import com.rusobr.academic.web.dto.grade.StudentAverageDto;
 import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeRequest;
 import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeResponse;
-import com.rusobr.academic.web.dto.grade.periodGrade.StudentPeriodGradeProjection;
-import com.rusobr.academic.web.dto.grade.periodGrade.StudentPeriodGradeResponse;
-import com.rusobr.academic.web.dto.userService.UserResponse;
+import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeStudentResponse;
+import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeTeacherResponse;
+import com.rusobr.academic.web.exception.ConflictException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -26,6 +31,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,176 +40,161 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class PeriodGradeServiceTest {
+class PeriodGradeServiceTest {
 
-    @Mock PeriodGradeRepository periodGradeRepository;
-    @Mock AcademicPeriodRepository academicPeriodRepository;
-    @Mock TeachingAssignmentRepository teachingAssignmentRepository;
-    @Mock PeriodGradeMapper periodGradeMapper;
-    @Mock UserClient userClient;
+    @Mock private PeriodGradeRepository periodGradeRepository;
+    @Mock private AcademicPeriodRepository academicPeriodRepository;
+    @Mock private TeachingAssignmentRepository teachingAssignmentRepository;
+    @Mock private PeriodGradeMapper periodGradeMapper;
+    @Mock private UserClient userClient;
+    @Mock private TeachingAssignmentService teachingAssignmentService;
+    @Mock private GradeRepository gradeRepository;
+    @Mock private GradeMapper gradeMapper;
 
-    @InjectMocks PeriodGradeService service;
+    @InjectMocks private PeriodGradeService service;
+
+    private static final Long STUDENT_ID = 42L;
+    private static final Long ASSIGNMENT_ID = 7L;
+    private static final Long PERIOD_ID = 1L;
+    private static final String SCHOOL_YEAR = "2026-2027";
 
     @Nested
-    @DisplayName("findBySchoolClassId")
-    class FindBySchoolClassId {
+    @DisplayName("getByStudentId")
+    class GetByStudentId {
 
         @Test
-        @DisplayName("возвращает список с именами из user-service")
-        void returnsResponsesWithUserData() {
-            StudentPeriodGradeProjection projection = new StudentPeriodGradeProjection(1L, 5, "Отлично", 10L);
-            UserResponse user = new UserResponse("Иван", "Иванов", "kc-123", 1L);
-            StudentPeriodGradeResponse expected = new StudentPeriodGradeResponse(1L, "Иван", "Иванов", 5, "Отлично", 10L);
+        @DisplayName("успешно возвращает сгруппированные по предметам оценки периода")
+        void success() {
+            PeriodGrade grade1 = new PeriodGrade();
+            PeriodGrade grade2 = new PeriodGrade();
 
-            when(periodGradeRepository.findPeriodGradesByTeachingAssignment(1L, 3L)).thenReturn(List.of(projection));
-            when(userClient.getBatchUsers(List.of(1L))).thenReturn(List.of(user));
-            when(periodGradeMapper.toStudentPeriodGradeResponse(projection, user)).thenReturn(expected);
+            PeriodGradeStudentResponse response1 = new PeriodGradeStudentResponse(1L, 5, "I четверть", "Алгебра", PERIOD_ID);
+            PeriodGradeStudentResponse response2 = new PeriodGradeStudentResponse(2L, 4, "II четверть", "Алгебра", PERIOD_ID);
+            PeriodGradeStudentResponse response3 = new PeriodGradeStudentResponse(3L, 5, "I четверть", "Физика", PERIOD_ID);
 
-            List<StudentPeriodGradeResponse> result = service.findBySchoolClassId(1L, 3L);
+            when(periodGradeRepository.findPeriodGradeByStudentId(STUDENT_ID, SCHOOL_YEAR))
+                    .thenReturn(List.of(grade1, grade1, grade2)); // Передаем 3 сырых сущности
 
-            assertThat(result).hasSize(1);
-            assertThat(result.get(0)).isEqualTo(expected);
-        }
+            // Настраиваем маппер на возврат DTO с нужными названиями предметов
+            when(periodGradeMapper.toPeriodGradeStudentResponse(grade1))
+                    .thenReturn(response1)
+                    .thenReturn(response3);
+            when(periodGradeMapper.toPeriodGradeStudentResponse(grade2))
+                    .thenReturn(response2);
 
-        @Test
-        @DisplayName("пользователь не найден в user-service — маппит с null")
-        void userNotFound_mapsWithNull() {
-            StudentPeriodGradeProjection projection = new StudentPeriodGradeProjection(99L, null, null, null);
-            StudentPeriodGradeResponse expected = new StudentPeriodGradeResponse(99L, null, null, null, null, null);
+            Map<String, List<PeriodGradeStudentResponse>> result = service.getByStudentId(STUDENT_ID, SCHOOL_YEAR);
 
-            when(periodGradeRepository.findPeriodGradesByTeachingAssignment(1L, 3L)).thenReturn(List.of(projection));
-            when(userClient.getBatchUsers(List.of(99L))).thenReturn(List.of());
-            when(periodGradeMapper.toStudentPeriodGradeResponse(projection, null)).thenReturn(expected);
-
-            List<StudentPeriodGradeResponse> result = service.findBySchoolClassId(1L, 3L);
-
-            assertThat(result).hasSize(1);
-            assertThat(result.get(0).firstName()).isNull();
-        }
-
-        @Test
-        @DisplayName("нет оценок в БД — возвращает пустой список")
-        void emptyList_returnsEmpty() {
-            when(periodGradeRepository.findPeriodGradesByTeachingAssignment(1L, 3L)).thenReturn(List.of());
-            when(userClient.getBatchUsers(List.of())).thenReturn(List.of());
-
-            List<StudentPeriodGradeResponse> result = service.findBySchoolClassId(1L, 3L);
-
-            assertThat(result).isEmpty();
-            verifyNoInteractions(periodGradeMapper);
+            assertThat(result).hasSize(2);
+            assertThat(result.get("Алгебра")).hasSize(2).containsExactly(response1, response2);
+            assertThat(result.get("Физика")).hasSize(1).containsExactly(response3);
         }
     }
 
     @Nested
-    @DisplayName("createGrade")
-    class CreateGrade {
+    @DisplayName("getByAssignmentWithAverage")
+    class GetByAssignmentWithAverage {
 
         @Test
-        @DisplayName("успешно создаёт оценку")
+        @DisplayName("успешно собирает данные студентов с итоговыми оценками и средним баллом")
         void success() {
-            PeriodGradeRequest dto = new PeriodGradeRequest(5, "Отлично", 1L, 1L, LocalDate.of(2026, 3, 31));
-            AcademicPeriod period = AcademicPeriod.builder().closed(false).build();
-            TeachingAssignment ta = TeachingAssignment.builder().build();
-            PeriodGrade saved = PeriodGrade.builder().build();
-            PeriodGradeResponse expected = new PeriodGradeResponse(1L, 5, "Отлично", 1L);
+            LocalDate startDate = LocalDate.of(2026, 9, 1);
+            LocalDate endDate = LocalDate.of(2026, 11, 1);
+            AcademicPeriod period = AcademicPeriod.builder().startDate(startDate).endDate(endDate).build();
 
-            when(academicPeriodRepository.findByDate(dto.date())).thenReturn(Optional.of(period));
-            when(teachingAssignmentRepository.findById(1L)).thenReturn(Optional.of(ta));
-            when(periodGradeRepository.save(any())).thenReturn(saved);
-            when(periodGradeMapper.toPeriodGradeResponse(saved)).thenReturn(expected);
+            UserFeignResponse user = new UserFeignResponse(STUDENT_ID, "Иван", "Иванов", "ivan", "key");
 
-            PeriodGradeResponse result = service.createGrade(dto);
+            // Мокаем проекции и DTO
+            PeriodGradeProjection pgProjection = mock(PeriodGradeProjection.class);
+            PeriodGradeResponse pgResponse = new PeriodGradeResponse(10L, 5, "I четверть", STUDENT_ID, PERIOD_ID);
 
-            assertThat(result).isEqualTo(expected);
-            verify(periodGradeRepository).save(any(PeriodGrade.class));
+            StudentAverageProjection avgProjection = mock(StudentAverageProjection.class);
+            StudentAverageDto avgDto = new StudentAverageDto(STUDENT_ID, 4.75);
+
+            when(academicPeriodRepository.findById(PERIOD_ID)).thenReturn(Optional.of(period));
+            when(teachingAssignmentService.getStudentIdsByTeachingAssignmentId(ASSIGNMENT_ID)).thenReturn(List.of(STUDENT_ID));
+            when(userClient.getBatchUsers(List.of(STUDENT_ID))).thenReturn(List.of(user));
+
+            when(periodGradeRepository.findPeriodGradesByTeachingAssignmentId(ASSIGNMENT_ID, SCHOOL_YEAR))
+                    .thenReturn(List.of(pgProjection));
+            when(periodGradeMapper.toPeriodGradeResponse(pgProjection)).thenReturn(pgResponse);
+
+            when(gradeRepository.findAverageStudentsByTeachingAssignment(ASSIGNMENT_ID, startDate, endDate))
+                    .thenReturn(List.of(avgProjection));
+            when(gradeMapper.toStudentAverageDto(avgProjection)).thenReturn(avgDto);
+
+            List<PeriodGradeTeacherResponse> result = service.getByAssignmentWithAverage(ASSIGNMENT_ID, PERIOD_ID, SCHOOL_YEAR);
+
+            assertThat(result).hasSize(1);
+            PeriodGradeTeacherResponse teacherResponse = result.get(0);
+            assertThat(teacherResponse.user()).isEqualTo(user);
+            assertThat(teacherResponse.periodGrades()).containsExactly(pgResponse);
+            assertThat(teacherResponse.currentAverage()).isEqualTo(4.75);
+        }
+    }
+
+    @Nested
+    @DisplayName("create")
+    class Create {
+        private final PeriodGradeRequest request = new PeriodGradeRequest(5, "I четверть", ASSIGNMENT_ID, STUDENT_ID, PERIOD_ID);
+
+        @Test
+        @DisplayName("успешно создает итоговую оценку, если период открыт")
+        void success() {
+            AcademicPeriod period = AcademicPeriod.builder().id(PERIOD_ID).closed(false).build();
+            TeachingAssignment assignment = TeachingAssignment.builder().id(ASSIGNMENT_ID).build();
+            PeriodGrade savedGrade = PeriodGrade.builder().id(100L).value(5).build();
+            PeriodGradeResponse response = mock(PeriodGradeResponse.class);
+
+            when(academicPeriodRepository.findById(PERIOD_ID)).thenReturn(Optional.of(period));
+            when(teachingAssignmentRepository.findById(ASSIGNMENT_ID)).thenReturn(Optional.of(assignment));
+            when(periodGradeRepository.save(any(PeriodGrade.class))).thenReturn(savedGrade);
+            when(periodGradeMapper.toPeriodGradeResponse(savedGrade)).thenReturn(response);
+
+            PeriodGradeResponse result = service.create(request);
+
+            assertThat(result).isEqualTo(response);
+            verify(periodGradeRepository).save(argThat(pg -> pg.getValue() == 5 && pg.getStudentId().equals(STUDENT_ID)));
         }
 
         @Test
-        @DisplayName("период не найден — бросает NotFoundException")
-        void periodNotFound_throwsNotFoundException() {
-            PeriodGradeRequest dto = new PeriodGradeRequest(5, "Отлично", 1L, 1L, LocalDate.of(2026, 3, 31));
+        @DisplayName("бросает ConflictException, если период закрыт")
+        void closedPeriod_throwsException() {
+            AcademicPeriod period = AcademicPeriod.builder().closed(true).build();
+            when(academicPeriodRepository.findById(PERIOD_ID)).thenReturn(Optional.of(period));
 
-            when(academicPeriodRepository.findByDate(dto.date())).thenReturn(Optional.empty());
-
-            assertThatThrownBy(() -> service.createGrade(dto))
-                    .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("Academic period not found");
-
-            verifyNoInteractions(periodGradeRepository);
-        }
-
-        @Test
-        @DisplayName("период закрыт — бросает ConflictException")
-        void periodClosed_throwsConflictException() {
-            PeriodGradeRequest dto = new PeriodGradeRequest(5, "Отлично", 1L, 1L, LocalDate.of(2026, 3, 31));
-            AcademicPeriod closedPeriod = AcademicPeriod.builder().closed(true).build();
-
-            when(academicPeriodRepository.findByDate(dto.date())).thenReturn(Optional.of(closedPeriod));
-
-            assertThatThrownBy(() -> service.createGrade(dto))
+            assertThatThrownBy(() -> service.create(request))
                     .isInstanceOf(ConflictException.class)
                     .hasMessageContaining("Period is already closed");
-
-            verifyNoInteractions(periodGradeRepository);
-        }
-
-        @Test
-        @DisplayName("teachingAssignment не найден — бросает NotFoundException")
-        void teachingAssignmentNotFound_throwsNotFoundException() {
-            PeriodGradeRequest dto = new PeriodGradeRequest(5, "Отлично", 1L, 1L, LocalDate.of(2026, 3, 31));
-            AcademicPeriod period = AcademicPeriod.builder().closed(false).build();
-
-            when(academicPeriodRepository.findByDate(dto.date())).thenReturn(Optional.of(period));
-            when(teachingAssignmentRepository.findById(1L)).thenReturn(Optional.empty());
-
-            assertThatThrownBy(() -> service.createGrade(dto))
-                    .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("Teaching assignment not found");
-
-            verifyNoInteractions(periodGradeRepository);
         }
     }
 
     @Nested
-    @DisplayName("deletePeriodGrade")
-    class DeletePeriodGrade {
+    @DisplayName("delete")
+    class Delete {
 
         @Test
-        @DisplayName("успешно удаляет оценку")
+        @DisplayName("успешно удаляет итоговую оценку, если период открыт")
         void success() {
             AcademicPeriod period = AcademicPeriod.builder().closed(false).build();
             PeriodGrade grade = PeriodGrade.builder().academicPeriod(period).build();
 
-            when(periodGradeRepository.findWithAcademicPeriodById(1L)).thenReturn(Optional.of(grade));
+            when(periodGradeRepository.findWithAcademicPeriodById(10L)).thenReturn(Optional.of(grade));
 
-            service.deletePeriodGrade(1L);
+            service.delete(10L);
 
             verify(periodGradeRepository).delete(grade);
         }
 
         @Test
-        @DisplayName("оценка не найдена — бросает NotFoundException")
-        void notFound_throwsNotFoundException() {
-            when(periodGradeRepository.findWithAcademicPeriodById(1L)).thenReturn(Optional.empty());
+        @DisplayName("бросает ConflictException, если период закрыт")
+        void closedPeriod_throwsException() {
+            AcademicPeriod period = AcademicPeriod.builder().closed(true).build();
+            PeriodGrade grade = PeriodGrade.builder().academicPeriod(period).build();
 
-            assertThatThrownBy(() -> service.deletePeriodGrade(1L))
-                    .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("Period grade not found");
+            when(periodGradeRepository.findWithAcademicPeriodById(10L)).thenReturn(Optional.of(grade));
 
-            verify(periodGradeRepository, never()).delete(any());
-        }
-
-        @Test
-        @DisplayName("период закрыт — бросает ConflictException")
-        void periodClosed_throwsConflictException() {
-            AcademicPeriod closedPeriod = AcademicPeriod.builder().closed(true).build();
-            PeriodGrade grade = PeriodGrade.builder().academicPeriod(closedPeriod).build();
-
-            when(periodGradeRepository.findWithAcademicPeriodById(1L)).thenReturn(Optional.of(grade));
-
-            assertThatThrownBy(() -> service.deletePeriodGrade(1L))
-                    .isInstanceOf(ConflictException.class)
-                    .hasMessageContaining("Period is already closed");
+            assertThatThrownBy(() -> service.delete(10L))
+                    .isInstanceOf(ConflictException.class);
 
             verify(periodGradeRepository, never()).delete(any());
         }

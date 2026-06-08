@@ -75,7 +75,7 @@ public class JournalService {
                 .map(e -> new DatesGradesDto(e.getKey(), e.getValue()))
                 .toList();
 
-        return new GradesLessonsResponse(academicPeriodMapper.toDto(academicPeriod), dates, subjects);
+        return new GradesLessonsResponse(academicPeriodMapper.toResponse(academicPeriod), dates, subjects);
     }
 
     public TeacherJournalResponse getJournalByAssignment(Long teachingAssignmentId,
@@ -141,7 +141,7 @@ public class JournalService {
                     );
         }).toList();
 
-        return new TeacherJournalResponse(academicPeriodMapper.toDto(academicPeriod), studentNames, lessonInstances, studentJournal);
+        return new TeacherJournalResponse(academicPeriodMapper.toResponse(academicPeriod), studentNames, lessonInstances, studentJournal);
     }
 
     public List<LessonInstanceDto> getInstancesByAssignment(Long teachingAssignmentId, Long academicPeriodId) {

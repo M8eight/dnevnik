@@ -15,7 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
-public class LessonInstanceController {
+public class JournalController {
 
     private final JournalService lessonInstanceService;
 

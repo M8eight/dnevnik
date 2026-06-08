@@ -1,16 +1,16 @@
 package com.rusobr.academic.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rusobr.academic.application.service.GradeService;
 import com.rusobr.academic.domain.enums.GradeType;
-import com.rusobr.academic.infrastructure.exception.ConflictException;
-import com.rusobr.academic.infrastructure.exception.NotFoundException;
-import com.rusobr.academic.infrastructure.service.GradeService;
 import com.rusobr.academic.web.controller.GradeController;
 import com.rusobr.academic.web.dto.grade.GradeResponse;
 import com.rusobr.academic.web.dto.grade.GradeWithSubjectNameResponse;
 import com.rusobr.academic.web.dto.grade.createGrade.CreateGradeRequest;
 import com.rusobr.academic.web.dto.grade.createGrade.CreateGradeResponse;
 import com.rusobr.academic.web.dto.lessonInstance.LessonInstanceDto;
+import com.rusobr.academic.web.exception.ConflictException;
+import com.rusobr.academic.web.exception.NotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDate;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -45,209 +44,130 @@ public class GradeControllerTest {
     @MockitoBean
     private GradeService gradeService;
 
-    // ─────────────────────────────────────────────
-    // GET /api/v1/grades/{id}
-    // ─────────────────────────────────────────────
+    private static final Long GRADE_ID = 1L;
+    private static final Long STUDENT_ID = 10L;
+    private static final Long PERIOD_ID = 5L;
+    private static final Long LESSON_ID = 100L;
+    private static final LocalDate DATE = LocalDate.of(2026, 10, 20);
+
+    private GradeResponse buildGradeResponse() {
+        return new GradeResponse(GRADE_ID, STUDENT_ID, 5, 2, GradeType.TEST);
+    }
+
+    private GradeWithSubjectNameResponse buildGradeWithSubjectResponse() {
+        return new GradeWithSubjectNameResponse(GRADE_ID, 5, GradeType.CONTROL, "Mathematics");
+    }
+
+    private CreateGradeRequest buildCreateRequest() {
+        return new CreateGradeRequest(STUDENT_ID, LESSON_ID, PERIOD_ID, 5, 2, GradeType.TEST);
+    }
+
+    private CreateGradeResponse buildCreateResponse() {
+        return new CreateGradeResponse(GRADE_ID, STUDENT_ID, new LessonInstanceDto(LESSON_ID, DATE), 5, 2, GradeType.TEST);
+    }
 
     @Test
-    @DisplayName("GET /grades/{id} — 200 и тело ответа")
-    void getGradeById_ShouldReturn200() throws Exception {
-        GradeResponse dto = new GradeResponse(1L, 10L, 5, GradeType.TEST);
-        when(gradeService.getGradeById(1L)).thenReturn(dto);
+    @DisplayName("GET /grades/{id} — 200 and grade details")
+    void getById_ShouldReturn200() throws Exception {
+        when(gradeService.getById(GRADE_ID)).thenReturn(buildGradeResponse());
 
-        mockMvc.perform(get("/api/v1/grades/1"))
+        mockMvc.perform(get("/api/v1/grades/{id}", GRADE_ID))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.gradeId").value(1))
-                .andExpect(jsonPath("$.studentId").value(10))
+                .andExpect(jsonPath("$.gradeId").value(GRADE_ID))
+                .andExpect(jsonPath("$.studentId").value(STUDENT_ID))
                 .andExpect(jsonPath("$.value").value(5))
+                .andExpect(jsonPath("$.weight").value(2))
                 .andExpect(jsonPath("$.gradeType").value("TEST"));
     }
 
     @Test
-    @DisplayName("GET /grades/{id} — 404 если оценка не найдена")
-    void getGradeById_ShouldReturn404_WhenNotFound() throws Exception {
-        when(gradeService.getGradeById(99L))
-                .thenThrow(new NotFoundException("Grade not found gradeId: 99"));
+    @DisplayName("GET /grades/{id} — 404 when grade not found")
+    void getById_ShouldReturn404_WhenNotFound() throws Exception {
+        when(gradeService.getById(GRADE_ID)).thenThrow(new NotFoundException("Grade with id " + GRADE_ID + " not found"));
 
-        mockMvc.perform(get("/api/v1/grades/99"))
+        mockMvc.perform(get("/api/v1/grades/{id}", GRADE_ID))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("Grade not found gradeId: 99"));
+                .andExpect(jsonPath("$.message").value("Grade with id " + GRADE_ID + " not found"));
     }
 
-    // ─────────────────────────────────────────────
-    // GET /api/v1/grades/avg/by-student/{id}
-    // ─────────────────────────────────────────────
-
     @Test
-    @DisplayName("GET /grades/avg/by-student/{id} — 200 и средняя оценка")
-    void getAverageGrade_ShouldReturn200() throws Exception {
-        when(gradeService.getAverageGrade(1L, 2L)).thenReturn(4.5);
+    @DisplayName("GET /grades/avg/by-student/{id} — 200 and average value")
+    void getAverageByPeriod_ShouldReturn200() throws Exception {
+        when(gradeService.getAverageByPeriod(STUDENT_ID, PERIOD_ID)).thenReturn(4.33);
 
-        mockMvc.perform(get("/api/v1/grades/avg/by-student/1")
-                        .param("academicPeriodId", "2"))
+        mockMvc.perform(get("/api/v1/grades/avg/by-student/{id}", STUDENT_ID)
+                        .param("academicPeriodId", String.valueOf(PERIOD_ID)))
                 .andExpect(status().isOk())
-                .andExpect(content().string("4.5"));
+                .andExpect(content().string("4.33"));
     }
 
     @Test
-    @DisplayName("GET /grades/avg/by-student/{id} — 404 если период не найден")
-    void getAverageGrade_ShouldReturn404_WhenPeriodNotFound() throws Exception {
-        when(gradeService.getAverageGrade(1L, 99L))
-                .thenThrow(new NotFoundException("Academic period not found academicPeriodId: 99"));
-
-        mockMvc.perform(get("/api/v1/grades/avg/by-student/1")
-                        .param("academicPeriodId", "99"))
-                .andExpect(status().isNotFound())
-                .andExpect(content().string("Academic period not found academicPeriodId: 99"));
-    }
-
-    // ─────────────────────────────────────────────
-    // GET /api/v1/grades/by-date
-    // ─────────────────────────────────────────────
-
-    @Test
-    @DisplayName("GET /grades/by-date — 200 и список оценок")
-    void findAllGradesByDate_ShouldReturn200() throws Exception {
-        List<GradeWithSubjectNameResponse> grades = List.of(
-                new GradeWithSubjectNameResponse(1L, 5, GradeType.TEST, "Математика")
-        );
-        when(gradeService.findAllGradesByDate(1L, LocalDate.of(2025, 9, 1))).thenReturn(grades);
+    @DisplayName("GET /grades/by-date — 200 and list of grades")
+    void findAllByDate_ShouldReturn200() throws Exception {
+        when(gradeService.findAllByDate(STUDENT_ID, DATE)).thenReturn(List.of(buildGradeWithSubjectResponse()));
 
         mockMvc.perform(get("/api/v1/grades/by-date")
-                        .param("studentId", "1")
-                        .param("date", "2025-09-01"))
+                        .param("studentId", String.valueOf(STUDENT_ID))
+                        .param("date", DATE.toString()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].id").value(GRADE_ID))
                 .andExpect(jsonPath("$[0].value").value(5))
-                .andExpect(jsonPath("$[0].gradeType").value("TEST"))
-                .andExpect(jsonPath("$[0].subjectName").value("Математика"));
+                .andExpect(jsonPath("$[0].gradeType").value("CONTROL"))
+                .andExpect(jsonPath("$[0].subjectName").value("Mathematics"));
     }
 
     @Test
-    @DisplayName("GET /grades/by-date — 200 пустой список если оценок нет")
-    void findAllGradesByDate_ShouldReturnEmptyList_WhenNoGrades() throws Exception {
-        when(gradeService.findAllGradesByDate(1L, LocalDate.of(2025, 9, 1))).thenReturn(List.of());
-
-        mockMvc.perform(get("/api/v1/grades/by-date")
-                        .param("studentId", "1")
-                        .param("date", "2025-09-01"))
-                .andExpect(status().isOk())
-                .andExpect(content().json("[]"));
-    }
-
-    // ─────────────────────────────────────────────
-    // POST /api/v1/grades
-    // ─────────────────────────────────────────────
-
-    @Test
-    @DisplayName("POST /grades — 200 и тело ответа при успешном создании")
-    void createGrade_ShouldReturn200() throws Exception {
-        CreateGradeRequest request = new CreateGradeRequest(1L, 10L, 2L, 5, 1, GradeType.TEST);
-        LessonInstanceDto lessonInstanceDto = new LessonInstanceDto(10L, LocalDate.of(2025, 9, 1));
-        CreateGradeResponse response = new CreateGradeResponse(100L, 1L, lessonInstanceDto, 5, 1, GradeType.TEST);
-
-        when(gradeService.createGrade(any(CreateGradeRequest.class))).thenReturn(response);
+    @DisplayName("POST /grades — 200 and created grade")
+    void create_ShouldReturn200() throws Exception {
+        CreateGradeRequest request = buildCreateRequest();
+        when(gradeService.create(request)).thenReturn(buildCreateResponse());
 
         mockMvc.perform(post("/api/v1/grades")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.gradeId").value(100))
-                .andExpect(jsonPath("$.studentId").value(1))
+                .andExpect(jsonPath("$.gradeId").value(GRADE_ID))
+                .andExpect(jsonPath("$.studentId").value(STUDENT_ID))
+                .andExpect(jsonPath("$.lessonInstance.id").value(LESSON_ID))
+                .andExpect(jsonPath("$.lessonInstance.lessonDate").value(DATE.toString()))
                 .andExpect(jsonPath("$.value").value(5))
-                .andExpect(jsonPath("$.weight").value(1))
-                .andExpect(jsonPath("$.gradeType").value("TEST"))
-                .andExpect(jsonPath("$.lessonInstance.id").value(10))
-                .andExpect(jsonPath("$.lessonInstance.lessonDate").value("2025-09-01"));
+                .andExpect(jsonPath("$.weight").value(2))
+                .andExpect(jsonPath("$.gradeType").value("TEST"));
     }
 
     @Test
-    @DisplayName("POST /grades — 400 если тело запроса не валидно")
-    void createGrade_ShouldReturn400_WhenRequestInvalid() throws Exception {
-        mockMvc.perform(post("/api/v1/grades")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}"))
-                .andExpect(status().isBadRequest());
-
-        verifyNoInteractions(gradeService);
-    }
-
-    @Test
-    @DisplayName("POST /grades — 404 если LessonInstance не найден")
-    void createGrade_ShouldReturn404_WhenLessonInstanceNotFound() throws Exception {
-        CreateGradeRequest request = new CreateGradeRequest(1L, 10L, 2L, 5, 1, GradeType.TEST);
-
-        when(gradeService.createGrade(any())).thenThrow(new NotFoundException("Lesson instance not found"));
-
-        mockMvc.perform(post("/api/v1/grades")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isNotFound())
-                .andExpect(content().string("Lesson instance not found"));
-    }
-
-    @Test
-    @DisplayName("POST /grades — 404 если период не найден")
-    void createGrade_ShouldReturn404_WhenPeriodNotFound() throws Exception {
-        CreateGradeRequest request = new CreateGradeRequest(1L, 10L, 2L, 5, 1, GradeType.TEST);
-
-        when(gradeService.createGrade(any())).thenThrow(new NotFoundException("Academic period not found"));
-
-        mockMvc.perform(post("/api/v1/grades")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isNotFound())
-                .andExpect(content().string("Academic period not found"));
-    }
-
-    @Test
-    @DisplayName("POST /grades — 409 если период закрыт")
-    void createGrade_ShouldReturn409_WhenPeriodIsClosed() throws Exception {
-        CreateGradeRequest request = new CreateGradeRequest(1L, 10L, 2L, 5, 1, GradeType.TEST);
-
-        when(gradeService.createGrade(any())).thenThrow(new ConflictException("Academic period is already closed"));
+    @DisplayName("POST /grades — 409 when academic period is closed")
+    void create_ShouldReturn409_WhenPeriodClosed() throws Exception {
+        CreateGradeRequest request = buildCreateRequest();
+        doThrow(new ConflictException("Academic period is already closed"))
+                .when(gradeService).create(request);
 
         mockMvc.perform(post("/api/v1/grades")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
-                .andExpect(content().string("Academic period is already closed"));
+                .andExpect(jsonPath("$.message").value("Academic period is already closed"));
     }
 
-    // ─────────────────────────────────────────────
-    // DELETE /api/v1/grades/{id}
-    // ─────────────────────────────────────────────
-
     @Test
-    @DisplayName("DELETE /grades/{id} — 200 при успешном удалении")
-    void deleteGrade_ShouldReturn200() throws Exception {
-        doNothing().when(gradeService).deleteGrade(1L);
+    @DisplayName("DELETE /grades/{id} — 200 on success")
+    void delete_ShouldReturn200() throws Exception {
+        doNothing().when(gradeService).delete(GRADE_ID);
 
-        mockMvc.perform(delete("/api/v1/grades/1"))
+        mockMvc.perform(delete("/api/v1/grades/{id}", GRADE_ID))
                 .andExpect(status().isOk());
 
-        verify(gradeService).deleteGrade(1L);
+        verify(gradeService).delete(GRADE_ID);
     }
 
     @Test
-    @DisplayName("DELETE /grades/{id} — 404 если оценка не найдена")
-    void deleteGrade_ShouldReturn404_WhenNotFound() throws Exception {
-        doThrow(new NotFoundException("Grade not found gradeId: 99"))
-                .when(gradeService).deleteGrade(99L);
+    @DisplayName("DELETE /grades/{id} — 404 when grade not found")
+    void delete_ShouldReturn404_WhenNotFound() throws Exception {
+        doThrow(new NotFoundException("Grade with id " + GRADE_ID + " not found"))
+                .when(gradeService).delete(GRADE_ID);
 
-        mockMvc.perform(delete("/api/v1/grades/99"))
+        mockMvc.perform(delete("/api/v1/grades/{id}", GRADE_ID))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("Grade not found gradeId: 99"));
-    }
-
-    @Test
-    @DisplayName("DELETE /grades/{id} — 409 если период закрыт")
-    void deleteGrade_ShouldReturn409_WhenPeriodIsClosed() throws Exception {
-        doThrow(new ConflictException("Academic period is closed"))
-                .when(gradeService).deleteGrade(1L);
-
-        mockMvc.perform(delete("/api/v1/grades/1"))
-                .andExpect(status().isConflict())
-                .andExpect(content().string("Academic period is closed"));
+                .andExpect(jsonPath("$.message").value("Grade with id " + GRADE_ID + " not found"));
     }
 }

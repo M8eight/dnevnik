@@ -33,6 +33,7 @@ class ParentStrategyTest {
     @DisplayName("getRole возвращает PARENT")
     void getRole() {
         assertThat(strategy.getRole()).isEqualTo(UserRole.PARENT);
+
     }
 
     @Nested
