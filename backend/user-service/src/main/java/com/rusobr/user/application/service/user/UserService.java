@@ -1,19 +1,16 @@
 package com.rusobr.user.application.service.user;
 
 import com.rusobr.user.application.event.UserDeletedEvent;
-import com.rusobr.user.domain.model.User;
-import com.rusobr.user.domain.enums.UserRole;
-import com.rusobr.user.web.exception.NotFoundException;
 import com.rusobr.user.application.mapper.UserMapper;
-import com.rusobr.user.infrastructure.persistence.repository.ParentRepository;
-import com.rusobr.user.infrastructure.persistence.repository.StudentRepository;
-import com.rusobr.user.infrastructure.persistence.repository.TeacherRepository;
+import com.rusobr.user.domain.enums.UserRole;
+import com.rusobr.user.domain.model.User;
+import com.rusobr.user.infrastructure.client.webClient.KeycloakRestClient;
 import com.rusobr.user.infrastructure.persistence.repository.UserRepository;
 import com.rusobr.user.infrastructure.specification.UserSpecification;
-import com.rusobr.user.infrastructure.client.webClient.KeycloakRestClient;
 import com.rusobr.user.web.dto.keycloak.role.KeycloakRole;
 import com.rusobr.user.web.dto.user.UserDataDto;
 import com.rusobr.user.web.dto.user.UserResponse;
+import com.rusobr.user.web.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -34,9 +31,6 @@ public class UserService {
     private final UserRepository userRepository;
     private final KeycloakRestClient keycloakRestClient;
     private final UserMapper userMapper;
-    private final TeacherRepository teacherRepository;
-    private final StudentRepository studentRepository;
-    private final ParentRepository parentRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional(readOnly = true)
