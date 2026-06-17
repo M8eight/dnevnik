@@ -1,9 +1,11 @@
 package com.rusobr.academic.web.dto.grade.finalGrade;
 
+import com.rusobr.academic.web.dto.academicYear.AcademicYearResponse;
+
 public record FinalGradeResponse(
         Long id,
         Long studentId,
-        String schoolYear,
+        AcademicYearResponse academicYear,
         Integer value,
         String description,
         String subjectName

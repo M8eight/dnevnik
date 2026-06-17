@@ -40,8 +40,9 @@ public class PeriodGradeService {
     private final GradeMapper gradeMapper;
 
     @Transactional(readOnly = true)
-    public Map<String, List<PeriodGradeStudentResponse>> getByStudentId(Long studentId, String schoolYear) {
-        List<PeriodGradeStudentResponse> periodGrades = periodGradeRepository.findPeriodGradeByStudentId(studentId, schoolYear)
+    public Map<String, List<PeriodGradeStudentResponse>> getByStudentId(Long studentId, Long academicYearId) {
+        List<PeriodGradeStudentResponse> periodGrades = periodGradeRepository
+                .findPeriodGradeByStudentId(studentId, academicYearId)
                 .stream().map(periodGradeMapper::toPeriodGradeStudentResponse)
                 .toList();
 
@@ -55,14 +56,14 @@ public class PeriodGradeService {
     }
 
     @Transactional(readOnly = true)
-    public List<PeriodGradeTeacherResponse> getByAssignmentWithAverage(Long teachingAssignmentId, Long currentAcademicPeriodId, String schoolYear) {
+    public List<PeriodGradeTeacherResponse> getByAssignmentWithAverage(Long teachingAssignmentId, Long currentAcademicPeriodId, Long academicYearId) {
         AcademicPeriod academicPeriod = academicPeriodRepository.findById(currentAcademicPeriodId)
                 .orElseThrow(() -> new NotFoundException("Academic period not found academicPeriodId: " + currentAcademicPeriodId));
         List<Long> studentIds = teachingAssignmentService.getStudentIdsByTeachingAssignmentId(teachingAssignmentId);
         List<UserFeignResponse> students = userClient.getBatchUsers(studentIds);
 
         List<PeriodGradeResponse> periodGrades = periodGradeRepository
-                .findPeriodGradesByTeachingAssignmentId(teachingAssignmentId, schoolYear)
+                .findPeriodGradesByTeachingAssignmentId(teachingAssignmentId, academicYearId)
                 .stream().map(periodGradeMapper::toPeriodGradeResponse).toList();
         Map<Long, List<PeriodGradeResponse>> periodGradesMap = periodGrades.stream().collect(Collectors.groupingBy(
                 PeriodGradeResponse::studentId,

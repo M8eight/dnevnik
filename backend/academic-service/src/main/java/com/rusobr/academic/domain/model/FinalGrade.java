@@ -13,7 +13,7 @@ import org.hibernate.annotations.SQLRestriction;
 @Getter
 @Setter
 @Builder
-@ToString(exclude = {"teachingAssignment"})
+@ToString(exclude = {"teachingAssignment", "academicYear"})
 @Table(name = "final_grades")
 @SQLRestriction("deleted_at is NULL")
 @SQLDelete(sql = "update final_grades set deleted_at = now() where id = ?")
@@ -25,7 +25,9 @@ public class FinalGrade extends BaseEntity {
     @Column(name = "student_id", nullable = false)
     private Long studentId;
 
-    private String schoolYear;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "academic_year_id",  nullable = false)
+    private AcademicYear academicYear;
 
     @Max(5)
     @Min(1)

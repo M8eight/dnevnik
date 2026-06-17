@@ -21,35 +21,35 @@ import java.util.*;
 @Slf4j
 public class DebugDataInitializer implements CommandLineRunner {
 
-    // Опорная дата — прошлый понедельник от сегодня
     private static final LocalDate ANCHOR = LocalDate.now()
             .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
     private static final int PAST_WEEKS = 4;
 
-    private final SubjectRepository            subjectRepository;
-    private final SchoolClassRepository        schoolClassRepository;
+    private final SubjectRepository subjectRepository;
+    private final SchoolClassRepository schoolClassRepository;
     private final TeachingAssignmentRepository teachingAssignmentRepository;
-    private final ScheduleLessonRepository     scheduleLessonRepository;
-    private final LessonInstanceRepository     lessonInstanceRepository;
-    private final GradeRepository              gradeRepository;
-    private final AttendanceRepository         attendanceRepository;
-    private final AcademicPeriodRepository     academicPeriodRepository;
-    private final HomeworkRepository           homeworkRepository;
-    private final TeacherSubjectRepository     teacherSubjectRepository;
-    private final FinalGradeRepository         finalGradeRepository;
+    private final ScheduleLessonRepository scheduleLessonRepository;
+    private final LessonInstanceRepository lessonInstanceRepository;
+    private final GradeRepository gradeRepository;
+    private final AttendanceRepository attendanceRepository;
+    private final AcademicPeriodRepository academicPeriodRepository;
+    private final HomeworkRepository homeworkRepository;
+    private final TeacherSubjectRepository teacherSubjectRepository;
+    private final FinalGradeRepository finalGradeRepository;
 
     private final Random rng = new Random(42);
     private final PeriodGradeRepository periodGradeRepository;
+    private final AcademicYearRepository academicYearRepository;
 
     private enum Teachers {
         MATH1(17), MATH2(4), GEOM(5),
-        PHYS1(6),  PHYS2(7),
-        IT1(8),    IT2(9),
-        RUS1(10),  RUS2(11), LIT(12),
+        PHYS1(6), PHYS2(7),
+        IT1(8), IT2(9),
+        RUS1(10), RUS2(11), LIT(12),
         HIST1(13), HIST2(14), SOC(15),
-        ENG1(16),  ENG2(3),  DE(18),
-        CHEM(19),  BIO(20),  GEO(21),
-        PE1(22),   PE2(23),  ART(24),
+        ENG1(16), ENG2(3), DE(18),
+        CHEM(19), BIO(20), GEO(21),
+        PE1(22), PE2(23), ART(24),
         MUSIC(25), TECH(26);
 
         final long id;
@@ -59,7 +59,8 @@ public class DebugDataInitializer implements CommandLineRunner {
         }
     }
 
-    private record Slot(int number, String room, TeachingAssignment ta) {}
+    private record Slot(int number, String room, TeachingAssignment ta) {
+    }
 
     @Override
     public void run(String... args) {
@@ -79,9 +80,17 @@ public class DebugDataInitializer implements CommandLineRunner {
                 "Физкультура", "Изо", "Музыка", "Технология"
         ).forEach(n -> S.put(n, subjectRepository.save(Subject.builder().name(n).build())));
 
-        ClassBundle c8a = buildClass("8А", "2025", 24L, range(27L, 54L), S);
-        ClassBundle c8b = buildClass("8Б", "2025", 26L, range(55L, 81L), S);
-        ClassBundle c9a = buildClass("9А", "2025", 25L, range(82L, 107L), S);
+        AcademicYear academicYear = academicYearRepository.save(AcademicYear.builder()
+                .name("2025-2026")
+                .description("Год")
+                .startDate(LocalDate.of(2025, 1, 1))
+                .endDate(LocalDate.of(2026, 6, 26))
+                .isActive(true)
+                .build());
+
+        ClassBundle c8a = buildClass("8А", 24L, range(27L, 54L), S, academicYear);
+        ClassBundle c8b = buildClass("8Б", 26L, range(55L, 81L), S, academicYear);
+        ClassBundle c9a = buildClass("9А", 25L, range(82L, 107L), S, academicYear);
 
         Map<DayOfWeek, List<ScheduleLesson>> sched8a = buildSchedule8A(c8a.ta());
         Map<DayOfWeek, List<ScheduleLesson>> sched8b = buildSchedule8B(c8b.ta());
@@ -106,12 +115,13 @@ public class DebugDataInitializer implements CommandLineRunner {
         log.info("=== Инициализация завершена ===");
     }
 
-    private record ClassBundle(SchoolClass schoolClass, Map<String, TeachingAssignment> ta) {}
+    private record ClassBundle(SchoolClass schoolClass, Map<String, TeachingAssignment> ta) {
+    }
 
-    private ClassBundle buildClass(String name, String year, Long classTeacherId,
-                                   List<Long> studentIds, Map<String, Subject> S) {
+    private ClassBundle buildClass(String name, Long classTeacherId,
+                                   List<Long> studentIds, Map<String, Subject> S, AcademicYear academicYear) {
         SchoolClass sc = SchoolClass.builder()
-                .name(name).schoolYear(year)
+                .name(name).academicYear(academicYear)
                 .classTeacherId(classTeacherId)
                 .students(new HashSet<>()).build();
         schoolClassRepository.save(sc);
@@ -124,23 +134,23 @@ public class DebugDataInitializer implements CommandLineRunner {
 
         Map<String, TeachingAssignment> ta = new HashMap<>();
         boolean is9 = name.startsWith("9");
-        ta.put("Алг",   saveTA(Teachers.MATH1.id, sc, S.get("Алгебра")));
-        ta.put("Гео",   saveTA(Teachers.GEOM.id,  sc, S.get("Геометрия")));
-        ta.put("Рус",   saveTA(is9 ? Teachers.RUS2.id : Teachers.RUS1.id, sc, S.get("Русский язык")));
-        ta.put("Лит",   saveTA(Teachers.LIT.id,   sc, S.get("Литература")));
-        ta.put("Физ",   saveTA(is9 ? Teachers.PHYS2.id : Teachers.PHYS1.id, sc, S.get("Физика")));
-        ta.put("Хим",   saveTA(Teachers.CHEM.id,  sc, S.get("Химия")));
-        ta.put("Био",   saveTA(Teachers.BIO.id,   sc, S.get("Биология")));
-        ta.put("Ист",   saveTA(Teachers.HIST1.id, sc, S.get("История")));
-        ta.put("Общ",   saveTA(Teachers.SOC.id,   sc, S.get("Обществознание")));
-        ta.put("Инф",   saveTA(is9 ? Teachers.IT2.id : Teachers.IT1.id, sc, S.get("Информатика")));
-        ta.put("Анг",   saveTA(Teachers.ENG1.id,  sc, S.get("Английский язык")));
-        ta.put("Нем",   saveTA(Teachers.DE.id,    sc, S.get("Немецкий язык")));
-        ta.put("ГеоГр", saveTA(Teachers.GEO.id,   sc, S.get("География")));
+        ta.put("Алг", saveTA(Teachers.MATH1.id, sc, S.get("Алгебра")));
+        ta.put("Гео", saveTA(Teachers.GEOM.id, sc, S.get("Геометрия")));
+        ta.put("Рус", saveTA(is9 ? Teachers.RUS2.id : Teachers.RUS1.id, sc, S.get("Русский язык")));
+        ta.put("Лит", saveTA(Teachers.LIT.id, sc, S.get("Литература")));
+        ta.put("Физ", saveTA(is9 ? Teachers.PHYS2.id : Teachers.PHYS1.id, sc, S.get("Физика")));
+        ta.put("Хим", saveTA(Teachers.CHEM.id, sc, S.get("Химия")));
+        ta.put("Био", saveTA(Teachers.BIO.id, sc, S.get("Биология")));
+        ta.put("Ист", saveTA(Teachers.HIST1.id, sc, S.get("История")));
+        ta.put("Общ", saveTA(Teachers.SOC.id, sc, S.get("Обществознание")));
+        ta.put("Инф", saveTA(is9 ? Teachers.IT2.id : Teachers.IT1.id, sc, S.get("Информатика")));
+        ta.put("Анг", saveTA(Teachers.ENG1.id, sc, S.get("Английский язык")));
+        ta.put("Нем", saveTA(Teachers.DE.id, sc, S.get("Немецкий язык")));
+        ta.put("ГеоГр", saveTA(Teachers.GEO.id, sc, S.get("География")));
         ta.put("Спорт", saveTA(is9 ? Teachers.PE2.id : Teachers.PE1.id, sc, S.get("Физкультура")));
-        ta.put("Изо",   saveTA(Teachers.ART.id,   sc, S.get("Изо")));
-        ta.put("Муз",   saveTA(Teachers.MUSIC.id, sc, S.get("Музыка")));
-        ta.put("Тех",   saveTA(Teachers.TECH.id,  sc, S.get("Технология")));
+        ta.put("Изо", saveTA(Teachers.ART.id, sc, S.get("Изо")));
+        ta.put("Муз", saveTA(Teachers.MUSIC.id, sc, S.get("Музыка")));
+        ta.put("Тех", saveTA(Teachers.TECH.id, sc, S.get("Технология")));
 
         return new ClassBundle(sc, ta);
     }
@@ -148,28 +158,28 @@ public class DebugDataInitializer implements CommandLineRunner {
     private Map<DayOfWeek, List<ScheduleLesson>> buildSchedule8A(Map<String, TeachingAssignment> ta) {
         Map<DayOfWeek, List<ScheduleLesson>> map = new LinkedHashMap<>();
         map.put(DayOfWeek.MONDAY, scheduleDay(DayOfWeek.MONDAY, List.of(
-                new Slot(1, "201", ta.get("Рус")),   new Slot(2, "201", ta.get("Лит")),
-                new Slot(3, "305", ta.get("Алг")),   new Slot(4, "305", ta.get("Гео")),
+                new Slot(1, "201", ta.get("Рус")), new Slot(2, "201", ta.get("Лит")),
+                new Slot(3, "305", ta.get("Алг")), new Slot(4, "305", ta.get("Гео")),
                 new Slot(5, "Зал", ta.get("Спорт")), new Slot(6, "114", ta.get("Муз"))
         )));
         map.put(DayOfWeek.TUESDAY, scheduleDay(DayOfWeek.TUESDAY, List.of(
-                new Slot(1, "402", ta.get("Физ")),   new Slot(2, "402", ta.get("Хим")),
-                new Slot(3, "104", ta.get("Анг")),   new Slot(4, "205", ta.get("Ист")),
-                new Slot(5, "301", ta.get("Био")),   new Slot(6, "206", ta.get("Общ"))
+                new Slot(1, "402", ta.get("Физ")), new Slot(2, "402", ta.get("Хим")),
+                new Slot(3, "104", ta.get("Анг")), new Slot(4, "205", ta.get("Ист")),
+                new Slot(5, "301", ta.get("Био")), new Slot(6, "206", ta.get("Общ"))
         )));
         map.put(DayOfWeek.WEDNESDAY, scheduleDay(DayOfWeek.WEDNESDAY, List.of(
-                new Slot(1, "305", ta.get("Алг")),   new Slot(2, "305", ta.get("Алг")),
-                new Slot(3, "201", ta.get("Рус")),   new Slot(4, "ПК-1", ta.get("Инф")),
+                new Slot(1, "305", ta.get("Алг")), new Slot(2, "305", ta.get("Алг")),
+                new Slot(3, "201", ta.get("Рус")), new Slot(4, "ПК-1", ta.get("Инф")),
                 new Slot(5, "ПК-1", ta.get("Инф")), new Slot(6, "113", ta.get("ГеоГр"))
         )));
         map.put(DayOfWeek.THURSDAY, scheduleDay(DayOfWeek.THURSDAY, List.of(
-                new Slot(1, "104", ta.get("Анг")),   new Slot(2, "402", ta.get("Физ")),
-                new Slot(3, "205", ta.get("Ист")),   new Slot(4, "305", ta.get("Гео")),
-                new Slot(5, "201", ta.get("Лит")),   new Slot(6, "Нем", ta.get("Нем"))
+                new Slot(1, "104", ta.get("Анг")), new Slot(2, "402", ta.get("Физ")),
+                new Slot(3, "205", ta.get("Ист")), new Slot(4, "305", ta.get("Гео")),
+                new Slot(5, "201", ta.get("Лит")), new Slot(6, "Нем", ta.get("Нем"))
         )));
         map.put(DayOfWeek.FRIDAY, scheduleDay(DayOfWeek.FRIDAY, List.of(
-                new Slot(1, "301", ta.get("Био")),   new Slot(2, "402", ta.get("Хим")),
-                new Slot(3, "305", ta.get("Алг")),   new Slot(4, "201", ta.get("Рус")),
+                new Slot(1, "301", ta.get("Био")), new Slot(2, "402", ta.get("Хим")),
+                new Slot(3, "305", ta.get("Алг")), new Slot(4, "201", ta.get("Рус")),
                 new Slot(5, "Зал", ta.get("Спорт")), new Slot(6, "Мас", ta.get("Тех"))
         )));
         return map;
@@ -178,29 +188,29 @@ public class DebugDataInitializer implements CommandLineRunner {
     private Map<DayOfWeek, List<ScheduleLesson>> buildSchedule8B(Map<String, TeachingAssignment> ta) {
         Map<DayOfWeek, List<ScheduleLesson>> map = new LinkedHashMap<>();
         map.put(DayOfWeek.MONDAY, scheduleDay(DayOfWeek.MONDAY, List.of(
-                new Slot(1, "305", ta.get("Алг")),   new Slot(2, "305", ta.get("Гео")),
-                new Slot(3, "402", ta.get("Физ")),   new Slot(4, "202", ta.get("Рус")),
-                new Slot(5, "202", ta.get("Лит")),   new Slot(6, "Зал", ta.get("Спорт"))
+                new Slot(1, "305", ta.get("Алг")), new Slot(2, "305", ta.get("Гео")),
+                new Slot(3, "402", ta.get("Физ")), new Slot(4, "202", ta.get("Рус")),
+                new Slot(5, "202", ta.get("Лит")), new Slot(6, "Зал", ta.get("Спорт"))
         )));
         map.put(DayOfWeek.TUESDAY, scheduleDay(DayOfWeek.TUESDAY, List.of(
-                new Slot(1, "205", ta.get("Ист")),   new Slot(2, "206", ta.get("Общ")),
-                new Slot(3, "104", ta.get("Анг")),   new Slot(4, "ПК-2", ta.get("Инф")),
+                new Slot(1, "205", ta.get("Ист")), new Slot(2, "206", ta.get("Общ")),
+                new Slot(3, "104", ta.get("Анг")), new Slot(4, "ПК-2", ta.get("Инф")),
                 new Slot(5, "ПК-2", ta.get("Инф")), new Slot(6, "113", ta.get("ГеоГр"))
         )));
         map.put(DayOfWeek.WEDNESDAY, scheduleDay(DayOfWeek.WEDNESDAY, List.of(
-                new Slot(1, "402", ta.get("Хим")),   new Slot(2, "301", ta.get("Био")),
-                new Slot(3, "305", ta.get("Алг")),   new Slot(4, "104", ta.get("Анг")),
-                new Slot(5, "Нем", ta.get("Нем")),   new Slot(6, "114", ta.get("Муз"))
+                new Slot(1, "402", ta.get("Хим")), new Slot(2, "301", ta.get("Био")),
+                new Slot(3, "305", ta.get("Алг")), new Slot(4, "104", ta.get("Анг")),
+                new Slot(5, "Нем", ta.get("Нем")), new Slot(6, "114", ta.get("Муз"))
         )));
         map.put(DayOfWeek.THURSDAY, scheduleDay(DayOfWeek.THURSDAY, List.of(
-                new Slot(1, "202", ta.get("Рус")),   new Slot(2, "305", ta.get("Гео")),
-                new Slot(3, "402", ta.get("Физ")),   new Slot(4, "402", ta.get("Хим")),
-                new Slot(5, "301", ta.get("Био")),   new Slot(6, "Мас", ta.get("Тех"))
+                new Slot(1, "202", ta.get("Рус")), new Slot(2, "305", ta.get("Гео")),
+                new Slot(3, "402", ta.get("Физ")), new Slot(4, "402", ta.get("Хим")),
+                new Slot(5, "301", ta.get("Био")), new Slot(6, "Мас", ta.get("Тех"))
         )));
         map.put(DayOfWeek.FRIDAY, scheduleDay(DayOfWeek.FRIDAY, List.of(
-                new Slot(1, "305", ta.get("Алг")),   new Slot(2, "205", ta.get("Ист")),
-                new Slot(3, "202", ta.get("Лит")),   new Slot(4, "Зал", ta.get("Спорт")),
-                new Slot(5, "202", ta.get("Рус")),   new Slot(6, "Изо", ta.get("Изо"))
+                new Slot(1, "305", ta.get("Алг")), new Slot(2, "205", ta.get("Ист")),
+                new Slot(3, "202", ta.get("Лит")), new Slot(4, "Зал", ta.get("Спорт")),
+                new Slot(5, "202", ta.get("Рус")), new Slot(6, "Изо", ta.get("Изо"))
         )));
         return map;
     }
@@ -208,29 +218,29 @@ public class DebugDataInitializer implements CommandLineRunner {
     private Map<DayOfWeek, List<ScheduleLesson>> buildSchedule9A(Map<String, TeachingAssignment> ta) {
         Map<DayOfWeek, List<ScheduleLesson>> map = new LinkedHashMap<>();
         map.put(DayOfWeek.MONDAY, scheduleDay(DayOfWeek.MONDAY, List.of(
-                new Slot(1, "402", ta.get("Физ")),   new Slot(2, "402", ta.get("Физ")),
-                new Slot(3, "305", ta.get("Алг")),   new Slot(4, "203", ta.get("Рус")),
-                new Slot(5, "203", ta.get("Лит")),   new Slot(6, "Зал", ta.get("Спорт"))
+                new Slot(1, "402", ta.get("Физ")), new Slot(2, "402", ta.get("Физ")),
+                new Slot(3, "305", ta.get("Алг")), new Slot(4, "203", ta.get("Рус")),
+                new Slot(5, "203", ta.get("Лит")), new Slot(6, "Зал", ta.get("Спорт"))
         )));
         map.put(DayOfWeek.TUESDAY, scheduleDay(DayOfWeek.TUESDAY, List.of(
                 new Slot(1, "ПК-1", ta.get("Инф")), new Slot(2, "ПК-1", ta.get("Инф")),
-                new Slot(3, "402", ta.get("Хим")),   new Slot(4, "301", ta.get("Био")),
-                new Slot(5, "205", ta.get("Ист")),   new Slot(6, "206", ta.get("Общ"))
+                new Slot(3, "402", ta.get("Хим")), new Slot(4, "301", ta.get("Био")),
+                new Slot(5, "205", ta.get("Ист")), new Slot(6, "206", ta.get("Общ"))
         )));
         map.put(DayOfWeek.WEDNESDAY, scheduleDay(DayOfWeek.WEDNESDAY, List.of(
-                new Slot(1, "305", ta.get("Алг")),   new Slot(2, "305", ta.get("Гео")),
-                new Slot(3, "104", ta.get("Анг")),   new Slot(4, "104", ta.get("Нем")),
+                new Slot(1, "305", ta.get("Алг")), new Slot(2, "305", ta.get("Гео")),
+                new Slot(3, "104", ta.get("Анг")), new Slot(4, "104", ta.get("Нем")),
                 new Slot(5, "113", ta.get("ГеоГр")), new Slot(6, "Зал", ta.get("Спорт"))
         )));
         map.put(DayOfWeek.THURSDAY, scheduleDay(DayOfWeek.THURSDAY, List.of(
-                new Slot(1, "203", ta.get("Рус")),   new Slot(2, "305", ta.get("Алг")),
-                new Slot(3, "402", ta.get("Физ")),   new Slot(4, "205", ta.get("Ист")),
-                new Slot(5, "305", ta.get("Гео")),   new Slot(6, "Мас", ta.get("Тех"))
+                new Slot(1, "203", ta.get("Рус")), new Slot(2, "305", ta.get("Алг")),
+                new Slot(3, "402", ta.get("Физ")), new Slot(4, "205", ta.get("Ист")),
+                new Slot(5, "305", ta.get("Гео")), new Slot(6, "Мас", ta.get("Тех"))
         )));
         map.put(DayOfWeek.FRIDAY, scheduleDay(DayOfWeek.FRIDAY, List.of(
-                new Slot(1, "402", ta.get("Хим")),   new Slot(2, "301", ta.get("Био")),
-                new Slot(3, "203", ta.get("Лит")),   new Slot(4, "104", ta.get("Анг")),
-                new Slot(5, "203", ta.get("Рус")),   new Slot(6, "Изо", ta.get("Изо"))
+                new Slot(1, "402", ta.get("Хим")), new Slot(2, "301", ta.get("Био")),
+                new Slot(3, "203", ta.get("Лит")), new Slot(4, "104", ta.get("Анг")),
+                new Slot(5, "203", ta.get("Рус")), new Slot(6, "Изо", ta.get("Изо"))
         )));
         return map;
     }
@@ -264,8 +274,8 @@ public class DebugDataInitializer implements CommandLineRunner {
                 if (rng.nextInt(100) < 25) {
                     GradeType type = switch (rng.nextInt(10)) {
                         case 0, 1 -> GradeType.TEST;       // 20% — контрольная
-                        case 2    -> GradeType.CONTROL;    // 10% — проверочная
-                        default   -> GradeType.HOMEWORK;   // 70% — за ДЗ
+                        case 2 -> GradeType.CONTROL;    // 10% — проверочная
+                        default -> GradeType.HOMEWORK;   // 70% — за ДЗ
                     };
                     int weight = type == GradeType.TEST ? 3
                             : type == GradeType.CONTROL ? 2
@@ -280,8 +290,8 @@ public class DebugDataInitializer implements CommandLineRunner {
                 if (rng.nextInt(100) < 8) {
                     AttendanceStatus status = switch (rng.nextInt(10)) {
                         case 0, 1, 2 -> AttendanceStatus.EXCUSED; // 30% уважительная
-                        case 3       -> AttendanceStatus.LATE;    // 10% опоздал
-                        default      -> AttendanceStatus.ABSENT;  // 60% просто прогул
+                        case 3 -> AttendanceStatus.LATE;    // 10% опоздал
+                        default -> AttendanceStatus.ABSENT;  // 60% просто прогул
                     };
                     attendanceRepository.save(Attendance.builder()
                             .lessonInstance(li).studentId(sid).status(status).build());
@@ -291,17 +301,19 @@ public class DebugDataInitializer implements CommandLineRunner {
     }
 
     private void savePeriods() {
+        AcademicYear academicYear = academicYearRepository.getReferenceById(1L);
+
         academicPeriodRepository.saveAll(List.of(
-                AcademicPeriod.builder().name("Первая четверть").schoolYear("2025-2026")
+                AcademicPeriod.builder().name("Первая четверть").academicYear(academicYear)
                         .startDate(LocalDate.of(2025, 9, 1)).endDate(LocalDate.of(2025, 10, 26))
                         .closed(true).build(),
-                AcademicPeriod.builder().name("Вторая четверть").schoolYear("2025-2026")
+                AcademicPeriod.builder().name("Вторая четверть").academicYear(academicYear)
                         .startDate(LocalDate.of(2025, 11, 5)).endDate(LocalDate.of(2025, 12, 28))
                         .closed(true).build(),
-                AcademicPeriod.builder().name("Третья четверть").schoolYear("2025-2026")
+                AcademicPeriod.builder().name("Третья четверть").academicYear(academicYear)
                         .startDate(LocalDate.of(2026, 1, 9)).endDate(LocalDate.of(2026, 3, 31))
                         .closed(true).build(),
-                AcademicPeriod.builder().name("Четвертая четверть").schoolYear("2025-2026")
+                AcademicPeriod.builder().name("Четвертая четверть").academicYear(academicYear)
                         .startDate(LocalDate.of(2026, 4, 6)).endDate(LocalDate.of(2026, 6, 25))
                         .closed(false).build()
         ));
@@ -326,31 +338,31 @@ public class DebugDataInitializer implements CommandLineRunner {
         // Русский / литература
         addTS(teacherToSubjects, Teachers.RUS1.id, "Русский язык");
         addTS(teacherToSubjects, Teachers.RUS2.id, "Русский язык");
-        addTS(teacherToSubjects, Teachers.LIT.id,  "Литература");
+        addTS(teacherToSubjects, Teachers.LIT.id, "Литература");
 
         // История / обществознание
         addTS(teacherToSubjects, Teachers.HIST1.id, "История");
         addTS(teacherToSubjects, Teachers.HIST2.id, "История");
-        addTS(teacherToSubjects, Teachers.SOC.id,   "Обществознание");
+        addTS(teacherToSubjects, Teachers.SOC.id, "Обществознание");
 
         // Иностранные языки
         addTS(teacherToSubjects, Teachers.ENG1.id, "Английский язык");
         addTS(teacherToSubjects, Teachers.ENG2.id, "Английский язык");
-        addTS(teacherToSubjects, Teachers.DE.id,   "Немецкий язык");
+        addTS(teacherToSubjects, Teachers.DE.id, "Немецкий язык");
 
         // Естественные науки
         addTS(teacherToSubjects, Teachers.CHEM.id, "Химия");
-        addTS(teacherToSubjects, Teachers.BIO.id,  "Биология");
-        addTS(teacherToSubjects, Teachers.GEO.id,  "География");
+        addTS(teacherToSubjects, Teachers.BIO.id, "Биология");
+        addTS(teacherToSubjects, Teachers.GEO.id, "География");
 
         // Физкультура
         addTS(teacherToSubjects, Teachers.PE1.id, "Физкультура");
         addTS(teacherToSubjects, Teachers.PE2.id, "Физкультура");
 
         // Творческие
-        addTS(teacherToSubjects, Teachers.ART.id,   "Изо");
+        addTS(teacherToSubjects, Teachers.ART.id, "Изо");
         addTS(teacherToSubjects, Teachers.MUSIC.id, "Музыка");
-        addTS(teacherToSubjects, Teachers.TECH.id,  "Технология");
+        addTS(teacherToSubjects, Teachers.TECH.id, "Технология");
 
         teacherToSubjects.forEach((teacherId, subjects) ->
                 subjects.forEach(subjectName -> {
@@ -434,7 +446,7 @@ public class DebugDataInitializer implements CommandLineRunner {
     }
 
     private void saveFinalGrades(ClassBundle... bundles) {
-        String schoolYear = "2025-2026";
+        AcademicYear academicYear = academicYearRepository.getReferenceById(1L);
 
         List<FinalGrade> toSave = new ArrayList<>();
 
@@ -448,7 +460,7 @@ public class DebugDataInitializer implements CommandLineRunner {
                     toSave.add(FinalGrade.builder()
                             .studentId(studentId)
                             .teachingAssignment(ta)
-                            .schoolYear(schoolYear)
+                            .academicYear(academicYear)
                             .value(value)
                             .description(generateFinalGradeDescription(value))
                             .build());

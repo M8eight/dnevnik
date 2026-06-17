@@ -1,7 +1,7 @@
 package com.rusobr.academic.application.mapper;
 
+import com.rusobr.academic.domain.model.AcademicYear;
 import com.rusobr.academic.domain.model.SchoolClass;
-import com.rusobr.academic.infrastructure.persistence.projection.SchoolClassProjection;
 import com.rusobr.academic.web.dto.feign.TeacherResponse;
 import com.rusobr.academic.web.dto.feign.UserFeignResponse;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassFullResponse;
@@ -16,14 +16,14 @@ public interface SchoolClassMapper {
 
     SchoolClassResponse toSchoolClassResponse(SchoolClass schoolClass);
 
-    SchoolClass toSchoolClass(SchoolClassRequest schoolClassReq);
+    @Mapping(target = "academicYear.id", source = "academicYear.id")
+    @Mapping(target = "name", source = "schoolClassReq.name")
+    @Mapping(target = "id", ignore = true)
+    SchoolClass toSchoolClass(SchoolClassRequest schoolClassReq, AcademicYear academicYear);
 
-    void updateSchoolClass(@MappingTarget SchoolClass schoolClass, SchoolClassRequest request);
     @Mapping(target = "teacher", source = "teacher")
     @Mapping(target = "students", source = "users")
     SchoolClassFullResponse toSchoolClassFullResponse(SchoolClass schoolClass, List<UserFeignResponse> users,
                                                       TeacherResponse teacher);
-
-    SchoolClassResponse toSchoolClassResponse(SchoolClassProjection projection);
 
 }

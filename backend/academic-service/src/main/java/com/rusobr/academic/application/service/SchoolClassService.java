@@ -1,18 +1,20 @@
 package com.rusobr.academic.application.service;
 
+import com.rusobr.academic.application.mapper.SchoolClassMapper;
+import com.rusobr.academic.domain.model.AcademicYear;
 import com.rusobr.academic.domain.model.ClassStudent;
 import com.rusobr.academic.domain.model.SchoolClass;
-import com.rusobr.academic.infrastructure.persistence.projection.SchoolClassProjection;
-import com.rusobr.academic.web.exception.ConflictException;
-import com.rusobr.academic.web.exception.NotFoundException;
 import com.rusobr.academic.infrastructure.client.UserClient;
-import com.rusobr.academic.application.mapper.SchoolClassMapper;
+import com.rusobr.academic.infrastructure.persistence.repository.AcademicYearRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.SchoolClassRepository;
 import com.rusobr.academic.web.dto.feign.TeacherResponse;
 import com.rusobr.academic.web.dto.feign.UserFeignResponse;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassFullResponse;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassRequest;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassResponse;
+import com.rusobr.academic.web.dto.schoolClass.SchoolClassUpdateRequest;
+import com.rusobr.academic.web.exception.ConflictException;
+import com.rusobr.academic.web.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -28,6 +30,7 @@ public class SchoolClassService {
     private final SchoolClassRepository schoolClassRepository;
     private final SchoolClassMapper schoolClassMapper;
     private final UserClient userClient;
+    private final AcademicYearRepository academicYearRepository;
 
     @Lazy
     @Autowired
@@ -35,86 +38,115 @@ public class SchoolClassService {
 
     @Transactional(readOnly = true)
     public SchoolClassResponse findById(Long id) {
-        SchoolClass schoolClass = schoolClassRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("SchoolClass Not Found by id: " + id));
-
+        SchoolClass schoolClass = getSchoolClassOrThrow(id);
         return schoolClassMapper.toSchoolClassResponse(schoolClass);
     }
 
     @Transactional(readOnly = true)
-    public SchoolClassFullResponse findWithClassStudentById(Long id) {
+    public SchoolClassFullResponse findWithStudentById(Long id) {
         SchoolClass schoolClass = schoolClassRepository.findWithClassStudentById(id)
                 .orElseThrow(() -> new NotFoundException("SchoolClass Not Found by id: " + id));
 
-        List<UserFeignResponse> users = userClient.getBatchUsers(schoolClass.getStudents()
-                .stream().map(ClassStudent::getStudentId).toList());
+        List<UserFeignResponse> users = List.of();
+        if (!schoolClass.getStudents().isEmpty()) {
+            users = userClient.getBatchUsers(
+                    schoolClass.getStudents().stream().map(ClassStudent::getStudentId).toList()
+            );
+        }
 
-        TeacherResponse teacher = userClient.getTeacherById(schoolClass.getClassTeacherId());
+        TeacherResponse teacher = null;
+        if (schoolClass.getClassTeacherId() != null) {
+            teacher = userClient.getTeacherById(schoolClass.getClassTeacherId());
+        }
 
         return schoolClassMapper.toSchoolClassFullResponse(schoolClass, users, teacher);
     }
 
     @Transactional(readOnly = true)
-    public SchoolClassResponse findByStudentId(Long studentId) {
-        SchoolClassProjection schoolClass = schoolClassRepository.getSchoolClassByStudentId(studentId)
+    public SchoolClassResponse findByStudent(Long studentId) {
+        SchoolClass schoolClass = schoolClassRepository.findSchoolClassByStudentId(studentId)
                 .orElseThrow(() -> new NotFoundException("SchoolClass not found for student: " + studentId));
         return schoolClassMapper.toSchoolClassResponse(schoolClass);
     }
 
     @Transactional(readOnly = true)
-    public List<SchoolClassResponse> findAllClasses() {
+    public List<SchoolClassResponse> findAll() {
         return schoolClassRepository.findAllByOrderByNameAsc().stream()
                 .map(schoolClassMapper::toSchoolClassResponse).toList();
     }
 
-    public void assignTeacher(Long classId, Long teacherId) {
-        userClient.getTeacherById(teacherId);
-        self.assignTeacherTransactional(classId, teacherId);
+    @Transactional(readOnly = true)
+    public List<SchoolClassResponse> findByAcademicYear(Long academicYearId) {
+        return schoolClassRepository.findAllByAcademicYearIdOrderByNameAsc(academicYearId).stream()
+                .map(schoolClassMapper::toSchoolClassResponse).toList();
     }
 
     @Transactional
-    public void assignTeacherTransactional(Long classId, Long teacherId) {
-        SchoolClass schoolClass = schoolClassRepository.findWithClassStudentById(classId)
-                .orElseThrow(() -> new NotFoundException("SchoolClass Not Found by id: " + classId));
-        schoolClass.setClassTeacherId(teacherId);
-    }
-
     public SchoolClassResponse create(SchoolClassRequest schoolClassReq) {
-        return self.createTransactional(schoolClassReq);
-    }
+        AcademicYear academicYear = getAcademicYearOrThrow(schoolClassReq.academicYearId());
+        validateAcademicYearIsActive(academicYear);
 
-    @Transactional
-    public SchoolClassResponse createTransactional(SchoolClassRequest schoolClassReq) {
-        if (schoolClassRepository.existsByName(schoolClassReq.name())) {
-            throw new ConflictException("School class with name " + schoolClassReq.name() + " already exists");
+        if (schoolClassRepository.existsByNameAndAcademicYearId(schoolClassReq.name(), schoolClassReq.academicYearId())) {
+            throw new ConflictException("School class with name " + schoolClassReq.name()
+                    + " and year " + schoolClassReq.academicYearId() + " already exists");
         }
 
-        SchoolClass schoolClass = schoolClassMapper.toSchoolClass(schoolClassReq);
+        SchoolClass schoolClass = schoolClassMapper.toSchoolClass(schoolClassReq, academicYear);
+
         return schoolClassMapper.toSchoolClassResponse(schoolClassRepository.save(schoolClass));
     }
 
-    public void update(Long id, SchoolClassRequest schoolClassReq) {
-        self.updateTransactional(id, schoolClassReq);
+    public void assignTeacher(Long classId, Long teacherId) {
+        userClient.getTeacherById(teacherId);
+        self.assignTeacherDb(classId, teacherId);
     }
 
     @Transactional
-    public void updateTransactional(Long id, SchoolClassRequest schoolClassReq) {
-        SchoolClass schoolClass = schoolClassRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("SchoolClass Not Found by id: " + id));
+    protected void assignTeacherDb(Long classId, Long teacherId) {
+        SchoolClass schoolClass = getSchoolClassWithAcademicYear(classId);
 
-        if (schoolClassRepository.existsByNameAndIdNot(schoolClassReq.name(), id)) {
-            throw new ConflictException("School class with name " + schoolClassReq.name() + " already exists");
-        }
+        validateAcademicYearIsActive(schoolClass.getAcademicYear());
 
-        schoolClassMapper.updateSchoolClass(schoolClass, schoolClassReq);
+        schoolClass.setClassTeacherId(teacherId);
+    }
+
+    @Transactional
+    public void update(Long id, SchoolClassUpdateRequest request) {
+        SchoolClass schoolClass = getSchoolClassWithAcademicYear(id);
+
+        validateAcademicYearIsActive(schoolClass.getAcademicYear());
+
+        schoolClass.setName(request.name());
     }
 
     @Transactional
     public void delete(Long id) {
-        if (!schoolClassRepository.existsById(id)) {
-            throw new NotFoundException("SchoolClass not found " + id);
-        }
-        schoolClassRepository.deleteById(id);
+        SchoolClass schoolClass = getSchoolClassOrThrow(id);
+
+        validateAcademicYearIsActive(schoolClass.getAcademicYear());
+
+        schoolClassRepository.delete(schoolClass);
     }
 
+    // helpers
+    private SchoolClass getSchoolClassOrThrow(Long id) {
+        return schoolClassRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("SchoolClass Not Found by id: " + id));
+    }
+
+    private SchoolClass getSchoolClassWithAcademicYear(Long id) {
+        return schoolClassRepository.findWithAcademicYearById(id)
+                .orElseThrow(() -> new NotFoundException("SchoolClass Not Found by id: " + id));
+    }
+
+    private AcademicYear getAcademicYearOrThrow(Long academicYearId) {
+        return academicYearRepository.findById(academicYearId)
+                .orElseThrow(() -> new NotFoundException("Academic year not found by id: " + academicYearId));
+    }
+
+    private void validateAcademicYearIsActive(AcademicYear academicYear) {
+        if (academicYear == null || !academicYear.getIsActive()) {
+            throw new ConflictException("Academic year is not active");
+        }
+    }
 }

@@ -6,9 +6,11 @@ import com.rusobr.academic.web.dto.feign.UserFeignResponse;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassFullResponse;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassRequest;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassResponse;
+import com.rusobr.academic.web.dto.schoolClass.SchoolClassUpdateRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,7 +23,6 @@ public class SchoolClassController {
     private final SchoolClassService schoolClassService;
     private final ClassStudentService classStudentService;
 
-    // GET
     @GetMapping("/{id}")
     public SchoolClassResponse getById(@PathVariable Long id){
         return schoolClassService.findById(id);
@@ -29,54 +30,58 @@ public class SchoolClassController {
 
     @GetMapping("/{id}/details")
     public SchoolClassFullResponse getWithDetailsById(@PathVariable Long id){
-        return schoolClassService.findWithClassStudentById(id);
+        return schoolClassService.findWithStudentById(id);
     }
 
     @GetMapping("/search/by-student")
     public SchoolClassResponse getByStudentId(@RequestParam("studentId") @NotNull Long studentId) {
-        return schoolClassService.findByStudentId(studentId);
+        return schoolClassService.findByStudent(studentId);
+    }
+
+    @GetMapping("/by-academic-year/{id}")
+    public List<SchoolClassResponse> getByAcademicYear(@PathVariable Long id) {
+        return schoolClassService.findByAcademicYear(id);
     }
 
     @GetMapping
     public List<SchoolClassResponse> findAll() {
-        return schoolClassService.findAllClasses();
+        return schoolClassService.findAll();
     }
 
-    @GetMapping("/unassigned")
+    @GetMapping("/unassigned-students")
     public List<UserFeignResponse> getAllUnassignedStudents() {
         return classStudentService.getUnassignedStudents();
     }
 
-    // POST
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public SchoolClassResponse create(@RequestBody @Valid SchoolClassRequest schoolClassReq) {
         return schoolClassService.create(schoolClassReq);
     }
 
-    // PATCH
     @PatchMapping("/{id}")
-    public void update(@PathVariable @NotNull Long id, @RequestBody SchoolClassRequest schoolClassReq) {
-        schoolClassService.update(id, schoolClassReq);
+    public void update(@PathVariable Long id, @RequestBody @Valid SchoolClassUpdateRequest request) {
+        schoolClassService.update(id, request);
     }
 
-    @PatchMapping("/{classId}/add/{studentId}")
+    @PostMapping("/{classId}/students/{studentId}")
     public void addStudentToClass(@PathVariable Long classId, @PathVariable Long studentId) {
         classStudentService.addStudent(classId, studentId);
     }
 
-    @PatchMapping("/{classId}/remove/{studentId}")
+    @DeleteMapping("/{classId}/students/{studentId}")
     public void removeStudentToClass(@PathVariable Long classId, @PathVariable Long studentId) {
         classStudentService.removeStudent(classId, studentId);
     }
 
-    @PatchMapping("/{classId}/assign-teacher/{teacherId}")
+    @PutMapping("/{classId}/teacher/{teacherId}")
     public void assignTeacherToClass(@PathVariable Long classId, @PathVariable Long teacherId) {
         schoolClassService.assignTeacher(classId, teacherId);
     }
 
-    // DELETE
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable @NotNull Long id) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Long id) {
         schoolClassService.delete(id);
     }
 

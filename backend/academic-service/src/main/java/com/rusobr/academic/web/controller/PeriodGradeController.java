@@ -17,15 +17,15 @@ public class PeriodGradeController {
 
     @GetMapping("/by-student")
     public Map<String, List<PeriodGradeStudentResponse>> getByStudentId(@RequestParam Long studentId,
-                                                                        @RequestParam String schoolYear) {
-        return periodGradeService.getByStudentId(studentId, schoolYear);
+                                                                        @RequestParam Long academicYearId) {
+        return periodGradeService.getByStudentId(studentId, academicYearId);
     }
 
     @GetMapping("/by-assignment")
     public List<PeriodGradeTeacherResponse> getGradesByAssignment(@RequestParam Long teachingAssignmentId,
                                                                   @RequestParam Long currentAcademicPeriodId,
-                                                                  @RequestParam String schoolYear) {
-        return periodGradeService.getByAssignmentWithAverage(teachingAssignmentId, currentAcademicPeriodId, schoolYear);
+                                                                  @RequestParam Long academicYearId) {
+        return periodGradeService.getByAssignmentWithAverage(teachingAssignmentId, currentAcademicPeriodId, academicYearId);
     }
 
     @PostMapping

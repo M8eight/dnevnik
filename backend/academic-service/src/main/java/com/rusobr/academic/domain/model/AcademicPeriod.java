@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString
+@ToString(exclude = {"academicYear"})
 @Builder
 @Table(name = "academic_periods")
 @SQLRestriction("deleted_at is NULL")
@@ -24,7 +24,9 @@ public class AcademicPeriod extends BaseEntity {
 
     private String name;
 
-    private String schoolYear;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "academic_year_id",  nullable = false)
+    private AcademicYear academicYear;
 
     @Builder.Default
     private boolean closed = false;

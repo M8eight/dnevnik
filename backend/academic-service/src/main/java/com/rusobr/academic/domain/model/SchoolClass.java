@@ -14,7 +14,7 @@ import java.util.Set;
 @Table(name = "school_classes")
 @Getter
 @Setter
-@ToString(exclude = "students")
+@ToString(exclude = {"students", "academicYear"})
 @Builder
 @SQLRestriction("deleted_at is NULL")
 @SQLDelete(sql = "update school_classes set deleted_at = now() where id = ?")
@@ -25,7 +25,9 @@ public class SchoolClass extends BaseEntity {
 
     private String name;
 
-    private String schoolYear;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "academic_year_id",  nullable = false)
+    private AcademicYear academicYear;
 
     private Long classTeacherId;
 

@@ -21,8 +21,13 @@ public class AcademicPeriodController {
     }
 
     @GetMapping("/{id}")
-    public AcademicPeriodResponse getById(@PathVariable Long id){
+    public AcademicPeriodResponse getById(@PathVariable Long id) {
         return academicPeriodService.findById(id);
+    }
+
+    @GetMapping("/by-academic-year/{id}")
+    public List<AcademicPeriodResponse> getAllByAcademicYear(@PathVariable Long id) {
+        return academicPeriodService.getAllByAcademicYear(id);
     }
 
     @PatchMapping("/{id}/open")

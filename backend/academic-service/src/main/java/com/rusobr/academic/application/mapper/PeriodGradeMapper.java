@@ -21,6 +21,4 @@ public interface PeriodGradeMapper {
     @Mapping(target = "academicPeriodId", source = "academicPeriod.id")
     PeriodGradeStudentResponse toPeriodGradeStudentResponse(PeriodGrade periodGrade);
 
-    PeriodGradeResponse toPeriodGradeResponse(PeriodGradeProjection projection);
-
 }

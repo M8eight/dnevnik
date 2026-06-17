@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotNull;
 
 public record FinalGradeRequest(
         @NotNull Long studentId,
-        @NotNull String schoolYear,
+        @NotNull Long academicYearId,
         @NotNull Integer value,
         String description,
         @NotNull Long teachingAssignmentId
