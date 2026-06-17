@@ -1,4 +1,5 @@
 import api from "@/axios/axios";
+import type { AcademicYearResponse } from "./academic-year-service";
 
 
 export interface StudentMetadata {
@@ -39,7 +40,7 @@ export interface TeacherJournalResponse {
     academicPeriod: {
         id: number;
         name: string;
-        schoolYear: string;
+        academicYear: AcademicYearResponse;
         isClosed: boolean;
         startDate: string;
         endDate: string;

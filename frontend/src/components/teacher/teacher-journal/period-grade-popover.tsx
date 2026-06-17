@@ -1,5 +1,6 @@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useCreatePeriodGrade, useDeletePeriodGrade } from "@/hooks/use-period-grade";
+import { useJournalAccess } from "@/hooks/use-journal-access";
 import { GRADE_STYLE } from "@/constants/component-constants";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -16,9 +17,10 @@ export default function PeriodGradePopover({
   periodGrade,
   studentId,
   teachingAssignmentId,
-  academicPeriodId,
+  academicPeriodId
 }: PeriodGradePopoverProps) {
   const [open, setOpen] = useState(false);
+  const { isReadOnly } = useJournalAccess();
   const { mutate: create, isPending: isCreating } = useCreatePeriodGrade();
   const { mutate: remove, isPending: isDeleting } = useDeletePeriodGrade();
   const isPending = isCreating || isDeleting;
@@ -38,7 +40,13 @@ export default function PeriodGradePopover({
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open && !isReadOnly} onOpenChange={(newOpen) => {
+      if (isReadOnly) {
+        setOpen(false);
+      } else {
+        setOpen(newOpen);
+      }
+    }}>
       <PopoverTrigger asChild>
         <div className="w-full h-full flex items-center justify-center cursor-pointer group">
           {periodGrade ? (
@@ -56,38 +64,40 @@ export default function PeriodGradePopover({
         </div>
       </PopoverTrigger>
 
-      <PopoverContent className="w-[160px] p-3 rounded-2xl shadow-2xl border border-black/[0.06] bg-white/95 backdrop-blur-xl flex flex-col gap-3">
-        <p className="text-[9px] font-extrabold uppercase tracking-[0.2em] text-black/30 text-center">
-          Четвертная оценка
-        </p>
+      {!isReadOnly && (
+        <PopoverContent className="w-[160px] p-3 rounded-2xl shadow-2xl border border-black/[0.06] bg-white/95 backdrop-blur-xl flex flex-col gap-3">
+          <p className="text-[9px] font-extrabold uppercase tracking-[0.2em] text-black/30 text-center">
+            Четвертная оценка
+          </p>
 
-        <div className="grid grid-cols-4 gap-1.5">
-          {[2, 3, 4, 5].map((val) => (
+          <div className="grid grid-cols-4 gap-1.5">
+            {[2, 3, 4, 5].map((val) => (
+              <button
+                key={val}
+                onClick={() => handleGradeClick(val)}
+                disabled={isPending}
+                className={cn(
+                  "h-9 rounded-lg flex items-center justify-center font-serif text-[14px] font-bold border border-black/[0.05] transition-all hover:scale-105 active:scale-95 disabled:opacity-50",
+                  periodGrade?.value === val ? "ring-2 ring-[var(--navy)] ring-offset-1" : "",
+                  GRADE_STYLE[val]
+                )}
+              >
+                {val}
+              </button>
+            ))}
+          </div>
+
+          {periodGrade && (
             <button
-              key={val}
-              onClick={() => handleGradeClick(val)}
+              onClick={handleDelete}
               disabled={isPending}
-              className={cn(
-                "h-9 rounded-lg flex items-center justify-center font-serif text-[14px] font-bold border border-black/[0.05] transition-all hover:scale-105 active:scale-95 disabled:opacity-50",
-                periodGrade?.value === val ? "ring-2 ring-[var(--navy)] ring-offset-1" : "",
-                GRADE_STYLE[val]
-              )}
+              className="w-full py-1.5 text-[10px] font-bold text-red-400 hover:text-red-600 transition-colors bg-red-50/50 rounded-lg disabled:opacity-50"
             >
-              {val}
+              Удалить оценку
             </button>
-          ))}
-        </div>
-
-        {periodGrade && (
-          <button
-            onClick={handleDelete}
-            disabled={isPending}
-            className="w-full py-1.5 text-[10px] font-bold text-red-400 hover:text-red-600 transition-colors bg-red-50/50 rounded-lg disabled:opacity-50"
-          >
-            Удалить оценку
-          </button>
-        )}
-      </PopoverContent>
+          )}
+        </PopoverContent>
+      )}
     </Popover>
   );
 }

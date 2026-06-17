@@ -6,6 +6,7 @@ import {
     deleteAcademicPeriod,
     type AcademicPeriodRequest,
     type AcademicPeriodResponse,
+    findAcademicPeriodsByAcademicYear,
 } from "@/services/academic-period-service";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -15,6 +16,14 @@ export const useGetAcademicPeriods = () => {
     return useQuery<AcademicPeriodResponse[]>({
         queryKey: QUERY_KEY,
         queryFn: findAcademicPeriods,
+    });
+};
+
+export const useGetAcademicPeriodsByAcademicYear = (academicYearId: number) => {
+    return useQuery<AcademicPeriodResponse[]>({
+        queryKey: [...QUERY_KEY, academicYearId],
+        queryFn: () => findAcademicPeriodsByAcademicYear(academicYearId),
+        enabled: !!academicYearId,
     });
 };
 

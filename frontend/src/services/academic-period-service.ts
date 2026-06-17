@@ -1,9 +1,10 @@
 import api from "@/axios/axios";
+import type { AcademicYearResponse } from "./academic-year-service";
 
 export interface AcademicPeriodResponse {
     id: number;
     name: string;
-    schoolYear: string;
+    academicYear: AcademicYearResponse;
     isClosed: boolean;
     startDate: string;
     endDate: string;
@@ -11,13 +12,18 @@ export interface AcademicPeriodResponse {
 
 export interface AcademicPeriodRequest {
     name: string;
-    schoolYear: string;
+    academicYearId: number;
     startDate: string;
     endDate: string;
 }
 
 export const findAcademicPeriods = async (): Promise<AcademicPeriodResponse[]> => {
     const {data} = await api.get<AcademicPeriodResponse[]>(`/academic-service/api/v1/academic-periods`);
+    return data;
+}
+
+export const findAcademicPeriodsByAcademicYear = async (academicYearId: number): Promise<AcademicPeriodResponse[]> => {
+    const {data} = await api.get<AcademicPeriodResponse[]>(`/academic-service/api/v1/academic-periods/by-academic-year/${academicYearId}`);
     return data;
 }
 

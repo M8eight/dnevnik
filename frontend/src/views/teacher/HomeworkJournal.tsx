@@ -18,7 +18,7 @@ import { useLessonInstancesByTeachingAssignment } from "@/hooks/use-lesson-insta
 import { useGetAcademicPeriods } from "@/hooks/use-academic-period";
 import HomeworkCalendar from "@/components/teacher/homework-journal/homework-calendar";
 import DayDetailPanel from "@/components/teacher/homework-journal/day-detail-panel";
-import TeacherNavbar from "@/templates/navbars/TeacherNavbar";
+import TeacherNavbar from "@/components/layout/navbars/TeacherNavbar";
 
 
 export default function HomeworkJournal() {

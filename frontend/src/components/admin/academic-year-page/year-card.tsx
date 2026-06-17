@@ -1,7 +1,7 @@
 import { ACCENT_PALETTE } from "@/constants/component-constants";
 import { cn } from "@/lib/utils";
-import type { AcademicPeriodResponse } from "@/services/academic-period-service";
-import { Loader2, LockOpen, Lock, Trash2, CalendarDays } from "lucide-react";
+import type { AcademicYearResponse } from "@/services/academic-year-service";
+import { Loader2, Trash2, CalendarDays, CheckCircle2 } from "lucide-react";
 import { useState } from "react";
 
 function formatDate(iso: string) {
@@ -12,29 +12,29 @@ function formatDate(iso: string) {
     });
 }
 
-export default function PeriodCard({
-    period,
+export default function YearCard({
+    year,
     index,
     onDelete,
-    onToggle,
+    onToggleActive,
     isDeleting,
-    isToggling,
+    isSettingActive,
 }: {
-    period: AcademicPeriodResponse;
+    year: AcademicYearResponse;
     index: number;
     onDelete?: (id: number) => void;
-    onToggle?: (period: AcademicPeriodResponse) => void;
+    onToggleActive?: (year: AcademicYearResponse) => void;
     isDeleting: boolean;
-    isToggling: boolean;
+    isSettingActive: boolean;
 }) {
     const accent = ACCENT_PALETTE[index % ACCENT_PALETTE.length];
     const [confirmDelete, setConfirmDelete] = useState(false);
 
     const handleDeleteClick = () => {
-        if (!onDelete) return; // Защита на случай, если функции нет
+        if (!onDelete) return;
 
         if (confirmDelete) {
-            onDelete(period.id);
+            onDelete(year.id);
         } else {
             setConfirmDelete(true);
             setTimeout(() => setConfirmDelete(false), 3000);
@@ -58,50 +58,49 @@ export default function PeriodCard({
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                         <p className="font-black text-[var(--navy)] text-[15px] leading-snug truncate">
-                            {period.name}
+                            {year.name}
                         </p>
                         {/* Status badge */}
                         <span
                             className={cn(
                                 "text-[10px] font-extrabold px-2.5 py-0.5 rounded-full tracking-wider uppercase",
-                                period.isClosed
+                                !year.isActive
                                     ? "bg-black/5 text-black/35"
                                     : "bg-emerald-50 text-emerald-600 ring-1 ring-emerald-200"
                             )}
                         >
-                            {period.isClosed ? "Закрыта" : "Открыта"}
+                            {year.isActive ? "Активен" : "Архив"}
                         </span>
                     </div>
 
                     <div className="flex items-center gap-3 mt-1.5 flex-wrap">
                         <span className="text-[11px] font-semibold text-black/30">
-                            {formatDate(period.startDate)} — {formatDate(period.endDate)}
+                            {formatDate(year.startDate)} — {formatDate(year.endDate)}
                         </span>
                     </div>
                 </div>
 
-                {/* Actions (Показываем только если есть хотя бы один обработчик) */}
-                {(onToggle || onDelete) && (
+                {/* Actions */}
+                {(onToggleActive || onDelete) && (
                     <div className="flex items-center gap-1.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                        {/* Open / Close toggle */}
-                        {onToggle && (
+                        
+                        {/* Toggle Active Button (Теперь показывается всегда) */}
+                        {onToggleActive && (
                             <button
-                                onClick={() => onToggle(period)}
-                                disabled={isToggling}
-                                title={period.isClosed ? "Открыть четверть" : "Закрыть четверть"}
+                                onClick={() => onToggleActive(year)}
+                                disabled={isSettingActive}
+                                title={year.isActive ? "Перенести в архив (деактивировать)" : "Сделать год активным"}
                                 className={cn(
                                     "w-8 h-8 rounded-[10px] flex items-center justify-center transition-all",
-                                    period.isClosed
-                                        ? "bg-emerald-50 hover:bg-emerald-100 text-emerald-600"
-                                        : "bg-black/5 hover:bg-amber-50 text-black/35 hover:text-amber-500"
+                                    year.isActive
+                                        ? "bg-emerald-50 hover:bg-amber-50 text-emerald-600 hover:text-amber-500" // Зеленая, при наведении желтеет (типа отключаем)
+                                        : "bg-black/5 hover:bg-emerald-50 text-black/35 hover:text-emerald-500"   // Серая, при наведении зеленеет (включаем)
                                 )}
                             >
-                                {isToggling ? (
+                                {isSettingActive ? (
                                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                ) : period.isClosed ? (
-                                    <LockOpen className="w-3.5 h-3.5" />
                                 ) : (
-                                    <Lock className="w-3.5 h-3.5" />
+                                    <CheckCircle2 className="w-3.5 h-3.5" />
                                 )}
                             </button>
                         )}
@@ -111,7 +110,7 @@ export default function PeriodCard({
                             <button
                                 onClick={handleDeleteClick}
                                 disabled={isDeleting}
-                                title={confirmDelete ? "Нажмите ещё раз для подтверждения" : "Удалить четверть"}
+                                title={confirmDelete ? "Нажмите ещё раз для подтверждения" : "Удалить учебный год"}
                                 className={cn(
                                     "w-8 h-8 rounded-[10px] flex items-center justify-center transition-all",
                                     confirmDelete

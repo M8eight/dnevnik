@@ -1,10 +1,13 @@
 import { DAYS_MAP } from "@/constants/component-constants";
 import type { StudentFullDetailsResponse } from "@/services/student-service";
 import GradeBadge from "./grade-badge";
-import { subjectColor } from "@/helpers/student-helpers";
-import Chip from "@/components/teacher/teacher-journal/chip";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import Chip from "@/components/student/chip";
+import type { ScheduleItem, ScheduleResponse } from "@/services/schedule-service";
+import type { GradeWithSubjectNameResponse } from "@/services/grade-service";
+import type { HomeworkWithSubjectResponse } from "@/services/homework-service";
+import subjectColor from "./subject-color-helper";
 
 
 export function UserCard({ user }: { user: StudentFullDetailsResponse }) {
@@ -83,7 +86,7 @@ export function TeacherCard({ user }: { user?: StudentFullDetailsResponse }) {
   );
 }
 
-export function TodayScheduleCard({ schedule }: { schedule?: any[] }) {
+export function TodayScheduleCard({ schedule }: { schedule?: ScheduleItem[] }) {
   return (
     <div className="col-span-12 md:col-span-4 glass-card rounded-[22px] p-6 anim-in anim-delay-3">
       <Chip className="border-[var(--red)]/30 text-[var(--red)] bg-[var(--red-light)]/60">Сегодня</Chip>
@@ -106,7 +109,7 @@ export function TodayScheduleCard({ schedule }: { schedule?: any[] }) {
   );
 }
 
-export function TodayGradesCard({ grades }: { grades?: any[] }) {
+export function TodayGradesCard({ grades }: { grades?: GradeWithSubjectNameResponse[] }) {
   return (
     <div className="col-span-12 md:col-span-4 glass-card rounded-[22px] p-6 anim-in anim-delay-4">
       <Chip className="border-emerald-300/50 text-emerald-700 bg-emerald-50">Оценки за сегодня</Chip>
@@ -124,7 +127,7 @@ export function TodayGradesCard({ grades }: { grades?: any[] }) {
   );
 }
 
-export function HomeworkCard({ homework }: { homework?: any[] }) {
+export function HomeworkCard({ homework }: { homework?: HomeworkWithSubjectResponse[] }) {
   return (
     <div className="col-span-12 md:col-span-4 glass-card rounded-[22px] p-6 anim-in anim-delay-4">
       <Chip className="border-[var(--brown)]/30 text-[var(--brown)] bg-[var(--brown-light)]/60 mb-2">ДЗ на завтра</Chip>
@@ -143,7 +146,7 @@ export function HomeworkCard({ homework }: { homework?: any[] }) {
   );
 }
 
-export function WeekScheduleCard({ fullSchedule, currentDayOfWeek }: { fullSchedule?: any; currentDayOfWeek: string }) {
+export function WeekScheduleCard({ fullSchedule, currentDayOfWeek }: { fullSchedule?: ScheduleResponse; currentDayOfWeek: string }) {
   return (
     <div className="col-span-12 glass-card rounded-[22px] p-6 anim-in anim-delay-5">
       <Chip className="border-[var(--navy)]/20 text-[var(--navy)] bg-[var(--navy-light)]/30">
@@ -167,7 +170,7 @@ export function WeekScheduleCard({ fullSchedule, currentDayOfWeek }: { fullSched
               </p>
               <div className="flex flex-col gap-1">
                 {lessons.length > 0
-                  ? lessons.map((l: any) => (
+                  ? lessons.map((l: ScheduleItem) => (
                     <div key={l.id} className="flex items-center gap-1.5">
                       <span className={`w-1 h-1 rounded-full flex-shrink-0 ${isToday ? "bg-[var(--red)]" : "bg-black/20"}`} />
                       <span className={`text-[11px] font-semibold truncate ${isToday ? "text-[var(--navy)]" : "text-[var(--ink)]"}`}>

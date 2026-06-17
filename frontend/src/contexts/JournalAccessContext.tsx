@@ -1,0 +1,23 @@
+import { createContext } from "react";
+
+export interface AcademicPeriod {
+  id: number;
+  isClosed: boolean;
+  name: string;
+}
+
+export interface AcademicYear {
+  id: number;
+  isActive: boolean;
+  name: string;
+}
+
+export interface JournalAccessContextType {
+  isReadOnly: boolean;
+  isPeriodClosed: boolean;
+  isYearClosed: boolean;
+  closedReason: "year" | "period" | null;
+}
+
+// Создаем контекст ОДИН раз
+export const JournalAccessContext = createContext<JournalAccessContextType | null>(null);

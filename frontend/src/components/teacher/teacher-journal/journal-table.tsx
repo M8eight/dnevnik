@@ -3,11 +3,12 @@ import { useRef } from "react";
 import type { ViewMode } from "@/constants/component-constants";
 import { formatColDay, formatColDate, avgStyle, useHorizontalScrollDrag } from "@/helpers/teacher-helpers";
 import type { StudentJournalEntry } from "@/services/teacher-journal-service";
+import { useJournalAccess } from "@/hooks/use-journal-access";
 import GradePopover from "./grade-popover";
-import Chip from "./chip";
+import Chip from "@/components/student/chip";
 
 interface JournalTableProps {
-  sortedStudents: StudentJournalEntry["studentId"] extends number ? any[] : any[];
+  sortedStudents: any[];
   sortedLessons: any[];
   journalMap: Record<number, StudentJournalEntry>;
   isLoading: boolean;
@@ -27,9 +28,10 @@ export default function JournalTable({
   academicPeriodId,
   viewMode,
 }: JournalTableProps) {
+  const { isReadOnly } = useJournalAccess();
   const tableContainerRef = useRef<HTMLDivElement>(null);
   useHorizontalScrollDrag(tableContainerRef);
-    
+
   return (
     <div className="glass-card rounded-[22px] overflow-hidden anim-in border-none shadow-xl">
       <div
@@ -92,22 +94,35 @@ export default function JournalTable({
                         {student.lastName} {student.firstName}
                       </p>
                     </td>
-                    {sortedLessons.map((lesson) => (
-                      <td key={lesson.id} className="h-[70px] p-0 text-center border-r border-black/[0.05]">
-                        <GradePopover
-                          grade={entry?.grades.find((g) => g.lessonInstanceId === lesson.id)}
-                          attendance={entry?.attendances.find((a) => a.lessonInstanceId === lesson.id)}
-                          studentId={student.id}
-                          lessonInstanceId={lesson.id}
-                          academicPeriodId={academicPeriodId}
-                          gradeType={gradeType}
-                          gradeWeight={gradeWeight}
-                          viewMode={viewMode}
-                        />
-                      </td>
-                    ))}
+                    {sortedLessons.map((lesson) => {
+                      const grade = entry?.grades.find((g) => g.lessonInstanceId === lesson.id);
+                      const attendance = entry?.attendances.find((a) => a.lessonInstanceId === lesson.id);
+                      
+                      return (
+                        <td key={lesson.id} className="h-[70px] p-0 text-center border-r border-black/[0.05]">
+                          {isReadOnly ? (
+                            <div className="flex items-center justify-center w-full h-full text-[13px] font-bold text-[var(--navy)]/60 select-none">
+                              {grade?.value ?? attendance?.status ?? ""}
+                            </div>
+                          ) : (
+                            <GradePopover
+                              grade={grade}
+                              attendance={attendance}
+                              studentId={student.id}
+                              lessonInstanceId={lesson.id}
+                              academicPeriodId={academicPeriodId}
+                              gradeType={gradeType}
+                              gradeWeight={gradeWeight}
+                              viewMode={viewMode}
+                            />
+                          )}
+                        </td>
+                      );
+                    })}
                     <td className="sticky right-0 z-10 bg-white/95 group-hover:bg-slate-50/95 transition-colors text-center border-l border-black/[0.05]">
-                      <span className={`font-serif text-[16px] ${avgStyle(entry.gradesAverage)}`}>{entry.gradesAverage}</span>
+                      <span className={`font-serif text-[16px] ${avgStyle(entry?.gradesAverage)}`}>
+                        {entry?.gradesAverage}
+                      </span>
                     </td>
                   </tr>
                 );

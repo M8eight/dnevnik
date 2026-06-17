@@ -1,22 +1,18 @@
-import { useCreateAcademicPeriod } from "@/hooks/use-academic-period";
+import { useCreateAcademicYear } from "@/hooks/use-academic-year";
 import { Loader2, CheckCircle2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { Input } from "../../ui/input";
+import { Input } from "@/components/ui/input";
 
-export interface CreatePeriodFormProps {
-    academicYearId: number;
-}
-
-export default function CreatePeriodForm({ academicYearId }: CreatePeriodFormProps) {
+export default function CreateYearForm() {
     const [form, setForm] = useState({
         name: "",
-        academicYearId: academicYearId,
         startDate: "",
         endDate: "",
     });
     const [success, setSuccess] = useState(false);
-    const createMutation = useCreateAcademicPeriod();
+    
+    const createMutation = useCreateAcademicYear();
 
     const isValid =
         form.name.trim() &&
@@ -30,16 +26,16 @@ export default function CreatePeriodForm({ academicYearId }: CreatePeriodFormPro
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!isValid) return;
+        
         createMutation.mutate(
             {
                 name: form.name.trim(),
-                academicYearId: academicYearId,
                 startDate: form.startDate,
                 endDate: form.endDate,
             },
             {
                 onSuccess: () => {
-                    setForm({ name: "", academicYearId: academicYearId, startDate: "", endDate: "" });
+                    setForm({ name: "", startDate: "", endDate: "" });
                     setSuccess(true);
                     setTimeout(() => setSuccess(false), 2500);
                 },
@@ -55,10 +51,10 @@ export default function CreatePeriodForm({ academicYearId }: CreatePeriodFormPro
             {/* Name */}
             <div className="space-y-1.5">
                 <label className="text-xs font-bold tracking-widest uppercase text-black/30">
-                    Название
+                    Название года
                 </label>
                 <Input
-                    placeholder="Введите название четверти"
+                    placeholder="Например: 2024-2025"
                     value={form.name}
                     onChange={handleChange("name")}
                     disabled={createMutation.isPending}
@@ -107,11 +103,11 @@ export default function CreatePeriodForm({ academicYearId }: CreatePeriodFormPro
                 ) : success ? (
                     <>
                         <CheckCircle2 className="w-4 h-4" />
-                        Создана!
+                        Создан!
                     </>
                 ) : (
                     <>
-                        Создать четверть
+                        Добавить учебный год
                         <Send className="w-4 h-4" />
                     </>
                 )}

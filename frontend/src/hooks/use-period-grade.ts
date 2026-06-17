@@ -9,19 +9,19 @@ import {
 } from "@/services/period-grade-service";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
  
-export const usePeriodGradesByStudent = (studentId: number, schoolYear: string) => {
+export const usePeriodGradesByStudent = (studentId: number, academicYearId: number) => {
   return useQuery<PeriodGradesStudentResponse>({
-    queryKey: ["studentPeriodGrades", studentId, schoolYear],
-    queryFn: () => getPeriodGradesByStudent(studentId, schoolYear),
-    enabled: !!studentId && !!schoolYear,
+    queryKey: ["studentPeriodGrades", studentId, academicYearId],
+    queryFn: () => getPeriodGradesByStudent(studentId, academicYearId),
+    enabled: !!studentId && !!academicYearId,
   });
 };
 
-export const usePeriodGradesByAssignment = (teachingAssignmentId: number, currentAcademicPeriodId: number, schoolYear: string) => {
+export const usePeriodGradesByAssignment = (teachingAssignmentId: number, currentAcademicPeriodId: number, academicYearId: number) => {
   return useQuery<PeriodGradeTeacherResponse[]>({
-    queryKey: ["periodGrades", teachingAssignmentId, currentAcademicPeriodId, schoolYear],
-    queryFn: () => getPeriodGradesByAssignment(teachingAssignmentId, currentAcademicPeriodId, schoolYear),
-    enabled: !!teachingAssignmentId && !!currentAcademicPeriodId && !!schoolYear,
+    queryKey: ["periodGrades", teachingAssignmentId, currentAcademicPeriodId, academicYearId],
+    queryFn: () => getPeriodGradesByAssignment(teachingAssignmentId, currentAcademicPeriodId, academicYearId),
+    enabled: !!teachingAssignmentId && !!currentAcademicPeriodId && !!academicYearId,
   });
 };
 
