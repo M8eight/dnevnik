@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { getAvgGradeByStudentId, findAllGradesByDate, getGradesLessonsByStudentId, deleteGrade } from "@/services/grade-service"
-import type { AvgGrade, Grade } from "@/services/grade-service"
+import type { AvgGrade, GradeWithSubjectNameResponse } from "@/services/grade-service"
 
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { createGrade } from "@/services/grade-service"
@@ -44,7 +44,7 @@ export const useAvgGrade = (studentId: number, academicPeriodId: number) => {
 };
 
 export const useGradesByDate = (studentId: number, date: string) => {
-    return useQuery<Grade[]>({
+    return useQuery<GradeWithSubjectNameResponse[]>({
         queryKey: ['gradesByDate', studentId, date],
         queryFn: () => findAllGradesByDate(studentId, date),
         enabled: !!studentId && !!date,

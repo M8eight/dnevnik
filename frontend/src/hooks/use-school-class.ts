@@ -11,6 +11,9 @@ import {
     type SchoolClassRequest,
     getAllUnassignedStudents,
     assignTeacherToClass,
+    getSchoolClassesByAcademicYear,
+    type SchoolClassUpdateRequest,
+    type SchoolClassFullResponse,
 } from "@/services/school-class-service";
 import type { UserSimpleResponse } from "@/services/user-service";
 
@@ -24,8 +27,17 @@ export const useGetAllClasses = () => {
     });
 };
 
+export const useGetAllClassesByAcademicYear = (academicYearId: number) => {
+    return useQuery<SchoolClassResponse[]>({
+        queryKey: [...CLASS_QUERY_KEY, "by-academic-year", academicYearId],
+        queryFn: () => getSchoolClassesByAcademicYear(academicYearId),
+        staleTime: 1000 * 60 * 5,
+        enabled: !!academicYearId,
+    });
+};
+
 export const useGetClassDetails = (classId: number | null) => {
-    return useQuery({
+    return useQuery<SchoolClassFullResponse>({
         queryKey: [...CLASS_QUERY_KEY, "details", classId],
         queryFn: () => getSchoolClassDetails(classId!),
         enabled: classId !== null,
@@ -50,6 +62,9 @@ export const useCreateClass = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: CLASS_QUERY_KEY });
         },
+        onError: (error) => {
+            console.error('Failed to create class:', error);
+        },
     });
 };
 
@@ -57,10 +72,12 @@ export const useUpdateClass = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ id, data }: { id: number; data: Partial<SchoolClassRequest> }) =>
-            updateClass(id, data),
+        mutationFn: ({ id, data }: { id: number; data: SchoolClassUpdateRequest }) => updateClass(id, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: CLASS_QUERY_KEY });
+        },
+        onError: (error) => {
+            console.error('Failed to update class:', error);
         },
     });
 };
@@ -86,7 +103,7 @@ export const useAssignTeacherToClass = () => {
             queryClient.invalidateQueries({ queryKey: CLASS_QUERY_KEY });
         },
     });
-}
+};
 
 export const useAddStudentToClass = () => {
     const queryClient = useQueryClient();

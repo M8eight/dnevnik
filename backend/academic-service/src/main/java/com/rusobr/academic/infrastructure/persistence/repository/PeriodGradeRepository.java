@@ -23,26 +23,25 @@ public interface PeriodGradeRepository extends CrudRepository<PeriodGrade, Long>
             join fetch pg.academicPeriod ap
             join fetch pg.teachingAssignment ta
             join fetch ta.subject su
+            join ap.academicYear ay
             where pg.studentId = :studentId
-                and ap.schoolYear = :schoolYear
+                and ay.id = :academicYearId
             order by ap.startDate asc, su.name asc
     """)
-    List<PeriodGrade> findPeriodGradeByStudentId(@Param("studentId") Long studentId, @Param("schoolYear") String schoolYear);
+    List<PeriodGrade> findPeriodGradeByStudentId(@Param("studentId") Long studentId,
+                                                 @Param("academicYearId") Long academicYearId);
 
     @Query("""
-        select
-            per.id id,
-            per.value value,
-            per.description description,
-            per.studentId studentId,
-            ap.id academicPeriodId
+        select per
         from PeriodGrade per
-        join per.teachingAssignment ta
-        join per.academicPeriod ap
+        join fetch per.teachingAssignment ta
+        join fetch per.academicPeriod ap
+        join ap.academicYear ay
         where ta.id = :teachingAssignmentId
-            and ap.schoolYear = :schoolYear
+            and ay.id = :academicYearId
         order by ap.id asc
 """)
-    List<PeriodGradeProjection> findPeriodGradesByTeachingAssignmentId(@Param("teachingAssignmentId") Long teachingAssignmentId, @Param("schoolYear") String schoolYear);
+    List<PeriodGrade> findPeriodGradesByTeachingAssignmentId(@Param("teachingAssignmentId") Long teachingAssignmentId,
+                                                             @Param("academicYearId") Long academicYearId);
 
 }

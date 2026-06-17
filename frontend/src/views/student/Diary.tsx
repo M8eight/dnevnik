@@ -8,10 +8,10 @@ import { addDays } from "date-fns/addDays";
 import { format } from "date-fns/format";
 import { ru } from "date-fns/locale";
 import { nextWeek, prevWeek } from "@/store/slices/scheduleSlice";
-import Chip from "@/components/student/diary/chip";
+import Chip from "@/components/student/chip";
 import { RUSSIAN_DAYS } from "@/constants/component-constants";
 import { AttendanceBadge, GradeBadge } from "@/components/student/diary/badges";
-import StudentNavbar from "@/templates/navbars/StudentNavbar";
+import StudentNavbar from "@/components/layout/navbars/StudentNavbar";
 import type { DiaryScheduleDto } from "@/services/schedule-service";
 
 const DAY_ORDER = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];

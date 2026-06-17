@@ -40,6 +40,7 @@ export default function AdminNavbar() {
                             <NavItem to="/admin/school-class" label="Класс" />
                             <NavItem to="/admin/user" label="Пользователь" />
                             <NavItem to="/admin/schedule" label="Расписание" />
+                            <NavItem to="/admin/academic-year" label="Учебный год" />
                         </nav>
 
                         <div className="flex items-center gap-4">

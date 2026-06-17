@@ -1,7 +1,7 @@
 package com.rusobr.academic.infrastructure.persistence.repository;
 
 import com.rusobr.academic.domain.model.AcademicPeriod;
-import com.rusobr.academic.infrastructure.persistence.projection.AcademicPeriodProjection;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -18,18 +18,19 @@ public interface AcademicPeriodRepository extends JpaRepository<AcademicPeriod,L
     Optional<AcademicPeriod> findByDate(@Param("date") LocalDate date);
 
     @Query("""
-        select
-            ap.id id,
-            ap.name name,
-            ap.schoolYear schoolYear,
-            ap.closed isClosed,
-            ap.startDate startDate,
-            ap.endDate endDate
+        select ap
         from AcademicPeriod ap
+        join fetch ap.academicYear ay
         order by ap.startDate asc
     """)
-    List<AcademicPeriodProjection> findAllOrderAsc();
+    List<AcademicPeriod> findAllOrderAsc();
 
-    List<AcademicPeriod> findAcademicPeriodsBySchoolYear(String schoolYear);
+    @EntityGraph(attributePaths = {"academicYear"})
+    Optional<AcademicPeriod> findWithAcademicYearById(Long id);
+
+    @EntityGraph(attributePaths = {"academicYear"})
+    List<AcademicPeriod> findAllByAcademicYearIdOrderByStartDateAsc(Long academicYearId);
+
+    List<AcademicPeriod> findAcademicPeriodsByAcademicYearId(Long academicYearId);
 
 }

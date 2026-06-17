@@ -2,19 +2,19 @@ import { createFinalGrade, deleteFinalGrade, getFinalGradesByAssignment, getFina
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 
-export const useFinalGradesByStudent = ( studentId: number, schoolYear: string ) => {
+export const useFinalGradesByStudent = ( studentId: number, academicYearId: number ) => {
   return useQuery<FinalGradesStudentResponse>({
-    queryKey: ["finalGrades", studentId, schoolYear],
-    queryFn: () => getFinalGradesByStudent(studentId, schoolYear),
-    enabled: !!studentId && !!schoolYear,
+    queryKey: ["finalGrades", studentId, academicYearId],
+    queryFn: () => getFinalGradesByStudent(studentId, academicYearId),
+    enabled: !!studentId && !!academicYearId,
   });
 };
 
-export const useFinalGradesByAssignment = ( teachingAssignmentId: number, schoolYear: string ) => {
+export const useFinalGradesByAssignment = ( teachingAssignmentId: number, academicYearId: number ) => {
   return useQuery<FinalGradeTeacherResponse[]>({
-    queryKey: ["finalGrades", teachingAssignmentId, schoolYear],
-    queryFn: () => getFinalGradesByAssignment(teachingAssignmentId, schoolYear),
-    enabled: !!teachingAssignmentId && !!schoolYear,
+    queryKey: ["finalGrades", teachingAssignmentId, academicYearId],
+    queryFn: () => getFinalGradesByAssignment(teachingAssignmentId, academicYearId),
+    enabled: !!teachingAssignmentId && !!academicYearId,
   });
 };
 

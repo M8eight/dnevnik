@@ -5,7 +5,7 @@ import { useHomeworkByDate } from "@/hooks/use-homework";
 import { useStudentFullDetails } from "@/hooks/use-student";
 import { CurrentDate } from "@/helpers/student-helpers";
 import { UserCard, RatingCard, TeacherCard, TodayScheduleCard, TodayGradesCard, HomeworkCard, WeekScheduleCard } from "@/components/student/home/home-cards";
-import StudentNavbar from "@/templates/navbars/StudentNavbar";
+import StudentNavbar from "@/components/layout/navbars/StudentNavbar";
 
 
 function Home() {

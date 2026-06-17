@@ -7,8 +7,8 @@ import type { SchoolClassResponse } from "@/services/school-class-service";
 interface ClassCardProps {
     schoolClass: SchoolClassResponse;
     index: number;
-    onDelete: (id: number) => void;
-    onUpdate: (id: number, data: { name?: string; year?: string }) => void;
+    onDelete?: (id: number) => void;
+    onUpdate?: (id: number, data: { name: string; }) => void;
     onSelect: (id: number) => void;
     isDeleting?: boolean;
     isUpdating?: boolean;
@@ -27,19 +27,17 @@ export default function ClassCard({
 }: ClassCardProps) {
     const [editing, setEditing] = useState(false);
     const [name, setName] = useState(schoolClass.name);
-    const [year, setYear] = useState(schoolClass.schoolYear);
 
     const handleSave = (e: React.MouseEvent) => {
         e.stopPropagation();
-        if (!name.trim() || !year.trim()) return;
-        onUpdate(schoolClass.id, { name: name.trim(), year: year.trim() });
+        if (!name.trim() || !onUpdate) return; // Защита от вызова undefined
+        onUpdate(schoolClass.id, { name: name.trim() });
         setEditing(false);
     };
 
     const handleCancel = (e: React.MouseEvent) => {
         e.stopPropagation();
         setName(schoolClass.name);
-        setYear(schoolClass.schoolYear);
         setEditing(false);
     };
 
@@ -50,7 +48,7 @@ export default function ClassCard({
 
     const handleDeleteClick = (e: React.MouseEvent) => {
         e.stopPropagation();
-        onDelete(schoolClass.id);
+        if (onDelete) onDelete(schoolClass.id); // Защита от вызова undefined
     };
 
     return (
@@ -82,12 +80,6 @@ export default function ClassCard({
                             className="h-9 text-sm font-semibold bg-white/60 border-black/10 rounded-xl focus-visible:ring-[var(--red)] w-28"
                             autoFocus
                         />
-                        <Input
-                            value={year}
-                            onChange={(e) => setYear(e.target.value)}
-                            placeholder="2024-2025"
-                            className="h-9 text-sm bg-white/60 border-black/10 rounded-xl focus-visible:ring-[var(--red)] w-28"
-                        />
                     </div>
                 ) : (
                     <div className="min-w-0">
@@ -96,7 +88,7 @@ export default function ClassCard({
                         </p>
                         <p className="text-xs text-black/40 mt-0.5 flex items-center gap-1">
                             <GraduationCap className="w-3 h-3" />
-                            {schoolClass.schoolYear}
+                            {schoolClass.academicYear.name}
                         </p>
                     </div>
                 )}
@@ -109,7 +101,7 @@ export default function ClassCard({
                             size="icon"
                             variant="ghost"
                             onClick={handleSave}
-                            disabled={isUpdating || !name.trim() || !year.trim()}
+                            disabled={isUpdating || !name.trim()}
                             className="w-8 h-8 rounded-xl text-emerald-600 hover:bg-emerald-50"
                         >
                             {isUpdating ? (
@@ -130,27 +122,33 @@ export default function ClassCard({
                     </>
                 ) : (
                     <>
-                        <Button
-                            size="icon"
-                            variant="ghost"
-                            onClick={handleEditClick}
-                            className="w-8 h-8 rounded-xl text-black/30 hover:text-[var(--navy)] hover:bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                            <Pencil className="w-3.5 h-3.5" />
-                        </Button>
-                        <Button
-                            size="icon"
-                            variant="ghost"
-                            onClick={handleDeleteClick}
-                            disabled={isDeleting}
-                            className="w-8 h-8 rounded-xl text-black/30 hover:text-red-500 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                            {isDeleting ? (
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : (
-                                <Trash2 className="w-3.5 h-3.5" />
-                            )}
-                        </Button>
+                        {/* 2. Рендерим кнопки ТОЛЬКО если переданы функции (год не закрыт) */}
+                        {onUpdate && (
+                            <Button
+                                size="icon"
+                                variant="ghost"
+                                onClick={handleEditClick}
+                                className="w-8 h-8 rounded-xl text-black/30 hover:text-[var(--navy)] hover:bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                                <Pencil className="w-3.5 h-3.5" />
+                            </Button>
+                        )}
+                        
+                        {onDelete && (
+                            <Button
+                                size="icon"
+                                variant="ghost"
+                                onClick={handleDeleteClick}
+                                disabled={isDeleting}
+                                className="w-8 h-8 rounded-xl text-black/30 hover:text-red-500 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                                {isDeleting ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                )}
+                            </Button>
+                        )}
                     </>
                 )}
             </div>

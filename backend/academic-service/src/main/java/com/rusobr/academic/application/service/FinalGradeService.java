@@ -36,8 +36,8 @@ public class FinalGradeService {
     private final UserClient userClient;
 
     @Transactional(readOnly = true)
-    public Map<String, FinalGradeResponse> getByStudentId(Long studentId, String schoolYear) {
-        List<FinalGrade> finalGrades = finalGradeRepository.findFinalGradesByStudentId(studentId, schoolYear);
+    public Map<String, FinalGradeResponse> getByStudentId(Long studentId, Long academicYearId) {
+        List<FinalGrade> finalGrades = finalGradeRepository.findFinalGradesByStudentId(studentId, academicYearId);
         List<FinalGradeResponse> mappedFinalGrades = finalGrades.stream().map(finalGradeMapper::toFinalGradeResponse).toList();
         return mappedFinalGrades.stream()
                 .collect(Collectors.toMap(
@@ -47,8 +47,8 @@ public class FinalGradeService {
     }
 
     @Transactional(readOnly = true)
-    public List<FinalGradeTeacherResponse> getByAssignmentId(Long teachingAssignmentId, String schoolYear) {
-        List<FinalGrade> finalGrades = finalGradeRepository.findFinalGradesByTeachingAssignmentId(teachingAssignmentId, schoolYear);
+    public List<FinalGradeTeacherResponse> getByAssignmentId(Long teachingAssignmentId, Long academicYearId) {
+        List<FinalGrade> finalGrades = finalGradeRepository.findFinalGradesByTeachingAssignmentId(teachingAssignmentId, academicYearId);
         List<FinalGradeResponse> mappedFinalGrades = finalGrades.stream().map(finalGradeMapper::toFinalGradeResponse).toList();
         Map<Long, List<FinalGradeResponse>> finalGradesMap = mappedFinalGrades.stream().collect(Collectors.groupingBy(
                 FinalGradeResponse::studentId,
@@ -65,9 +65,10 @@ public class FinalGradeService {
 
     @Transactional
     public FinalGradeCreateResponse create(FinalGradeRequest finalGradeRequest) {
-        List<AcademicPeriod> academicPeriods = academicPeriodRepository.findAcademicPeriodsBySchoolYear(finalGradeRequest.schoolYear());
+
+        List<AcademicPeriod> academicPeriods = academicPeriodRepository.findAcademicPeriodsByAcademicYearId(finalGradeRequest.academicYearId());
         if (academicPeriods.isEmpty()) {
-            throw new ConflictException("Academic period not found with school year " + finalGradeRequest.schoolYear());
+            throw new ConflictException("Academic periods not found by academic year id " + finalGradeRequest.academicYearId());
         }
         academicPeriods.forEach(ap -> {
             if (!ap.isClosed()) {
@@ -85,12 +86,12 @@ public class FinalGradeService {
 
     @Transactional
     public void delete(Long id) {
-        FinalGrade finalGrade = finalGradeRepository.findById(id)
+        FinalGrade finalGrade = finalGradeRepository.findWithAcademicYearById(id)
                 .orElseThrow(() -> new NotFoundException("Final grade not found with id " + id));
 
-        List<AcademicPeriod> academicPeriods = academicPeriodRepository.findAcademicPeriodsBySchoolYear(finalGrade.getSchoolYear());
+        List<AcademicPeriod> academicPeriods = academicPeriodRepository.findAcademicPeriodsByAcademicYearId(finalGrade.getAcademicYear().getId());
         if (academicPeriods.isEmpty()) {
-            throw new ConflictException("Academic period not found with school year " + finalGrade.getSchoolYear());
+            throw new ConflictException("Academic period not found with school year " + finalGrade.getAcademicYear().getId());
         }
         academicPeriods.forEach(ap -> {
             if (!ap.isClosed()) {

@@ -2,6 +2,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { type ViewMode, GRADE_STYLE, ATTENDANCE_STYLE, ATTENDANCE_LABEL, ATTENDANCE_OPTIONS, GRADE_TYPES } from "@/constants/component-constants";
 import { useCreateAttendance, useDeleteAttendance } from "@/hooks/use-attendance";
 import { useCreateGrade, useDeleteGrade } from "@/hooks/use-grade";
+import { useJournalAccess } from "@/hooks/use-journal-access";
 import { cn } from "@/lib/utils";
 import type { GradeJournalDto, AttendanceJournalDto } from "@/services/teacher-journal-service";
 import { useState } from "react";
@@ -28,6 +29,7 @@ export default function GradePopover({
   viewMode,
 }: GradePopoverProps) {
   const [open, setOpen] = useState(false);
+  const { isReadOnly } = useJournalAccess();
 
   const { mutate: createGrade, isPending: isCreatingGrade } = useCreateGrade();
   const { mutate: deleteGrade, isPending: isDeletingGrade } = useDeleteGrade();
@@ -54,7 +56,13 @@ export default function GradePopover({
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open && !isReadOnly} onOpenChange={(newOpen) => {
+      if (isReadOnly) {
+        setOpen(false);
+      } else {
+        setOpen(newOpen);
+      }
+    }}>
       <PopoverTrigger asChild>
         <div className="w-full h-full flex flex-col items-center justify-center gap-1 py-1 cursor-pointer group">
           {showGrade && (
@@ -85,73 +93,75 @@ export default function GradePopover({
         </div>
       </PopoverTrigger>
 
-      <PopoverContent className="w-[200px] p-3 rounded-2xl shadow-2xl border border-black/[0.06] bg-white/95 backdrop-blur-xl flex flex-col gap-4">
-        {/* Grades section */}
-        <div className="space-y-2">
-          <p className="text-[9px] font-extrabold uppercase tracking-[0.2em] text-black/30 text-center">Оценка</p>
-          <div className="grid grid-cols-4 gap-1.5">
-            {[2, 3, 4, 5].map((val) => (
+      {!isReadOnly && (
+        <PopoverContent className="w-[200px] p-3 rounded-2xl shadow-2xl border border-black/[0.06] bg-white/95 backdrop-blur-xl flex flex-col gap-4">
+          {/* Grades section */}
+          <div className="space-y-2">
+            <p className="text-[9px] font-extrabold uppercase tracking-[0.2em] text-black/30 text-center">Оценка</p>
+            <div className="grid grid-cols-4 gap-1.5">
+              {[2, 3, 4, 5].map((val) => (
+                <button
+                  key={val}
+                  onClick={() => handleGradeClick(val)}
+                  disabled={isLoading}
+                  className={cn(
+                    "h-9 rounded-lg flex items-center justify-center font-serif text-[14px] font-bold border border-black/[0.05] transition-all hover:scale-105 active:scale-95 disabled:opacity-50",
+                    grade?.value === val ? "ring-2 ring-[var(--navy)] ring-offset-1" : "bg-white",
+                    GRADE_STYLE[val]
+                  )}
+                >
+                  {val}
+                </button>
+              ))}
+            </div>
+            {grade && (
               <button
-                key={val}
-                onClick={() => handleGradeClick(val)}
-                disabled={isLoading}
-                className={cn(
-                  "h-9 rounded-lg flex items-center justify-center font-serif text-[14px] font-bold border border-black/[0.05] transition-all hover:scale-105 active:scale-95 disabled:opacity-50",
-                  grade?.value === val ? "ring-2 ring-[var(--navy)] ring-offset-1" : "bg-white",
-                  GRADE_STYLE[val]
-                )}
+                onClick={() => deleteGrade(grade.gradeId, { onSuccess: close })}
+                className="w-full py-1.5 text-[10px] font-bold text-red-400 hover:text-red-600 transition-colors bg-red-50/50 rounded-lg"
               >
-                {val}
+                Удалить оценку
               </button>
-            ))}
+            )}
           </div>
-          {grade && (
-            <button
-              onClick={() => deleteGrade(grade.gradeId, { onSuccess: close })}
-              className="w-full py-1.5 text-[10px] font-bold text-red-400 hover:text-red-600 transition-colors bg-red-50/50 rounded-lg"
-            >
-              Удалить оценку
-            </button>
-          )}
-        </div>
 
-        <div className="h-px bg-black/[0.06]" />
+          <div className="h-px bg-black/[0.06]" />
 
-        {/* Attendance section */}
-        <div className="space-y-2">
-          <p className="text-[9px] font-extrabold uppercase tracking-[0.2em] text-black/30 text-center">Посещаемость</p>
-          <div className="grid grid-cols-4 gap-1.5">
-            {ATTENDANCE_OPTIONS.map((opt) => (
+          {/* Attendance section */}
+          <div className="space-y-2">
+            <p className="text-[9px] font-extrabold uppercase tracking-[0.2em] text-black/30 text-center">Посещаемость</p>
+            <div className="grid grid-cols-4 gap-1.5">
+              {ATTENDANCE_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => handleAttendanceClick(opt.value)}
+                  disabled={isLoading}
+                  className={cn(
+                    "h-9 rounded-lg flex items-center justify-center font-extrabold text-[11px] border border-black/[0.05] transition-all hover:scale-105 active:scale-95 disabled:opacity-50",
+                    attendance?.status === opt.value ? "ring-2 ring-[var(--navy)] ring-offset-1" : "bg-white",
+                    ATTENDANCE_STYLE[opt.label]
+                  )}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+            {attendance && (
               <button
-                key={opt.value}
-                onClick={() => handleAttendanceClick(opt.value)}
-                disabled={isLoading}
-                className={cn(
-                  "h-9 rounded-lg flex items-center justify-center font-extrabold text-[11px] border border-black/[0.05] transition-all hover:scale-105 active:scale-95 disabled:opacity-50",
-                  attendance?.status === opt.value ? "ring-2 ring-[var(--navy)] ring-offset-1" : "bg-white",
-                  ATTENDANCE_STYLE[opt.label]
-                )}
+                onClick={() => deleteAttendance(attendance.attendanceId, { onSuccess: close })}
+                className="w-full py-1.5 text-[10px] font-bold text-red-400 hover:text-red-600 transition-colors bg-red-50/50 rounded-lg"
               >
-                {opt.label}
+                Удалить отметку
               </button>
-            ))}
+            )}
           </div>
-          {attendance && (
-            <button
-              onClick={() => deleteAttendance(attendance.attendanceId, { onSuccess: close })}
-              className="w-full py-1.5 text-[10px] font-bold text-red-400 hover:text-red-600 transition-colors bg-red-50/50 rounded-lg"
-            >
-              Удалить отметку
-            </button>
-          )}
-        </div>
 
-        {!grade && (
-          <p className="text-[8px] text-black/30 text-center italic">
-            Вес: {gradeWeight} • {GRADE_TYPES.find((t) => t.value === gradeType)?.label}
-          </p>
-        )}
-      </PopoverContent>
+          {!grade && (
+            <p className="text-[8px] text-black/30 text-center italic">
+              Вес: {gradeWeight} • {GRADE_TYPES.find((t) => t.value === gradeType)?.label}
+            </p>
+          )}
+        </PopoverContent>
+      )}
     </Popover>
   );
 }

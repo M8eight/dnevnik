@@ -11,8 +11,8 @@ import {
     useGetUnassignedStudents,
     useAssignTeacherToClass,
 } from "@/hooks/use-school-class";
-import { useFindUsersByFilter } from "@/hooks/use-user"; 
-import type { UserResponse } from "@/services/user-service"; 
+import { useFindUsersByFilter } from "@/hooks/use-user";
+import type { UserResponse, UserSimpleResponse } from "@/services/user-service";
 
 interface ClassDetailModalProps {
     classId: number | null;
@@ -39,8 +39,8 @@ function TeacherPicker({
     onSelect,
 }: {
     placeholder: string;
-    value: UserResponse | null;
-    onSelect: (user: UserResponse) => void;
+    value: UserSimpleResponse | null;
+    onSelect: (user: UserSimpleResponse) => void;
 }) {
     const [open, setOpen] = useState(false);
     const [search, setSearch] = useState("");
@@ -132,8 +132,8 @@ function StudentPicker({
     onSelect,
 }: {
     placeholder: string;
-    value: any | null;
-    onSelect: (user: any) => void;
+    value: UserSimpleResponse | null;
+    onSelect: (user: UserSimpleResponse) => void;
 }) {
     const [open, setOpen] = useState(false);
     const [search, setSearch] = useState("");
@@ -149,7 +149,7 @@ function StudentPicker({
         return () => document.removeEventListener("mousedown", handler);
     }, []);
 
-    const handleSelect = (u: any) => {
+    const handleSelect = (u: UserSimpleResponse) => {
         setOpen(false);
         setSearch("");
         onSelect(u);
@@ -225,22 +225,15 @@ function StudentPicker({
 // ─── Main modal ──────────────────────────────────────────────────────────────
 
 export default function ClassDetailModal({ classId, className, onClose }: ClassDetailModalProps) {
-    const [newTeacher, setNewTeacher] = useState<UserResponse | null>(null);
-    const [newStudent, setNewStudent] = useState<any | null>(null);
+    const [newTeacher, setNewTeacher] = useState<UserSimpleResponse | null>(null);
+    const [newStudent, setNewStudent] = useState<UserSimpleResponse | null>(null);
 
     const { data: details, isLoading } = useGetClassDetails(classId);
     const addMutation = useAddStudentToClass();
     const removeMutation = useRemoveStudentFromClass();
-    const assignTeacherMutation = useAssignTeacherToClass(); 
+    const assignTeacherMutation = useAssignTeacherToClass();
 
     const isOpen = classId !== null;
-
-    useEffect(() => {
-        if (!isOpen) {
-            setNewTeacher(null);
-            setNewStudent(null);
-        }
-    }, [isOpen]);
 
     const handleAddStudent = () => {
         if (!classId || !newStudent) return;
@@ -268,9 +261,8 @@ export default function ClassDetailModal({ classId, className, onClose }: ClassD
             {/* Backdrop */}
             <div
                 onClick={onClose}
-                className={`fixed inset-0 z-40 bg-black/30 backdrop-blur-[3px] transition-opacity duration-200 ${
-                    isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-                }`}
+                className={`fixed inset-0 z-40 bg-black/30 backdrop-blur-[3px] transition-opacity duration-200 ${isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+                    }`}
             />
 
             {/* Modal Wrapper */}
@@ -280,8 +272,8 @@ export default function ClassDetailModal({ classId, className, onClose }: ClassD
                         bg-white/90 backdrop-blur-2xl rounded-[32px] border border-black/8 shadow-2xl
                         transition-all duration-300 ease-[cubic-bezier(.32,.72,0,1)] overflow-hidden
                         
-                        ${isOpen 
-                            ? "opacity-100 scale-100 translate-y-0 pointer-events-auto" 
+                        ${isOpen
+                            ? "opacity-100 scale-100 translate-y-0 pointer-events-auto"
                             : "opacity-0 scale-95 translate-y-4 pointer-events-none"
                         }`}
                 >
@@ -326,14 +318,23 @@ export default function ClassDetailModal({ classId, className, onClose }: ClassD
                                         <UserRound className="w-5 h-5 text-[var(--navy)]" />
                                     </div>
                                     <div className="min-w-0 flex-1">
-                                        <p className="font-bold text-sm text-[var(--navy)] truncate">
-                                            {details.teacher.user.firstName} {details.teacher.user.lastName}
-                                        </p>
-                                        {details.teacher.teacherDetails?.email && (
-                                            <p className="text-xs text-black/40 mt-0.5 truncate">
-                                                {details.teacher.teacherDetails.email}
+                                        {(details.teacher) ? (
+                                            <>
+                                                <p className="font-bold text-sm text-[var(--navy)] truncate">
+                                                    {details.teacher.user.firstName} {details.teacher.user.lastName}
+                                                </p>
+                                                {details.teacher.teacherDetails?.email && (
+                                                    <p className="text-xs text-black/40 mt-0.5 truncate">
+                                                        {details.teacher.teacherDetails.email}
+                                                    </p>
+                                                )}
+                                            </>
+                                        ) : (
+                                            <p className="font-bold text-sm text-[var(--navy)]">
+                                                Не назначен
                                             </p>
                                         )}
+
                                     </div>
                                 </div>
                                 <div className="flex gap-2">

@@ -20,7 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { UserResponse, UserRole } from "@/services/user-service";
-import AdminNavbar from "@/templates/navbars/AdminNavbar";
+import AdminNavbar from "@/components/layout/navbars/AdminNavbar";
 import { ROLES } from "@/constants/component-constants";
 import AssignStudentsModal from "@/components/admin/user-admin-page/assign-students-modal";
 import CreateUserForm from "@/components/admin/user-admin-page/create-user-form";

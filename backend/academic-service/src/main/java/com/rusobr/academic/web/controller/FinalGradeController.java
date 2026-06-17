@@ -19,14 +19,14 @@ public class FinalGradeController {
     private final FinalGradeService finalGradeService;
 
     @GetMapping("/by-student")
-    public Map<String, FinalGradeResponse> getByStudentId(@RequestParam Long studentId, @RequestParam String schoolYear) {
-        return finalGradeService.getByStudentId(studentId, schoolYear);
+    public Map<String, FinalGradeResponse> getByStudentId(@RequestParam Long studentId, @RequestParam Long academicYearId) {
+        return finalGradeService.getByStudentId(studentId, academicYearId);
     }
 
     @GetMapping("/by-assignment")
     public List<FinalGradeTeacherResponse> getByAssignmentId(@RequestParam Long teachingAssignmentId,
-                                                             @RequestParam String schoolYear) {
-        return finalGradeService.getByAssignmentId(teachingAssignmentId, schoolYear);
+                                                             @RequestParam Long academicYearId) {
+        return finalGradeService.getByAssignmentId(teachingAssignmentId, academicYearId);
     }
 
     @PostMapping

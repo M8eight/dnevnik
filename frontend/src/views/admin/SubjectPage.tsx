@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { SubjectResponse } from "@/services/subject-service";
-import AdminNavbar from "@/templates/navbars/AdminNavbar";
+import AdminNavbar from "@/components/layout/navbars/AdminNavbar";
 import CreateSubjectForm from "@/components/admin/subject-page/create-subject-form";
 import SubjectCard from "@/components/admin/subject-page/subject-card";
 

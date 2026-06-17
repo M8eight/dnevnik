@@ -4,10 +4,14 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Input } from "../../ui/input";
 
-export default function CreatePeriodForm() {
+export interface CreatePeriodFormProps {
+    academicYearId: number;
+}
+
+export default function CreatePeriodForm({ academicYearId }: CreatePeriodFormProps) {
     const [form, setForm] = useState({
         name: "",
-        schoolYear: "",
+        academicYearId: academicYearId,
         startDate: "",
         endDate: "",
     });
@@ -16,7 +20,6 @@ export default function CreatePeriodForm() {
 
     const isValid =
         form.name.trim() &&
-        form.schoolYear.trim() &&
         form.startDate &&
         form.endDate;
 
@@ -30,13 +33,13 @@ export default function CreatePeriodForm() {
         createMutation.mutate(
             {
                 name: form.name.trim(),
-                schoolYear: form.schoolYear.trim(),
+                academicYearId: academicYearId,
                 startDate: form.startDate,
                 endDate: form.endDate,
             },
             {
                 onSuccess: () => {
-                    setForm({ name: "", schoolYear: "", startDate: "", endDate: "" });
+                    setForm({ name: "", academicYearId: academicYearId, startDate: "", endDate: "" });
                     setSuccess(true);
                     setTimeout(() => setSuccess(false), 2500);
                 },
@@ -58,20 +61,6 @@ export default function CreatePeriodForm() {
                     placeholder="Введите название четверти"
                     value={form.name}
                     onChange={handleChange("name")}
-                    disabled={createMutation.isPending}
-                    className={fieldClass}
-                />
-            </div>
-
-            {/* School year */}
-            <div className="space-y-1.5">
-                <label className="text-xs font-bold tracking-widest uppercase text-black/30">
-                    Учебный год
-                </label>
-                <Input
-                    placeholder="Например: 2024-2025"
-                    value={form.schoolYear}
-                    onChange={handleChange("schoolYear")}
                     disabled={createMutation.isPending}
                     className={fieldClass}
                 />

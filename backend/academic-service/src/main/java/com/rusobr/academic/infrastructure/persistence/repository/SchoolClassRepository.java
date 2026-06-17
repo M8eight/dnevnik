@@ -1,8 +1,6 @@
 package com.rusobr.academic.infrastructure.persistence.repository;
 
 import com.rusobr.academic.domain.model.SchoolClass;
-import com.rusobr.academic.infrastructure.persistence.projection.SchoolClassProjection;
-import com.rusobr.academic.web.dto.schoolClass.SchoolClassResponse;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -21,19 +19,16 @@ public interface SchoolClassRepository extends JpaRepository<SchoolClass, Long> 
                 join sc.students s
                 where sc.id = :classId
             """)
-    List<Long> getStudentIdsFromSchoolClasses(@Param("classId") Long classId);
+    List<Long> findStudentIdsFromSchoolClasses(@Param("classId") Long classId);
 
     @Query("""
-            select
-                 sc.id id,
-                 sc.name name,
-                 sc.schoolYear schoolYear,
-                 sc.classTeacherId classTeacherId
-            from ClassStudent cs
-            join cs.schoolClass sc
+            select sc
+            from SchoolClass sc
+            join sc.students cs
+            join fetch sc.academicYear
             where cs.studentId = :studentId
             """)
-    Optional<SchoolClassProjection> getSchoolClassByStudentId(@Param("studentId") Long studentId);
+    Optional<SchoolClass> findSchoolClassByStudentId(@Param("studentId") Long studentId);
 
     @Query("""
             select cs.studentId
@@ -44,13 +39,20 @@ public interface SchoolClassRepository extends JpaRepository<SchoolClass, Long> 
 """)
     List<Long> findStudentsIdsByTeachingAssignment(@Param("teachingAssignmentId") Long teachingAssignmentId);
 
-    List<SchoolClassProjection> findAllByOrderByNameAsc();
+    List<SchoolClass> findAllByAcademicYearIdOrderByNameAsc(Long academicYearId);
 
-    boolean existsByName(String name);
+    @EntityGraph(attributePaths = {"academicYear"})
+    List<SchoolClass> findAllByOrderByNameAsc();
+
+    boolean existsByNameAndAcademicYearId(String name, Long academicYearId);
 
     boolean existsByNameAndIdNot(String name, Long id);
 
     @EntityGraph(attributePaths = {"students"})
     Optional<SchoolClass> findWithClassStudentById(Long id);
+    boolean existsByNameAndAcademicYearIdAndIdNot(String name, Long academicYearId, Long id);
+
+    @EntityGraph(attributePaths = {"academicYear"})
+    Optional<SchoolClass> findWithAcademicYearById(Long id);
 
 }

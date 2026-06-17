@@ -1,10 +1,10 @@
 import api from "@/axios/axios";
 import { type PageResponse } from "@/helpers/helper-interfaces";
 
-export interface Homework {
-    id: number;
-    text: string;
-    subjectName: string;
+export interface HomeworkWithSubjectResponse {
+    id: number,
+    text: string,
+    subjectName: string,
 }
 
 export interface HomeworkResponse {
@@ -21,8 +21,8 @@ export interface HomeworkRequest {
     lessonInstanceId: number;
 }
 
-export const getHomeworkByDate = async (date: string, studentId: number): Promise<Homework[]> => {
-    const { data } = await api.get<Homework[]>(`/academic-service/api/v1/homeworks/by-date?date=${date}&studentId=${studentId}`);
+export const getHomeworkByDate = async (date: string, studentId: number): Promise<HomeworkWithSubjectResponse[]> => {
+    const { data } = await api.get<HomeworkWithSubjectResponse[]>(`/academic-service/api/v1/homeworks/by-date?date=${date}&studentId=${studentId}`);
     return data;
 }
 
