@@ -56,7 +56,7 @@ class PeriodGradeServiceTest {
     private static final Long STUDENT_ID = 42L;
     private static final Long ASSIGNMENT_ID = 7L;
     private static final Long PERIOD_ID = 1L;
-    private static final String SCHOOL_YEAR = "2026-2027";
+    private static final Long ACADEMIC_YEAR_ID = 1L;
 
     @Nested
     @DisplayName("getByStudentId")
@@ -72,7 +72,7 @@ class PeriodGradeServiceTest {
             PeriodGradeStudentResponse response2 = new PeriodGradeStudentResponse(2L, 4, "II четверть", "Алгебра", PERIOD_ID);
             PeriodGradeStudentResponse response3 = new PeriodGradeStudentResponse(3L, 5, "I четверть", "Физика", PERIOD_ID);
 
-            when(periodGradeRepository.findPeriodGradeByStudentId(STUDENT_ID, SCHOOL_YEAR))
+            when(periodGradeRepository.findPeriodGradeByStudentId(STUDENT_ID, 1L))
                     .thenReturn(List.of(grade1, grade1, grade2)); // Передаем 3 сырых сущности
 
             // Настраиваем маппер на возврат DTO с нужными названиями предметов
@@ -82,7 +82,7 @@ class PeriodGradeServiceTest {
             when(periodGradeMapper.toPeriodGradeStudentResponse(grade2))
                     .thenReturn(response2);
 
-            Map<String, List<PeriodGradeStudentResponse>> result = service.getByStudentId(STUDENT_ID, SCHOOL_YEAR);
+            Map<String, List<PeriodGradeStudentResponse>> result = service.getByStudentId(STUDENT_ID, 1L);
 
             assertThat(result).hasSize(2);
             assertThat(result.get("Алгебра")).hasSize(2).containsExactly(response1, response2);
@@ -97,14 +97,20 @@ class PeriodGradeServiceTest {
         @Test
         @DisplayName("успешно собирает данные студентов с итоговыми оценками и средним баллом")
         void success() {
+            // Given
             LocalDate startDate = LocalDate.of(2026, 9, 1);
             LocalDate endDate = LocalDate.of(2026, 11, 1);
             AcademicPeriod period = AcademicPeriod.builder().startDate(startDate).endDate(endDate).build();
 
             UserFeignResponse user = new UserFeignResponse(STUDENT_ID, "Иван", "Иванов", "ivan", "key");
 
-            // Мокаем проекции и DTO
-            PeriodGradeProjection pgProjection = mock(PeriodGradeProjection.class);
+            // ИСПРАВЛЕНО: Создаем ОДИН экземпляр сущности, чтобы передавать его в моки по ссылке
+            PeriodGrade periodGrade = PeriodGrade.builder()
+                    .id(1L)
+                    .value(5)
+                    .studentId(STUDENT_ID)
+                    .build();
+
             PeriodGradeResponse pgResponse = new PeriodGradeResponse(10L, 5, "I четверть", STUDENT_ID, PERIOD_ID);
 
             StudentAverageProjection avgProjection = mock(StudentAverageProjection.class);
@@ -114,23 +120,27 @@ class PeriodGradeServiceTest {
             when(teachingAssignmentService.getStudentIdsByTeachingAssignmentId(ASSIGNMENT_ID)).thenReturn(List.of(STUDENT_ID));
             when(userClient.getBatchUsers(List.of(STUDENT_ID))).thenReturn(List.of(user));
 
-            when(periodGradeRepository.findPeriodGradesByTeachingAssignmentId(ASSIGNMENT_ID, SCHOOL_YEAR))
-                    .thenReturn(List.of(pgProjection));
-            when(periodGradeMapper.toPeriodGradeResponse(pgProjection)).thenReturn(pgResponse);
+            // ИСПРАВЛЕНО: Заменили 1L на константу ACADEMIC_YEAR_ID
+            when(periodGradeRepository.findPeriodGradesByTeachingAssignmentId(ASSIGNMENT_ID, ACADEMIC_YEAR_ID))
+                    .thenReturn(List.of(periodGrade));
+
+            // ИСПРАВЛЕНО: Передаем ту же самую переменную periodGrade
+            when(periodGradeMapper.toPeriodGradeResponse(periodGrade)).thenReturn(pgResponse);
 
             when(gradeRepository.findAverageStudentsByTeachingAssignment(ASSIGNMENT_ID, startDate, endDate))
                     .thenReturn(List.of(avgProjection));
             when(gradeMapper.toStudentAverageDto(avgProjection)).thenReturn(avgDto);
 
-            List<PeriodGradeTeacherResponse> result = service.getByAssignmentWithAverage(ASSIGNMENT_ID, PERIOD_ID, SCHOOL_YEAR);
+            // When
+            List<PeriodGradeTeacherResponse> result = service.getByAssignmentWithAverage(ASSIGNMENT_ID, PERIOD_ID, ACADEMIC_YEAR_ID);
 
+            // Then
             assertThat(result).hasSize(1);
             PeriodGradeTeacherResponse teacherResponse = result.get(0);
             assertThat(teacherResponse.user()).isEqualTo(user);
             assertThat(teacherResponse.periodGrades()).containsExactly(pgResponse);
             assertThat(teacherResponse.currentAverage()).isEqualTo(4.75);
         }
-    }
 
     @Nested
     @DisplayName("create")
@@ -199,4 +209,5 @@ class PeriodGradeServiceTest {
             verify(periodGradeRepository, never()).delete(any());
         }
     }
+}
 }

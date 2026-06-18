@@ -1,16 +1,14 @@
 package com.rusobr.academic.service;
 
-import com.rusobr.academic.application.service.AcademicYearService;
 import com.rusobr.academic.application.mapper.AcademicYearMapper;
+import com.rusobr.academic.application.service.AcademicYearService;
 import com.rusobr.academic.domain.model.AcademicYear;
 import com.rusobr.academic.infrastructure.persistence.repository.AcademicYearRepository;
 import com.rusobr.academic.web.dto.academicYear.AcademicYearRequest;
 import com.rusobr.academic.web.dto.academicYear.AcademicYearResponse;
 import com.rusobr.academic.web.exception.ConflictException;
 import com.rusobr.academic.web.exception.NotFoundException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,12 +19,10 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("AcademicYearService tests")
 class AcademicYearServiceTest {
 
     @Mock
@@ -38,272 +34,260 @@ class AcademicYearServiceTest {
     @InjectMocks
     private AcademicYearService academicYearService;
 
-    private AcademicYear testAcademicYear;
-    private AcademicYearRequest testRequest;
-    private AcademicYearResponse testResponse;
+    private static final Long ACADEMIC_YEAR_ID = 1L;
 
-    @BeforeEach
-    void setUp() {
-        LocalDate startDate = LocalDate.of(2023, 9, 1);
-        LocalDate endDate = LocalDate.of(2024, 6, 30);
+    // ─────────────────────────────────────────────
+    // Builders
+    // ─────────────────────────────────────────────
 
-        testAcademicYear = AcademicYear.builder()
-                .id(1L)
-                .name("2023-2024")
-                .description("Academic year 2023-2024")
-                .startDate(startDate)
-                .endDate(endDate)
-                .isActive(true)
-                .build();
+    private AcademicYear buildAcademicYear(boolean isActive) {
+        AcademicYear year = new AcademicYear();
+        year.setId(ACADEMIC_YEAR_ID);
+        year.setName("2024-2025");
+        year.setDescription("Description");
+        year.setStartDate(LocalDate.of(2024, 9, 1));
+        year.setEndDate(LocalDate.of(2025, 5, 31));
+        year.setIsActive(isActive);
+        return year;
+    }
 
-        testRequest = new AcademicYearRequest(
-                "2023-2024",
-                "Academic year 2023-2024",
-                startDate,
-                endDate
-        );
-
-        testResponse = new AcademicYearResponse(
-                1L,
-                "2023-2024",
-                "Academic year 2023-2024",
-                startDate,
-                endDate,
-                true
+    private AcademicYearResponse buildResponse(boolean isActive) {
+        return new AcademicYearResponse(
+                ACADEMIC_YEAR_ID,
+                "2024-2025",
+                "Description",
+                LocalDate.of(2024, 9, 1),
+                LocalDate.of(2025, 5, 31),
+                isActive
         );
     }
 
-    @Nested
-    @DisplayName("Get operations")
-    class GetOperations {
-
-        @Test
-        @DisplayName("Should return all academic years")
-        void shouldReturnAllAcademicYears() {
-            // Given
-            List<AcademicYear> academicYears = List.of(testAcademicYear);
-            List<AcademicYearResponse> responses = List.of(testResponse);
-
-            when(academicYearRepository.findAll()).thenReturn(academicYears);
-            when(academicYearMapper.toResponse(testAcademicYear)).thenReturn(testResponse);
-
-            // When
-            List<AcademicYearResponse> result = academicYearService.getAll();
-
-            // Then
-            assertEquals(1, result.size());
-            assertEquals(testResponse, result.get(0));
-            verify(academicYearRepository, times(1)).findAll();
-            verify(academicYearMapper, times(1)).toResponse(testAcademicYear);
-        }
-
-        @Test
-        @DisplayName("Should return academic year by id")
-        void shouldReturnAcademicYearById() {
-            // Given
-            when(academicYearRepository.findById(1L)).thenReturn(Optional.of(testAcademicYear));
-            when(academicYearMapper.toResponse(testAcademicYear)).thenReturn(testResponse);
-
-            // When
-            AcademicYearResponse result = academicYearService.findById(1L);
-
-            // Then
-            assertNotNull(result);
-            assertEquals(testResponse, result);
-            verify(academicYearRepository, times(1)).findById(1L);
-        }
-
-        @Test
-        @DisplayName("Should throw NotFoundException when academic year not found")
-        void shouldThrowNotFoundExceptionWhenAcademicYearNotFound() {
-            // Given
-            when(academicYearRepository.findById(999L)).thenReturn(Optional.empty());
-
-            // When & Then
-            assertThrows(NotFoundException.class, () -> academicYearService.findById(999L));
-            verify(academicYearRepository, times(1)).findById(999L);
-        }
+    private AcademicYearRequest buildRequest() {
+        return new AcademicYearRequest(
+                "2024-2025",
+                "Description",
+                LocalDate.of(2024, 9, 1),
+                LocalDate.of(2025, 5, 31)
+        );
     }
 
-    @Nested
-    @DisplayName("Create operations")
-    class CreateOperations {
+    // ─────────────────────────────────────────────
+    // getAll
+    // ─────────────────────────────────────────────
 
-        @Test
-        @DisplayName("Should create academic year successfully")
-        void shouldCreateAcademicYearSuccessfully() {
-            // Given
-            when(academicYearMapper.toEntity(testRequest)).thenReturn(testAcademicYear);
-            when(academicYearRepository.save(any(AcademicYear.class))).thenReturn(testAcademicYear);
-            when(academicYearMapper.toResponse(testAcademicYear)).thenReturn(testResponse);
+    @Test
+    @DisplayName("getAll — возвращает список ответов, отсортированный по дате начала")
+    void getAll_ShouldReturnMappedList() {
+        AcademicYear entity = buildAcademicYear(true);
+        AcademicYearResponse response = buildResponse(true);
 
-            // When
-            AcademicYearResponse result = academicYearService.create(testRequest);
+        when(academicYearRepository.findAllByOrderByStartDateDesc()).thenReturn(List.of(entity));
+        when(academicYearMapper.toResponse(entity)).thenReturn(response);
 
-            // Then
-            assertNotNull(result);
-            assertEquals(testResponse, result);
-            verify(academicYearRepository, times(1)).save(any(AcademicYear.class));
-        }
+        List<AcademicYearResponse> result = academicYearService.getAll();
 
-        @Test
-        @DisplayName("Should throw ConflictException when start date is after end date")
-        void shouldThrowConflictExceptionWhenStartDateIsAfterEndDate() {
-            // Given
-            AcademicYearRequest invalidRequest = new AcademicYearRequest(
-                    "2023-2024",
-                    "Invalid dates",
-                    LocalDate.of(2024, 6, 30),
-                    LocalDate.of(2023, 9, 1)
-            );
-
-            // When & Then
-            assertThrows(ConflictException.class, () -> academicYearService.create(invalidRequest));
-            verify(academicYearRepository, never()).save(any());
-        }
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).id()).isEqualTo(ACADEMIC_YEAR_ID);
+        verify(academicYearRepository).findAllByOrderByStartDateDesc();
+        verify(academicYearMapper).toResponse(entity);
     }
 
-    @Nested
-    @DisplayName("Update operations")
-    class UpdateOperations {
+    @Test
+    @DisplayName("getAll — возвращает пустой список, если учебных годов нет")
+    void getAll_ShouldReturnEmptyList_WhenNoYears() {
+        when(academicYearRepository.findAllByOrderByStartDateDesc()).thenReturn(List.of());
 
-        @Test
-        @DisplayName("Should update academic year successfully")
-        void shouldUpdateAcademicYearSuccessfully() {
-            // Given
-            AcademicYearRequest updateRequest = new AcademicYearRequest(
-                    "2024-2025",
-                    "Updated description",
-                    LocalDate.of(2024, 9, 1),
-                    LocalDate.of(2025, 6, 30)
-            );
-
-            when(academicYearRepository.findById(1L)).thenReturn(Optional.of(testAcademicYear));
-            when(academicYearMapper.toResponse(any(AcademicYear.class))).thenReturn(testResponse);
-
-            // When
-            AcademicYearResponse result = academicYearService.update(1L, updateRequest);
-
-            // Then
-            assertNotNull(result);
-            verify(academicYearRepository, times(1)).findById(1L);
-        }
-
-        @Test
-        @DisplayName("Should throw ConflictException when updating with invalid dates")
-        void shouldThrowConflictExceptionWhenUpdatingWithInvalidDates() {
-            // Given
-            AcademicYearRequest invalidRequest = new AcademicYearRequest(
-                    "2023-2024",
-                    "Invalid dates",
-                    LocalDate.of(2024, 6, 30),
-                    LocalDate.of(2023, 9, 1)
-            );
-
-            when(academicYearRepository.findById(1L)).thenReturn(Optional.of(testAcademicYear));
-
-            // When & Then
-            assertThrows(ConflictException.class, () -> academicYearService.update(1L, invalidRequest));
-        }
-
-        @Test
-        @DisplayName("Should throw NotFoundException when updating non-existent academic year")
-        void shouldThrowNotFoundExceptionWhenUpdatingNonExistent() {
-            // Given
-            when(academicYearRepository.findById(999L)).thenReturn(Optional.empty());
-
-            // When & Then
-            assertThrows(NotFoundException.class, () -> academicYearService.update(999L, testRequest));
-        }
+        assertThat(academicYearService.getAll()).isEmpty();
     }
 
-    @Nested
-    @DisplayName("Delete operations")
-    class DeleteOperations {
+    // ─────────────────────────────────────────────
+    // findById
+    // ─────────────────────────────────────────────
 
-        @Test
-        @DisplayName("Should delete academic year successfully")
-        void shouldDeleteAcademicYearSuccessfully() {
-            // Given
-            when(academicYearRepository.findById(1L)).thenReturn(Optional.of(testAcademicYear));
-            doNothing().when(academicYearRepository).delete(testAcademicYear);
+    @Test
+    @DisplayName("findById — возвращает ответ, если учебный год найден")
+    void findById_ShouldReturnResponse_WhenFound() {
+        AcademicYear entity = buildAcademicYear(true);
+        AcademicYearResponse response = buildResponse(true);
 
-            // When
-            academicYearService.delete(1L);
+        when(academicYearRepository.findById(ACADEMIC_YEAR_ID)).thenReturn(Optional.of(entity));
+        when(academicYearMapper.toResponse(entity)).thenReturn(response);
 
-            // Then
-            verify(academicYearRepository, times(1)).delete(testAcademicYear);
-        }
+        AcademicYearResponse result = academicYearService.findById(ACADEMIC_YEAR_ID);
 
-        @Test
-        @DisplayName("Should throw NotFoundException when deleting non-existent academic year")
-        void shouldThrowNotFoundExceptionWhenDeletingNonExistent() {
-            // Given
-            when(academicYearRepository.findById(999L)).thenReturn(Optional.empty());
-
-            // When & Then
-            assertThrows(NotFoundException.class, () -> academicYearService.delete(999L));
-            verify(academicYearRepository, never()).delete(any());
-        }
+        assertThat(result.id()).isEqualTo(ACADEMIC_YEAR_ID);
+        assertThat(result.name()).isEqualTo("2024-2025");
     }
 
-    @Nested
-    @DisplayName("Set active operations")
-    class SetActiveOperations {
+    @Test
+    @DisplayName("findById — бросает NotFoundException, если учебный год не найден")
+    void findById_ShouldThrowNotFoundException_WhenNotFound() {
+        when(academicYearRepository.findById(ACADEMIC_YEAR_ID)).thenReturn(Optional.empty());
 
-        @Test
-        @DisplayName("Should set academic year as active successfully")
-        void shouldSetAcademicYearAsActiveSuccessfully() {
-            // Given
-            AcademicYear inactiveYear = AcademicYear.builder()
-                    .id(1L)
-                    .name("2023-2024")
-                    .description("Academic year 2023-2024")
-                    .startDate(LocalDate.of(2023, 9, 1))
-                    .endDate(LocalDate.of(2024, 6, 30))
-                    .isActive(false)
-                    .build();
-            when(academicYearRepository.findById(1L)).thenReturn(Optional.of(inactiveYear));
+        assertThatThrownBy(() -> academicYearService.findById(ACADEMIC_YEAR_ID))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("Academic year with id " + ACADEMIC_YEAR_ID + " not found");
+    }
 
-            // When
-            academicYearService.setActive(1L, true);
+    // ─────────────────────────────────────────────
+    // create
+    // ─────────────────────────────────────────────
 
-            // Then
-            assertTrue(inactiveYear.getIsActive());
-            verify(academicYearRepository, times(1)).findById(1L);
-        }
+    @Test
+    @DisplayName("create — успешно создаёт и возвращает учебный год")
+    void create_ShouldReturnCreatedYear() {
+        AcademicYearRequest request = buildRequest();
+        AcademicYear entity = buildAcademicYear(true);
+        AcademicYearResponse response = buildResponse(true);
 
-        @Test
-        @DisplayName("Should set academic year as inactive successfully")
-        void shouldSetAcademicYearAsInactiveSuccessfully() {
-            // Given
-            when(academicYearRepository.findById(1L)).thenReturn(Optional.of(testAcademicYear));
+        when(academicYearMapper.toEntity(request)).thenReturn(entity);
+        when(academicYearRepository.save(entity)).thenReturn(entity);
+        when(academicYearMapper.toResponse(entity)).thenReturn(response);
 
-            // When
-            academicYearService.setActive(1L, false);
+        AcademicYearResponse result = academicYearService.create(request);
 
-            // Then
-            assertFalse(testAcademicYear.getIsActive());
-        }
+        assertThat(result.id()).isEqualTo(ACADEMIC_YEAR_ID);
+        verify(academicYearRepository).save(entity);
+    }
 
-        @Test
-        @DisplayName("Should throw ConflictException when setting already active year as active")
-        void shouldThrowConflictExceptionWhenSettingAlreadyActiveYearAsActive() {
-            // Given
-            when(academicYearRepository.findById(1L)).thenReturn(Optional.of(testAcademicYear));
+    @Test
+    @DisplayName("create — бросает ConflictException, если startDate после endDate")
+    void create_ShouldThrowConflictException_WhenStartDateAfterEndDate() {
+        AcademicYearRequest request = new AcademicYearRequest(
+                "2024-2025",
+                "Description",
+                LocalDate.of(2025, 9, 1),
+                LocalDate.of(2024, 5, 31)
+        );
 
-            // When & Then
-            assertThrows(ConflictException.class, () -> academicYearService.setActive(1L, true));
-        }
+        assertThatThrownBy(() -> academicYearService.create(request))
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("Start date cannot be after end date");
 
-        @Test
-        @DisplayName("Should throw NotFoundException when setting active status on non-existent year")
-        void shouldThrowNotFoundExceptionWhenSettingActiveStatusOnNonExistent() {
-            // Given
-            when(academicYearRepository.findById(999L)).thenReturn(Optional.empty());
+        verify(academicYearRepository, never()).save(any());
+    }
 
-            // When & Then
-            assertThrows(NotFoundException.class, () -> academicYearService.setActive(999L, true));
-        }
+    // ─────────────────────────────────────────────
+    // isActive
+    // ─────────────────────────────────────────────
+
+    @Test
+    @DisplayName("isActive — возвращает true, если учебный год активен")
+    void isActive_ShouldReturnTrue_WhenYearIsActive() {
+        AcademicYear entity = buildAcademicYear(true);
+        when(academicYearRepository.findById(ACADEMIC_YEAR_ID)).thenReturn(Optional.of(entity));
+
+        boolean result = academicYearService.isActive(ACADEMIC_YEAR_ID);
+
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    @DisplayName("isActive — бросает NotFoundException, если учебный год не найден")
+    void isActive_ShouldThrowNotFoundException_WhenNotFound() {
+        when(academicYearRepository.findById(ACADEMIC_YEAR_ID)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> academicYearService.isActive(ACADEMIC_YEAR_ID))
+                .isInstanceOf(NotFoundException.class);
+    }
+
+    // ─────────────────────────────────────────────
+    // setActive
+    // ─────────────────────────────────────────────
+
+    @Test
+    @DisplayName("setActive — успешно меняет статус активности")
+    void setActive_ShouldChangeStatus_WhenCurrentStatusIsDifferent() {
+        AcademicYear entity = buildAcademicYear(true);
+        when(academicYearRepository.findById(ACADEMIC_YEAR_ID)).thenReturn(Optional.of(entity));
+
+        academicYearService.setActive(ACADEMIC_YEAR_ID, false);
+
+        assertThat(entity.getIsActive()).isFalse();
+    }
+
+    @Test
+    @DisplayName("setActive — бросает ConflictException, если статус уже соответствует запрашиваемому")
+    void setActive_ShouldThrowConflictException_WhenStatusIsAlreadySame() {
+        AcademicYear entity = buildAcademicYear(true);
+        when(academicYearRepository.findById(ACADEMIC_YEAR_ID)).thenReturn(Optional.of(entity));
+
+        assertThatThrownBy(() -> academicYearService.setActive(ACADEMIC_YEAR_ID, true))
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("Academic year is already active");
+    }
+
+    // ─────────────────────────────────────────────
+    // update
+    // ─────────────────────────────────────────────
+
+    @Test
+    @DisplayName("update — обновляет переданные поля учебного года")
+    void update_ShouldUpdateFieldsAndReturnResponse() {
+        AcademicYear entity = buildAcademicYear(true);
+        AcademicYearRequest request = new AcademicYearRequest(
+                "Updated Name",
+                "Updated Description",
+                LocalDate.of(2024, 10, 1),
+                LocalDate.of(2025, 6, 30)
+        );
+        AcademicYearResponse response = new AcademicYearResponse(
+                ACADEMIC_YEAR_ID, "Updated Name", "Updated Description",
+                LocalDate.of(2024, 10, 1), LocalDate.of(2025, 6, 30), true
+        );
+
+        when(academicYearRepository.findById(ACADEMIC_YEAR_ID)).thenReturn(Optional.of(entity));
+        when(academicYearMapper.toResponse(entity)).thenReturn(response);
+
+        AcademicYearResponse result = academicYearService.update(ACADEMIC_YEAR_ID, request);
+
+        assertThat(entity.getName()).isEqualTo("Updated Name");
+        assertThat(entity.getDescription()).isEqualTo("Updated Description");
+        assertThat(entity.getStartDate()).isEqualTo(LocalDate.of(2024, 10, 1));
+        assertThat(entity.getEndDate()).isEqualTo(LocalDate.of(2025, 6, 30));
+        assertThat(result.name()).isEqualTo("Updated Name");
+    }
+
+    @Test
+    @DisplayName("update — бросает ConflictException, если новые даты невалидны")
+    void update_ShouldThrowConflictException_WhenDatesAreInvalid() {
+        AcademicYear entity = buildAcademicYear(true);
+        AcademicYearRequest request = new AcademicYearRequest(
+                null, null,
+                LocalDate.of(2026, 1, 1),
+                LocalDate.of(2025, 1, 1)
+        );
+
+        when(academicYearRepository.findById(ACADEMIC_YEAR_ID)).thenReturn(Optional.of(entity));
+
+        assertThatThrownBy(() -> academicYearService.update(ACADEMIC_YEAR_ID, request))
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("Start date cannot be after end date");
+    }
+
+    // ─────────────────────────────────────────────
+    // delete
+    // ─────────────────────────────────────────────
+
+    @Test
+    @DisplayName("delete — успешно удаляет учебный год")
+    void delete_ShouldDeleteYear() {
+        AcademicYear entity = buildAcademicYear(true);
+        when(academicYearRepository.findById(ACADEMIC_YEAR_ID)).thenReturn(Optional.of(entity));
+
+        academicYearService.delete(ACADEMIC_YEAR_ID);
+
+        verify(academicYearRepository).delete(entity);
+    }
+
+    @Test
+    @DisplayName("delete — бросает NotFoundException, если учебный год для удаления не найден")
+    void delete_ShouldThrowNotFoundException_WhenNotFound() {
+        when(academicYearRepository.findById(ACADEMIC_YEAR_ID)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> academicYearService.delete(ACADEMIC_YEAR_ID))
+                .isInstanceOf(NotFoundException.class);
+
+        verify(academicYearRepository, never()).delete(any());
     }
 }

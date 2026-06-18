@@ -35,7 +35,7 @@ public class AcademicYear extends BaseEntity {
     private LocalDate endDate;
 
     @Builder.Default
-    private Boolean isActive = false;
+    private Boolean isActive = true;
 
     @PrePersist
     @PreUpdate
