@@ -78,12 +78,12 @@ public class PeriodGradeControllerTest {
     @Test
     @DisplayName("GET /period-grades/by-student — 200 and student period grades map")
     void getByStudentId_ShouldReturn200() throws Exception {
-        when(periodGradeService.getByStudentId(STUDENT_ID, SCHOOL_YEAR))
+        when(periodGradeService.getByStudentId(STUDENT_ID, 1L))
                 .thenReturn(Map.of("Mathematics", List.of(buildStudentResponse())));
 
         mockMvc.perform(get("/api/v1/period-grades/by-student")
                         .param("studentId", String.valueOf(STUDENT_ID))
-                        .param("schoolYear", SCHOOL_YEAR))
+                        .param("academicYearId", String.valueOf(1L)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.Mathematics[0].id").value(PERIOD_GRADE_ID))
                 .andExpect(jsonPath("$.Mathematics[0].subjectName").value("Mathematics"));
@@ -92,13 +92,13 @@ public class PeriodGradeControllerTest {
     @Test
     @DisplayName("GET /period-grades/by-assignment — 200 and teacher period grades list")
     void getGradesByAssignment_ShouldReturn200() throws Exception {
-        when(periodGradeService.getByAssignmentWithAverage(TEACHING_ASSIGNMENT_ID, ACADEMIC_PERIOD_ID, SCHOOL_YEAR))
+        when(periodGradeService.getByAssignmentWithAverage(TEACHING_ASSIGNMENT_ID, ACADEMIC_PERIOD_ID, 1L))
                 .thenReturn(List.of(buildTeacherResponse()));
 
         mockMvc.perform(get("/api/v1/period-grades/by-assignment")
                         .param("teachingAssignmentId", String.valueOf(TEACHING_ASSIGNMENT_ID))
                         .param("currentAcademicPeriodId", String.valueOf(ACADEMIC_PERIOD_ID))
-                        .param("schoolYear", SCHOOL_YEAR))
+                        .param("academicYearId", String.valueOf(1L)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].user.id").value(STUDENT_ID))
                 .andExpect(jsonPath("$[0].periodGrades[0].id").value(PERIOD_GRADE_ID))

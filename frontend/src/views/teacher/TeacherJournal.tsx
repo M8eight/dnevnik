@@ -228,10 +228,6 @@ export default function TeacherJournal() {
                 </>
               )}
 
-              {/* {(activeTab === "journal" || activeTab === "period") && (
-                
-              )} */}
-
               {activeTab === "journal" && <div className="hidden xl:block w-px h-8 bg-black/[0.06]" />}
 
               <Select

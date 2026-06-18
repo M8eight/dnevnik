@@ -4,13 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rusobr.academic.application.service.ClassStudentService;
 import com.rusobr.academic.application.service.SchoolClassService;
 import com.rusobr.academic.web.controller.SchoolClassController;
+import com.rusobr.academic.web.dto.academicYear.AcademicYearResponse;
 import com.rusobr.academic.web.dto.feign.TeacherDetails;
 import com.rusobr.academic.web.dto.feign.TeacherResponse;
 import com.rusobr.academic.web.dto.feign.UserFeignResponse;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassFullResponse;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassRequest;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassResponse;
-import jakarta.validation.constraints.NotNull;
+import com.rusobr.academic.web.dto.schoolClass.SchoolClassUpdateRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,15 +22,13 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -58,8 +57,19 @@ public class SchoolClassControllerTest {
     private static final String NAME = "10A";
     private static final String YEAR = "2025/2026";
 
+    private AcademicYearResponse buildAcademicYearResponse() {
+        return new AcademicYearResponse(
+                2L,                                // id учебного года
+                "2024-2025",                       // name
+                "Учебный год 2024-2025",           // description (может быть null)
+                LocalDate.of(2024, 9, 1),          // startDate
+                LocalDate.of(2025, 5, 31),         // endDate
+                true                               // isActive
+        );
+    }
+
     private SchoolClassResponse buildSchoolClassResponse() {
-        return new SchoolClassResponse(SCHOOL_CLASS_ID, NAME, YEAR, TEACHER_ID);
+        return new SchoolClassResponse(SCHOOL_CLASS_ID, NAME, buildAcademicYearResponse(), TEACHER_ID);
     }
 
     private UserFeignResponse buildStudentResponse() {
@@ -92,14 +102,14 @@ public class SchoolClassControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(SCHOOL_CLASS_ID))
                 .andExpect(jsonPath("$.name").value(NAME))
-                .andExpect(jsonPath("$.schoolYear").value(YEAR))
+                .andExpect(jsonPath("$.academicYear.id").value(2L))
                 .andExpect(jsonPath("$.classTeacherId").value(TEACHER_ID));
     }
 
     @Test
     @DisplayName("GET /school-classes/{id}/details — 200 and full school class response")
     void getWithDetailsById_ShouldReturn200() throws Exception {
-        when(schoolClassService.findWithClassStudentById(SCHOOL_CLASS_ID)).thenReturn(buildSchoolClassFullResponse());
+        when(schoolClassService.findWithStudentById(SCHOOL_CLASS_ID)).thenReturn(buildSchoolClassFullResponse());
 
         mockMvc.perform(get("/api/v1/school-classes/{id}/details", SCHOOL_CLASS_ID))
                 .andExpect(status().isOk())
@@ -113,7 +123,7 @@ public class SchoolClassControllerTest {
     @Test
     @DisplayName("GET /school-classes/search/by-student — 200 and school class response")
     void getByStudentId_ShouldReturn200() throws Exception {
-        when(schoolClassService.findByStudentId(STUDENT_ID)).thenReturn(buildSchoolClassResponse());
+        when(schoolClassService.findByStudent(STUDENT_ID)).thenReturn(buildSchoolClassResponse());
 
         mockMvc.perform(get("/api/v1/school-classes/search/by-student")
                         .param("studentId", String.valueOf(STUDENT_ID)))
@@ -125,7 +135,7 @@ public class SchoolClassControllerTest {
     @Test
     @DisplayName("GET /school-classes — 200 and school class list")
     void findAll_ShouldReturn200() throws Exception {
-        when(schoolClassService.findAllClasses()).thenReturn(List.of(buildSchoolClassResponse()));
+        when(schoolClassService.findAll()).thenReturn(List.of(buildSchoolClassResponse()));
 
         mockMvc.perform(get("/api/v1/school-classes"))
                 .andExpect(status().isOk())
@@ -138,7 +148,7 @@ public class SchoolClassControllerTest {
     void getAllUnassignedStudents_ShouldReturn200() throws Exception {
         when(classStudentService.getUnassignedStudents()).thenReturn(List.of(buildStudentResponse()));
 
-        mockMvc.perform(get("/api/v1/school-classes/unassigned"))
+        mockMvc.perform(get("/api/v1/school-classes/unassigned-students"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(STUDENT_ID))
                 .andExpect(jsonPath("$[0].firstName").value("Ivan"));
@@ -147,13 +157,13 @@ public class SchoolClassControllerTest {
     @Test
     @DisplayName("POST /school-classes — 200 and create school class")
     void create_ShouldReturn200() throws Exception {
-        SchoolClassRequest request = new SchoolClassRequest(NAME, YEAR);
+        SchoolClassRequest request = new SchoolClassRequest(NAME, 1L);
         when(schoolClassService.create(request)).thenReturn(buildSchoolClassResponse());
 
         mockMvc.perform(post("/api/v1/school-classes")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(SCHOOL_CLASS_ID))
                 .andExpect(jsonPath("$.name").value(NAME));
     }
@@ -161,7 +171,7 @@ public class SchoolClassControllerTest {
     @Test
     @DisplayName("PATCH /school-classes/{id} — 200 on update")
     void update_ShouldReturn200() throws Exception {
-        SchoolClassRequest request = new SchoolClassRequest("10B", "2026/2027");
+        SchoolClassUpdateRequest request = new SchoolClassUpdateRequest("10B");
         doNothing().when(schoolClassService).update(SCHOOL_CLASS_ID, request);
 
         mockMvc.perform(patch("/api/v1/school-classes/{id}", SCHOOL_CLASS_ID)
@@ -173,33 +183,33 @@ public class SchoolClassControllerTest {
     }
 
     @Test
-    @DisplayName("PATCH /school-classes/{classId}/add/{studentId} — 200 on add student")
+    @DisplayName("POST /school-classes/{classId}/students/{studentId} — 200 on add student")
     void addStudent_ShouldReturn200() throws Exception {
         doNothing().when(classStudentService).addStudent(SCHOOL_CLASS_ID, STUDENT_ID);
 
-        mockMvc.perform(patch("/api/v1/school-classes/{classId}/add/{studentId}", SCHOOL_CLASS_ID, STUDENT_ID))
+        mockMvc.perform(post("/api/v1/school-classes/{classId}/students/{studentId}", SCHOOL_CLASS_ID, STUDENT_ID))
                 .andExpect(status().isOk());
 
         verify(classStudentService).addStudent(SCHOOL_CLASS_ID, STUDENT_ID);
     }
 
     @Test
-    @DisplayName("PATCH /school-classes/{classId}/remove/{studentId} — 200 on remove student")
+    @DisplayName("DELETE /school-classes/{classId}/students/{studentId} — 200 on remove student")
     void removeStudent_ShouldReturn200() throws Exception {
         doNothing().when(classStudentService).removeStudent(SCHOOL_CLASS_ID, STUDENT_ID);
 
-        mockMvc.perform(patch("/api/v1/school-classes/{classId}/remove/{studentId}", SCHOOL_CLASS_ID, STUDENT_ID))
+        mockMvc.perform(delete("/api/v1/school-classes/{classId}/students/{studentId}", SCHOOL_CLASS_ID, STUDENT_ID))
                 .andExpect(status().isOk());
 
         verify(classStudentService).removeStudent(SCHOOL_CLASS_ID, STUDENT_ID);
     }
 
     @Test
-    @DisplayName("PATCH /school-classes/{classId}/assign-teacher/{teacherId} — 200 on assign teacher")
+    @DisplayName("PUT /school-classes/{classId}/assign-teacher/{teacherId} — 200 on assign teacher")
     void assignTeacher_ShouldReturn200() throws Exception {
         doNothing().when(schoolClassService).assignTeacher(SCHOOL_CLASS_ID, TEACHER_ID);
 
-        mockMvc.perform(patch("/api/v1/school-classes/{classId}/assign-teacher/{teacherId}", SCHOOL_CLASS_ID, TEACHER_ID))
+        mockMvc.perform(put("/api/v1/school-classes/{classId}/teacher/{teacherId}", SCHOOL_CLASS_ID, TEACHER_ID))
                 .andExpect(status().isOk());
 
         verify(schoolClassService).assignTeacher(SCHOOL_CLASS_ID, TEACHER_ID);
@@ -211,7 +221,7 @@ public class SchoolClassControllerTest {
         doNothing().when(schoolClassService).delete(SCHOOL_CLASS_ID);
 
         mockMvc.perform(delete("/api/v1/school-classes/{id}", SCHOOL_CLASS_ID))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         verify(schoolClassService).delete(SCHOOL_CLASS_ID);
     }

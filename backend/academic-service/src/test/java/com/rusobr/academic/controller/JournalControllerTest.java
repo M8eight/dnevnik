@@ -5,6 +5,7 @@ import com.rusobr.academic.application.service.JournalService;
 import com.rusobr.academic.domain.enums.GradeType;
 import com.rusobr.academic.web.controller.JournalController;
 import com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodResponse;
+import com.rusobr.academic.web.dto.academicYear.AcademicYearResponse;
 import com.rusobr.academic.web.dto.feign.UserFeignResponse;
 import com.rusobr.academic.web.dto.lessonInstance.DatesGradesDto;
 import com.rusobr.academic.web.dto.lessonInstance.GradeLessonDto;
@@ -51,8 +52,19 @@ public class JournalControllerTest {
     private static final Long LESSON_INSTANCE_ID = 100L;
     private static final LocalDate START_DATE = LocalDate.of(2026, 9, 1);
 
+    private AcademicYearResponse buildAcademicYearResponse() {
+        return new AcademicYearResponse(
+                2L,                                // id учебного года
+                "2024-2025",                       // name
+                "Учебный год 2024-2025",           // description (может быть null)
+                LocalDate.of(2024, 9, 1),          // startDate
+                LocalDate.of(2025, 5, 31),         // endDate
+                true                               // isActive
+        );
+    }
+
     private AcademicPeriodResponse buildAcademicPeriodResponse() {
-        return new AcademicPeriodResponse(PERIOD_ID, "Q1", "2026-2027", false, START_DATE, START_DATE.plusMonths(3));
+        return new AcademicPeriodResponse(PERIOD_ID, "Q1", buildAcademicYearResponse(), false, START_DATE, START_DATE.plusMonths(3));
     }
 
     private GradesLessonsResponse buildGradesLessonsResponse() {
