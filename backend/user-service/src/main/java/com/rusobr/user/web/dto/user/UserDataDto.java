@@ -1,5 +1,6 @@
 package com.rusobr.user.web.dto.user;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -17,12 +18,12 @@ public record UserDataDto(
                 regexp = "^[^()<>\\\\/\"']*$",
                 message = "Имя содержит недопустимые символы (скобки, кавычки или слэши)"
         )
-        @NotNull String firstName,
+        @NotBlank String firstName,
         @Size(max = 255, message = "Фамилия слишком длинная")
         @Pattern(
                 regexp = "^[^()<>\\\\/\"']*$",
                 message = "Фамилия содержит недопустимые символы (скобки, кавычки или слэши)"
         )
-        @NotNull String lastName
+        @NotBlank String lastName
 ) {
 }

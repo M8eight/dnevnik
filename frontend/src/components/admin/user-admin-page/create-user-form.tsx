@@ -7,26 +7,67 @@ import { Input } from "@/components/ui/input";
 import RoleTab from "./role-tab";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useForm, Controller, useWatch } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 
+const formSchema = z.object({
+    role: z.enum(["STUDENT", "PARENT", "TEACHER"]),
+    username: z.string().min(3, "Имя пользователя не может быть меньше 3 символов").max(50, "Имя пользователя не может быть больше 50 символов").trim(),
+    password: z.string().min(5, "Пароль не может быть меньше 5 символов").max(50, "Пароль не может быть больше 50 символов").trim(),
+    firstName: z.string().min(1, "Введите имя").max(255, "Имя не может быть больше 255 символов").trim(),
+    lastName: z.string().min(1, "Введите фамилию").max(255, "Фамилия не может быть больше 255 символов").trim(),
+    studentDetails: z.string().optional(),
+    email: z.string().optional(),
+    phoneNumber: z.string().optional(),
+}).superRefine((data, ctx) => {
+    if (data.role === "STUDENT" && (!data.studentDetails || !data.studentDetails.trim())) {
+        ctx.addIssue({ path: ["studentDetails"], code: z.ZodIssueCode.custom, message: "Обязательное поле" });
+    }
+    if (data.role === "TEACHER") {
+        if (!data.email || !data.email.trim()) {
+            ctx.addIssue({ path: ["email"], code: z.ZodIssueCode.custom, message: "Обязательное поле" });
+        }
+        if (!data.phoneNumber || !data.phoneNumber.trim()) {
+            ctx.addIssue({ path: ["phoneNumber"], code: z.ZodIssueCode.custom, message: "Обязательное поле" });
+        }
+    }
+});
+
+const roleFormat = (role: string) => {
+    switch (role) {
+        case "ученик": return "ученика";
+        case "родитель": return "родителя";
+        case "учитель": return "учителя";
+    }
+}
+
+type FormValues = z.infer<typeof formSchema>;
 
 export default function CreateUserForm() {
-    const [role, setRole] = useState<UserRole>("STUDENT");
     const [success, setSuccess] = useState(false);
-
-    const [base, setBase] = useState({
-        username: "",
-        password: "",
-        firstName: "",
-        lastName: "",
-    });
-
-    const [studentDetails, setStudentDetails] = useState("");
-    const [teacherEmail, setTeacherEmail] = useState("");
-    const [teacherPhone, setTeacherPhone] = useState("");
 
     const studentMutation = useCreateStudent();
     const parentMutation = useCreateParent();
     const teacherMutation = useCreateTeacher();
+
+    const { control, handleSubmit, reset, setValue, clearErrors, formState: { isValid } } = useForm<FormValues>({
+        resolver: zodResolver(formSchema),
+        mode: "onChange",
+        defaultValues: {
+            role: "STUDENT",
+            username: "",
+            password: "",
+            firstName: "",
+            lastName: "",
+            studentDetails: "",
+            email: "",
+            phoneNumber: "",
+        },
+    });
+
+    const currentRole = useWatch({ control, name: "role" });
 
     const isPending =
         studentMutation.isPending ||
@@ -38,126 +79,154 @@ export default function CreateUserForm() {
         parentMutation.isError ||
         teacherMutation.isError;
 
-    const isBaseValid =
-        base.username.trim() &&
-        base.password.trim() &&
-        base.firstName.trim() &&
-        base.lastName.trim();
-
-    const isRoleValid =
-        role === "STUDENT"
-            ? !!studentDetails.trim()
-            : role === "TEACHER"
-            ? !!teacherEmail.trim() && !!teacherPhone.trim()
-            : true;
-
-    const isValid = isBaseValid && isRoleValid;
-
-    const handleBaseChange =
-        (field: keyof typeof base) =>
-        (e: React.ChangeEvent<HTMLInputElement>) => {
-            setBase((prev) => ({ ...prev, [field]: e.target.value }));
-        };
-
     const handleRoleChange = (newRole: UserRole) => {
-        setRole(newRole);
+        setValue("role", newRole, { shouldValidate: true });
         studentMutation.reset();
         parentMutation.reset();
         teacherMutation.reset();
+        clearErrors();
     };
 
     const handleSuccess = () => {
-        setBase({ username: "", password: "", firstName: "", lastName: "" });
-        setStudentDetails("");
-        setTeacherEmail("");
-        setTeacherPhone("");
+        reset();
         setSuccess(true);
         setTimeout(() => setSuccess(false), 2500);
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!isValid || isPending) return;
-
+    const onSubmit = (values: FormValues) => {
         const userBase = {
-            username: base.username.trim(),
-            password: base.password.trim(),
-            firstName: base.firstName.trim(),
-            lastName: base.lastName.trim(),
+            username: values.username,
+            password: values.password,
+            firstName: values.firstName,
+            lastName: values.lastName,
         };
 
-        if (role === "STUDENT") {
+        if (values.role === "STUDENT") {
             studentMutation.mutate(
-                { user: userBase, role: "STUDENT", details: { studentDetails: studentDetails.trim() } },
+                { user: userBase, role: "STUDENT", details: { studentDetails: values.studentDetails! } },
                 { onSuccess: handleSuccess }
             );
-        } else if (role === "PARENT") {
+        } else if (values.role === "PARENT") {
             parentMutation.mutate(
                 { user: userBase, role: "PARENT", details: {} },
                 { onSuccess: handleSuccess }
             );
-        } else {
+        } else if (values.role === "TEACHER") {
             teacherMutation.mutate(
-                { user: userBase, role: "TEACHER", details: { email: teacherEmail.trim(), phoneNumber: teacherPhone.trim() } },
+                { user: userBase, role: "TEACHER", details: { email: values.email!, phoneNumber: values.phoneNumber! } },
                 { onSuccess: handleSuccess }
             );
         }
     };
 
     const fieldClass =
-        "h-11 bg-white/40 border-black/10 rounded-2xl focus-visible:ring-[var(--red)] text-sm font-semibold placeholder:font-normal";
+        "h-11 bg-white/40 border border-black/10 rounded-2xl focus-visible:ring-(--red) text-sm font-semibold placeholder:font-normal transition-all duration-200";
 
-    const activeRole = ROLES.find((r) => r.value === role)!;
+    const activeRole = ROLES.find((r) => r.value === currentRole)!;
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div className="space-y-1.5">
                 <label className="text-xs font-bold tracking-widest uppercase text-black/30">Роль</label>
                 <div className="flex gap-1 bg-black/5 rounded-[18px] p-1">
                     {ROLES.map((r) => (
-                        <RoleTab key={r.value} role={r} active={role === r.value} onClick={() => handleRoleChange(r.value)} />
+                        <RoleTab
+                            key={r.value}
+                            role={r}
+                            active={currentRole === r.value}
+                            onClick={() => handleRoleChange(r.value)}
+                        />
                     ))}
                 </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                    <label className="text-xs font-bold tracking-widest uppercase text-black/30">Имя</label>
-                    <Input placeholder="Иван" value={base.firstName} onChange={handleBaseChange("firstName")} disabled={isPending} className={fieldClass} />
-                </div>
-                <div className="space-y-1.5">
-                    <label className="text-xs font-bold tracking-widest uppercase text-black/30">Фамилия</label>
-                    <Input placeholder="Иванов" value={base.lastName} onChange={handleBaseChange("lastName")} disabled={isPending} className={fieldClass} />
-                </div>
+                <Controller
+                    name="firstName"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid} className="space-y-1.5">
+                            <FieldLabel className="text-xs font-bold tracking-widest uppercase text-black/30">Имя</FieldLabel>
+                            <Input {...field} placeholder="Иван" disabled={isPending} aria-invalid={fieldState.invalid} className={fieldClass} />
+                            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                        </Field>
+                    )}
+                />
+                <Controller
+                    name="lastName"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid} className="space-y-1.5">
+                            <FieldLabel className="text-xs font-bold tracking-widest uppercase text-black/30">Фамилия</FieldLabel>
+                            <Input {...field} placeholder="Иванов" disabled={isPending} aria-invalid={fieldState.invalid} className={fieldClass} />
+                            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                        </Field>
+                    )}
+                />
             </div>
 
-            <div className="space-y-1.5">
-                <label className="text-xs font-bold tracking-widest uppercase text-black/30">Логин</label>
-                <Input placeholder="ivanov_ivan" value={base.username} onChange={handleBaseChange("username")} disabled={isPending} className={fieldClass} />
-            </div>
+            <Controller
+                name="username"
+                control={control}
+                render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid} className="space-y-1.5">
+                        <FieldLabel className="text-xs font-bold tracking-widest uppercase text-black/30">Логин</FieldLabel>
+                        <Input {...field} placeholder="ivanov_ivan" disabled={isPending} aria-invalid={fieldState.invalid} className={fieldClass} />
+                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    </Field>
+                )}
+            />
 
-            <div className="space-y-1.5">
-                <label className="text-xs font-bold tracking-widest uppercase text-black/30">Пароль</label>
-                <Input placeholder="••••••••" value={base.password} onChange={handleBaseChange("password")} disabled={isPending} className={fieldClass} />
-            </div>
+            <Controller
+                name="password"
+                control={control}
+                render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid} className="space-y-1.5">
+                        <FieldLabel className="text-xs font-bold tracking-widest uppercase text-black/30">Пароль</FieldLabel>
+                        <Input {...field} type="password" placeholder="••••••••" disabled={isPending} aria-invalid={fieldState.invalid} className={fieldClass} />
+                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    </Field>
+                )}
+            />
 
-            {role === "STUDENT" && (
-                <div className="space-y-1.5">
-                    <label className="text-xs font-bold tracking-widest uppercase text-black/30">Детали ученика</label>
-                    <Input placeholder="Профиль ученика" value={studentDetails} onChange={(e) => setStudentDetails(e.target.value)} disabled={isPending} className={fieldClass} />
-                </div>
+            {currentRole === "STUDENT" && (
+                <Controller
+                    name="studentDetails"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                        <Field data-invalid={fieldState.invalid} className="space-y-1.5">
+                            <FieldLabel className="text-xs font-bold tracking-widest uppercase text-black/30">Детали ученика</FieldLabel>
+                            <Input {...field} placeholder="Профиль ученика" disabled={isPending} aria-invalid={fieldState.invalid} className={fieldClass} />
+                            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                        </Field>
+                    )}
+                />
             )}
 
-            {role === "TEACHER" && (
+            {currentRole === "TEACHER" && (
                 <>
-                    <div className="space-y-1.5">
-                        <label className="text-xs font-bold tracking-widest uppercase text-black/30">Email</label>
-                        <Input type="email" placeholder="teacher@school.ru" value={teacherEmail} onChange={(e) => setTeacherEmail(e.target.value)} disabled={isPending} className={fieldClass} />
-                    </div>
-                    <div className="space-y-1.5">
-                        <label className="text-xs font-bold tracking-widest uppercase text-black/30">Телефон</label>
-                        <Input placeholder="+79001234567" value={teacherPhone} onChange={(e) => setTeacherPhone(e.target.value)} disabled={isPending} className={fieldClass} />
-                    </div>
+                    <Controller
+                        name="email"
+                        control={control}
+                        render={({ field, fieldState }) => (
+                            <Field data-invalid={fieldState.invalid} className="space-y-1.5">
+                                <FieldLabel className="text-xs font-bold tracking-widest uppercase text-black/30">Email</FieldLabel>
+                                <Input {...field} type="email" placeholder="teacher@school.ru" disabled={isPending} aria-invalid={fieldState.invalid} className={fieldClass} />
+                                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                            </Field>
+                        )}
+                    />
+                    <Controller
+                        name="phoneNumber"
+                        control={control}
+                        render={({ field, fieldState }) => (
+                            <Field data-invalid={fieldState.invalid} className="space-y-1.5">
+                                <FieldLabel className="text-xs font-bold tracking-widest uppercase text-black/30">Телефон</FieldLabel>
+                                <Input {...field} placeholder="+79001234567" disabled={isPending} aria-invalid={fieldState.invalid} className={fieldClass} />
+                                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                            </Field>
+                        )}
+                    />
                 </>
             )}
 
@@ -166,11 +235,11 @@ export default function CreateUserForm() {
                 disabled={!isValid || isPending}
                 className={cn(
                     "w-full gap-2 text-white rounded-2xl py-6 text-sm font-bold shadow-lg transition-all active:scale-[0.98] disabled:opacity-40",
-                    role === "STUDENT"
+                    currentRole === "STUDENT"
                         ? "bg-blue-600 hover:bg-blue-700 shadow-blue-200"
-                        : role === "PARENT"
-                        ? "bg-violet-600 hover:bg-violet-700 shadow-violet-200"
-                        : "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200"
+                        : currentRole === "PARENT"
+                            ? "bg-violet-600 hover:bg-violet-700 shadow-violet-200"
+                            : "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200"
                 )}
             >
                 {isPending ? (
@@ -178,12 +247,13 @@ export default function CreateUserForm() {
                 ) : success ? (
                     <><CheckCircle2 className="w-4 h-4" />Создан!</>
                 ) : (
-                    <>Создать {activeRole.label.toLowerCase()}а<Send className="w-4 h-4" /></>
+                    <>Создать {roleFormat(activeRole.label.toLowerCase())}
+                        <Send className="w-4 h-4" /></>
                 )}
             </Button>
 
             {isError && (
-                <p className="text-xs text-[var(--red)] font-semibold text-center">
+                <p className="text-xs text-(--red) font-semibold text-center">
                     Ошибка при создании. Попробуйте ещё раз.
                 </p>
             )}

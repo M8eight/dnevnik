@@ -79,14 +79,14 @@ export default function HomeworkJournal() {
             <TeacherNavbar />
 
             {/* ── Controls bar ── */}
-            <div className="max-w-[1400px] mx-auto mb-6">
+            <div className="max-w-350 mx-auto mb-6">
                 <div className="glass-card rounded-[24px] p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-5 border-none shadow-lg backdrop-blur-md">
                     <div className="flex items-center gap-4">
-                        <div className="hidden sm:flex w-12 h-12 rounded-[18px] bg-[var(--red-light)]/60 items-center justify-center ring-1 ring-[var(--red)]/10">
-                            <BookOpen className="w-6 h-6 text-[var(--red)]" />
+                        <div className="hidden sm:flex w-12 h-12 rounded-[18px] bg-(--red-light)/60 items-center justify-center ring-1 ring-(--red)/10">
+                            <BookOpen className="w-6 h-6 text-(--red)" />
                         </div>
                         <div>
-                            <h1 className="font-serif font-black text-2xl lg:text-3xl text-[var(--navy)] tracking-tight">
+                            <h1 className="font-serif font-black text-2xl lg:text-3xl text-(--navy) tracking-tight">
                                 Домашние задания
                             </h1>
                             {currentAssignment && (
@@ -103,9 +103,9 @@ export default function HomeworkJournal() {
                     <div className="flex flex-wrap gap-3 items-center">
                         {/* Period select */}
                         <Select value={selectedPeriodId} onValueChange={setSelectedPeriodId}>
-                            <SelectTrigger className="glass-pill w-[220px] h-11 font-bold text-[13px] rounded-2xl text-[var(--navy)] px-4 border-0 shadow-none">
+                            <SelectTrigger className="glass-pill w-55 h-11 font-bold text-[13px] rounded-2xl text-(--navy) px-4 border-0 shadow-none">
                                 <div className="flex items-center gap-2">
-                                    <CalendarDays className="w-4 h-4 text-[var(--red)] shrink-0" />
+                                    <CalendarDays className="w-4 h-4 text-(--red) shrink-0" />
                                     <SelectValue placeholder="Выберите четверть" />
                                 </div>
                             </SelectTrigger>
@@ -114,7 +114,7 @@ export default function HomeworkJournal() {
                                     <SelectItem
                                         key={p.id}
                                         value={p.id.toString()}
-                                        className="font-bold text-[13px] text-[var(--navy)] py-2.5 px-3 rounded-xl cursor-pointer"
+                                        className="font-bold text-[13px] text-(--navy) py-2.5 px-3 rounded-xl cursor-pointer"
                                     >
                                         {p.name}
                                     </SelectItem>
@@ -124,18 +124,18 @@ export default function HomeworkJournal() {
 
                         {/* Assignment select */}
                         <Select value={selectedAssignmentId} onValueChange={setSelectedAssignmentId}>
-                            <SelectTrigger className="glass-pill h-11 px-5 text-[13px] font-bold rounded-2xl text-[var(--navy)] border-0 shadow-sm gap-2 min-w-[220px]">
-                                <Users className="w-4 h-4 text-[var(--red)]" />
+                            <SelectTrigger className="glass-pill h-11 px-5 text-[13px] font-bold rounded-2xl text-(--navy) border-0 shadow-sm gap-2 min-w-55">
+                                <Users className="w-4 h-4 text-(--red)" />
                                 <SelectValue placeholder="Выберите группу" />
                             </SelectTrigger>
-                            <SelectContent className="rounded-2xl border-none shadow-2xl bg-white/95 backdrop-blur-xl max-h-[350px]">
+                            <SelectContent className="rounded-2xl border-none shadow-2xl bg-white/95 backdrop-blur-xl max-h-87.5">
                                 {assignments?.map((p) => (
                                     <SelectItem
                                         key={p.teachingAssignmentId}
                                         value={p.teachingAssignmentId.toString()}
                                         className="font-bold text-[13px] py-3 rounded-xl cursor-pointer"
                                     >
-                                        <span className="text-[var(--red)] mr-1">{p.schoolClassName}</span>
+                                        <span className="text-(--red) mr-1">{p.schoolClassName}</span>
                                         {" "}· {p.subjectName}
                                     </SelectItem>
                                 ))}
@@ -146,11 +146,11 @@ export default function HomeworkJournal() {
             </div>
 
             {/* ── Main grid ── */}
-            <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="max-w-350 mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Calendar — 2 cols */}
                 <div className="lg:col-span-2">
                     {homeworksLoading ? (
-                        <div className="glass-card rounded-[32px] p-6 backdrop-blur-md h-full flex items-center justify-center min-h-[500px]">
+                        <div className="glass-card rounded-[32px] p-6 backdrop-blur-md h-full flex items-center justify-center min-h-125">
                             <div className="animate-pulse text-black/30 font-medium">Загрузка...</div>
                         </div>
                     ) : (

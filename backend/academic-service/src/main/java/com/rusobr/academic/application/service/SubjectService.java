@@ -4,7 +4,7 @@ import com.rusobr.academic.domain.model.Subject;
 import com.rusobr.academic.web.exception.NotFoundException;
 import com.rusobr.academic.application.mapper.SubjectMapper;
 import com.rusobr.academic.infrastructure.persistence.repository.SubjectRepository;
-import com.rusobr.academic.web.dto.subject.SubjectRequestDto;
+import com.rusobr.academic.web.dto.subject.SubjectRequest;
 import com.rusobr.academic.web.dto.subject.SubjectResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -31,7 +31,7 @@ public class SubjectService {
     }
 
     @Transactional
-    public SubjectResponseDto create(SubjectRequestDto dto) {
+    public SubjectResponseDto create(SubjectRequest dto) {
         Subject subject = subjectMapper.toSubject(dto);
         return subjectMapper.toSubjectResponseDto(subjectRepository.save(subject));
     }

@@ -3,7 +3,7 @@ package com.rusobr.academic.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rusobr.academic.application.service.SubjectService;
 import com.rusobr.academic.web.controller.SubjectController;
-import com.rusobr.academic.web.dto.subject.SubjectRequestDto;
+import com.rusobr.academic.web.dto.subject.SubjectRequest;
 import com.rusobr.academic.web.dto.subject.SubjectResponseDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -67,7 +67,7 @@ public class SubjectControllerTest {
     @Test
     @DisplayName("POST /subjects — 200 and create")
     void create_ShouldReturn200() throws Exception {
-        SubjectRequestDto request = new SubjectRequestDto(SUBJECT_NAME);
+        SubjectRequest request = new SubjectRequest(SUBJECT_NAME);
         when(subjectService.create(request)).thenReturn(buildSubjectResponse());
 
         mockMvc.perform(post("/api/v1/subjects")
