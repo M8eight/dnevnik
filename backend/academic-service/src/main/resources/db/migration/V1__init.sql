@@ -99,7 +99,7 @@ create table schedule_lessons
     created_at             timestamptz,
     updated_at             timestamptz,
     deleted_at             timestamptz,
-    constraint chk_schedule_lesson_dates check (valid_from < valid_to)
+    constraint chk_schedule_lesson_dates check (valid_from <= valid_to)
 );
 
 create table lesson_instances

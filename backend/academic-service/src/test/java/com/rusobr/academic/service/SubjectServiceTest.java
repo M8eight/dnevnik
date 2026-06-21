@@ -5,7 +5,7 @@ import com.rusobr.academic.application.service.SubjectService;
 import com.rusobr.academic.domain.model.Subject;
 import com.rusobr.academic.infrastructure.persistence.projection.SubjectResponseProjection;
 import com.rusobr.academic.infrastructure.persistence.repository.SubjectRepository;
-import com.rusobr.academic.web.dto.subject.SubjectRequestDto;
+import com.rusobr.academic.web.dto.subject.SubjectRequest;
 import com.rusobr.academic.web.dto.subject.SubjectResponseDto;
 import com.rusobr.academic.web.exception.NotFoundException;
 import org.junit.jupiter.api.DisplayName;
@@ -97,7 +97,7 @@ class SubjectServiceTest {
         @Test
         @DisplayName("успешно создает и сохраняет предмет")
         void success() {
-            SubjectRequestDto requestDto = mock(SubjectRequestDto.class);
+            SubjectRequest requestDto = mock(SubjectRequest.class);
             Subject subject = new Subject();
             Subject savedSubject = new Subject();
             SubjectResponseDto responseDto = new SubjectResponseDto(SUBJECT_ID, SUBJECT_NAME);

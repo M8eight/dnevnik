@@ -1,7 +1,7 @@
 package com.rusobr.academic.web.controller;
 
 import com.rusobr.academic.application.service.SubjectService;
-import com.rusobr.academic.web.dto.subject.SubjectRequestDto;
+import com.rusobr.academic.web.dto.subject.SubjectRequest;
 import com.rusobr.academic.web.dto.subject.SubjectResponseDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +22,8 @@ public class SubjectController {
     }
 
     @PostMapping
-    public SubjectResponseDto create(@RequestBody @Valid SubjectRequestDto createSubjectRequestDto) {
-        return subjectService.create(createSubjectRequestDto);
+    public SubjectResponseDto create(@RequestBody @Valid SubjectRequest createSubjectRequest) {
+        return subjectService.create(createSubjectRequest);
     }
 
     @DeleteMapping("/{id}")

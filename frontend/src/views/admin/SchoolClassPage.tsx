@@ -23,7 +23,6 @@ export default function SchoolClassPage() {
     const [search, setSearch] = useState("");
     const [selectedClassId, setSelectedClassId] = useState<number | null>(null);
 
-    // Academic year selection
     const { data: academicYears } = useGetAcademicYears();
     const [selectedAcademicYearId, setSelectedAcademicYearId] = useState<string>("");
 
@@ -40,7 +39,6 @@ export default function SchoolClassPage() {
 
     const isYearClosed = currentAcademicYear ? !currentAcademicYear.isActive : false;
 
-    // Classes data
     const { data: classes = [], isLoading } = useGetAllClassesByAcademicYear(parseInt(resolvedAcademicYearId, 10));
     
     const filteredClasses = useMemo(() => {
@@ -51,11 +49,9 @@ export default function SchoolClassPage() {
 
     const selectedClass = classes.find((c) => c.id === selectedClassId);
 
-    // Mutations
     const deleteMutation = useDeleteClass();
     const updateMutation = useUpdateClass();
 
-    // Handlers
     const handleSelect = (id: number) => {
         setSelectedClassId((prev) => (prev === id ? null : id));
     };
@@ -70,14 +66,14 @@ export default function SchoolClassPage() {
             <AdminNavbar />
 
             {/* Header with controls */}
-            <div className="max-w-[1400px] mx-auto mb-6">
+            <div className="max-w-350 mx-auto mb-6">
                 <div className="glass-card rounded-[24px] p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-5 border-none shadow-lg backdrop-blur-md">
                     <div className="flex items-center gap-4">
-                        <div className="hidden sm:flex w-12 h-12 rounded-[18px] bg-[var(--red-light)]/60 items-center justify-center ring-1 ring-[var(--red)]/10">
-                            <GraduationCap className="w-6 h-6 text-[var(--red)]" />
+                        <div className="hidden sm:flex w-12 h-12 rounded-[18px] bg-(--red-light)/60 items-center justify-center ring-1 ring-(--red)/10">
+                            <GraduationCap className="w-6 h-6 text-(--red)" />
                         </div>
                         <div>
-                            <h1 className="font-serif font-black text-2xl lg:text-3xl text-[var(--navy)] tracking-tight">
+                            <h1 className="font-serif font-black text-2xl lg:text-3xl text-(--navy) tracking-tight">
                                 Классы
                             </h1>
                             <p className="text-sm text-black/40 mt-0.5">
@@ -98,11 +94,11 @@ export default function SchoolClassPage() {
                             value={resolvedAcademicYearId}
                             onValueChange={setSelectedAcademicYearId}
                         >
-                            <SelectTrigger className="glass-pill h-10 px-5 text-[12px] font-bold rounded-2xl text-[var(--navy)] border-0 shadow-sm gap-2 min-w-[180px]">
-                                <CalendarClock className="w-4 h-4 text-[var(--red)]" />
+                            <SelectTrigger className="glass-pill h-10 px-5 text-[12px] font-bold rounded-2xl text-(--navy) border-0 shadow-sm gap-2 min-w-45">
+                                <CalendarClock className="w-4 h-4 text-(--red)" />
                                 <SelectValue placeholder="Выберите год" />
                             </SelectTrigger>
-                            <SelectContent className="rounded-2xl border-none shadow-2xl bg-white/95 backdrop-blur-xl max-h-[350px]">
+                            <SelectContent className="rounded-2xl border-none shadow-2xl bg-white/95 backdrop-blur-xl max-h-87.5">
                                 {academicYears?.map((academicYear) => (
                                     <SelectItem key={academicYear.id} value={academicYear.id.toString()} className="font-bold text-[13px] py-3 rounded-xl cursor-pointer">
                                         {academicYear.name} {!academicYear.isActive && "(Архив)"}
@@ -111,13 +107,13 @@ export default function SchoolClassPage() {
                             </SelectContent>
                         </Select>
 
-                        <div className="relative w-full lg:w-[280px]">
+                        <div className="relative w-full lg:w-70">
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/30" />
                             <Input
                                 placeholder="Поиск класса..."
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
-                                className="pl-10 h-11 bg-white/40 border-black/10 rounded-2xl text-sm font-semibold placeholder:font-normal focus-visible:ring-[var(--red)]"
+                                className="pl-10 h-11 bg-white/40 border-black/10 rounded-2xl text-sm font-semibold placeholder:font-normal focus-visible:ring-(--red)"
                             />
                         </div>
                     </div>
@@ -126,10 +122,10 @@ export default function SchoolClassPage() {
 
             {/* Closed year alert */}
             {isYearClosed && (
-                <div className="max-w-[1400px] mx-auto mb-6 animate-in fade-in slide-in-from-top-2 duration-300">
-                    <Alert variant="destructive" className="rounded-[24px] bg-gradient-to-r from-red-50 to-red-50/50 border-red-200/80 shadow-lg backdrop-blur-sm">
+                <div className="max-w-350 mx-auto mb-6 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <Alert variant="destructive" className="rounded-[24px] bg-linear-to-r from-red-50 to-red-50/50 border-red-200/80 shadow-lg backdrop-blur-sm">
                         <div className="flex items-start gap-4">
-                            <div className="flex-shrink-0 mt-0.5 w-10 h-10 rounded-[14px] bg-red-100/60 flex items-center justify-center">
+                            <div className="shrink-0 mt-0.5 w-10 h-10 rounded-[14px] bg-red-100/60 flex items-center justify-center">
                                 <AlertTriangle className="h-5 w-5 text-yellow-600" />
                             </div>
                             <div className="flex-1">
@@ -146,12 +142,12 @@ export default function SchoolClassPage() {
             )}
 
             {/* Main content */}
-            <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="max-w-350 mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Classes list */}
                 <div className="lg:col-span-2">
-                    <div className="glass-card rounded-[32px] p-6 backdrop-blur-md min-h-[500px] flex flex-col">
-                        <h2 className="font-serif font-black text-lg text-[var(--navy)] tracking-tight flex items-center gap-2 mb-5">
-                            <GraduationCap className="w-5 h-5 text-[var(--red)]" />
+                    <div className="glass-card rounded-[32px] p-6 backdrop-blur-md min-h-125 flex flex-col">
+                        <h2 className="font-serif font-black text-lg text-(--navy) tracking-tight flex items-center gap-2 mb-5">
+                            <GraduationCap className="w-5 h-5 text-(--red)" />
                             Все классы
                             {selectedClassId && (
                                 <span className="ml-auto text-xs font-bold text-black/30 bg-black/5 rounded-full px-3 py-1">
@@ -205,12 +201,12 @@ export default function SchoolClassPage() {
                 <div className="lg:col-span-1">
                     <div className="sticky top-6">
                         <div className="glass-card rounded-[32px] p-6 backdrop-blur-md">
-                            <h2 className="text-base font-black text-[var(--navy)] flex items-center gap-2 mb-5">
-                                <Plus className="w-4 h-4 text-[var(--red)]" />
+                            <h2 className="text-base font-black text-(--navy) flex items-center gap-2 mb-5">
+                                <Plus className="w-4 h-4 text-(--red)" />
                                 Создать класс
                             </h2>
                             {isYearClosed ? (
-                                <div className="text-center py-8 px-4 border border-dashed border-black/10 rounded-2xl bg-black/[0.02]">
+                                <div className="text-center py-8 px-4 border border-dashed border-black/10 rounded-2xl bg-black/2">
                                     <p className="text-sm font-semibold text-black/40">
                                         Создание классов в закрытом году недоступно
                                     </p>

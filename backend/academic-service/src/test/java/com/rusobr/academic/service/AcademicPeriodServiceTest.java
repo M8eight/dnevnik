@@ -8,6 +8,7 @@ import com.rusobr.academic.infrastructure.persistence.repository.AcademicPeriodR
 import com.rusobr.academic.infrastructure.persistence.repository.AcademicYearRepository;
 import com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodRequest;
 import com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodResponse;
+import com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodUpdateRequest;
 import com.rusobr.academic.web.dto.academicYear.AcademicYearResponse;
 import com.rusobr.academic.web.exception.ConflictException;
 import com.rusobr.academic.web.exception.NotFoundException;
@@ -91,6 +92,14 @@ class AcademicPeriodServiceTest {
         return new AcademicPeriodRequest(
                 "Q1",
                 ACADEMIC_YEAR_ID,
+                LocalDate.of(2024, 9, 1),
+                LocalDate.of(2024, 12, 31)
+        );
+    }
+
+    private AcademicPeriodUpdateRequest buildUpdateRequest() {
+        return new AcademicPeriodUpdateRequest(
+                "Q1",
                 LocalDate.of(2024, 9, 1),
                 LocalDate.of(2024, 12, 31)
         );
@@ -285,48 +294,29 @@ class AcademicPeriodServiceTest {
     // ─────────────────────────────────────────────
 
     @Test
-    @DisplayName("update — обновляет поля (включая academicYear) и возвращает ответ")
+    @DisplayName("update — обновляет поля и возвращает ответ")
     void update_ShouldUpdateFieldsAndReturnResponse() {
         AcademicPeriod entity = buildEntity(false);
-        AcademicYear newAcademicYear = new AcademicYear();
-        newAcademicYear.setId(3L);
 
-        AcademicPeriodRequest request = new AcademicPeriodRequest(
+        AcademicPeriodUpdateRequest request = new AcademicPeriodUpdateRequest(
                 "Q2",
-                3L,
                 LocalDate.of(2025, 1, 1),
                 LocalDate.of(2025, 3, 31)
         );
 
         AcademicPeriodResponse response = new AcademicPeriodResponse(
-                PERIOD_ID, "Q2", buildAcademicYearResponse(), false, // Для теста response dto не так важен
+                PERIOD_ID, "Q2", buildAcademicYearResponse(), false,
                 LocalDate.of(2025, 1, 1), LocalDate.of(2025, 3, 31)
         );
 
         when(academicPeriodRepository.findWithAcademicYearById(PERIOD_ID)).thenReturn(Optional.of(entity));
-        when(academicYearRepository.findById(3L)).thenReturn(Optional.of(newAcademicYear));
         when(academicPeriodMapper.toResponse(entity)).thenReturn(response);
 
         AcademicPeriodResponse result = academicPeriodService.update(PERIOD_ID, request);
 
         assertThat(entity.getName()).isEqualTo("Q2");
         assertThat(entity.getStartDate()).isEqualTo(LocalDate.of(2025, 1, 1));
-        assertThat(entity.getAcademicYear().getId()).isEqualTo(3L);
         assertThat(result.name()).isEqualTo("Q2");
-    }
-
-    @Test
-    @DisplayName("update — бросает NotFoundException если новый AcademicYear не найден")
-    void update_ShouldThrowNotFoundException_WhenNewAcademicYearNotFound() {
-        AcademicPeriod entity = buildEntity(false);
-        AcademicPeriodRequest request = buildRequest();
-
-        when(academicPeriodRepository.findWithAcademicYearById(PERIOD_ID)).thenReturn(Optional.of(entity));
-        when(academicYearRepository.findById(ACADEMIC_YEAR_ID)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> academicPeriodService.update(PERIOD_ID, request))
-                .isInstanceOf(NotFoundException.class)
-                .hasMessage("Academic year with id " + ACADEMIC_YEAR_ID + " not found");
     }
 
     @Test
@@ -335,7 +325,7 @@ class AcademicPeriodServiceTest {
         AcademicPeriod entity = buildEntity(true);
         when(academicPeriodRepository.findWithAcademicYearById(PERIOD_ID)).thenReturn(Optional.of(entity));
 
-        assertThatThrownBy(() -> academicPeriodService.update(PERIOD_ID, buildRequest()))
+        assertThatThrownBy(() -> academicPeriodService.update(PERIOD_ID, buildUpdateRequest()))
                 .isInstanceOf(ConflictException.class)
                 .hasMessage("Academic period is closed");
     }
@@ -346,8 +336,8 @@ class AcademicPeriodServiceTest {
         AcademicPeriod entity = buildEntity(false);
         entity.setEndDate(LocalDate.of(2024, 12, 31));
 
-        AcademicPeriodRequest request = new AcademicPeriodRequest(
-                null, null,
+        AcademicPeriodUpdateRequest request = new AcademicPeriodUpdateRequest(
+                null,
                 LocalDate.of(2025, 6, 1),
                 null
         );
@@ -364,7 +354,7 @@ class AcademicPeriodServiceTest {
     void update_ShouldThrowNotFoundException_WhenNotFound() {
         when(academicPeriodRepository.findWithAcademicYearById(PERIOD_ID)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> academicPeriodService.update(PERIOD_ID, buildRequest()))
+        assertThatThrownBy(() -> academicPeriodService.update(PERIOD_ID, buildUpdateRequest()))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("Academic period with id " + PERIOD_ID + " not found");
     }

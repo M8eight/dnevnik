@@ -7,6 +7,7 @@ import com.rusobr.academic.infrastructure.persistence.repository.AcademicPeriodR
 import com.rusobr.academic.infrastructure.persistence.repository.AcademicYearRepository;
 import com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodRequest;
 import com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodResponse;
+import com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodUpdateRequest;
 import com.rusobr.academic.web.exception.ConflictException;
 import com.rusobr.academic.web.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -86,7 +87,7 @@ public class AcademicPeriodService {
     }
 
     @Transactional
-    public AcademicPeriodResponse update(Long id, AcademicPeriodRequest request) {
+    public AcademicPeriodResponse update(Long id, AcademicPeriodUpdateRequest request) {
         AcademicPeriod academicPeriod = getWithAcademicYearOrThrow(id);
 
         validateAcademicYear(academicPeriod.getAcademicYear());
@@ -98,11 +99,6 @@ public class AcademicPeriodService {
         if (request.startDate() != null) academicPeriod.setStartDate(request.startDate());
         if (request.endDate() != null) academicPeriod.setEndDate(request.endDate());
         if (request.name() != null) academicPeriod.setName(request.name());
-        if (request.academicYearId() != null) {
-            AcademicYear academicYear = getAcademicYearOrThrow(request.academicYearId());
-            validateAcademicYear(academicYear);
-            academicPeriod.setAcademicYear(academicYear);
-        }
 
         validateDates(academicPeriod.getStartDate(), academicPeriod.getEndDate());
 

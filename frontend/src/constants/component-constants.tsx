@@ -110,13 +110,21 @@ export const ATTENDANCE_LEGEND_ITEMS = [
 ];
 
 
-{/* Student */}
+// {/* Student */}
+// export const DAYS_MAP = [
+//   { key: "MONDAY",    label: "Пн" },
+//   { key: "TUESDAY",   label: "Вт" },
+//   { key: "WEDNESDAY", label: "Ср" },
+//   { key: "THURSDAY",  label: "Чт" },
+//   { key: "FRIDAY",    label: "Пт" },
+// ];
+
 export const DAYS_MAP = [
-  { key: "MONDAY",    label: "Пн" },
-  { key: "TUESDAY",   label: "Вт" },
-  { key: "WEDNESDAY", label: "Ср" },
-  { key: "THURSDAY",  label: "Чт" },
-  { key: "FRIDAY",    label: "Пт" },
+    { key: "MONDAY", label: "Пн", full: "Понедельник" },
+    { key: "TUESDAY", label: "Вт", full: "Вторник" },
+    { key: "WEDNESDAY", label: "Ср", full: "Среда" },
+    { key: "THURSDAY", label: "Чт", full: "Четверг" },
+    { key: "FRIDAY", label: "Пт", full: "Пятница" },
 ];
 
 export const RUSSIAN_DAYS: Record<string, string> = {
@@ -128,3 +136,13 @@ export const RUSSIAN_DAYS: Record<string, string> = {
   SATURDAY:  "Суббота",
   SUNDAY:    "Воскресенье",
 };
+
+export const LESSON_SLOTS = [
+    { num: 1, time: "08:30 – 09:15" },
+    { num: 2, time: "09:25 – 10:10" },
+    { num: 3, time: "10:25 – 11:10" },
+    { num: 4, time: "11:20 – 12:05" },
+    { num: 5, time: "12:35 – 13:20" },
+    { num: 6, time: "13:30 – 14:15" },
+    { num: 7, time: "14:25 – 15:10" },
+];
