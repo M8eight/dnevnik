@@ -33,4 +33,6 @@ public interface AcademicPeriodRepository extends JpaRepository<AcademicPeriod,L
 
     List<AcademicPeriod> findAcademicPeriodsByAcademicYearId(Long academicYearId);
 
+    Boolean existsByName(String name);
+
 }

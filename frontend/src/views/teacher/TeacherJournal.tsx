@@ -13,13 +13,13 @@ import { cn } from "@/lib/utils";
 import TeacherNavbar from "@/components/layout/navbars/TeacherNavbar";
 import StatsStrip from "@/components/teacher/teacher-journal/stats-strip";
 import ToolbarPanel from "@/components/teacher/teacher-journal/toolbar-panel";
-import JournalTable from "@/components/teacher/teacher-journal/journal-table";
 import Legend from "@/components/teacher/teacher-journal/legend";
 import { useGetAcademicYears } from "@/hooks/use-academic-year";
 import FinalGradesView from "./TeacherJournalFinalGradeTab";
 import PeriodGradesView from "./TeacherJournalPeriodTab";
 import { JournalAccessProvider } from "@/hooks/use-journal-access";
 import ClosedPeriodAlert from "@/components/teacher/teacher-journal/closed-period-alert";
+import JournalTable from "./TeacherJournalGradeTab";
 
 const TEACHER_ID = 17;
 const DEFAULT_GRADE_TYPE = "TEST";

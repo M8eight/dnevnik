@@ -17,6 +17,10 @@ export interface AcademicPeriodRequest {
     endDate: string;
 }
 
+export interface AcademicPeriodUpdateRequest {
+    name: string;
+}
+
 export const findAcademicPeriods = async (): Promise<AcademicPeriodResponse[]> => {
     const {data} = await api.get<AcademicPeriodResponse[]>(`/academic-service/api/v1/academic-periods`);
     return data;
@@ -30,6 +34,10 @@ export const findAcademicPeriodsByAcademicYear = async (academicYearId: number):
 export const createAcademicPeriod = async (request: AcademicPeriodRequest): Promise<AcademicPeriodResponse> => {
     const {data} = await api.post<AcademicPeriodResponse>(`/academic-service/api/v1/academic-periods`, request);
     return data;
+}
+
+export const updateAcademicPeriod = async (id: number, request: Partial<AcademicPeriodUpdateRequest>): Promise<void> => {
+    await api.patch(`/academic-service/api/v1/academic-periods/${id}`, request);
 }
 
 export const openAcademicPeriod = async (id: number): Promise<void> => {

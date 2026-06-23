@@ -99,9 +99,7 @@ class AcademicPeriodServiceTest {
 
     private AcademicPeriodUpdateRequest buildUpdateRequest() {
         return new AcademicPeriodUpdateRequest(
-                "Q1",
-                LocalDate.of(2024, 9, 1),
-                LocalDate.of(2024, 12, 31)
+                "Q1"
         );
     }
 
@@ -284,39 +282,9 @@ class AcademicPeriodServiceTest {
 
         assertThatThrownBy(() -> academicPeriodService.create(request))
                 .isInstanceOf(ConflictException.class)
-                .hasMessage("Start date cannot be after end date");
+                .hasMessage("Start date must be before end date");
 
         verify(academicPeriodRepository, never()).save(any());
-    }
-
-    // ─────────────────────────────────────────────
-    // update
-    // ─────────────────────────────────────────────
-
-    @Test
-    @DisplayName("update — обновляет поля и возвращает ответ")
-    void update_ShouldUpdateFieldsAndReturnResponse() {
-        AcademicPeriod entity = buildEntity(false);
-
-        AcademicPeriodUpdateRequest request = new AcademicPeriodUpdateRequest(
-                "Q2",
-                LocalDate.of(2025, 1, 1),
-                LocalDate.of(2025, 3, 31)
-        );
-
-        AcademicPeriodResponse response = new AcademicPeriodResponse(
-                PERIOD_ID, "Q2", buildAcademicYearResponse(), false,
-                LocalDate.of(2025, 1, 1), LocalDate.of(2025, 3, 31)
-        );
-
-        when(academicPeriodRepository.findWithAcademicYearById(PERIOD_ID)).thenReturn(Optional.of(entity));
-        when(academicPeriodMapper.toResponse(entity)).thenReturn(response);
-
-        AcademicPeriodResponse result = academicPeriodService.update(PERIOD_ID, request);
-
-        assertThat(entity.getName()).isEqualTo("Q2");
-        assertThat(entity.getStartDate()).isEqualTo(LocalDate.of(2025, 1, 1));
-        assertThat(result.name()).isEqualTo("Q2");
     }
 
     @Test
@@ -328,25 +296,6 @@ class AcademicPeriodServiceTest {
         assertThatThrownBy(() -> academicPeriodService.update(PERIOD_ID, buildUpdateRequest()))
                 .isInstanceOf(ConflictException.class)
                 .hasMessage("Academic period is closed");
-    }
-
-    @Test
-    @DisplayName("update — бросает ConflictException если после обновления startDate после endDate")
-    void update_ShouldThrowConflictException_WhenDatesInvalidAfterUpdate() {
-        AcademicPeriod entity = buildEntity(false);
-        entity.setEndDate(LocalDate.of(2024, 12, 31));
-
-        AcademicPeriodUpdateRequest request = new AcademicPeriodUpdateRequest(
-                null,
-                LocalDate.of(2025, 6, 1),
-                null
-        );
-
-        when(academicPeriodRepository.findWithAcademicYearById(PERIOD_ID)).thenReturn(Optional.of(entity));
-
-        assertThatThrownBy(() -> academicPeriodService.update(PERIOD_ID, request))
-                .isInstanceOf(ConflictException.class)
-                .hasMessage("Start date cannot be after end date");
     }
 
     @Test

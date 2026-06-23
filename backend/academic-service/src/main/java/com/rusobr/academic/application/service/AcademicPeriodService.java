@@ -87,7 +87,7 @@ public class AcademicPeriodService {
     }
 
     @Transactional
-    public AcademicPeriodResponse update(Long id, AcademicPeriodUpdateRequest request) {
+    public void update(Long id, AcademicPeriodUpdateRequest request) {
         AcademicPeriod academicPeriod = getWithAcademicYearOrThrow(id);
 
         validateAcademicYear(academicPeriod.getAcademicYear());
@@ -96,13 +96,13 @@ public class AcademicPeriodService {
             throw new ConflictException("Academic period is closed");
         }
 
-        if (request.startDate() != null) academicPeriod.setStartDate(request.startDate());
-        if (request.endDate() != null) academicPeriod.setEndDate(request.endDate());
+        if (academicPeriodRepository.existsByName(request.name())) {
+            throw new ConflictException("Academic period with name " + request.name() + " already exists");
+        }
+
         if (request.name() != null) academicPeriod.setName(request.name());
 
-        validateDates(academicPeriod.getStartDate(), academicPeriod.getEndDate());
 
-        return academicPeriodMapper.toResponse(academicPeriod);
     }
 
     @Transactional
@@ -126,8 +126,8 @@ public class AcademicPeriodService {
     }
 
     private void validateDates(LocalDate start, LocalDate end) {
-        if (start != null && end != null && start.isAfter(end)) {
-            throw new ConflictException("Start date cannot be after end date");
+        if (start != null && end != null && !start.isBefore(end)) {
+            throw new ConflictException("Start date must be before end date");
         }
     }
 
