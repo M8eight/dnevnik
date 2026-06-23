@@ -2,14 +2,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useRef } from "react";
 import type { ViewMode } from "@/constants/component-constants";
 import { formatColDay, formatColDate, avgStyle, useHorizontalScrollDrag } from "@/helpers/teacher-helpers";
-import type { StudentJournalEntry } from "@/services/teacher-journal-service";
+import type { LessonInstanceDto, StudentJournalEntry, StudentMetadata } from "@/services/teacher-journal-service";
 import { useJournalAccess } from "@/hooks/use-journal-access";
 import GradePopover from "./grade-popover";
 import Chip from "@/components/student/chip";
 
 interface JournalTableProps {
-  sortedStudents: any[];
-  sortedLessons: any[];
+  sortedStudents: StudentMetadata[];
+  sortedLessons: LessonInstanceDto[];
   journalMap: Record<number, StudentJournalEntry>;
   isLoading: boolean;
   gradeType: string;
@@ -42,25 +42,25 @@ export default function JournalTable({
         <table className="w-full border-collapse">
           <thead>
             <tr>
-              <th className="sticky left-0 z-40 bg-slate-50/95 text-left px-4 py-6 border-b border-r border-black/[0.05] w-[180px] min-w-[180px] shadow-sm backdrop-blur-md">
-                <Chip className="border-[var(--navy)]/20 text-[var(--navy)]">Ученик</Chip>
+              <th className="sticky left-0 z-40 bg-slate-50/95 text-left px-4 py-6 border-b border-r border-black/5 w-45 min-w-45 shadow-sm backdrop-blur-md">
+                <Chip className="border-(--navy)/20 text-(--navy)">Ученик</Chip>
               </th>
               {sortedLessons.map((l) => (
                 <th
                   key={l.id}
-                  className="z-30 bg-slate-50/95 min-w-[64px] text-center align-middle py-4 border-b border-r border-black/[0.05] shadow-sm backdrop-blur-md"
+                  className="z-30 bg-slate-50/95 min-w-16 text-center align-middle py-4 border-b border-r border-black/5 shadow-sm backdrop-blur-md"
                 >
                   <div className="flex flex-col items-center gap-0.5">
                     <span className="text-[12px] font-extrabold text-black/30 uppercase">
                       {formatColDay(l.lessonDate)}
                     </span>
-                    <span className="text-[12px] font-bold text-[var(--navy)]">
+                    <span className="text-[12px] font-bold text-(--navy)">
                       {formatColDate(l.lessonDate)}
                     </span>
                   </div>
                 </th>
               ))}
-              <th className="sticky right-0 z-40 bg-slate-50/95 text-center px-4 border-b border-l border-black/[0.05] w-[70px] shadow-sm backdrop-blur-md">
+              <th className="sticky right-0 z-40 bg-slate-50/95 text-center px-4 border-b border-l border-black/5 w-17.5 shadow-sm backdrop-blur-md">
                 <Chip className="border-amber-200 text-amber-600 bg-amber-50/50">Ср.б</Chip>
               </th>
             </tr>
@@ -87,10 +87,10 @@ export default function JournalTable({
                 return (
                   <tr
                     key={student.id}
-                    className="group hover:bg-slate-50/80 transition-colors border-b border-black/[0.03]"
+                    className="group hover:bg-slate-50/80 transition-colors border-b border-black/3"
                   >
-                    <td className="sticky left-0 z-10 bg-white/95 group-hover:bg-slate-50/95 transition-colors px-4 py-3 border-r border-black/[0.05]">
-                      <p className="text-[13px] font-bold text-[var(--navy)] leading-tight truncate">
+                    <td className="sticky left-0 z-10 bg-white/95 group-hover:bg-slate-50/95 transition-colors px-4 py-3 border-r border-black/5">
+                      <p className="text-[13px] font-bold text-(--navy) leading-tight truncate">
                         {student.lastName} {student.firstName}
                       </p>
                     </td>
@@ -99,9 +99,9 @@ export default function JournalTable({
                       const attendance = entry?.attendances.find((a) => a.lessonInstanceId === lesson.id);
                       
                       return (
-                        <td key={lesson.id} className="h-[70px] p-0 text-center border-r border-black/[0.05]">
+                        <td key={lesson.id} className="h-17.5 p-0 text-center border-r border-black/5">
                           {isReadOnly ? (
-                            <div className="flex items-center justify-center w-full h-full text-[13px] font-bold text-[var(--navy)]/60 select-none">
+                            <div className="flex items-center justify-center w-full h-full text-[13px] font-bold text-(--navy)/60 select-none">
                               {grade?.value ?? attendance?.status ?? ""}
                             </div>
                           ) : (
@@ -119,7 +119,7 @@ export default function JournalTable({
                         </td>
                       );
                     })}
-                    <td className="sticky right-0 z-10 bg-white/95 group-hover:bg-slate-50/95 transition-colors text-center border-l border-black/[0.05]">
+                    <td className="sticky right-0 z-10 bg-white/95 group-hover:bg-slate-50/95 transition-colors text-center border-l border-black/5">
                       <span className={`font-serif text-[16px] ${avgStyle(entry?.gradesAverage)}`}>
                         {entry?.gradesAverage}
                       </span>

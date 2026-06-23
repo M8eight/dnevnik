@@ -43,8 +43,8 @@ function TabSwitcher({ active, onChange }: { active: Tab; onChange: (t: Tab) => 
           className={cn(
             "px-5 h-9 rounded-xl text-[12px] font-extrabold uppercase tracking-wider transition-all duration-200",
             active === tab.id
-              ? "bg-white/70 text-[var(--navy)] shadow-sm"
-              : "text-black/30 hover:text-[var(--navy)] hover:bg-white/20"
+              ? "bg-white/70 text-(--navy) shadow-sm"
+              : "text-black/30 hover:text-(--navy) hover:bg-white/20"
           )}
         >
           {tab.label}
@@ -135,20 +135,20 @@ export default function TeacherJournal() {
       <div className="relative z-10 min-h-screen px-4 md:px-10 pt-5 pb-14">
         <TeacherNavbar />
 
-        <header className="sticky top-5 z-50 max-w-[1400px] mx-auto mb-6">
-          <div className="glass-card rounded-[24px] p-5 flex flex-col xl:flex-row xl:items-center gap-5 border-none shadow-lg backdrop-blur-md ring-1 ring-black/[0.04]">
+        <header className="sticky top-5 z-50 max-w-350 mx-auto mb-6">
+          <div className="glass-card rounded-[24px] p-5 flex flex-col xl:flex-row xl:items-center gap-5 border-none shadow-lg backdrop-blur-md ring-1 ring-black/4">
             <div className="flex-1 min-w-0 flex items-center gap-4">
-              <div className="hidden sm:flex w-10 h-10 rounded-[14px] bg-[var(--red-light)]/60 items-center justify-center flex-shrink-0 ring-1 ring-[var(--red)]/10">
-                <BookOpen className="w-5 h-5 text-[var(--red)]" />
+              <div className="hidden sm:flex w-10 h-10 rounded-[14px] bg-(--red-light)/60 items-center justify-center shrink-0 ring-1 ring-(--red)/10">
+                <BookOpen className="w-5 h-5 text-(--red)" />
               </div>
               <div className="truncate">
-                <div className="flex items-center gap-2 text-[10px] font-extrabold tracking-[0.2em] text-[var(--red)] uppercase mb-0.5">
+                <div className="flex items-center gap-2 text-[10px] font-extrabold tracking-[0.2em] text-(--red) uppercase mb-0.5">
                   <span>{data?.academicPeriod?.academicYear.name}</span>
-                  <span className="w-1 h-1 rounded-full bg-[var(--red)]" />
+                  <span className="w-1 h-1 rounded-full bg-(--red)" />
                   <span className="truncate">{currentAssignment?.schoolClassName ?? "..."}</span>
                 </div>
-                <h1 className="font-serif font-black text-[1.8rem] xl:text-[2.2rem] text-[var(--navy)] leading-tight tracking-tight truncate">
-                  Табель <em className="not-italic text-[var(--red)]">успеваемости</em>
+                <h1 className="font-serif font-black text-[1.8rem] xl:text-[2.2rem] text-(--navy) leading-tight tracking-tight truncate">
+                  Табель <em className="not-italic text-(--red)">успеваемости</em>
                 </h1>
               </div>
             </div>
@@ -157,11 +157,11 @@ export default function TeacherJournal() {
               value={selectedAcademicYearId || academicYears?.[0]?.id.toString() || ""}
               onValueChange={setSelectedAcademicYearId}
             >
-              <SelectTrigger className="glass-pill h-10 px-5 text-[12px] font-bold rounded-2xl text-[var(--navy)] border-0 shadow-sm gap-2 min-w-[180px]">
-                <CalendarClock className="w-4 h-4 text-[var(--red)]" />
+              <SelectTrigger className="glass-pill h-10 px-5 text-[12px] font-bold rounded-2xl text-(--navy) border-0 shadow-sm gap-2 min-w-45">
+                <CalendarClock className="w-4 h-4 text-(--red)" />
                 <SelectValue placeholder="Выберите год" />
               </SelectTrigger>
-              <SelectContent className="rounded-2xl border-none shadow-2xl bg-white/95 backdrop-blur-xl max-h-[350px]">
+              <SelectContent className="rounded-2xl border-none shadow-2xl bg-white/95 backdrop-blur-xl max-h-87.5">
                 {academicYears?.map((academicYear) => (
                   <SelectItem key={academicYear.id} value={academicYear.id.toString()} className="font-bold text-[13px] py-3 rounded-xl cursor-pointer">
                     {academicYear.name} {!academicYear.isActive && "(Архив)"}
@@ -174,8 +174,8 @@ export default function TeacherJournal() {
               {activeTab === "journal" && (
                 <>
                   <Select value={selectedWeight.toString()} onValueChange={(v) => setSelectedWeight(parseInt(v))}>
-                    <SelectTrigger className="glass-pill h-10 px-4 text-[12px] font-bold rounded-2xl text-[var(--navy)] border-0 shadow-sm gap-2">
-                      <Scale className="w-4 h-4 text-[var(--red)]" />
+                    <SelectTrigger className="glass-pill h-10 px-4 text-[12px] font-bold rounded-2xl text-(--navy) border-0 shadow-sm gap-2">
+                      <Scale className="w-4 h-4 text-(--red)" />
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="rounded-2xl border-none shadow-2xl bg-white/95 backdrop-blur-xl">
@@ -188,8 +188,8 @@ export default function TeacherJournal() {
                   </Select>
 
                   <Select value={selectedGradeType} onValueChange={setSelectedGradeType}>
-                    <SelectTrigger className="glass-pill h-10 px-4 text-[12px] font-bold rounded-2xl text-[var(--navy)] border-0 shadow-sm gap-2">
-                      <BookCheck className="w-4 h-4 text-[var(--red)]" />
+                    <SelectTrigger className="glass-pill h-10 px-4 text-[12px] font-bold rounded-2xl text-(--navy) border-0 shadow-sm gap-2">
+                      <BookCheck className="w-4 h-4 text-(--red)" />
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="rounded-2xl border-none shadow-2xl bg-white/95 backdrop-blur-xl">
@@ -203,10 +203,10 @@ export default function TeacherJournal() {
 
                   <Select value={resolvedPeriodId} onValueChange={setSelectedPeriodId}>
                   <SelectTrigger className={cn(
-                    "glass-pill w-[240px] h-11 font-bold text-[13px] rounded-2xl px-4 border-0 shadow-none transition-all text-[var(--navy)]"
+                    "glass-pill w-60 h-11 font-bold text-[13px] rounded-2xl px-4 border-0 shadow-none transition-all text-(--navy)"
                   )}>
                     <div className="flex items-center gap-2">
-                      <CalendarDays className="w-4 h-4 text-[var(--red)] shrink-0" />
+                      <CalendarDays className="w-4 h-4 text-(--red) shrink-0" />
                       <SelectValue placeholder="Выберите четверть" />
                     </div>
                   </SelectTrigger>
@@ -215,11 +215,11 @@ export default function TeacherJournal() {
                       <SelectItem
                         key={p.id}
                         value={p.id.toString()}
-                        className="font-bold text-[13px] text-[var(--navy)] py-2.5 px-3 rounded-xl cursor-pointer"
+                        className="font-bold text-[13px] text-(--navy) py-2.5 px-3 rounded-xl cursor-pointer"
                       >
                         <div className="flex items-center gap-2">
                           {p.name}
-                          {p.isClosed && <Lock className='w-3 h-3 text-[var(--red)]' />}
+                          {p.isClosed && <Lock className='w-3 h-3 text-(--red)' />}
                         </div>
                       </SelectItem>
                     ))}
@@ -228,20 +228,20 @@ export default function TeacherJournal() {
                 </>
               )}
 
-              {activeTab === "journal" && <div className="hidden xl:block w-px h-8 bg-black/[0.06]" />}
+              {activeTab === "journal" && <div className="hidden xl:block w-px h-8 bg-black/6" />}
 
               <Select
                 value={selectedAssignmentId || assignments?.[0]?.teachingAssignmentId.toString() || ""}
                 onValueChange={setSelectedAssignmentId}
               >
-                <SelectTrigger className="glass-pill h-10 px-5 text-[12px] font-bold rounded-2xl text-[var(--navy)] border-0 shadow-sm gap-2 min-w-[180px]">
-                  <Users className="w-4 h-4 text-[var(--red)]" />
+                <SelectTrigger className="glass-pill h-10 px-5 text-[12px] font-bold rounded-2xl text-(--navy) border-0 shadow-sm gap-2 min-w-45">
+                  <Users className="w-4 h-4 text-(--red)" />
                   <SelectValue placeholder="Выберите группу" />
                 </SelectTrigger>
-                <SelectContent className="rounded-2xl border-none shadow-2xl bg-white/95 backdrop-blur-xl max-h-[350px]">
+                <SelectContent className="rounded-2xl border-none shadow-2xl bg-white/95 backdrop-blur-xl max-h-87.5">
                   {assignments?.map((p) => (
                     <SelectItem key={p.teachingAssignmentId} value={p.teachingAssignmentId.toString()} className="font-bold text-[13px] py-3 rounded-xl cursor-pointer">
-                      <span className="text-[var(--red)] mr-1">{p.schoolClassName}</span> · {p.subjectName}
+                      <span className="text-(--red) mr-1">{p.schoolClassName}</span> · {p.subjectName}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -250,7 +250,7 @@ export default function TeacherJournal() {
           </div>
         </header>
 
-        <div className="max-w-[1400px] mx-auto">
+        <div className="max-w-350 mx-auto">
           <TabSwitcher active={activeTab} onChange={setActiveTab} />
 
           <ClosedPeriodAlert 
