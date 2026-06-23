@@ -8,7 +8,13 @@ import {
     CalendarClock,
     AlertTriangle,
 } from "lucide-react";
-import { useCloseAcademicPeriod, useDeleteAcademicPeriod, useGetAcademicPeriodsByAcademicYear, useOpenAcademicPeriod } from "@/hooks/use-academic-period";
+import {
+    useCloseAcademicPeriod,
+    useDeleteAcademicPeriod,
+    useGetAcademicPeriodsByAcademicYear,
+    useOpenAcademicPeriod,
+    useUpdateAcademicPeriod,
+} from "@/hooks/use-academic-period";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { AcademicPeriodResponse } from "@/services/academic-period-service";
@@ -43,6 +49,7 @@ export default function AcademicPeriodPage() {
     const openMutation = useOpenAcademicPeriod();
     const closeMutation = useCloseAcademicPeriod();
     const deleteMutation = useDeleteAcademicPeriod();
+    const updateMutation = useUpdateAcademicPeriod();
 
     const handleToggle = (period: AcademicPeriodResponse) => {
         if (period.isClosed) {
@@ -52,6 +59,12 @@ export default function AcademicPeriodPage() {
         }
     };
 
+    const filteredPeriods = useMemo(() => {
+        return periods.filter((p) =>
+            p.name.toLowerCase().includes(search.toLowerCase())
+        );
+    }, [periods, search]);
+
     const openCount = periods.filter((p) => !p.isClosed).length;
 
     return (
@@ -60,15 +73,15 @@ export default function AcademicPeriodPage() {
             <AdminNavbar />
 
             {/* ── Controls bar ── */}
-            <div className="max-w-[1400px] mx-auto mb-6">
+            <div className="max-w-350 mx-auto mb-6">
                 <div className="glass-card rounded-[24px] p-5 flex flex-col lg:flex-row justify-between lg:items-center gap-5 border-none shadow-lg backdrop-blur-md">
 
                     <div className="flex items-center gap-4">
-                        <div className="hidden sm:flex w-12 h-12 rounded-[18px] bg-[var(--red-light)]/60 items-center justify-center ring-1 ring-[var(--red)]/10">
-                            <CalendarDays className="w-6 h-6 text-[var(--red)]" />
+                        <div className="hidden sm:flex w-12 h-12 rounded-[18px] bg-(--red-light)/60 items-center justify-center ring-1 ring-(--red)/10">
+                            <CalendarDays className="w-6 h-6 text-(--red)" />
                         </div>
                         <div>
-                            <h1 className="font-serif font-black text-2xl lg:text-3xl text-[var(--navy)] tracking-tight">
+                            <h1 className="font-serif font-black text-2xl lg:text-3xl text-(--navy) tracking-tight">
                                 Четверти
                             </h1>
                             <p className="text-sm text-black/40 mt-0.5">
@@ -85,27 +98,26 @@ export default function AcademicPeriodPage() {
                             value={selectedAcademicYearId || academicYears?.[0]?.id.toString() || ""}
                             onValueChange={setSelectedAcademicYearId}
                         >
-                            <SelectTrigger className="glass-pill h-10 px-5 text-[12px] font-bold rounded-2xl text-[var(--navy)] border-0 shadow-sm gap-2 min-w-[180px]">
-                                <CalendarClock className="w-4 h-4 text-[var(--red)]" />
+                            <SelectTrigger className="glass-pill h-10 px-5 text-[12px] font-bold rounded-2xl text-(--navy) border-0 shadow-sm gap-2 min-w-45">
+                                <CalendarClock className="w-4 h-4 text-(--red)" />
                                 <SelectValue placeholder="Выберите год" />
                             </SelectTrigger>
-                            <SelectContent className="rounded-2xl border-none shadow-2xl bg-white/95 backdrop-blur-xl max-h-[350px]">
+                            <SelectContent className="rounded-2xl border-none shadow-2xl bg-white/95 backdrop-blur-xl max-h-87.5">
                                 {academicYears?.map((academicYear) => (
                                     <SelectItem key={academicYear.id} value={academicYear.id.toString()} className="font-bold text-[13px] py-3 rounded-xl cursor-pointer">
-                                        {/* Добавили пометку (Архив) */}
                                         {academicYear.name} {!academicYear.isActive && "(Архив)"}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
 
-                        <div className="relative w-full lg:w-[280px] float-end">
+                        <div className="relative w-full lg:w-70 float-end">
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/30" />
                             <Input
                                 placeholder="Поиск четверти..."
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
-                                className="pl-10 h-11 bg-white/40 border-black/10 rounded-2xl text-sm font-semibold placeholder:font-normal focus-visible:ring-[var(--red)]"
+                                className="pl-10 h-11 bg-white/40 border-black/10 rounded-2xl text-sm font-semibold placeholder:font-normal focus-visible:ring-(--red)"
                             />
                         </div>
 
@@ -115,10 +127,10 @@ export default function AcademicPeriodPage() {
 
             {/* Closed year alert */}
             {isYearClosed && (
-                <div className="max-w-[1400px] mx-auto mb-6 animate-in fade-in slide-in-from-top-2 duration-300">
-                    <Alert variant="destructive" className="rounded-[24px] bg-gradient-to-r from-red-50 to-red-50/50 border-red-200/80 shadow-lg backdrop-blur-sm">
+                <div className="max-w-350 mx-auto mb-6 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <Alert variant="destructive" className="rounded-[24px] bg-linear-to-r from-red-50 to-red-50/50 border-red-200/80 shadow-lg backdrop-blur-sm">
                         <div className="flex items-start gap-4">
-                            <div className="flex-shrink-0 mt-0.5 w-10 h-10 rounded-[14px] bg-red-100/60 flex items-center justify-center">
+                            <div className="shrink-0 mt-0.5 w-10 h-10 rounded-[14px] bg-red-100/60 flex items-center justify-center">
                                 <AlertTriangle className="h-5 w-5 text-yellow-600" />
                             </div>
                             <div className="flex-1">
@@ -126,7 +138,7 @@ export default function AcademicPeriodPage() {
                                     Учебный год <span className="font-bold text-yellow-900">({currentAcademicYear?.name})</span> закрыт
                                 </AlertTitle>
                                 <AlertDescription className="text-sm text-yellow-800/85 font-medium leading-relaxed">
-                                    Операции удаления и редактирования классов запрещены
+                                    Операции удаления и редактирования четвертей запрещены
                                 </AlertDescription>
                             </div>
                         </div>
@@ -135,32 +147,33 @@ export default function AcademicPeriodPage() {
             )}
 
             {/* ── Main grid ── */}
-            <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="max-w-350 mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                 <div className="lg:col-span-2">
-                    <div className="glass-card rounded-[32px] p-6 backdrop-blur-md min-h-[500px] flex flex-col">
+                    <div className="glass-card rounded-[32px] p-6 backdrop-blur-md min-h-125 flex flex-col">
 
-                        <h2 className="font-serif font-black text-lg text-[var(--navy)] tracking-tight flex items-center gap-2 mb-5">
-                            <CalendarDays className="w-5 h-5 text-[var(--red)]" />
+                        <h2 className="font-serif font-black text-lg text-(--navy) tracking-tight flex items-center gap-2 mb-5">
+                            <CalendarDays className="w-5 h-5 text-(--red)" />
                             Все четверти
                         </h2>
 
-                        {/* Список четвертей */}
                         <ScrollArea className="flex-1 pr-2">
                             {isLoading ? (
                                 <div className="flex flex-col items-center justify-center py-20 text-black/30">
                                     <Loader2 className="w-8 h-8 animate-spin" />
                                 </div>
-                            ) : periods.length > 0 ? (
+                            ) : filteredPeriods.length > 0 ? (
                                 <div className="flex flex-col gap-3">
-                                    {periods.map((period, idx) => (
+                                    {filteredPeriods.map((period, idx) => (
                                         <PeriodCard
                                             key={period.id}
                                             period={period}
                                             index={idx}
-                                            // Блокируем функции управления, если год закрыт
                                             onDelete={isYearClosed ? undefined : (id) => deleteMutation.mutate(id)}
                                             onToggle={isYearClosed ? undefined : handleToggle}
+                                            onUpdate={isYearClosed ? undefined : (id, data) =>
+                                                updateMutation.mutate({ id, request: data })
+                                            }
                                             isDeleting={
                                                 deleteMutation.isPending &&
                                                 deleteMutation.variables === period.id
@@ -168,6 +181,10 @@ export default function AcademicPeriodPage() {
                                             isToggling={
                                                 (openMutation.isPending && openMutation.variables === period.id) ||
                                                 (closeMutation.isPending && closeMutation.variables === period.id)
+                                            }
+                                            isUpdating={
+                                                updateMutation.isPending &&
+                                                updateMutation.variables?.id === period.id
                                             }
                                         />
                                     ))}
@@ -186,13 +203,12 @@ export default function AcademicPeriodPage() {
                 <div className="lg:col-span-1">
                     <div className="sticky top-6">
                         <div className="glass-card rounded-[32px] p-6 backdrop-blur-md">
-                            <h2 className="text-base font-black text-[var(--navy)] flex items-center gap-2 mb-5">
-                                <Plus className="w-4 h-4 text-[var(--red)]" />
+                            <h2 className="text-base font-black text-(--navy) flex items-center gap-2 mb-5">
+                                <Plus className="w-4 h-4 text-(--red)" />
                                 Создать четверть
                             </h2>
-                            {/* Блокируем форму, если год закрыт */}
                             {isYearClosed ? (
-                                <div className="text-center py-8 px-4 border border-dashed border-black/10 rounded-2xl bg-black/[0.02]">
+                                <div className="text-center py-8 px-4 border border-dashed border-black/10 rounded-2xl bg-black/2">
                                     <p className="text-sm font-semibold text-black/40">
                                         Создание четвертей в закрытом году недоступно
                                     </p>

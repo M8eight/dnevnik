@@ -7,6 +7,8 @@ import {
     type AcademicPeriodRequest,
     type AcademicPeriodResponse,
     findAcademicPeriodsByAcademicYear,
+    updateAcademicPeriod,
+    type AcademicPeriodUpdateRequest,
 } from "@/services/academic-period-service";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -31,6 +33,15 @@ export const useCreateAcademicPeriod = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: (request: AcademicPeriodRequest) => createAcademicPeriod(request),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: QUERY_KEY }),
+    });
+};
+
+export const useUpdateAcademicPeriod = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, request }: { id: number; request: AcademicPeriodUpdateRequest }) =>
+            updateAcademicPeriod(id, request),
         onSuccess: () => queryClient.invalidateQueries({ queryKey: QUERY_KEY }),
     });
 };

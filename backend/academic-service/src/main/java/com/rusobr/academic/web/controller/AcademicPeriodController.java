@@ -3,6 +3,7 @@ package com.rusobr.academic.web.controller;
 import com.rusobr.academic.application.service.AcademicPeriodService;
 import com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodRequest;
 import com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodResponse;
+import com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodUpdateRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,6 +44,11 @@ public class AcademicPeriodController {
     @PostMapping
     public AcademicPeriodResponse create(@RequestBody AcademicPeriodRequest academicPeriodRequest) {
         return academicPeriodService.create(academicPeriodRequest);
+    }
+
+    @PatchMapping("/{id}")
+    public void update(@PathVariable Long id, @RequestBody AcademicPeriodUpdateRequest request) {
+        academicPeriodService.update(id, request);
     }
 
     @DeleteMapping("/{id}")
