@@ -39,7 +39,7 @@ public interface GradeRepository extends JpaRepository<Grade, Long> {
     Optional<Grade> findWithLessonInstanceById(Long id);
 
     @Query("""
-            select sum(g.value * g.weight) / sum(g.weight)
+            select coalesce(sum(g.value * g.weight) / sum(g.weight), 0.0)
             from Grade g
             join g.lessonInstance li
             where g.studentId = :studentId

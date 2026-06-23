@@ -29,8 +29,8 @@ function TabSwitcher({ active, onChange }: { active: Tab; onChange: (t: Tab) => 
                     className={cn(
                         "px-5 h-9 rounded-xl text-[12px] font-extrabold uppercase tracking-wider transition-all duration-200",
                         active === tab.id
-                            ? "bg-white/70 text-[var(--navy)] shadow-sm"
-                            : "text-black/30 hover:text-[var(--navy)] hover:bg-white/20"
+                            ? "bg-white/70 text-(--navy) shadow-sm"
+                            : "text-black/30 hover:text-(--navy) hover:bg-white/20"
                     )}
                 >
                     {tab.label}
@@ -67,21 +67,21 @@ export default function GradeTablePage() {
     const academicYearIdNumber = resolvedAcademicYearId ? parseInt(resolvedAcademicYearId, 10) : 0;
 
     return (
-        <div className="relative z-10 min-h-screen px-6 md:px-10 pt-2 pb-14 max-w-[1600px] mx-auto">
+        <div className="relative z-10 min-h-screen px-6 md:px-10 pt-2 pb-14 max-w-400 mx-auto">
 
             <StudentNavbar />
 
-            <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 pb-6 border-b border-black/[0.08] anim-in">
+            <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 pb-6 border-b border-black/8 anim-in">
                 <div>
-                    <p className="text-[10px] font-extrabold tracking-[0.25em] text-[var(--red)] uppercase mb-2 flex items-center gap-2">
-                        <span className="inline-block w-4 h-[2px] bg-[var(--red)] rounded-full" />
+                    <p className="text-[10px] font-extrabold tracking-[0.25em] text-(--red) uppercase mb-2 flex items-center gap-2">
+                        <span className="inline-block w-4 h-0.5 bg-(--red) rounded-full" />
                         Учебный процесс
                     </p>
-                    <h1 className="font-serif font-black text-[clamp(2rem,4vw,3rem)] text-[var(--navy)] leading-[0.95]">
+                    <h1 className="font-serif font-black text-[clamp(2rem,4vw,3rem)] text-(--navy) leading-[0.95]">
                         Успеваемость{" "}
                         <em className="not-italic relative">
-                            <span className="relative z-10 text-[var(--red)]">ученика</span>
-                            <span className="absolute bottom-0 left-0 right-0 h-[5px] rounded-full opacity-15 bg-[var(--red)]" />
+                            <span className="relative z-10 text-(--red)">ученика</span>
+                            <span className="absolute bottom-0 left-0 right-0 h-1.25 rounded-full opacity-15 bg-(--red)" />
                         </em>
                     </h1>
                 </div>
@@ -92,11 +92,11 @@ export default function GradeTablePage() {
                         value={resolvedAcademicYearId}
                         onValueChange={setSelectedAcademicYearId}
                     >
-                        <SelectTrigger className="glass-pill h-10 px-5 text-[12px] font-bold rounded-2xl text-[var(--navy)] border-0 shadow-sm gap-2 min-w-[180px]">
-                            <CalendarClock className="w-4 h-4 text-[var(--red)]" />
+                        <SelectTrigger className="glass-pill h-10 px-5 text-[12px] font-bold rounded-2xl text-(--navy) border-0 shadow-sm gap-2 min-w-45">
+                            <CalendarClock className="w-4 h-4 text-(--red)" />
                             <SelectValue placeholder="Выберите год" />
                         </SelectTrigger>
-                        <SelectContent className="rounded-2xl border-none shadow-2xl bg-white/95 backdrop-blur-xl max-h-[350px]">
+                        <SelectContent className="rounded-2xl border-none shadow-2xl bg-white/95 backdrop-blur-xl max-h-87.5">
                             {academicYears?.map((academicYear) => (
                                 <SelectItem key={academicYear.id} value={academicYear.id.toString()} className="font-bold text-[13px] py-3 rounded-xl cursor-pointer">
                                     {academicYear.name}
@@ -107,9 +107,9 @@ export default function GradeTablePage() {
 
                     {activeTab === "current" && (
                         <Select value={resolvedPeriodId} onValueChange={setSelectedPeriodId}>
-                            <SelectTrigger className="glass-pill w-[240px] h-11 font-bold text-[13px] rounded-2xl text-[var(--navy)] px-4 border-0 shadow-none">
+                            <SelectTrigger className="glass-pill w-60 h-11 font-bold text-[13px] rounded-2xl text-(--navy) px-4 border-0 shadow-none">
                                 <div className="flex items-center gap-2">
-                                    <CalendarDays className="w-4 h-4 text-[var(--red)] shrink-0" />
+                                    <CalendarDays className="w-4 h-4 text-(--red) shrink-0" />
                                     <SelectValue placeholder="Выберите четверть" />
                                 </div>
                             </SelectTrigger>
@@ -118,7 +118,7 @@ export default function GradeTablePage() {
                                     <SelectItem
                                         key={p.id}
                                         value={p.id.toString()}
-                                        className="font-bold text-[13px] text-[var(--navy)] py-2.5 px-3 rounded-xl cursor-pointer"
+                                        className="font-bold text-[13px] text-(--navy) py-2.5 px-3 rounded-xl cursor-pointer"
                                     >
                                         {p.name}
                                     </SelectItem>
@@ -129,9 +129,9 @@ export default function GradeTablePage() {
 
                     <Button
                         variant="outline"
-                        className="glass-pill h-11 border-0 text-[11px] font-extrabold uppercase tracking-widest rounded-2xl text-[var(--navy)] px-5 hover:scale-[1.02] transition-transform"
+                        className="glass-pill h-11 border-0 text-[11px] font-extrabold uppercase tracking-widest rounded-2xl text-(--navy) px-5 hover:scale-[1.02] transition-transform"
                     >
-                        <Download className="mr-2 h-4 w-4 text-[var(--red)]" /> PDF
+                        <Download className="mr-2 h-4 w-4 text-(--red)" /> PDF
                     </Button>
 
                 </div>
@@ -142,7 +142,6 @@ export default function GradeTablePage() {
                 <TabSwitcher active={activeTab} onChange={setActiveTab} />
             </div>
 
-            {/* ✅ Передаём гарантированные ID */}
             {activeTab === "current" && academicPeriodId > 0 && (
                 <GradeJournalGradeTab studentId={STUDENT_ID} academicPeriodId={academicPeriodId} />
             )}
@@ -163,7 +162,7 @@ export default function GradeTablePage() {
                         className="flex items-center gap-2 text-[9px] font-extrabold uppercase tracking-[0.22em] text-black/35"
                     >
                         <span
-                            className="w-5 h-5 rounded-[6px] ring-1 ring-black/[0.06] flex items-center justify-center shrink-0"
+                            className="w-5 h-5 rounded-[6px] ring-1 ring-black/6 flex items-center justify-center shrink-0"
                             style={{ background: item.bg }}
                         >
                             <span

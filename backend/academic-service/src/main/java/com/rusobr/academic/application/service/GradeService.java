@@ -44,7 +44,7 @@ public class GradeService {
         AcademicPeriod academicPeriod = academicPeriodRepository.findById(academicPeriodId)
                 .orElseThrow(() -> new NotFoundException("Academic period not found academicPeriodId: " + academicPeriodId));
         Double avg = gradeRepository.getAverageGrade(studentId, academicPeriod.getStartDate(), academicPeriod.getEndDate());
-        if (avg == null) return null;
+        if (avg == null) return 0.0;
 
         return BigDecimal.valueOf(avg)
                 .setScale(2, RoundingMode.HALF_UP)
