@@ -4,8 +4,8 @@ import type { ViewMode } from "@/constants/component-constants";
 import { formatColDay, formatColDate, avgStyle, useHorizontalScrollDrag } from "@/helpers/teacher-helpers";
 import type { LessonInstanceDto, StudentJournalEntry, StudentMetadata } from "@/services/teacher-journal-service";
 import { useJournalAccess } from "@/hooks/use-journal-access";
-import GradePopover from "./grade-popover";
 import Chip from "@/components/student/chip";
+import GradePopover from "@/components/teacher/teacher-journal/grade-popover";
 
 interface JournalTableProps {
   sortedStudents: StudentMetadata[];
@@ -95,19 +95,26 @@ export default function JournalTable({
                       </p>
                     </td>
                     {sortedLessons.map((lesson) => {
-                      const grade = entry?.grades.find((g) => g.lessonInstanceId === lesson.id);
-                      const attendance = entry?.attendances.find((a) => a.lessonInstanceId === lesson.id);
-                      
+                      // БЫЛО: .find(...) — брал только одну (первую попавшуюся) запись.
+                      // СТАЛО: .filter(...) — берём ВСЕ оценки/отметки посещаемости для этого урока.
+                      const grades = entry?.grades.filter((g) => g.lessonInstanceId === lesson.id) ?? [];
+                      const attendances = entry?.attendances.filter((a) => a.lessonInstanceId === lesson.id) ?? [];
+
                       return (
                         <td key={lesson.id} className="h-17.5 p-0 text-center border-r border-black/5">
                           {isReadOnly ? (
-                            <div className="flex items-center justify-center w-full h-full text-[13px] font-bold text-(--navy)/60 select-none">
-                              {grade?.value ?? attendance?.status ?? ""}
+                            <div className="flex flex-wrap items-center justify-center gap-0.5 w-full h-full px-1 text-[12px] font-bold text-(--navy)/60 select-none">
+                              {grades.map((g) => (
+                                <span key={`g-${g.gradeId}`}>{g.value}</span>
+                              ))}
+                              {attendances.map((a) => (
+                                <span key={`a-${a.attendanceId}`}>{a.status}</span>
+                              ))}
                             </div>
                           ) : (
                             <GradePopover
-                              grade={grade}
-                              attendance={attendance}
+                              grades={grades}
+                              attendances={attendances}
                               studentId={student.id}
                               lessonInstanceId={lesson.id}
                               academicPeriodId={academicPeriodId}
