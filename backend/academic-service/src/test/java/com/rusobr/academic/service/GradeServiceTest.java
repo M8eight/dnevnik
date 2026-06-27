@@ -103,11 +103,11 @@ class GradeServiceTest {
         void returnsNull_whenNoGrades() {
             AcademicPeriod period = AcademicPeriod.builder().build();
             when(academicPeriodRepository.findById(PERIOD_ID)).thenReturn(Optional.of(period));
-            when(gradeRepository.getAverageGrade(anyLong(), any(), any())).thenReturn(null);
+            when(gradeRepository.getAverageGrade(anyLong(), any(), any())).thenReturn(0.0);
 
             Double result = service.getAverageByPeriod(STUDENT_ID, PERIOD_ID);
 
-            assertThat(result).isNull();
+            assertThat(result).isEqualTo(0.0);
         }
     }
 

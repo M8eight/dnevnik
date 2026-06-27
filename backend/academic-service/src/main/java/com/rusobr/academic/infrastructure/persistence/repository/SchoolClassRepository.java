@@ -55,4 +55,13 @@ public interface SchoolClassRepository extends JpaRepository<SchoolClass, Long> 
     @EntityGraph(attributePaths = {"academicYear"})
     Optional<SchoolClass> findWithAcademicYearById(Long id);
 
+    @Query("""
+        select sc
+        from SchoolClass sc
+        left join fetch sc.academicYear ay
+        where sc.classTeacherId = :teacherId
+        order by sc.name
+    """)
+    List<SchoolClass> findSchoolClassesByTeacherId(Long teacherId);
+
 }

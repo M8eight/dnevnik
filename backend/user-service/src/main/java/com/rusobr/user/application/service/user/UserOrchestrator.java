@@ -45,7 +45,7 @@ public class UserOrchestrator {
     }
 
     public UserResponse update(Long userId, UserUpdateRequest userUpdateRequest) {
-        User user = userService.getById(userId);
+        User user = userService.getByIdInternal(userId);
         validateUsername(userUpdateRequest.user().username(), userId);
 
         //Собираем старые данные пользователя на случай отката

@@ -5,6 +5,9 @@ import com.rusobr.user.application.mapper.UserMapper;
 import com.rusobr.user.domain.model.Teacher;
 import com.rusobr.user.domain.model.User;
 import com.rusobr.user.domain.enums.UserRole;
+import com.rusobr.user.infrastructure.client.feign.AcademicClient;
+import com.rusobr.user.web.dto.feign.TeacherAcademicFeignDto;
+import com.rusobr.user.web.dto.teacher.TeacherInfoResponse;
 import com.rusobr.user.web.exception.NotFoundException;
 import com.rusobr.user.application.mapper.TeacherMapper;
 import com.rusobr.user.infrastructure.persistence.repository.TeacherRepository;
@@ -30,6 +33,7 @@ public class TeacherService {
     private final TeacherMapper teacherMapper;
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final AcademicClient academicClient;
 
     public TeacherResponse getWithUserById(Long id) {
         Teacher teacher = teacherRepository.findWithUserById(id).orElseThrow(() -> new NotFoundException("Teacher with id " + id + " not found"));
@@ -48,6 +52,19 @@ public class TeacherService {
 
     public UserFeignResponse getSimpleById(Long id) {
         return userMapper.toUserFeignResponse(teacherRepository.getTeacherSimpleById(id));
+    }
+
+    public TeacherInfoResponse getInfoById(Long id) {
+        Teacher teacher = teacherRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Teacher not found: " + id));
+
+        TeacherAcademicFeignDto teacherInfoFeignResponse = academicClient.getTeacherAcademicInfo(id);
+
+        return TeacherInfoResponse.builder()
+                .phoneNumber(teacher.getPhoneNumber())
+                .email(teacher.getEmail())
+                .schoolDetails(teacherInfoFeignResponse)
+                .build();
     }
 
     public Optional<Teacher> findByIdWithDeleted(Long id) {

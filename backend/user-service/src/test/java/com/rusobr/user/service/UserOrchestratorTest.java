@@ -139,7 +139,7 @@ class UserOrchestratorTest {
             );
             UserResponse expected = UserResponse.builder().id(USER_ID).build();
 
-            when(userService.getById(USER_ID)).thenReturn(user);
+            when(userService.getByIdInternal(USER_ID)).thenReturn(user);
             when(userService.isUsernameTaken("new", USER_ID)).thenReturn(false);
             when(userDbService.update(eq(user), eq(updateData), eq(Set.of(UserRole.STUDENT)), any()))
                     .thenReturn(expected);
@@ -167,7 +167,7 @@ class UserOrchestratorTest {
                     Map.of(UserRole.STUDENT, new StudentDetails("math"))
             );
 
-            when(userService.getById(USER_ID)).thenReturn(user);
+            when(userService.getByIdInternal(USER_ID)).thenReturn(user);
             when(userService.isUsernameTaken("taken", USER_ID)).thenReturn(true);
 
             assertThatThrownBy(() -> orchestrator.update(USER_ID, request))
@@ -193,7 +193,7 @@ class UserOrchestratorTest {
                     Map.of(UserRole.STUDENT, new StudentDetails("math"))
             );
 
-            when(userService.getById(USER_ID)).thenReturn(user);
+            when(userService.getByIdInternal(USER_ID)).thenReturn(user);
             when(userDbService.update(any(), any(), any(), any()))
                     .thenReturn(UserResponse.builder().id(USER_ID).build());
 
@@ -218,7 +218,7 @@ class UserOrchestratorTest {
                     Map.of(UserRole.STUDENT, new StudentDetails("math"))
             );
 
-            when(userService.getById(USER_ID)).thenReturn(user);
+            when(userService.getByIdInternal(USER_ID)).thenReturn(user);
             when(userService.isUsernameTaken("new", USER_ID)).thenReturn(false);
             when(userDbService.update(any(), any(), any(), any())).thenThrow(new RuntimeException("DB error"));
 
@@ -248,7 +248,7 @@ class UserOrchestratorTest {
                     Map.of(UserRole.STUDENT, new StudentDetails("math"))
             );
 
-            when(userService.getById(USER_ID)).thenReturn(user);
+            when(userService.getByIdInternal(USER_ID)).thenReturn(user);
             when(userDbService.update(any(), any(), any(), any()))
                     .thenReturn(UserResponse.builder().id(USER_ID).build());
 
@@ -273,7 +273,7 @@ class UserOrchestratorTest {
                     Map.of(UserRole.STUDENT, new StudentDetails("math"))
             );
 
-            when(userService.getById(USER_ID)).thenReturn(user);
+            when(userService.getByIdInternal(USER_ID)).thenReturn(user);
             when(userDbService.update(any(), any(), any(), any()))
                     .thenReturn(UserResponse.builder().id(USER_ID).build());
 
@@ -305,7 +305,7 @@ class UserOrchestratorTest {
             KeycloakRole teacherRole = new KeycloakRole("teacher-role-id", "TEACHER");
             KeycloakRole parentRole = new KeycloakRole("parent-role-id", "PARENT");
 
-            when(userService.getById(USER_ID)).thenReturn(user);
+            when(userService.getByIdInternal(USER_ID)).thenReturn(user);
             when(keycloakRestClient.getRoleByName("TEACHER")).thenReturn(teacherRole);
             when(keycloakRestClient.getRoleByName("PARENT")).thenReturn(parentRole);
             when(userDbService.update(any(), any(), any(), any()))

@@ -3,6 +3,7 @@ package com.rusobr.user.web.controller;
 import com.rusobr.user.application.service.teacher.TeacherService;
 import com.rusobr.user.web.dto.feign.UserFeignResponse;
 import com.rusobr.user.web.dto.teacher.TeacherDetails;
+import com.rusobr.user.web.dto.teacher.TeacherInfoResponse;
 import com.rusobr.user.web.dto.teacher.TeacherResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +25,11 @@ public class TeacherController {
     @GetMapping("/{id}/details")
     public TeacherDetails getDetailsById(@PathVariable Long id) {
         return teacherService.getDetailsById(id);
+    }
+
+    @GetMapping("/{id}/info")
+    public TeacherInfoResponse getInfoById(@PathVariable Long id) {
+        return teacherService.getInfoById(id);
     }
 
     @PostMapping("/batch")

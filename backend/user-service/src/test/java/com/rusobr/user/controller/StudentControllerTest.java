@@ -3,6 +3,7 @@ package com.rusobr.user.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rusobr.user.application.service.student.StudentService;
 import com.rusobr.user.web.controller.StudentController;
+import com.rusobr.user.web.dto.feign.AcademicYearResponse;
 import com.rusobr.user.web.dto.feign.SchoolClassResponse;
 import com.rusobr.user.web.dto.feign.UserFeignResponse;
 import com.rusobr.user.web.dto.student.StudentDetails;
@@ -22,6 +23,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
@@ -47,6 +49,17 @@ public class StudentControllerTest {
 
     private static final Long STUDENT_ID = 1L;
     private static final Long PARENT_ID = 2L;
+
+    private AcademicYearResponse buildAcademicYearResponse() {
+        return new AcademicYearResponse(
+                2L,
+                "2024-2025",
+                "Учебный год 2024-2025",
+                LocalDate.of(2024, 9, 1),
+                LocalDate.of(2025, 5, 31),
+                true
+        );
+    }
 
     // ─────────────────────────────────────────────
     // GET /api/v1/students/{id}/details
@@ -238,7 +251,7 @@ public class StudentControllerTest {
     @Test
     @DisplayName("GET /students/{id}/with-class — 200 и тело ответа")
     void getWithClassById_ShouldReturn200() throws Exception {
-        SchoolClassResponse schoolClass = new SchoolClassResponse(10L, "10А", "2024", 5L);
+        SchoolClassResponse schoolClass = new SchoolClassResponse(10L, "10А", buildAcademicYearResponse(), 5L);
         TeacherResponse teacher = new TeacherResponse(
                 UserResponse.builder().id(5L).build(),
                 new TeacherDetails("t@mail.com", "+7999")

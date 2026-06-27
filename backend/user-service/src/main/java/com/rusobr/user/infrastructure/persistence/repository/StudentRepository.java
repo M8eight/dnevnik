@@ -2,7 +2,6 @@ package com.rusobr.user.infrastructure.persistence.repository;
 
 import com.rusobr.user.domain.model.Student;
 import com.rusobr.user.infrastructure.persistence.repository.projection.UserProjection;
-import com.rusobr.user.web.dto.feign.UserFeignResponse;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -57,5 +56,15 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
 
     @Query(value = "select * from students where id = :id", nativeQuery = true)
     Optional<Student> findByIdWithDeleted(@Param("id") Long id);
+
+    @Query("""
+        select s
+        from Student s
+        left join fetch s.user su
+        left join fetch s.parent p
+        left join fetch p.user pu
+        where s.id = :id
+    """)
+    Optional<Student> findStudentInfoById(@Param("id") Long id);
 
 }

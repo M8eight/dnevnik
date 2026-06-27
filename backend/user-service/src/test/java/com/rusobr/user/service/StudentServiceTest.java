@@ -9,11 +9,12 @@ import com.rusobr.user.domain.enums.UserRole;
 import com.rusobr.user.domain.model.Parent;
 import com.rusobr.user.domain.model.Student;
 import com.rusobr.user.domain.model.User;
-import com.rusobr.user.infrastructure.client.feign.SchoolClassClient;
+import com.rusobr.user.infrastructure.client.feign.AcademicClient;
 import com.rusobr.user.infrastructure.persistence.repository.ParentRepository;
 import com.rusobr.user.infrastructure.persistence.repository.StudentRepository;
 import com.rusobr.user.infrastructure.persistence.repository.UserRepository;
 import com.rusobr.user.infrastructure.persistence.repository.projection.UserProjection;
+import com.rusobr.user.web.dto.feign.AcademicYearResponse;
 import com.rusobr.user.web.dto.feign.SchoolClassResponse;
 import com.rusobr.user.web.dto.feign.UserFeignResponse;
 import com.rusobr.user.web.dto.student.StudentDetails;
@@ -31,6 +32,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -46,7 +48,7 @@ class StudentServiceTest {
     @Mock private StudentRepository studentRepository;
     @Mock private UserRepository userRepository;
     @Mock private StudentMapper studentMapper;
-    @Mock private SchoolClassClient schoolClassClient;
+    @Mock private AcademicClient academicClient;
     @Mock private TeacherService teacherService;
     @Mock private ParentRepository parentRepository;
     @Mock private UserMapper userMapper;
@@ -56,6 +58,17 @@ class StudentServiceTest {
     private static final Long USER_ID = 1L;
     private static final Long STUDENT_ID = 1L;
     private static final Long PARENT_ID = 2L;
+
+    private AcademicYearResponse buildAcademicYearResponse() {
+        return new AcademicYearResponse(
+                2L,
+                "2024-2025",
+                "Учебный год 2024-2025",
+                LocalDate.of(2024, 9, 1),
+                LocalDate.of(2025, 5, 31),
+                true
+        );
+    }
 
     @Nested
     @DisplayName("getBatch")
@@ -170,7 +183,7 @@ class StudentServiceTest {
         void success() {
             User user = User.builder().id(USER_ID).build();
             Student student = Student.builder().id(STUDENT_ID).user(user).build();
-            SchoolClassResponse schoolClass = new SchoolClassResponse(10L, "10А", "2024", 5L);
+            SchoolClassResponse schoolClass = new SchoolClassResponse(10L, "10А", buildAcademicYearResponse(), 5L);
             TeacherResponse teacher = new TeacherResponse(
                     UserResponse.builder().id(5L).build(),
                     new TeacherDetails("t@mail.com", "+7999")
@@ -180,14 +193,14 @@ class StudentServiceTest {
             );
 
             when(studentRepository.findWithUserById(STUDENT_ID)).thenReturn(Optional.of(student));
-            when(schoolClassClient.getSchoolClassByStudentId(STUDENT_ID)).thenReturn(schoolClass);
+            when(academicClient.getSchoolClassByStudentId(STUDENT_ID)).thenReturn(schoolClass);
             when(teacherService.getWithUserById(5L)).thenReturn(teacher);
             when(studentMapper.toStudentDetailResponse(student, schoolClass, teacher)).thenReturn(expected);
 
             StudentWithClassResponse result = service.getWithClassById(STUDENT_ID);
 
             assertThat(result).isNotNull().isEqualTo(expected);
-            verify(schoolClassClient).getSchoolClassByStudentId(STUDENT_ID);
+            verify(academicClient).getSchoolClassByStudentId(STUDENT_ID);
             verify(teacherService).getWithUserById(5L);
         }
 
@@ -200,7 +213,7 @@ class StudentServiceTest {
                     .isInstanceOf(NotFoundException.class)
                     .hasMessageContaining("Student not found");
 
-            verifyNoInteractions(schoolClassClient, teacherService, studentMapper);
+            verifyNoInteractions(academicClient, teacherService, studentMapper);
         }
     }
 

@@ -58,7 +58,7 @@ class UserServiceTest {
             User user = User.builder().id(USER_ID).build();
             when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
 
-            User result = service.getById(USER_ID);
+            User result = service.getByIdInternal(USER_ID);
 
             assertThat(result).isNotNull().isEqualTo(user);
             verify(userRepository).findById(USER_ID);
@@ -69,7 +69,7 @@ class UserServiceTest {
         void notFound_throwsException() {
             when(userRepository.findById(USER_ID)).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> service.getById(USER_ID))
+            assertThatThrownBy(() -> service.getByIdInternal(USER_ID))
                     .isInstanceOf(NotFoundException.class)
                     .hasMessageContaining("User not found with id: " + USER_ID);
         }
