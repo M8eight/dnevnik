@@ -22,7 +22,8 @@ export interface TeacherDetails {
     phoneNumber: string;
 }
 
-export interface ParentDetails {}
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface ParentDetails { }
 
 export interface CreateStudentRequest {
     user: UserBase;
@@ -73,7 +74,8 @@ export interface TeacherDetailsResponse {
     phoneNumber: string;
 }
 
-export interface ParentDetailsResponse {}
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface ParentDetailsResponse { }
 
 // ─── User update types ────────────────────────────────────────────────────────────────────
 
@@ -83,9 +85,9 @@ export interface UserUpdateData {
     lastName?: string;
 }
 
-export type UserProfileDetails = 
-    | {studyProfile: string} // For students
-    | {email: string; phoneNumber: string} // For teachers
+export type UserProfileDetails =
+    | { studyProfile: string } // For students
+    | { email: string; phoneNumber: string } // For teachers
     | Record<string, never> // For parents
 
 export interface UserUpdateRequest {
@@ -129,37 +131,27 @@ export const createTeacher = async (
 };
 
 export const findUsersByFilter = async (
-    page: number, 
+    page: number,
     size: number,
     role?: UserRole,
     search?: string
 ): Promise<PageResponse<UserResponse>> => {
-    const { data } = await api.get<PageResponse<UserResponse>>(`/user-service/api/v1/users`, 
+    const { data } = await api.get<PageResponse<UserResponse>>(`/user-service/api/v1/users`,
         { params: { page, size, role, search } }
     );
     return data;
 }
 
+export const getUserById = async (userId: number): Promise<UserResponse> => {
+    const { data } = await api.get<UserResponse>(`/user-service/api/v1/users/${userId}`);
+    return data;
+}
+ 
 export const deleteUser = async (userId: number): Promise<void> => {
     await api.delete(`/user-service/api/v1/users/${userId}`);
 }
 
 export const updateUser = async (userId: number, request: UserUpdateRequest): Promise<UserResponse> => {
-    const { data } = await api.put<UserResponse>(`/user-service/api/v1/users/${userId}`, request); 
+    const { data } = await api.put<UserResponse>(`/user-service/api/v1/users/${userId}`, request);
     return data;
 }
-
-export const getStudentDetails = async (id: number): Promise<StudentDetailsResponse> => {
-    const { data } = await api.get(`/user-service/api/v1/students/${id}/details`);
-    return data;
-};
-
-export const getTeacherDetails = async (id: number): Promise<TeacherDetailsResponse> => {
-    const { data } = await api.get(`/user-service/api/v1/teachers/${id}/details`);
-    return data;
-};
-
-export const getParentDetails = async (id: number): Promise<ParentDetailsResponse> => {
-    const { data } = await api.get(`/user-service/api/v1/parents/${id}/details`);
-    return data;
-};

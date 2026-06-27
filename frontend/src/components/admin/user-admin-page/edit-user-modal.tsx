@@ -7,14 +7,14 @@ import { ROLES } from "@/constants/component-constants";
 import type { UserResponse, UserRole } from "@/services/user-service";
 import {
     useUpdateUser,
-    useStudentDetails,
-    useTeacherDetails,
 } from "@/hooks/use-user";
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { useState } from "react";
+import { useStudentDetails } from "@/hooks/use-student";
+import { useTeacherDetails } from "@/hooks/use-teacher";
 
 interface Props {
     user: UserResponse;

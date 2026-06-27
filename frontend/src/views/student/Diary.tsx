@@ -66,12 +66,12 @@ function DayCard({
   const isToday = date === today;
 
   return (
-    <div className={`col-span-12 md:col-span-6 glass-card rounded-[22px] p-6 anim-in transition-transform hover:-translate-y-0.5 ${isToday ? "ring-2 ring-[var(--red)]/20" : ""}`}>
+    <div className={`col-span-12 md:col-span-6 glass-card rounded-[22px] p-6 anim-in transition-transform hover:-translate-y-0.5 ${isToday ? "ring-2 ring-(--red)/20" : ""}`}>
 
       <div className="flex justify-between items-center mb-5">
         <Chip className={isToday
-          ? "border-[var(--red)]/30 text-[var(--red)] bg-[var(--red-light)]/60"
-          : "border-[var(--navy)]/20 text-[var(--navy)] bg-[var(--navy-light)]/30"
+          ? "border-(--red)/30 text-(--red) bg-(--red-light)/60"
+          : "border-(--navy)/20 text-(--navy) bg-(--navy-light)/30"
         }>
           {isToday ? `${RUSSIAN_DAYS[dayOfWeek] || "День"} · сегодня` : RUSSIAN_DAYS[dayOfWeek] || "День"}
         </Chip>
@@ -80,7 +80,7 @@ function DayCard({
         </p>
       </div>
 
-      <div className="divide-y divide-black/[0.05]">
+      <div className="divide-y divide-black/5">
         {lessons.map((lesson, idx) => {
           const attendance = lesson.instance?.attendances?.[0];
           const grade = lesson.instance?.grades?.[0];
@@ -91,7 +91,7 @@ function DayCard({
               <div className="flex items-start gap-3">
 
                 {/* Время урока */}
-                <div className="flex flex-col justify-center items-end min-w-[56px] pt-1 shrink-0">
+                <div className="flex flex-col justify-center items-end min-w-14 pt-1 shrink-0">
                   <span className="text-[13px] font-extrabold text-black/30 leading-none tabular-nums">
                     {LESSON_TIMES[lesson.lessonNumber]?.split("–")[0] ?? "—"}
                   </span>
@@ -101,13 +101,13 @@ function DayCard({
                 </div>
 
                 {/* Разделитель */}
-                <div className="w-[2px] self-stretch rounded-full bg-black/[0.06] shrink-0" />
+                <div className="w-0.5 self-stretch rounded-full bg-black/6 shrink-0" />
 
                 {/* Контент урока */}
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-start gap-2">
                     <div className="min-w-0">
-                      <p className="font-bold text-[13px] text-[var(--navy)] leading-tight">
+                      <p className="font-bold text-[13px] text-(--navy) leading-tight">
                         {lesson.subject?.name ?? "—"}
                       </p>
                       <p className="text-[11px] text-black/20 mt-0.5">
@@ -165,36 +165,36 @@ export default function Diary() {
     <div className="relative z-10 min-h-screen px-6 md:px-10 pt-2 pb-14">
       <StudentNavbar />
 
-      <header className="flex items-end justify-between mb-10 pb-6 border-b border-black/[0.08] max-w-7xl mx-auto anim-in">
+      <header className="flex items-end justify-between mb-10 pb-6 border-b border-black/8 max-w-7xl mx-auto anim-in">
         <div>
-          <p className="text-[10px] font-extrabold tracking-[0.25em] text-[var(--red)] uppercase mb-2 flex items-center gap-2">
-            <span className="inline-block w-4 h-[2px] bg-[var(--red)] rounded-full" />
+          <p className="text-[10px] font-extrabold tracking-[0.25em] text-(--red) uppercase mb-2 flex items-center gap-2">
+            <span className="inline-block w-4 h-0.5 bg-(--red) rounded-full" />
             Академический год 25/26
           </p>
-          <h1 className="font-serif font-black text-[clamp(2rem,4vw,3rem)] text-[var(--navy)] leading-[0.95]">
+          <h1 className="font-serif font-black text-[clamp(2rem,4vw,3rem)] text-(--navy) leading-[0.95]">
             Учебный{" "}
             <em className="not-italic relative">
-              <span className="relative z-10 text-[var(--red)]">дневник</span>
-              <span className="absolute bottom-0 left-0 right-0 h-[5px] rounded-full opacity-15 bg-[var(--red)]" />
+              <span className="relative z-10 text-(--red)">дневник</span>
+              <span className="absolute bottom-0 left-0 right-0 h-1.25 rounded-full opacity-15 bg-(--red)" />
             </em>
           </h1>
         </div>
 
         <div className="flex items-center gap-3">
           <Button onClick={() => dispatch(prevWeek())} variant="outline" size="icon"
-            className="glass-pill h-10 w-10 border-0 rounded-[12px] text-[var(--navy)] hover:scale-105 transition-transform">
+            className="glass-pill h-10 w-10 border-0 rounded-[12px] text-(--navy) hover:scale-105 transition-transform">
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <div className="text-center min-w-[110px]">
+          <div className="text-center min-w-27.5">
             <p className="text-[9px] font-extrabold uppercase text-black/25 tracking-[0.2em]">
               {capitalizedMonth}
             </p>
-            <p className="font-serif text-[17px] font-black text-[var(--navy)] leading-tight">
+            <p className="font-serif text-[17px] font-black text-(--navy) leading-tight">
               {startDay} — {endDayWithMonth}
             </p>
           </div>
           <Button onClick={() => dispatch(nextWeek())} variant="outline" size="icon"
-            className="glass-pill h-10 w-10 border-0 rounded-[12px] text-[var(--navy)] hover:scale-105 transition-transform">
+            className="glass-pill h-10 w-10 border-0 rounded-[12px] text-(--navy) hover:scale-105 transition-transform">
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
