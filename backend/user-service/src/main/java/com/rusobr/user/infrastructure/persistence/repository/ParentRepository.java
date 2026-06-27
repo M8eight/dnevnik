@@ -22,4 +22,13 @@ public interface ParentRepository extends JpaRepository<Parent, Long> {
 
     @Query(value = "select * from parents where id = :id", nativeQuery = true)
     Optional<Parent> findByIdWithDeleted(@Param("id") Long id);
+
+    @Query("""
+        select p
+        from Parent p
+        left join fetch p.children c
+        left join fetch c.user cu
+        where p.id = :id
+    """)
+    Optional<Parent> findParentInfoById(@Param("id") Long id);
 }

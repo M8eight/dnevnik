@@ -31,6 +31,11 @@ public class UserController {
         return userService.getAllByFilter(pageable, role, search);
     }
 
+    @GetMapping("/{id}")
+    public UserResponse getUserById(@PathVariable Long id) {
+        return userService.getById(id);
+    }
+
     @PostMapping("/students")
     public UserResponse createStudent(@RequestBody @Valid UserCreateRequest<StudentDetails> userRequest) {
         return userOrchestrator.create(userRequest);

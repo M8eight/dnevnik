@@ -34,7 +34,12 @@ public class UserService {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional(readOnly = true)
-    public User getById(Long id) {
+    public UserResponse getById(Long id) {
+        return userMapper.toUserResponse(getByIdInternal(id));
+    }
+
+    @Transactional(readOnly = true)
+    public User getByIdInternal(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found with id: " + id));
     }

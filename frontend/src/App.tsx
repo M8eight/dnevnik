@@ -12,12 +12,14 @@ import SchoolClassPage from './views/admin/SchoolClassPage'
 import SchedulePage from './views/admin/SchedulePage'
 import Index from './views'
 import AcademicYearPage from './views/admin/AcademicYearPage'
+import UserInfo from './views/user/UserInfo'
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Index />} />
+        <Route path="/user/:id/info" element={<UserInfo />} />
         <Route path="/student/home" element={<Home />} />
         <Route path="/student/diary" element={<Diary />} />
         <Route path="/student/grade" element={<GradeTablePage />} />

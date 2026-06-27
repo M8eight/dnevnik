@@ -1,4 +1,4 @@
-package com.rusobr.academic.web.dto.academicYear;
+package com.rusobr.user.web.dto.feign;
 
 import java.time.LocalDate;
 

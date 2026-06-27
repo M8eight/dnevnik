@@ -2,6 +2,7 @@ package com.rusobr.user.web.controller;
 
 import com.rusobr.user.application.service.parent.ParentService;
 import com.rusobr.user.web.dto.parent.ParentDetails;
+import com.rusobr.user.web.dto.parent.ParentInfoResponse;
 import com.rusobr.user.web.dto.parent.ParentResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,6 +25,11 @@ public class ParentController {
     @GetMapping("/{id}/details")
     public ParentDetails getDetailsById(@PathVariable Long id) {
         return parentService.getDetailsById(id);
+    }
+
+    @GetMapping("/{id}/info")
+    public ParentInfoResponse getInfoById(@PathVariable Long id) {
+        return parentService.getInfoById(id);
     }
 
 }

@@ -13,6 +13,7 @@ import java.util.Optional;
 
 @Repository
 public interface TeachingAssignmentRepository  extends JpaRepository<TeachingAssignment,Long> {
+
     @Query("select sc.id from TeachingAssignment ta join ta.schoolClass sc where ta.id = :id")
     Optional<Long> findByIdWithClassId(@Param("id") Long id);
 
@@ -41,4 +42,15 @@ public interface TeachingAssignmentRepository  extends JpaRepository<TeachingAss
         where ta.id = :teachingAssignmentId
     """)
     List<Long> findStudentIdsByTeachingAssignmentId(Long teachingAssignmentId);
+
+    @Query("""
+        select ta
+        from TeachingAssignment ta
+        left join fetch ta.subject s
+        left join fetch ta.schoolClass sc
+        where ta.teacherId = :teacherId
+        order by s.name
+    """)
+    List<TeachingAssignment> findByTeacherId(@Param("teacherId") Long teacherId);
+
 }

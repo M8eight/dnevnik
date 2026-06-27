@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { deleteUser, findUsersByFilter, getParentDetails, getStudentDetails, getTeacherDetails, updateUser, type ParentDetailsResponse, type StudentDetailsResponse, type TeacherDetailsResponse, type UserResponse, type UserRole, type UserUpdateRequest } from "../services/user-service"
+import { deleteUser, findUsersByFilter, getUserById, updateUser, type UserResponse, type UserRole, type UserUpdateRequest } from "../services/user-service"
 
 import {
     createStudent,
@@ -50,6 +50,12 @@ export const useFindUsersByFilter = (
     });
 };
 
+export const useUserById = (id: number) =>
+    useQuery<UserResponse>({
+        queryKey: [QUERY_KEY, id],
+        queryFn: () => getUserById(id),
+    });
+
 export const useDeleteUser = () => {
     const queryClient = useQueryClient();
     return useMutation({
@@ -68,23 +74,3 @@ export const useUpdateUser = (userId: number) => {
         },
     });
 }
-
-export const useStudentDetails = (id: number | null) =>
-    useQuery<StudentDetailsResponse>({
-        queryKey: ["users", "details", "student", id],
-        queryFn: () => getStudentDetails(id!),
-        enabled: id !== null,
-    });
-
-export const useTeacherDetails = (id: number | null) =>
-    useQuery<TeacherDetailsResponse>({
-        queryKey: ["users", "details", "teacher", id],
-        queryFn: () => getTeacherDetails(id!),
-        enabled: id !== null,
-    });
-
-export const useParentDetails = (id: number) =>
-    useQuery<ParentDetailsResponse>({
-        queryKey: ["users", "details", "parent", id],
-        queryFn: () => getParentDetails(id),
-    });

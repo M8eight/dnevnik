@@ -1,4 +1,6 @@
 import api from "@/axios/axios";
+import type { SubjectResponse } from "./subject-service";
+import type { SchoolClassResponse } from "./school-class-service";
 
 export interface TeachingAssignmentDetail {
     teachingAssignmentId: number;
@@ -6,6 +8,12 @@ export interface TeachingAssignmentDetail {
     schoolClassName: string;
     subjectId: number;
     subjectName: string;
+}
+
+export interface TeachingAssignmentResponse {
+    id: number;
+    subject: SubjectResponse;
+    schoolClass: SchoolClassResponse;
 }
 
 export const getTeachingAssignmentDetail = async (teacherId: number): Promise<TeachingAssignmentDetail[]> => {

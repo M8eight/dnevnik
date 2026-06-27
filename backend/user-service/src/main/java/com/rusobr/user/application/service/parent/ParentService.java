@@ -4,6 +4,7 @@ import com.rusobr.user.application.event.UserDeletedEvent;
 import com.rusobr.user.domain.model.Parent;
 import com.rusobr.user.domain.model.User;
 import com.rusobr.user.domain.enums.UserRole;
+import com.rusobr.user.web.dto.parent.ParentInfoResponse;
 import com.rusobr.user.web.exception.NotFoundException;
 import com.rusobr.user.application.mapper.ParentMapper;
 import com.rusobr.user.infrastructure.persistence.repository.ParentRepository;
@@ -34,6 +35,12 @@ public class ParentService {
         Parent parent = parentRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Parent not found: " + id));
         return parentMapper.toParentDetails(parent);
+    }
+
+    public ParentInfoResponse getInfoById(Long id) {
+        Parent parent = parentRepository.findParentInfoById(id)
+                .orElseThrow(() -> new NotFoundException("Parent not found: " + id));
+        return parentMapper.toParentInfoResponse(parent);
     }
 
     public Optional<Parent> findByIdWithDeleted(Long id) {

@@ -6,9 +6,10 @@ import com.rusobr.user.domain.model.Parent;
 import com.rusobr.user.domain.model.Student;
 import com.rusobr.user.domain.model.User;
 import com.rusobr.user.domain.enums.UserRole;
+import com.rusobr.user.web.dto.student.StudentInfoResponse;
 import com.rusobr.user.web.exception.ConflictException;
 import com.rusobr.user.web.exception.NotFoundException;
-import com.rusobr.user.infrastructure.client.feign.SchoolClassClient;
+import com.rusobr.user.infrastructure.client.feign.AcademicClient;
 import com.rusobr.user.application.mapper.StudentMapper;
 import com.rusobr.user.infrastructure.persistence.repository.ParentRepository;
 import com.rusobr.user.infrastructure.persistence.repository.StudentRepository;
@@ -37,11 +38,12 @@ public class StudentService {
     private final StudentRepository studentRepository;
     private final UserRepository userRepository;
     private final StudentMapper studentMapper;
-    private final SchoolClassClient schoolClassClient;
+    private final AcademicClient academicClient;
     private final TeacherService teacherService;
     private final ParentRepository parentRepository;
     private final UserMapper userMapper;
 
+    @Transactional(readOnly = true)
     public List<UserFeignResponse> getBatch(List<Long> ids) {
         if (ids == null || ids.isEmpty()) {
             return List.of();
@@ -50,6 +52,7 @@ public class StudentService {
         return studentRepository.findAllStudentsByIds(ids).stream().map(userMapper::toUserFeignResponse).toList();
     }
 
+    @Transactional(readOnly = true)
     public List<UserFeignResponse> getBatchWithExcludingIds(Set<Long> ids) {
         if (ids.isEmpty()) {
             return studentRepository.findWithUserAllStudents().stream().map(userMapper::toUserFeignResponse).toList();
@@ -58,19 +61,30 @@ public class StudentService {
         return studentRepository.findAllStudentsExcludeAssigned(ids).stream().map(userMapper::toUserFeignResponse).toList();
     }
 
+    @Transactional(readOnly = true)
     public StudentDetails getDetailsById(Long id) {
         Student student = studentRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Student not found: " + id));
         return studentMapper.toStudentDetails(student);
     }
 
+    @Transactional(readOnly = true)
     public StudentWithClassResponse getWithClassById(Long id) {
         Student student = studentRepository.findWithUserById(id)
                 .orElseThrow(() -> new NotFoundException("Student not found"));
-        SchoolClassResponse schoolClass = schoolClassClient.getSchoolClassByStudentId(student.getId());
+        SchoolClassResponse schoolClass = academicClient.getSchoolClassByStudentId(student.getId());
         TeacherResponse teacher = teacherService.getWithUserById(schoolClass.classTeacherId());
 
         return studentMapper.toStudentDetailResponse(student, schoolClass, teacher);
+    }
+
+    public StudentInfoResponse getStudentInfoById(Long id) {
+        Student student = studentRepository.findStudentInfoById(id)
+                .orElseThrow(() -> new NotFoundException("Student not found"));
+        SchoolClassResponse schoolClass = academicClient.getSchoolClassByStudentId(student.getId());
+        TeacherResponse teacher = teacherService.getWithUserById(schoolClass.classTeacherId());
+
+        return studentMapper.toStudentInfoResponse(student, schoolClass, teacher);
     }
 
     public Optional<Student> findByIdWithDeleted(Long id) {

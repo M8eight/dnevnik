@@ -4,6 +4,7 @@ import com.rusobr.user.domain.model.Parent;
 import com.rusobr.user.domain.model.Student;
 import com.rusobr.user.domain.model.User;
 import com.rusobr.user.web.dto.parent.ParentDetails;
+import com.rusobr.user.web.dto.parent.ParentInfoResponse;
 import com.rusobr.user.web.dto.parent.ParentResponse;
 import com.rusobr.user.web.dto.user.UserResponse;
 import org.mapstruct.Mapper;
@@ -13,6 +14,7 @@ import org.mapstruct.ReportingPolicy;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ParentMapper {
+
     @Mapping(target = "user", source = "user")
     @Mapping(target = "id", ignore = true)
     Parent toEntity(User user, ParentDetails parentDetails);
@@ -29,4 +31,7 @@ public interface ParentMapper {
     UserResponse toUserResponse(Student student);
 
     ParentDetails toParentDetails(Parent parent);
+
+    ParentInfoResponse toParentInfoResponse(Parent parent);
+
 }
