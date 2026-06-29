@@ -18,7 +18,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import AdminNavbar from "@/components/layout/navbars/AdminNavbar";
-import { useFindUsersByFilter } from "@/hooks/use-teacher-subject";
+import { useGetTeacherSubjects } from "@/hooks/use-teacher-subject";
 import { useScheduleByClassId, useCreateSchedule, useCloseSchedule, useLoadLessonInstance } from "@/hooks/use-schedule";
 import type { ScheduleLessonDto } from "@/services/schedule-service";
 import { useGetAllClasses } from "@/hooks/use-school-class";
@@ -52,7 +52,7 @@ export default function SchedulePage() {
         return Object.values(scheduleRecord).flat();
     }, [scheduleRecord]);
 
-    const { data: teacherSubjects = [], isLoading: isTeachersLoading } = useFindUsersByFilter();
+    const { data: teacherSubjects = [], isLoading: isTeachersLoading } = useGetTeacherSubjects();
 
     const { mutate: createSchedule, isPending: isCreating } = useCreateSchedule();
     const { mutate: closeSchedule, isPending: isClosing } = useCloseSchedule();

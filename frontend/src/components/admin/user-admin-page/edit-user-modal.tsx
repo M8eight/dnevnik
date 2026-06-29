@@ -15,6 +15,7 @@ import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { useState } from "react";
 import { useStudentDetails } from "@/hooks/use-student";
 import { useTeacherDetails } from "@/hooks/use-teacher";
+import TeacherSubjectsField from "./teacher-subject-selector";
 
 interface Props {
     user: UserResponse;
@@ -279,6 +280,8 @@ export default function EditUserModal({ user, onClose }: Props) {
                                         </Field>
                                     )}
                                 />
+
+                                <TeacherSubjectsField teacherId={user.id} disabled={isPending} />
                             </>
                         )}
 
