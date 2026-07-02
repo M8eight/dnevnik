@@ -1,7 +1,6 @@
 package com.rusobr.user.web.controller;
 
 import com.rusobr.user.application.service.teacher.TeacherService;
-import com.rusobr.user.web.dto.feign.BatchUserResponse;
 import com.rusobr.user.web.dto.feign.UserFeignResponse;
 import com.rusobr.user.web.dto.teacher.TeacherDetails;
 import com.rusobr.user.web.dto.teacher.TeacherInfoResponse;
@@ -34,7 +33,7 @@ public class TeacherController {
     }
 
     @PostMapping("/batch")
-    public BatchUserResponse findBatchTeachers(@RequestBody List<Long> ids) {
+    public List<UserFeignResponse> findBatchTeachers(@RequestBody List<Long> ids) {
         return teacherService.getBatch(ids);
     }
 

@@ -17,7 +17,6 @@ import com.rusobr.academic.infrastructure.persistence.repository.AcademicPeriodR
 import com.rusobr.academic.infrastructure.persistence.repository.LessonInstanceRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.SchoolClassRepository;
 import com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodResponse;
-import com.rusobr.academic.web.dto.feign.BatchUserResponse;
 import com.rusobr.academic.web.dto.feign.UserFeignResponse;
 import com.rusobr.academic.web.dto.lessonInstance.*;
 import com.rusobr.academic.web.dto.lessonInstance.teacher.AttendanceStudentDto;
@@ -144,7 +143,7 @@ class JournalServiceTest {
             when(lessonInstanceMapper.toLessonInstanceDto(lessonProjection)).thenReturn(lessonDto);
 
             when(schoolClassRepository.findStudentsIdsByTeachingAssignment(ASSIGNMENT_ID)).thenReturn(studentIds);
-            when(userClient.getBatchUsers(studentIds)).thenReturn(new BatchUserResponse(List.of(studentFeign), List.of()));
+            when(userClient.getBatchUsers(studentIds)).thenReturn(List.of(studentFeign));
 
             when(lessonInstanceRepository.findGradesByTeachingAssignment(ASSIGNMENT_ID, START_DATE, END_DATE))
                     .thenReturn(List.of(gradeProjection));

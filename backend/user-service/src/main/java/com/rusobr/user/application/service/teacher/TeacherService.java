@@ -6,8 +6,6 @@ import com.rusobr.user.domain.model.Teacher;
 import com.rusobr.user.domain.model.User;
 import com.rusobr.user.domain.enums.UserRole;
 import com.rusobr.user.infrastructure.client.feign.AcademicClient;
-import com.rusobr.user.infrastructure.persistence.repository.projection.UserProjection;
-import com.rusobr.user.web.dto.feign.BatchUserResponse;
 import com.rusobr.user.web.dto.feign.TeacherAcademicFeignDto;
 import com.rusobr.user.web.dto.teacher.TeacherInfoResponse;
 import com.rusobr.user.web.exception.NotFoundException;
@@ -48,17 +46,8 @@ public class TeacherService {
         return teacherMapper.toTeacherDetails(teacher);
     }
 
-    public BatchUserResponse getBatch(List<Long> ids) {
-        if (ids == null || ids.isEmpty()) {
-            return new BatchUserResponse(List.of(), List.of());
-        }
-
-        List<UserFeignResponse> teachers = teacherRepository.findAllTeachersByIds(ids).stream()
-                .map(userMapper::toUserFeignResponse).toList();
-        List<Long> foundIds = teachers.stream().map(UserFeignResponse::id).toList();
-        List<Long> notFound = ids.stream().filter(id->!foundIds.contains(id)).toList();
-
-        return new BatchUserResponse(teachers, notFound);
+    public List<UserFeignResponse> getBatch(List<Long> ids) {
+        return teacherRepository.findAllTeachersByIds(ids).stream().map(userMapper::toUserFeignResponse).toList();
     }
 
     public UserFeignResponse getSimpleById(Long id) {

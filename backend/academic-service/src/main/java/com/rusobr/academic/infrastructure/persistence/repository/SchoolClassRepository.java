@@ -50,7 +50,6 @@ public interface SchoolClassRepository extends JpaRepository<SchoolClass, Long> 
 
     @EntityGraph(attributePaths = {"students"})
     Optional<SchoolClass> findWithClassStudentById(Long id);
-
     boolean existsByNameAndAcademicYearIdAndIdNot(String name, Long academicYearId, Long id);
 
     @EntityGraph(attributePaths = {"academicYear"})

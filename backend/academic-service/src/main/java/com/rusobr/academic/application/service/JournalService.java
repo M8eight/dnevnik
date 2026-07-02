@@ -1,21 +1,21 @@
 package com.rusobr.academic.application.service;
 
-import com.rusobr.academic.application.mapper.AcademicPeriodMapper;
 import com.rusobr.academic.application.mapper.LessonInstanceMapper;
 import com.rusobr.academic.domain.model.AcademicPeriod;
 import com.rusobr.academic.domain.model.LessonInstance;
 import com.rusobr.academic.domain.model.ScheduleLesson;
+import com.rusobr.academic.web.exception.NotFoundException;
 import com.rusobr.academic.infrastructure.client.UserClient;
+import com.rusobr.academic.application.mapper.AcademicPeriodMapper;
 import com.rusobr.academic.infrastructure.persistence.repository.AcademicPeriodRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.LessonInstanceRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.SchoolClassRepository;
-import com.rusobr.academic.web.dto.feign.BatchUserResponse;
+import com.rusobr.academic.web.dto.feign.UserFeignResponse;
 import com.rusobr.academic.web.dto.lessonInstance.*;
 import com.rusobr.academic.web.dto.lessonInstance.teacher.AttendanceStudentDto;
 import com.rusobr.academic.web.dto.lessonInstance.teacher.GradeStudentDto;
 import com.rusobr.academic.web.dto.lessonInstance.teacher.StudentJournalDto;
 import com.rusobr.academic.web.dto.lessonInstance.teacher.TeacherJournalResponse;
-import com.rusobr.academic.web.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -91,7 +91,7 @@ public class JournalService {
 
         //Получаем список учеников с именами
         List<Long> studentsIds = schoolClassRepository.findStudentsIdsByTeachingAssignment(teachingAssignmentId);
-        BatchUserResponse students = userClient.getBatchUsers(studentsIds);
+        List<UserFeignResponse> studentNames = userClient.getBatchUsers(studentsIds);
 
         //Получаем оценки и посещаемость из базы данных
         List<GradeStudentDto> grades = lessonInstanceRepository.findGradesByTeachingAssignment(teachingAssignmentId,
@@ -141,7 +141,7 @@ public class JournalService {
                     );
         }).toList();
 
-        return new TeacherJournalResponse(academicPeriodMapper.toResponse(academicPeriod), students, lessonInstances, studentJournal);
+        return new TeacherJournalResponse(academicPeriodMapper.toResponse(academicPeriod), studentNames, lessonInstances, studentJournal);
     }
 
     public List<LessonInstanceDto> getInstancesByAssignment(Long teachingAssignmentId, Long academicPeriodId) {

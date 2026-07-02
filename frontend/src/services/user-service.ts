@@ -74,11 +74,6 @@ export interface TeacherDetailsResponse {
     phoneNumber: string;
 }
 
-export interface BatchUserResponse {
-    found: UserSimpleResponse[];
-    notFound: number[];
-}
-
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface ParentDetailsResponse { }
 

@@ -2,12 +2,12 @@ package com.rusobr.academic.application.service;
 
 import com.rusobr.academic.domain.model.ClassStudent;
 import com.rusobr.academic.domain.model.SchoolClass;
+import com.rusobr.academic.web.exception.ConflictException;
+import com.rusobr.academic.web.exception.NotFoundException;
 import com.rusobr.academic.infrastructure.client.UserClient;
 import com.rusobr.academic.infrastructure.persistence.repository.ClassStudentRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.SchoolClassRepository;
 import com.rusobr.academic.web.dto.feign.UserFeignResponse;
-import com.rusobr.academic.web.exception.ConflictException;
-import com.rusobr.academic.web.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -35,7 +35,7 @@ public class ClassStudentService {
     }
 
     public void addStudent(Long classId, Long studentId) {
-        userClient.existStudentById(studentId);
+        userClient.getStudentById(studentId);
         self.addStudentTransactional(classId, studentId);
     }
 

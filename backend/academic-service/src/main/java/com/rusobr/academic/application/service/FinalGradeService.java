@@ -57,7 +57,7 @@ public class FinalGradeService {
         ));
 
         List<Long> studentIds = teachingAssignmentService.getStudentIdsByTeachingAssignmentId(teachingAssignmentId);
-        List<UserFeignResponse> students = userClient.getBatchUsers(studentIds).found();
+        List<UserFeignResponse> students = userClient.getBatchUsers(studentIds);
 
         return students.stream().map(user ->
                 new FinalGradeTeacherResponse(user, finalGradesMap.get(user.id()))).toList();

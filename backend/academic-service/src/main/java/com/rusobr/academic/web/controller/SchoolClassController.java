@@ -30,7 +30,7 @@ public class SchoolClassController {
 
     @GetMapping("/{id}/details")
     public SchoolClassFullResponse getWithDetailsById(@PathVariable Long id){
-        return schoolClassService.findWithStudentsById(id);
+        return schoolClassService.findWithStudentById(id);
     }
 
     @GetMapping("/search/by-student")

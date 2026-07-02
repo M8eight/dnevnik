@@ -150,12 +150,12 @@ class SchoolClassServiceTest {
             SchoolClassFullResponse expectedResponse = mock(SchoolClassFullResponse.class);
 
             when(schoolClassRepository.findWithClassStudentById(CLASS_ID)).thenReturn(Optional.of(schoolClass));
-            when(userClient.getBatchUsers(List.of(STUDENT_ID))).thenReturn(new com.rusobr.academic.web.dto.feign.BatchUserResponse(List.of(userResponse), List.of()));
+            when(userClient.getBatchUsers(List.of(STUDENT_ID))).thenReturn(List.of(userResponse));
             when(userClient.getTeacherById(TEACHER_ID)).thenReturn(teacherResponse);
-            when(schoolClassMapper.toSchoolClassFullResponse(schoolClass, new com.rusobr.academic.web.dto.feign.BatchUserResponse(List.of(userResponse), List.of()), teacherResponse, TEACHER_ID))
+            when(schoolClassMapper.toSchoolClassFullResponse(schoolClass, List.of(userResponse), teacherResponse))
                     .thenReturn(expectedResponse);
 
-            SchoolClassFullResponse result = service.findWithStudentsById(CLASS_ID);
+            SchoolClassFullResponse result = service.findWithStudentById(CLASS_ID);
 
             assertThat(result).isEqualTo(expectedResponse);
             verify(schoolClassRepository).findWithClassStudentById(CLASS_ID);
@@ -181,10 +181,10 @@ class SchoolClassServiceTest {
 
             when(schoolClassRepository.findWithClassStudentById(CLASS_ID)).thenReturn(Optional.of(schoolClass));
             when(userClient.getTeacherById(TEACHER_ID)).thenReturn(teacherResponse);
-            when(schoolClassMapper.toSchoolClassFullResponse(schoolClass, new com.rusobr.academic.web.dto.feign.BatchUserResponse(List.of(), List.of()), teacherResponse, TEACHER_ID))
+            when(schoolClassMapper.toSchoolClassFullResponse(schoolClass, List.of(), teacherResponse))
                     .thenReturn(expectedResponse);
 
-            SchoolClassFullResponse result = service.findWithStudentsById(CLASS_ID);
+            SchoolClassFullResponse result = service.findWithStudentById(CLASS_ID);
 
             assertThat(result).isEqualTo(expectedResponse);
             verify(userClient, never()).getBatchUsers(any());
@@ -205,11 +205,11 @@ class SchoolClassServiceTest {
             SchoolClassFullResponse expectedResponse = mock(SchoolClassFullResponse.class);
 
             when(schoolClassRepository.findWithClassStudentById(CLASS_ID)).thenReturn(Optional.of(schoolClass));
-            when(userClient.getBatchUsers(List.of(STUDENT_ID))).thenReturn(new com.rusobr.academic.web.dto.feign.BatchUserResponse(List.of(userResponse), List.of()));
-            when(schoolClassMapper.toSchoolClassFullResponse(schoolClass, new com.rusobr.academic.web.dto.feign.BatchUserResponse(List.of(userResponse), List.of()), null, null))
+            when(userClient.getBatchUsers(List.of(STUDENT_ID))).thenReturn(List.of(userResponse));
+            when(schoolClassMapper.toSchoolClassFullResponse(schoolClass, List.of(userResponse), null))
                     .thenReturn(expectedResponse);
 
-            SchoolClassFullResponse result = service.findWithStudentsById(CLASS_ID);
+            SchoolClassFullResponse result = service.findWithStudentById(CLASS_ID);
 
             assertThat(result).isEqualTo(expectedResponse);
             verify(userClient, never()).getTeacherById(any());
@@ -220,7 +220,7 @@ class SchoolClassServiceTest {
         void notFound() {
             when(schoolClassRepository.findWithClassStudentById(CLASS_ID)).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> service.findWithStudentsById(CLASS_ID))
+            assertThatThrownBy(() -> service.findWithStudentById(CLASS_ID))
                     .isInstanceOf(NotFoundException.class)
                     .hasMessageContaining("SchoolClass Not Found by id: " + CLASS_ID);
         }

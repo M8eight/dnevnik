@@ -2,10 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import {
     X, Loader2, GraduationCap, UserRound, Users,
     UserMinus, UserPlus, Search, ChevronDown, Check,
-    AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
     useGetClassDetails,
     useAddStudentToClass,
@@ -16,26 +14,24 @@ import {
 import { useFindUsersByFilter } from "@/hooks/use-user";
 import type { UserResponse, UserSimpleResponse } from "@/services/user-service";
 
+interface ClassDetailModalProps {
+    classId: number | null;
+    className?: string;
+    onClose: () => void;
+}
+
+// ─── tiny helpers ────────────────────────────────────────────────────────────
 
 function Avatar({ name }: { name: string }) {
     const initials = name.split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase();
     return (
-        <div className="w-9 h-9 rounded-[12px] bg-linear-to-br from-(--red-light) to-(--red)/20 flex items-center justify-center ring-1 ring-(--red)/15 shrink-0">
-            <span className="text-xs font-black text-(--red)">{initials || "?"}</span>
+        <div className="w-9 h-9 rounded-[12px] bg-gradient-to-br from-[var(--red-light)] to-[var(--red)]/20 flex items-center justify-center ring-1 ring-[var(--red)]/15 flex-shrink-0">
+            <span className="text-xs font-black text-[var(--red)]">{initials || "?"}</span>
         </div>
     );
 }
 
-function DataWarningAlert({ children }: { children: React.ReactNode }) {
-    return (
-        <Alert className="rounded-2xl border-amber-200 bg-amber-50/80 py-2.5 px-3.5">
-            <AlertTriangle className="h-4 w-4 text-amber-500" />
-            <AlertDescription className="text-xs font-semibold text-amber-700 leading-snug">
-                {children}
-            </AlertDescription>
-        </Alert>
-    );
-}
+// ─── TEACHER PICKER (Server-side search) ─────────────────────────────────────
 
 function TeacherPicker({
     placeholder,
@@ -74,9 +70,9 @@ function TeacherPicker({
             <button
                 type="button"
                 onClick={() => setOpen((p) => !p)}
-                className="w-full h-10 flex items-center justify-between gap-2 px-3 bg-white/60 border border-black/10 rounded-xl text-sm font-semibold text-left focus:outline-none focus:ring-2 focus:ring-(--red) transition"
+                className="w-full h-10 flex items-center justify-between gap-2 px-3 bg-white/60 border border-black/10 rounded-xl text-sm font-semibold text-left focus:outline-none focus:ring-2 focus:ring-[var(--red)] transition"
             >
-                <span className={displayName ? "text-(--navy)" : "text-black/30 font-normal"}>
+                <span className={displayName ? "text-[var(--navy)]" : "text-black/30 font-normal"}>
                     {displayName ?? placeholder}
                 </span>
                 <ChevronDown className={`w-4 h-4 text-black/30 transition-transform ${open ? "rotate-180" : ""}`} />
@@ -84,7 +80,7 @@ function TeacherPicker({
 
             {open && (
                 <div className="absolute z-50 mt-1 w-full rounded-2xl bg-white border border-black/8 shadow-xl overflow-hidden flex flex-col max-h-60">
-                    <div className="p-2 border-b border-black/6 shrink-0">
+                    <div className="p-2 border-b border-black/6 flex-shrink-0">
                         <div className="relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-black/30" />
                             <input
@@ -112,11 +108,11 @@ function TeacherPicker({
                                         key={u.id}
                                         type="button"
                                         onClick={() => handleSelect(u)}
-                                        className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm hover:bg-black/4 transition text-left ${isActive ? "bg-(--red-light)/40" : ""}`}
+                                        className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm hover:bg-black/4 transition text-left ${isActive ? "bg-[var(--red-light)]/40" : ""}`}
                                     >
                                         <Avatar name={name} />
-                                        <span className="font-semibold text-(--navy) flex-1 truncate">{name}</span>
-                                        {isActive && <Check className="w-3.5 h-3.5 text-(--red) shrink-0" />}
+                                        <span className="font-semibold text-[var(--navy)] flex-1 truncate">{name}</span>
+                                        {isActive && <Check className="w-3.5 h-3.5 text-[var(--red)] flex-shrink-0" />}
                                     </button>
                                 );
                             })
@@ -127,6 +123,8 @@ function TeacherPicker({
         </div>
     );
 }
+
+// ─── STUDENT PICKER (Uses unassignedStudents + Client-side search) ───────────
 
 function StudentPicker({
     placeholder,
@@ -157,6 +155,7 @@ function StudentPicker({
         onSelect(u);
     };
 
+    // Клиентский поиск по полученным свободным студентам
     const filteredStudents = unassignedStudents.filter((u) => {
         const fullName = `${u.firstName ?? ""} ${u.lastName ?? ""}`.toLowerCase();
         return fullName.includes(search.toLowerCase());
@@ -169,9 +168,9 @@ function StudentPicker({
             <button
                 type="button"
                 onClick={() => setOpen((p) => !p)}
-                className="w-full h-10 flex items-center justify-between gap-2 px-3 bg-white/60 border border-black/10 rounded-xl text-sm font-semibold text-left focus:outline-none focus:ring-2 focus:ring-(--red) transition"
+                className="w-full h-10 flex items-center justify-between gap-2 px-3 bg-white/60 border border-black/10 rounded-xl text-sm font-semibold text-left focus:outline-none focus:ring-2 focus:ring-[var(--red)] transition"
             >
-                <span className={displayName ? "text-(--navy)" : "text-black/30 font-normal"}>
+                <span className={displayName ? "text-[var(--navy)]" : "text-black/30 font-normal"}>
                     {displayName ?? placeholder}
                 </span>
                 <ChevronDown className={`w-4 h-4 text-black/30 transition-transform ${open ? "rotate-180" : ""}`} />
@@ -179,7 +178,7 @@ function StudentPicker({
 
             {open && (
                 <div className="absolute z-50 mt-1 w-full rounded-2xl bg-white border border-black/8 shadow-xl overflow-hidden flex flex-col max-h-60">
-                    <div className="p-2 border-b border-black/6 shrink-0">
+                    <div className="p-2 border-b border-black/6 flex-shrink-0">
                         <div className="relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-black/30" />
                             <input
@@ -207,11 +206,11 @@ function StudentPicker({
                                         key={u.id}
                                         type="button"
                                         onClick={() => handleSelect(u)}
-                                        className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm hover:bg-black/4 transition text-left ${isActive ? "bg-(--red-light)/40" : ""}`}
+                                        className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm hover:bg-black/4 transition text-left ${isActive ? "bg-[var(--red-light)]/40" : ""}`}
                                     >
                                         <Avatar name={name} />
-                                        <span className="font-semibold text-(--navy) flex-1 truncate">{name}</span>
-                                        {isActive && <Check className="w-3.5 h-3.5 text-(--red) shrink-0" />}
+                                        <span className="font-semibold text-[var(--navy)] flex-1 truncate">{name}</span>
+                                        {isActive && <Check className="w-3.5 h-3.5 text-[var(--red)] flex-shrink-0" />}
                                     </button>
                                 );
                             })
@@ -223,11 +222,7 @@ function StudentPicker({
     );
 }
 
-interface ClassDetailModalProps {
-    classId: number | null;
-    className?: string;
-    onClose: () => void;
-}
+// ─── Main modal ──────────────────────────────────────────────────────────────
 
 export default function ClassDetailModal({ classId, className, onClose }: ClassDetailModalProps) {
     const [newTeacher, setNewTeacher] = useState<UserSimpleResponse | null>(null);
@@ -239,9 +234,6 @@ export default function ClassDetailModal({ classId, className, onClose }: ClassD
     const assignTeacherMutation = useAssignTeacherToClass();
 
     const isOpen = classId !== null;
-
-    const teacherDataUnavailable = !!details?.classTeacherId && !details?.teacher;
-    const missingStudentsCount = details?.students.notFound.length ?? 0;
 
     const handleAddStudent = () => {
         if (!classId || !newStudent) return;
@@ -276,7 +268,7 @@ export default function ClassDetailModal({ classId, className, onClose }: ClassD
             {/* Modal Wrapper */}
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
                 <div
-                    className={`w-full max-w-140 max-h-[85vh] flex flex-col
+                    className={`w-full max-w-[560px] max-h-[85vh] flex flex-col
                         bg-white/90 backdrop-blur-2xl rounded-[32px] border border-black/8 shadow-2xl
                         transition-all duration-300 ease-[cubic-bezier(.32,.72,0,1)] overflow-hidden
                         
@@ -286,21 +278,17 @@ export default function ClassDetailModal({ classId, className, onClose }: ClassD
                         }`}
                 >
                     {/* Header */}
-                    <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-black/6 shrink-0">
+                    <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-black/6 flex-shrink-0">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-[14px] bg-(--red-light)/60 flex items-center justify-center ring-1 ring-(--red)/10">
-                                <GraduationCap className="w-5 h-5 text-(--red)" />
+                            <div className="w-10 h-10 rounded-[14px] bg-[var(--red-light)]/60 flex items-center justify-center ring-1 ring-[var(--red)]/10">
+                                <GraduationCap className="w-5 h-5 text-[var(--red)]" />
                             </div>
                             <div>
-                                <h2 className="font-serif font-black text-xl text-(--navy) leading-tight">
+                                <h2 className="font-serif font-black text-xl text-[var(--navy)] leading-tight">
                                     {className ?? "Класс"}
                                 </h2>
                                 <p className="text-xs text-black/40 mt-0.5">
-                                    {isLoading
-                                        ? "Загрузка..."
-                                        : missingStudentsCount > 0
-                                            ? `${details?.students.found.length ?? 0} учеников (${missingStudentsCount} недоступно)`
-                                            : `${details?.students.found.length ?? 0} учеников`}
+                                    {isLoading ? "Загрузка..." : `${details?.students.length ?? 0} учеников`}
                                 </p>
                             </div>
                         </div>
@@ -326,13 +314,13 @@ export default function ClassDetailModal({ classId, className, onClose }: ClassD
                                     Классный руководитель
                                 </p>
                                 <div className="rounded-[20px] bg-white/70 border border-black/6 p-4 flex items-center gap-4 shadow-sm mb-3">
-                                    <div className="w-11 h-11 rounded-[14px] bg-linear-to-br from-(--navy)/10 to-(--navy)/20 flex items-center justify-center ring-1 ring-(--navy)/10 shrink-0">
-                                        <UserRound className="w-5 h-5 text-(--navy)" />
+                                    <div className="w-11 h-11 rounded-[14px] bg-gradient-to-br from-[var(--navy)]/10 to-[var(--navy)]/20 flex items-center justify-center ring-1 ring-[var(--navy)]/10 flex-shrink-0">
+                                        <UserRound className="w-5 h-5 text-[var(--navy)]" />
                                     </div>
                                     <div className="min-w-0 flex-1">
-                                        {details.teacher ? (
+                                        {(details.teacher) ? (
                                             <>
-                                                <p className="font-bold text-sm text-(--navy) truncate">
+                                                <p className="font-bold text-sm text-[var(--navy)] truncate">
                                                     {details.teacher.user.firstName} {details.teacher.user.lastName}
                                                 </p>
                                                 {details.teacher.teacherDetails?.email && (
@@ -341,26 +329,14 @@ export default function ClassDetailModal({ classId, className, onClose }: ClassD
                                                     </p>
                                                 )}
                                             </>
-                                        ) : teacherDataUnavailable ? (
-                                            <p className="font-bold text-sm text-amber-600">
-                                                Данные учителя временно недоступны
-                                            </p>
                                         ) : (
-                                            <p className="font-bold text-sm text-(--navy)">
+                                            <p className="font-bold text-sm text-[var(--navy)]">
                                                 Не назначен
                                             </p>
                                         )}
+
                                     </div>
                                 </div>
-
-                                {teacherDataUnavailable && (
-                                    <div className="mb-3">
-                                        <DataWarningAlert>
-                                            Учитель назначен, но его данные сейчас недоступны. Попробуйте обновить страницу позже.
-                                        </DataWarningAlert>
-                                    </div>
-                                )}
-
                                 <div className="flex gap-2">
                                     <TeacherPicker
                                         placeholder="Выбрать нового учителя..."
@@ -370,7 +346,7 @@ export default function ClassDetailModal({ classId, className, onClose }: ClassD
                                     <Button
                                         onClick={handleChangeTeacher}
                                         disabled={!newTeacher || assignTeacherMutation.isPending}
-                                        className="h-10 px-4 rounded-xl bg-(--navy) hover:bg-(--navy)/90 text-white font-bold text-sm gap-1.5 disabled:opacity-40 shrink-0"
+                                        className="h-10 px-4 rounded-xl bg-[var(--navy)] hover:bg-[var(--navy)]/90 text-white font-bold text-sm gap-1.5 disabled:opacity-40 flex-shrink-0"
                                     >
                                         {assignTeacherMutation.isPending
                                             ? <Loader2 className="w-4 h-4 animate-spin" />
@@ -397,7 +373,7 @@ export default function ClassDetailModal({ classId, className, onClose }: ClassD
                                     <Button
                                         onClick={handleAddStudent}
                                         disabled={!newStudent || addMutation.isPending}
-                                        className="h-10 px-4 rounded-xl bg-(--red) hover:bg-(--red)/90 text-white font-bold text-sm gap-1.5 disabled:opacity-40 shrink-0"
+                                        className="h-10 px-4 rounded-xl bg-[var(--red)] hover:bg-[var(--red)]/90 text-white font-bold text-sm gap-1.5 disabled:opacity-40 flex-shrink-0"
                                     >
                                         {addMutation.isPending
                                             ? <Loader2 className="w-4 h-4 animate-spin" />
@@ -417,28 +393,18 @@ export default function ClassDetailModal({ classId, className, onClose }: ClassD
                                         Ученики
                                     </p>
                                     <span className="text-[11px] font-bold text-black/30 bg-black/5 rounded-full px-2.5 py-0.5">
-                                        {details.students.found.length}
+                                        {details.students.length}
                                     </span>
                                 </div>
 
-                                {missingStudentsCount > 0 && (
-                                    <div className="mb-3">
-                                        <DataWarningAlert>
-                                            {missingStudentsCount === 1
-                                                ? "1 ученик не отображается — данные временно недоступны."
-                                                : `${missingStudentsCount} учеников не отображаются — данные временно недоступны.`}
-                                        </DataWarningAlert>
-                                    </div>
-                                )}
-
-                                {details.students.found.length === 0 ? (
+                                {details.students.length === 0 ? (
                                     <div className="flex flex-col items-center justify-center py-10 text-black/20">
                                         <Users className="w-10 h-10 mb-2 opacity-40" />
                                         <p className="text-xs font-bold">Нет учеников</p>
                                     </div>
                                 ) : (
                                     <div className="flex flex-col gap-2">
-                                        {details.students.found.map((student, idx) => {
+                                        {details.students.map((student, idx) => {
                                             const fullName = `${student.firstName ?? ""} ${student.lastName ?? ""}`.trim();
                                             return (
                                                 <div
@@ -448,7 +414,7 @@ export default function ClassDetailModal({ classId, className, onClose }: ClassD
                                                 >
                                                     <Avatar name={fullName || "?"} />
                                                     <div className="min-w-0 flex-1">
-                                                        <p className="font-bold text-sm text-(--navy) truncate leading-tight">
+                                                        <p className="font-bold text-sm text-[var(--navy)] truncate leading-tight">
                                                             {fullName || `Ученик #${student.id}`}
                                                         </p>
                                                     </div>
@@ -459,7 +425,7 @@ export default function ClassDetailModal({ classId, className, onClose }: ClassD
                                                             removeMutation.isPending &&
                                                             removeMutation.variables?.studentId === student.id
                                                         }
-                                                        className="w-8 h-8 rounded-xl text-black/25 hover:text-red-500 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                                                        className="w-8 h-8 rounded-xl text-black/25 hover:text-red-500 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
                                                     >
                                                         {removeMutation.isPending && removeMutation.variables?.studentId === student.id
                                                             ? <Loader2 className="w-3.5 h-3.5 animate-spin" />

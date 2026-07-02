@@ -1,17 +1,17 @@
 package com.rusobr.academic.application.service;
 
-import com.rusobr.academic.application.mapper.TeacherSubjectMapper;
 import com.rusobr.academic.domain.model.Subject;
 import com.rusobr.academic.domain.model.TeacherSubject;
 import com.rusobr.academic.domain.model.TeacherSubjectId;
+import com.rusobr.academic.web.exception.ConflictException;
+import com.rusobr.academic.web.exception.NotFoundException;
 import com.rusobr.academic.infrastructure.client.UserClient;
+import com.rusobr.academic.application.mapper.TeacherSubjectMapper;
 import com.rusobr.academic.infrastructure.persistence.repository.SubjectRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.TeacherSubjectRepository;
 import com.rusobr.academic.web.dto.feign.UserFeignResponse;
 import com.rusobr.academic.web.dto.teacherSubject.TeacherSubjectRequest;
 import com.rusobr.academic.web.dto.teacherSubject.TeacherSubjectResponse;
-import com.rusobr.academic.web.exception.ConflictException;
-import com.rusobr.academic.web.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,7 +35,7 @@ public class TeacherSubjectService {
         List<TeacherSubject> teacherSubjects = teacherSubjectRepository.findAll();
         List<Long> teacherIds = teacherSubjects.stream().map(ts -> ts.getId().getTeacherId())
                 .distinct().toList();
-        List<UserFeignResponse> teachers = userClient.getBatchTeachers(teacherIds).found();
+        List<UserFeignResponse> teachers = userClient.getBatchTeachers(teacherIds);
         Map<Long, UserFeignResponse> teachersMap = teachers.stream().collect(Collectors.toMap(
                 UserFeignResponse::id,
                 teacher -> teacher

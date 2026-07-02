@@ -15,7 +15,6 @@ import com.rusobr.academic.infrastructure.persistence.projection.ScheduleLessonP
 import com.rusobr.academic.infrastructure.persistence.projection.SchoolLessonProjection;
 import com.rusobr.academic.infrastructure.persistence.repository.LessonInstanceRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.ScheduleLessonRepository;
-import com.rusobr.academic.web.dto.feign.BatchUserResponse;
 import com.rusobr.academic.web.dto.attendances.journal.AttendanceSimpleResponse;
 import com.rusobr.academic.web.dto.feign.UserFeignResponse;
 import com.rusobr.academic.web.dto.grade.GradeResponse;
@@ -176,7 +175,7 @@ class ScheduleServiceTest {
             when(dto.dayOfWeek()).thenReturn(DayOfWeek.WEDNESDAY);
 
             when(scheduleLessonRepository.findClassSchedule(CLASS_ID, DATE)).thenReturn(List.of(sl));
-            when(userClient.getBatchTeachers(List.of(TEACHER_ID))).thenReturn(new BatchUserResponse(List.of(teacherResponse), List.of()));
+            when(userClient.getBatchTeachers(List.of(TEACHER_ID))).thenReturn(List.of(teacherResponse));
             when(scheduleLessonMapper.toDto(sl, teacherResponse)).thenReturn(dto);
 
             Map<DayOfWeek, List<ScheduleLessonDto>> result = service.getByClass(CLASS_ID, DATE);

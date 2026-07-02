@@ -2,15 +2,14 @@ package com.rusobr.academic.application.mapper;
 
 import com.rusobr.academic.domain.model.AcademicYear;
 import com.rusobr.academic.domain.model.SchoolClass;
-import com.rusobr.academic.web.dto.feign.BatchUserResponse;
 import com.rusobr.academic.web.dto.feign.TeacherResponse;
+import com.rusobr.academic.web.dto.feign.UserFeignResponse;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassFullResponse;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassRequest;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassResponse;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingConstants;
-import org.mapstruct.ReportingPolicy;
+import org.mapstruct.*;
+
+import java.util.List;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface SchoolClassMapper {
@@ -24,8 +23,7 @@ public interface SchoolClassMapper {
 
     @Mapping(target = "teacher", source = "teacher")
     @Mapping(target = "students", source = "users")
-    @Mapping(target = "classTeacherId", source = "classTeacherId")
-    SchoolClassFullResponse toSchoolClassFullResponse(SchoolClass schoolClass, BatchUserResponse users,
-                                                      TeacherResponse teacher, Long classTeacherId);
+    SchoolClassFullResponse toSchoolClassFullResponse(SchoolClass schoolClass, List<UserFeignResponse> users,
+                                                      TeacherResponse teacher);
 
 }

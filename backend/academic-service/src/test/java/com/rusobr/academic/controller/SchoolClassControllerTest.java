@@ -5,7 +5,6 @@ import com.rusobr.academic.application.service.ClassStudentService;
 import com.rusobr.academic.application.service.SchoolClassService;
 import com.rusobr.academic.web.controller.SchoolClassController;
 import com.rusobr.academic.web.dto.academicYear.AcademicYearResponse;
-import com.rusobr.academic.web.dto.feign.BatchUserResponse;
 import com.rusobr.academic.web.dto.feign.TeacherDetails;
 import com.rusobr.academic.web.dto.feign.TeacherResponse;
 import com.rusobr.academic.web.dto.feign.UserFeignResponse;
@@ -88,9 +87,9 @@ public class SchoolClassControllerTest {
         return new SchoolClassFullResponse(
                 SCHOOL_CLASS_ID,
                 NAME,
+                YEAR,
                 buildTeacherResponse(),
-                TEACHER_ID,
-                new BatchUserResponse(List.of(buildStudentResponse()), List.of())
+                List.of(buildStudentResponse())
         );
     }
 
@@ -110,15 +109,15 @@ public class SchoolClassControllerTest {
     @Test
     @DisplayName("GET /school-classes/{id}/details — 200 and full school class response")
     void getWithDetailsById_ShouldReturn200() throws Exception {
-        when(schoolClassService.findWithStudentsById(SCHOOL_CLASS_ID)).thenReturn(buildSchoolClassFullResponse());
+        when(schoolClassService.findWithStudentById(SCHOOL_CLASS_ID)).thenReturn(buildSchoolClassFullResponse());
 
         mockMvc.perform(get("/api/v1/school-classes/{id}/details", SCHOOL_CLASS_ID))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(SCHOOL_CLASS_ID))
                 .andExpect(jsonPath("$.name").value(NAME))
+                .andExpect(jsonPath("$.year").value(YEAR))
                 .andExpect(jsonPath("$.teacher.user.id").value(TEACHER_ID))
-                .andExpect(jsonPath("$.classTeacherId").value(TEACHER_ID))
-                .andExpect(jsonPath("$.students.found[0].id").value(STUDENT_ID));
+                .andExpect(jsonPath("$.students[0].id").value(STUDENT_ID));
     }
 
     @Test

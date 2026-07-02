@@ -10,7 +10,6 @@ import com.rusobr.user.domain.model.User;
 import com.rusobr.user.infrastructure.persistence.repository.TeacherRepository;
 import com.rusobr.user.infrastructure.persistence.repository.UserRepository;
 import com.rusobr.user.infrastructure.persistence.repository.projection.UserProjection;
-import com.rusobr.user.web.dto.feign.BatchUserResponse;
 import com.rusobr.user.web.dto.feign.UserFeignResponse;
 import com.rusobr.user.web.dto.teacher.TeacherDetails;
 import com.rusobr.user.web.dto.teacher.TeacherResponse;
@@ -125,19 +124,19 @@ class TeacherServiceTest {
             when(teacherRepository.findAllTeachersByIds(List.of(TEACHER_ID))).thenReturn(List.of(projection));
             when(userMapper.toUserFeignResponse(projection)).thenReturn(feignResponse);
 
-            BatchUserResponse result = service.getBatch(List.of(TEACHER_ID));
+            List<UserFeignResponse> result = service.getBatch(List.of(TEACHER_ID));
 
-            assertThat(result.found()).hasSize(1).containsExactly(feignResponse);
-            assertThat(result.notFound()).isEmpty();
+            assertThat(result).hasSize(1).containsExactly(feignResponse);
         }
 
         @Test
         @DisplayName("пустой список ids — возвращает пустой список")
         void emptyIds_returnsEmpty() {
-            BatchUserResponse result = service.getBatch(List.of());
+            when(teacherRepository.findAllTeachersByIds(List.of())).thenReturn(List.of());
 
-            assertThat(result.found()).isEmpty();
-            assertThat(result.notFound()).isEmpty();
+            List<UserFeignResponse> result = service.getBatch(List.of());
+
+            assertThat(result).isEmpty();
             verifyNoInteractions(userMapper);
         }
     }

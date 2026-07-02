@@ -14,7 +14,6 @@ import com.rusobr.academic.infrastructure.persistence.repository.AcademicPeriodR
 import com.rusobr.academic.infrastructure.persistence.repository.GradeRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.PeriodGradeRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.TeachingAssignmentRepository;
-import com.rusobr.academic.web.dto.feign.BatchUserResponse;
 import com.rusobr.academic.web.dto.feign.UserFeignResponse;
 import com.rusobr.academic.web.dto.grade.StudentAverageDto;
 import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeRequest;
@@ -119,7 +118,7 @@ class PeriodGradeServiceTest {
 
             when(academicPeriodRepository.findById(PERIOD_ID)).thenReturn(Optional.of(period));
             when(teachingAssignmentService.getStudentIdsByTeachingAssignmentId(ASSIGNMENT_ID)).thenReturn(List.of(STUDENT_ID));
-            when(userClient.getBatchUsers(List.of(STUDENT_ID))).thenReturn(new BatchUserResponse(List.of(user), List.of()));
+            when(userClient.getBatchUsers(List.of(STUDENT_ID))).thenReturn(List.of(user));
 
             // ИСПРАВЛЕНО: Заменили 1L на константу ACADEMIC_YEAR_ID
             when(periodGradeRepository.findPeriodGradesByTeachingAssignmentId(ASSIGNMENT_ID, ACADEMIC_YEAR_ID))

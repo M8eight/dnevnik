@@ -75,11 +75,11 @@ class ClassStudentServiceTest {
         @DisplayName("успешно проверяет студента во внешнем клиенте и делегирует вызов в транзакционный метод")
         void success() {
             // В addStudent() сначала дергается feign-клиент, а затем метод через self-прокси
-            doNothing().when(userClient).existStudentById(STUDENT_ID);
+            doNothing().when(userClient).getStudentById(STUDENT_ID);
 
             service.addStudent(CLASS_ID, STUDENT_ID);
 
-            verify(userClient).existStudentById(STUDENT_ID);
+            verify(userClient).getStudentById(STUDENT_ID);
             verify(self).addStudentTransactional(CLASS_ID, STUDENT_ID);
         }
     }

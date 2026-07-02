@@ -12,7 +12,6 @@ import com.rusobr.academic.infrastructure.persistence.repository.AcademicPeriodR
 import com.rusobr.academic.infrastructure.persistence.repository.FinalGradeRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.TeachingAssignmentRepository;
 import com.rusobr.academic.web.dto.academicYear.AcademicYearResponse;
-import com.rusobr.academic.web.dto.feign.BatchUserResponse;
 import com.rusobr.academic.web.dto.feign.UserFeignResponse;
 import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeCreateResponse;
 import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeRequest;
@@ -105,7 +104,7 @@ class FinalGradeServiceTest {
             when(finalGradeRepository.findFinalGradesByTeachingAssignmentId(ASSIGNMENT_ID, ACADEMIC_YEAR_ID)).thenReturn(List.of(grade));
             when(finalGradeMapper.toFinalGradeResponse(grade)).thenReturn(response);
             when(teachingAssignmentService.getStudentIdsByTeachingAssignmentId(ASSIGNMENT_ID)).thenReturn(List.of(STUDENT_ID));
-            when(userClient.getBatchUsers(List.of(STUDENT_ID))).thenReturn(new BatchUserResponse(List.of(student), List.of()));
+            when(userClient.getBatchUsers(List.of(STUDENT_ID))).thenReturn(List.of(student));
 
             List<FinalGradeTeacherResponse> result = service.getByAssignmentId(ASSIGNMENT_ID, ACADEMIC_YEAR_ID);
 
