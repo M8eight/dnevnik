@@ -6,6 +6,7 @@ import com.rusobr.academic.domain.enums.GradeType;
 import com.rusobr.academic.web.controller.JournalController;
 import com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodResponse;
 import com.rusobr.academic.web.dto.academicYear.AcademicYearResponse;
+import com.rusobr.academic.web.dto.feign.BatchUserResponse;
 import com.rusobr.academic.web.dto.feign.UserFeignResponse;
 import com.rusobr.academic.web.dto.lessonInstance.DatesGradesDto;
 import com.rusobr.academic.web.dto.lessonInstance.GradeLessonDto;
@@ -82,7 +83,7 @@ public class JournalControllerTest {
                 5.0,
                 List.of()
         );
-        return new TeacherJournalResponse(buildAcademicPeriodResponse(), List.of(student), List.of(lessonInstance), List.of(studentJournal));
+        return new TeacherJournalResponse(buildAcademicPeriodResponse(), new BatchUserResponse(List.of(student), List.of()), List.of(lessonInstance), List.of(studentJournal));
     }
 
     @Test
@@ -125,7 +126,7 @@ public class JournalControllerTest {
                         .param("academicPeriodId", String.valueOf(PERIOD_ID)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.academicPeriod.id").value(PERIOD_ID))
-                .andExpect(jsonPath("$.students[0].id").value(STUDENT_ID))
+                .andExpect(jsonPath("$.students.found[0].id").value(STUDENT_ID))
                 .andExpect(jsonPath("$.lessonInstances[0].id").value(LESSON_INSTANCE_ID));
     }
 

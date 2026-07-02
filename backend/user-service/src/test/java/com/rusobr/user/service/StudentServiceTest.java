@@ -15,6 +15,7 @@ import com.rusobr.user.infrastructure.persistence.repository.StudentRepository;
 import com.rusobr.user.infrastructure.persistence.repository.UserRepository;
 import com.rusobr.user.infrastructure.persistence.repository.projection.UserProjection;
 import com.rusobr.user.web.dto.feign.AcademicYearResponse;
+import com.rusobr.user.web.dto.feign.BatchUserResponse;
 import com.rusobr.user.web.dto.feign.SchoolClassResponse;
 import com.rusobr.user.web.dto.feign.UserFeignResponse;
 import com.rusobr.user.web.dto.student.StudentDetails;
@@ -77,16 +78,18 @@ class StudentServiceTest {
         @Test
         @DisplayName("возвращает пустой список, если ids == null")
         void nullIds_returnsEmpty() {
-            List<UserFeignResponse> result = service.getBatch(null);
-            assertThat(result).isEmpty();
+            BatchUserResponse result = service.getBatch(null);
+            assertThat(result.found()).isEmpty();
+            assertThat(result.notFound()).isEmpty();
             verifyNoInteractions(studentRepository, userMapper);
         }
 
         @Test
         @DisplayName("возвращает пустой список, если ids пустой")
         void emptyIds_returnsEmpty() {
-            List<UserFeignResponse> result = service.getBatch(Collections.emptyList());
-            assertThat(result).isEmpty();
+            BatchUserResponse result = service.getBatch(Collections.emptyList());
+            assertThat(result.found()).isEmpty();
+            assertThat(result.notFound()).isEmpty();
             verifyNoInteractions(studentRepository, userMapper);
         }
 
@@ -99,9 +102,10 @@ class StudentServiceTest {
             when(studentRepository.findAllStudentsByIds(List.of(STUDENT_ID))).thenReturn(List.of(projection));
             when(userMapper.toUserFeignResponse(projection)).thenReturn(feignResponse);
 
-            List<UserFeignResponse> result = service.getBatch(List.of(STUDENT_ID));
+            BatchUserResponse result = service.getBatch(List.of(STUDENT_ID));
 
-            assertThat(result).hasSize(1).containsExactly(feignResponse);
+            assertThat(result.found()).hasSize(1).containsExactly(feignResponse);
+            assertThat(result.notFound()).isEmpty();
         }
     }
 
