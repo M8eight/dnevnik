@@ -1,5 +1,5 @@
 import api from "@/axios/axios";
-import type { TeacherDetails, UserSimpleResponse } from "./user-service";
+import type { BatchUserResponse, TeacherDetails, UserSimpleResponse } from "./user-service";
 import type { AcademicYearResponse } from "./academic-year-service";
 
 export interface SchoolClassResponse {
@@ -19,11 +19,14 @@ export interface SchoolClassFullResponse {
     id: number;
     name: string;
     academicYear: AcademicYearResponse;
-    teacher: {
-        user: UserSimpleResponse;
-        teacherDetails: TeacherDetails
-    }
-    students: UserSimpleResponse[];
+    classTeacherId: number;
+    teacher: TeacherFullDetails | null;
+    students: BatchUserResponse;
+}
+
+export interface TeacherFullDetails {
+    user: UserSimpleResponse;
+    teacherDetails: TeacherDetails;
 }
 
 export interface SchoolClassUpdateRequest {

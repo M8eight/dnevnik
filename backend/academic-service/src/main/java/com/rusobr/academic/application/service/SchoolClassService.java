@@ -7,15 +7,17 @@ import com.rusobr.academic.domain.model.SchoolClass;
 import com.rusobr.academic.infrastructure.client.UserClient;
 import com.rusobr.academic.infrastructure.persistence.repository.AcademicYearRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.SchoolClassRepository;
+import com.rusobr.academic.web.dto.feign.BatchUserResponse;
 import com.rusobr.academic.web.dto.feign.TeacherResponse;
-import com.rusobr.academic.web.dto.feign.UserFeignResponse;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassFullResponse;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassRequest;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassResponse;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassUpdateRequest;
 import com.rusobr.academic.web.exception.ConflictException;
 import com.rusobr.academic.web.exception.NotFoundException;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class SchoolClassService {
 
     private final SchoolClassRepository schoolClassRepository;
@@ -43,11 +46,15 @@ public class SchoolClassService {
     }
 
     @Transactional(readOnly = true)
-    public SchoolClassFullResponse findWithStudentById(Long id) {
+    public SchoolClassFullResponse findWithStudentsById(Long id) {
         SchoolClass schoolClass = schoolClassRepository.findWithClassStudentById(id)
                 .orElseThrow(() -> new NotFoundException("SchoolClass Not Found by id: " + id));
 
-        List<UserFeignResponse> users = List.of();
+        return self.findWithStudentsFeign(schoolClass);
+    }
+
+    public SchoolClassFullResponse findWithStudentsFeign(SchoolClass schoolClass) {
+        BatchUserResponse users = new BatchUserResponse(List.of(), List.of());
         if (!schoolClass.getStudents().isEmpty()) {
             users = userClient.getBatchUsers(
                     schoolClass.getStudents().stream().map(ClassStudent::getStudentId).toList()
@@ -56,10 +63,15 @@ public class SchoolClassService {
 
         TeacherResponse teacher = null;
         if (schoolClass.getClassTeacherId() != null) {
-            teacher = userClient.getTeacherById(schoolClass.getClassTeacherId());
+            try {
+                teacher = userClient.getTeacherById(schoolClass.getClassTeacherId());
+            } catch (FeignException.NotFound e) {
+                log.warn("Data inconsistency: teacher teacherId={} references non-existent user in user-service",
+                        schoolClass.getClassTeacherId());
+            }
         }
 
-        return schoolClassMapper.toSchoolClassFullResponse(schoolClass, users, teacher);
+        return schoolClassMapper.toSchoolClassFullResponse(schoolClass, users, teacher, schoolClass.getClassTeacherId());
     }
 
     @Transactional(readOnly = true)

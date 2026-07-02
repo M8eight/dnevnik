@@ -8,6 +8,7 @@ import com.rusobr.academic.domain.model.TeacherSubjectId;
 import com.rusobr.academic.infrastructure.client.UserClient;
 import com.rusobr.academic.infrastructure.persistence.repository.SubjectRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.TeacherSubjectRepository;
+import com.rusobr.academic.web.dto.feign.BatchUserResponse;
 import com.rusobr.academic.web.dto.feign.UserFeignResponse;
 import com.rusobr.academic.web.dto.subject.SubjectResponseDto;
 import com.rusobr.academic.web.dto.teacherSubject.TeacherSubjectRequest;
@@ -56,7 +57,7 @@ class TeacherSubjectServiceTest {
             TeacherSubjectResponse expectedResponse = new TeacherSubjectResponse(teacherResponse, new SubjectResponseDto(SUBJECT_ID, "Физика"));
 
             when(teacherSubjectRepository.findAll()).thenReturn(List.of(teacherSubject));
-            when(userClient.getBatchTeachers(List.of(TEACHER_ID))).thenReturn(List.of(teacherResponse));
+            when(userClient.getBatchTeachers(List.of(TEACHER_ID))).thenReturn(new BatchUserResponse(List.of(teacherResponse), List.of()));
             when(teacherSubjectMapper.toResponse(teacherSubject, teacherResponse)).thenReturn(expectedResponse);
 
             List<TeacherSubjectResponse> result = service.findAll();

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rusobr.user.application.service.student.StudentService;
 import com.rusobr.user.web.controller.StudentController;
 import com.rusobr.user.web.dto.feign.AcademicYearResponse;
+import com.rusobr.user.web.dto.feign.BatchUserResponse;
 import com.rusobr.user.web.dto.feign.SchoolClassResponse;
 import com.rusobr.user.web.dto.feign.UserFeignResponse;
 import com.rusobr.user.web.dto.student.StudentDetails;
@@ -95,32 +96,34 @@ public class StudentControllerTest {
     @DisplayName("POST /students/batch — 200 и список UserFeignResponse")
     void getBatch_ShouldReturn200() throws Exception {
         List<Long> ids = List.of(1L, 2L);
-        List<UserFeignResponse> responses = List.of(
+        BatchUserResponse responses = new BatchUserResponse(List.of(
                 new UserFeignResponse(1L, "Ivan", "Ivanov", "ivan", "kc-1"),
                 new UserFeignResponse(2L, "Petr", "Petrov", "petr", "kc-2")
-        );
+        ), List.of());
+
         when(studentService.getBatch(ids)).thenReturn(responses);
 
-        mockMvc.perform(post("/api/v1/students/batch")
+                mockMvc.perform(post("/api/v1/students/batch")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(ids)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(1L))
-                .andExpect(jsonPath("$[0].username").value("ivan"))
-                .andExpect(jsonPath("$[1].id").value(2L))
-                .andExpect(jsonPath("$[1].username").value("petr"));
+                .andExpect(jsonPath("$.found[0].id").value(1L))
+                .andExpect(jsonPath("$.found[0].username").value("ivan"))
+                .andExpect(jsonPath("$.found[1].id").value(2L))
+                .andExpect(jsonPath("$.found[1].username").value("petr"))
+                .andExpect(jsonPath("$.notFound").isArray());
     }
 
     @Test
     @DisplayName("POST /students/batch — 200 пустой список если ids пустой")
     void getBatch_ShouldReturnEmptyList_WhenIdsEmpty() throws Exception {
-        when(studentService.getBatch(List.of())).thenReturn(List.of());
+        when(studentService.getBatch(List.of())).thenReturn(new BatchUserResponse(List.of(), List.of()));
 
-        mockMvc.perform(post("/api/v1/students/batch")
+                mockMvc.perform(post("/api/v1/students/batch")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("[]"))
                 .andExpect(status().isOk())
-                .andExpect(content().json("[]"));
+                .andExpect(content().json("{\"found\":[],\"notFound\":[]}"));
     }
 
     // ─────────────────────────────────────────────
