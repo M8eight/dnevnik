@@ -6,6 +6,7 @@ import com.rusobr.user.domain.model.Parent;
 import com.rusobr.user.domain.model.Student;
 import com.rusobr.user.domain.model.User;
 import com.rusobr.user.domain.enums.UserRole;
+import com.rusobr.user.web.dto.feign.BatchUserResponse;
 import com.rusobr.user.web.dto.student.StudentInfoResponse;
 import com.rusobr.user.web.exception.ConflictException;
 import com.rusobr.user.web.exception.NotFoundException;
@@ -44,12 +45,17 @@ public class StudentService {
     private final UserMapper userMapper;
 
     @Transactional(readOnly = true)
-    public List<UserFeignResponse> getBatch(List<Long> ids) {
+    public BatchUserResponse getBatch(List<Long> ids) {
         if (ids == null || ids.isEmpty()) {
-            return List.of();
+            return new BatchUserResponse(List.of(), List.of());
         }
 
-        return studentRepository.findAllStudentsByIds(ids).stream().map(userMapper::toUserFeignResponse).toList();
+        List<UserFeignResponse> students = studentRepository.findAllStudentsByIds(ids).stream().map(userMapper::toUserFeignResponse).toList();
+
+        List<Long> foundIds = students.stream().map(UserFeignResponse::id).toList();
+        List<Long> notFound = ids.stream().filter(id->!foundIds.contains(id)).toList();
+
+        return new BatchUserResponse(students, notFound);
     }
 
     @Transactional(readOnly = true)

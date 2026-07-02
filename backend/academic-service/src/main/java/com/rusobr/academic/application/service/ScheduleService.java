@@ -115,7 +115,7 @@ public class ScheduleService {
         List<Long> teacherIds = scheduleLessons.stream().map(scheduleLesson ->
                 scheduleLesson.getTeachingAssignment().getTeacherId()).distinct().toList();
 
-        Map<Long, UserFeignResponse> teachers = userClient.getBatchTeachers(teacherIds)
+        Map<Long, UserFeignResponse> teachers = userClient.getBatchTeachers(teacherIds).found()
                 .stream().collect(Collectors.toMap(
                         UserFeignResponse::id,
                         userFeignResponse -> userFeignResponse
