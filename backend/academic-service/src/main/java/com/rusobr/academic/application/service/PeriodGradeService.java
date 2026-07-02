@@ -1,21 +1,23 @@
 package com.rusobr.academic.application.service;
 
 import com.rusobr.academic.application.mapper.GradeMapper;
+import com.rusobr.academic.application.mapper.PeriodGradeMapper;
 import com.rusobr.academic.domain.model.AcademicPeriod;
 import com.rusobr.academic.domain.model.PeriodGrade;
 import com.rusobr.academic.domain.model.TeachingAssignment;
-import com.rusobr.academic.web.dto.grade.StudentAverageDto;
-import com.rusobr.academic.web.exception.ConflictException;
-import com.rusobr.academic.web.exception.NotFoundException;
 import com.rusobr.academic.infrastructure.client.UserClient;
-import com.rusobr.academic.application.mapper.PeriodGradeMapper;
 import com.rusobr.academic.infrastructure.persistence.repository.AcademicPeriodRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.GradeRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.PeriodGradeRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.TeachingAssignmentRepository;
 import com.rusobr.academic.web.dto.feign.UserFeignResponse;
-import com.rusobr.academic.infrastructure.persistence.projection.StudentAverageProjection;
-import com.rusobr.academic.web.dto.grade.periodGrade.*;
+import com.rusobr.academic.web.dto.grade.StudentAverageDto;
+import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeRequest;
+import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeResponse;
+import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeStudentResponse;
+import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeTeacherResponse;
+import com.rusobr.academic.web.exception.ConflictException;
+import com.rusobr.academic.web.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,7 +62,7 @@ public class PeriodGradeService {
         AcademicPeriod academicPeriod = academicPeriodRepository.findById(currentAcademicPeriodId)
                 .orElseThrow(() -> new NotFoundException("Academic period not found academicPeriodId: " + currentAcademicPeriodId));
         List<Long> studentIds = teachingAssignmentService.getStudentIdsByTeachingAssignmentId(teachingAssignmentId);
-        List<UserFeignResponse> students = userClient.getBatchUsers(studentIds);
+        List<UserFeignResponse> students = userClient.getBatchUsers(studentIds).found();
 
         List<PeriodGradeResponse> periodGrades = periodGradeRepository
                 .findPeriodGradesByTeachingAssignmentId(teachingAssignmentId, academicYearId)

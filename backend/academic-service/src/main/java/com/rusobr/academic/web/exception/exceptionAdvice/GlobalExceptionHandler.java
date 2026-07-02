@@ -1,8 +1,6 @@
 package com.rusobr.academic.web.exception.exceptionAdvice;
 
-import com.rusobr.academic.web.exception.ConflictException;
-import com.rusobr.academic.web.exception.ErrorResponse;
-import com.rusobr.academic.web.exception.NotFoundException;
+import com.rusobr.academic.web.exception.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,5 +34,31 @@ public class GlobalExceptionHandler {
         );
 
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(UserServiceUnavailableException.class)
+    public ResponseEntity<ErrorResponse> handleServiceUnavailable(UserServiceUnavailableException ex, HttpServletRequest req) {
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.SERVICE_UNAVAILABLE.value(),
+                ex.getMessage(),
+                req.getRequestURI()
+        );
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.SERVICE_UNAVAILABLE);
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ErrorResponse> handleBadRequest(BadRequestException ex, HttpServletRequest req) {
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getMessage(),
+                req.getRequestURI()
+        );
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 }
