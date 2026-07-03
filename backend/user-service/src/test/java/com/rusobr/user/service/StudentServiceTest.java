@@ -172,7 +172,7 @@ class StudentServiceTest {
 
             assertThatThrownBy(() -> service.getDetailsById(STUDENT_ID))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("Student not found: " + STUDENT_ID);
+                    .hasMessageContaining("Student by id: " + STUDENT_ID + " not found");
 
             verifyNoInteractions(studentMapper);
         }
@@ -215,7 +215,7 @@ class StudentServiceTest {
 
             assertThatThrownBy(() -> service.getWithClassById(STUDENT_ID))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("Student not found");
+                    .hasMessageContaining("Student by id: " + STUDENT_ID + " not found");
 
             verifyNoInteractions(academicClient, teacherService, studentMapper);
         }
@@ -274,7 +274,7 @@ class StudentServiceTest {
 
             assertThatThrownBy(() -> service.create(USER_ID, details))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("User not found: " + USER_ID);
+                    .hasMessageContaining("User by id: " + USER_ID + " not found");
 
             verifyNoInteractions(studentMapper, studentRepository);
         }
@@ -320,7 +320,7 @@ class StudentServiceTest {
 
             assertThatThrownBy(() -> service.update(USER_ID, details))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("User not found: " + USER_ID);
+                    .hasMessageContaining("User by id: " + USER_ID + " not found");
 
             verify(studentRepository, never()).findById(any());
         }
@@ -334,7 +334,7 @@ class StudentServiceTest {
 
             assertThatThrownBy(() -> service.update(USER_ID, details))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("Student not found: " + USER_ID);
+                    .hasMessageContaining("Student by id: " + USER_ID + " not found");
         }
     }
 
@@ -368,7 +368,7 @@ class StudentServiceTest {
 
             assertThatThrownBy(() -> service.assignToParent(STUDENT_ID, PARENT_ID))
                     .isInstanceOf(ConflictException.class)
-                    .hasMessageContaining("Student already has parent");
+                    .hasMessageContaining("Student by id: " + STUDENT_ID + " already has parent");
 
             verify(studentRepository, never()).save(any());
         }
@@ -385,7 +385,7 @@ class StudentServiceTest {
 
             assertThatThrownBy(() -> service.assignToParent(STUDENT_ID, PARENT_ID))
                     .isInstanceOf(ConflictException.class)
-                    .hasMessageContaining("Student already set parent");
+                    .hasMessageContaining("Student by id: " + STUDENT_ID + " already has parent");
 
             verify(studentRepository, never()).save(any());
         }
@@ -397,7 +397,7 @@ class StudentServiceTest {
 
             assertThatThrownBy(() -> service.assignToParent(STUDENT_ID, PARENT_ID))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("Parent not found: " + PARENT_ID);
+                    .hasMessageContaining("Parent by id: " + PARENT_ID + " not found");
 
             verifyNoInteractions(studentRepository);
         }
@@ -411,7 +411,7 @@ class StudentServiceTest {
 
             assertThatThrownBy(() -> service.assignToParent(STUDENT_ID, PARENT_ID))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("Student not found: " + STUDENT_ID);
+                    .hasMessageContaining("Student by id: " + STUDENT_ID + " not found");
         }
     }
 
@@ -442,7 +442,7 @@ class StudentServiceTest {
 
             assertThatThrownBy(() -> service.unassignFromParent(STUDENT_ID))
                     .isInstanceOf(ConflictException.class)
-                    .hasMessageContaining("Student has no parent");
+                    .hasMessageContaining("Student by id: " + STUDENT_ID + " has no parent");
 
             verify(studentRepository, never()).save(any());
         }
@@ -454,7 +454,7 @@ class StudentServiceTest {
 
             assertThatThrownBy(() -> service.unassignFromParent(STUDENT_ID))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("Student not found: " + STUDENT_ID);
+                    .hasMessageContaining("Student by id: " + STUDENT_ID + " not found");
         }
     }
 
@@ -465,6 +465,8 @@ class StudentServiceTest {
         @Test
         @DisplayName("успешно вызывает удаление из репозитория по id")
         void success() {
+            when(studentRepository.existsById(STUDENT_ID)).thenReturn(true);
+
             service.delete(STUDENT_ID);
 
             verify(studentRepository).deleteById(STUDENT_ID);
@@ -479,6 +481,7 @@ class StudentServiceTest {
         @DisplayName("если в событии есть роль STUDENT — запускает удаление")
         void roleMatches_callsDelete() {
             UserDeletedEvent event = new UserDeletedEvent(STUDENT_ID, Set.of(UserRole.STUDENT, UserRole.PARENT));
+            when(studentRepository.existsById(STUDENT_ID)).thenReturn(true);
 
             service.handleUserDelete(event);
 

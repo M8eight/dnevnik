@@ -51,23 +51,23 @@ class ParentServiceTest {
             UserResponse userResponse = UserResponse.builder().id(USER_ID).build();
             ParentResponse expectedResponse = new ParentResponse(userResponse, Collections.emptySet());
 
-            when(parentRepository.findWithUserById(USER_ID)).thenReturn(Optional.of(parent));
+            when(parentRepository.findWithUserById(PARENT_ID)).thenReturn(Optional.of(parent));
             when(parentMapper.toResponse(parent)).thenReturn(expectedResponse);
 
-            ParentResponse result = service.getWithUserById(USER_ID);
+            ParentResponse result = service.getWithUserById(PARENT_ID);
 
             assertThat(result).isNotNull().isEqualTo(expectedResponse);
-            verify(parentRepository).findWithUserById(USER_ID);
+            verify(parentRepository).findWithUserById(PARENT_ID);
         }
 
         @Test
         @DisplayName("родитель не найден — бросает NotFoundException")
         void notFound_throwsException() {
-            when(parentRepository.findWithUserById(USER_ID)).thenReturn(Optional.empty());
+            when(parentRepository.findWithUserById(PARENT_ID)).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> service.getWithUserById(USER_ID))
+            assertThatThrownBy(() -> service.getWithUserById(PARENT_ID))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("Parent not found: " + USER_ID);
+                    .hasMessageContaining("Parent by id: " + PARENT_ID + " not found");
 
             verifyNoInteractions(parentMapper);
         }
@@ -99,7 +99,7 @@ class ParentServiceTest {
 
             assertThatThrownBy(() -> service.getDetailsById(PARENT_ID))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("Parent not found: " + PARENT_ID);
+                    .hasMessageContaining("Parent by id: " + PARENT_ID + " not found");
 
             verifyNoInteractions(parentMapper);
         }
@@ -158,7 +158,7 @@ class ParentServiceTest {
 
             assertThatThrownBy(() -> service.create(USER_ID, details))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("User not found: " + USER_ID);
+                    .hasMessageContaining("User by id: " + USER_ID + " not found");
 
             verifyNoInteractions(parentMapper, parentRepository);
         }
@@ -189,7 +189,7 @@ class ParentServiceTest {
 
             assertThatThrownBy(() -> service.update(USER_ID, details))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("User not found: " + USER_ID);
+                    .hasMessageContaining("User by id: " + USER_ID + " not found");
 
             verify(parentRepository, never()).existsById(any());
         }
@@ -203,7 +203,7 @@ class ParentServiceTest {
 
             assertThatThrownBy(() -> service.update(USER_ID, details))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("Parent not found: " + USER_ID);
+                    .hasMessageContaining("Parent by id: " + USER_ID + " not found");
         }
     }
 
@@ -214,6 +214,8 @@ class ParentServiceTest {
         @Test
         @DisplayName("успешно вызывает удаление из репозитория по id")
         void success() {
+            when(parentRepository.existsById(PARENT_ID)).thenReturn(true);
+
             service.delete(PARENT_ID);
 
             verify(parentRepository).deleteById(PARENT_ID);
@@ -228,6 +230,7 @@ class ParentServiceTest {
         @DisplayName("если в событии есть роль PARENT — запускает удаление")
         void roleMatches_callsDelete() {
             UserDeletedEvent event = new UserDeletedEvent(PARENT_ID, Set.of(UserRole.PARENT, UserRole.STUDENT));
+            when(parentRepository.existsById(PARENT_ID)).thenReturn(true);
 
             service.handleUserDelete(event);
 

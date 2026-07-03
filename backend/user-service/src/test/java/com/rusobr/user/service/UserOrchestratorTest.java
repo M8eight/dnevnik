@@ -172,7 +172,7 @@ class UserOrchestratorTest {
 
             assertThatThrownBy(() -> orchestrator.update(USER_ID, request))
                     .isInstanceOf(ConflictException.class)
-                    .hasMessageContaining("Username already exists");
+                    .hasMessageContaining("Username taken already exists");
 
             verifyNoInteractions(keycloakRestClient, userDbService);
         }

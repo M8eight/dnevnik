@@ -74,7 +74,7 @@ class TeacherServiceTest {
 
             assertThatThrownBy(() -> service.getWithUserById(TEACHER_ID))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("Teacher with id " + TEACHER_ID + " not found");
+                    .hasMessageContaining("Teacher by id: " + TEACHER_ID + " not found");
 
             verifyNoInteractions(teacherMapper);
         }
@@ -106,7 +106,7 @@ class TeacherServiceTest {
 
             assertThatThrownBy(() -> service.getDetailsById(TEACHER_ID))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("Teacher not found: " + TEACHER_ID);
+                    .hasMessageContaining("Teacher by id: " + TEACHER_ID + " not found");
 
             verifyNoInteractions(teacherMapper);
         }
@@ -214,7 +214,7 @@ class TeacherServiceTest {
 
             assertThatThrownBy(() -> service.create(USER_ID, details))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("User not found: " + USER_ID);
+                    .hasMessageContaining("User by id: " + USER_ID + " not found");
 
             verifyNoInteractions(teacherMapper, teacherRepository);
         }
@@ -277,7 +277,7 @@ class TeacherServiceTest {
 
             assertThatThrownBy(() -> service.update(USER_ID, details))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("User not found: " + USER_ID);
+                    .hasMessageContaining("User by id: " + USER_ID + " not found");
 
             verify(teacherRepository, never()).findById(any());
         }
@@ -291,7 +291,7 @@ class TeacherServiceTest {
 
             assertThatThrownBy(() -> service.update(USER_ID, details))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("Teacher not found: " + USER_ID);
+                    .hasMessageContaining("Teacher by id: " + USER_ID + " not found");
         }
     }
 
@@ -302,6 +302,8 @@ class TeacherServiceTest {
         @Test
         @DisplayName("успешно вызывает удаление из репозитория по id")
         void success() {
+            when(teacherRepository.existsById(TEACHER_ID)).thenReturn(true);
+
             service.delete(TEACHER_ID);
 
             verify(teacherRepository).deleteById(TEACHER_ID);
@@ -316,6 +318,7 @@ class TeacherServiceTest {
         @DisplayName("если в событии есть роль TEACHER — запускает удаление")
         void roleMatches_callsDelete() {
             UserDeletedEvent event = new UserDeletedEvent(TEACHER_ID, Set.of(UserRole.TEACHER, UserRole.STUDENT));
+            when(teacherRepository.existsById(TEACHER_ID)).thenReturn(true);
 
             service.handleUserDelete(event);
 

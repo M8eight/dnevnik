@@ -13,6 +13,7 @@ import com.rusobr.user.web.dto.teacher.TeacherDetails;
 import com.rusobr.user.web.dto.teacher.TeacherResponse;
 import com.rusobr.user.web.dto.user.UserResponse;
 import com.rusobr.user.web.exception.ConflictException;
+import com.rusobr.user.web.exception.ExceptionCode;
 import com.rusobr.user.web.exception.NotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -81,7 +82,7 @@ public class StudentControllerTest {
     @DisplayName("GET /students/{id}/details — 404 если студент не найден")
     void getDetailsById_ShouldReturn404_WhenNotFound() throws Exception {
         when(studentService.getDetailsById(STUDENT_ID))
-                .thenThrow(new NotFoundException("Student not found: " + STUDENT_ID));
+                .thenThrow(new NotFoundException("Student not found: " + STUDENT_ID, ExceptionCode.STUDENT_NOT_FOUND));
 
         mockMvc.perform(get("/api/v1/students/{id}/details", STUDENT_ID))
                 .andExpect(status().isNotFound())
@@ -180,7 +181,7 @@ public class StudentControllerTest {
     @Test
     @DisplayName("PATCH /students/{studentId}/assign/{parentId} — 404 если студент не найден")
     void assignToParent_ShouldReturn404_WhenStudentNotFound() throws Exception {
-        doThrow(new NotFoundException("Student not found: " + STUDENT_ID))
+        doThrow(new NotFoundException("Student not found: " + STUDENT_ID, ExceptionCode.STUDENT_NOT_FOUND))
                 .when(studentService).assignToParent(STUDENT_ID, PARENT_ID);
 
         mockMvc.perform(patch("/api/v1/students/{studentId}/assign/{parentId}", STUDENT_ID, PARENT_ID))
@@ -191,7 +192,7 @@ public class StudentControllerTest {
     @Test
     @DisplayName("PATCH /students/{studentId}/assign/{parentId} — 404 если родитель не найден")
     void assignToParent_ShouldReturn404_WhenParentNotFound() throws Exception {
-        doThrow(new NotFoundException("Parent not found: " + PARENT_ID))
+        doThrow(new NotFoundException("Parent not found: " + PARENT_ID, ExceptionCode.PARENT_NOT_FOUND))
                 .when(studentService).assignToParent(STUDENT_ID, PARENT_ID);
 
         mockMvc.perform(patch("/api/v1/students/{studentId}/assign/{parentId}", STUDENT_ID, PARENT_ID))
@@ -202,7 +203,7 @@ public class StudentControllerTest {
     @Test
     @DisplayName("PATCH /students/{studentId}/assign/{parentId} — 409 если студент уже привязан")
     void assignToParent_ShouldReturn409_WhenAlreadyAssigned() throws Exception {
-        doThrow(new ConflictException("Student already has parent"))
+        doThrow(new ConflictException("Student already has parent", ExceptionCode.STUDENT_ALREADY_HAS_PARENT))
                 .when(studentService).assignToParent(STUDENT_ID, PARENT_ID);
 
         mockMvc.perform(patch("/api/v1/students/{studentId}/assign/{parentId}", STUDENT_ID, PARENT_ID))
@@ -228,7 +229,7 @@ public class StudentControllerTest {
     @Test
     @DisplayName("PATCH /students/{studentId}/unassign — 404 если студент не найден")
     void unassignFromParent_ShouldReturn404_WhenStudentNotFound() throws Exception {
-        doThrow(new NotFoundException("Student not found: " + STUDENT_ID))
+        doThrow(new NotFoundException("Student not found: " + STUDENT_ID, ExceptionCode.STUDENT_NOT_FOUND))
                 .when(studentService).unassignFromParent(STUDENT_ID);
 
         mockMvc.perform(patch("/api/v1/students/{studentId}/unassign", STUDENT_ID))
@@ -239,7 +240,7 @@ public class StudentControllerTest {
     @Test
     @DisplayName("PATCH /students/{studentId}/unassign — 409 если у студента нет родителя")
     void unassignFromParent_ShouldReturn409_WhenNoParent() throws Exception {
-        doThrow(new ConflictException("Student has no parent"))
+        doThrow(new ConflictException("Student has no parent", ExceptionCode.STUDENT_HAS_NO_PARENT))
                 .when(studentService).unassignFromParent(STUDENT_ID);
 
         mockMvc.perform(patch("/api/v1/students/{studentId}/unassign", STUDENT_ID))
@@ -280,7 +281,7 @@ public class StudentControllerTest {
     @DisplayName("GET /students/{id}/with-class — 404 если студент не найден")
     void getWithClassById_ShouldReturn404_WhenNotFound() throws Exception {
         when(studentService.getWithClassById(STUDENT_ID))
-                .thenThrow(new NotFoundException("Student not found"));
+                .thenThrow(new NotFoundException("Student not found", ExceptionCode.STUDENT_NOT_FOUND));
 
         mockMvc.perform(get("/api/v1/students/{id}/with-class", STUDENT_ID))
                 .andExpect(status().isNotFound())
