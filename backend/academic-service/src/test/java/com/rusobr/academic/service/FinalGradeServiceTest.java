@@ -133,7 +133,7 @@ class FinalGradeServiceTest {
             FinalGrade savedGrade = FinalGrade.builder().id(GRADE_ID).teachingAssignment(assignment).build();
             FinalGradeCreateResponse expectedResponse = mock(FinalGradeCreateResponse.class);
 
-            when(academicPeriodRepository.findAcademicPeriodsByAcademicYearId(ACADEMIC_YEAR_ID)).thenReturn(List.of(closedPeriod));
+            when(academicPeriodRepository.getAcademicPeriodsByAcademicYearId(ACADEMIC_YEAR_ID)).thenReturn(List.of(closedPeriod));
             when(teachingAssignmentRepository.findById(ASSIGNMENT_ID)).thenReturn(Optional.of(assignment));
             when(finalGradeMapper.toFinalGrade(request)).thenReturn(mappedGrade);
             when(finalGradeRepository.save(mappedGrade)).thenReturn(savedGrade);
@@ -149,12 +149,12 @@ class FinalGradeServiceTest {
         @Test
         @DisplayName("академический период не найден — бросает ConflictException")
         void academicPeriodNotFound_throwsConflictException() {
-            when(academicPeriodRepository.findAcademicPeriodsByAcademicYearId(ACADEMIC_YEAR_ID)).thenReturn(Collections.emptyList());
+            when(academicPeriodRepository.getAcademicPeriodsByAcademicYearId(ACADEMIC_YEAR_ID)).thenReturn(Collections.emptyList());
 
             assertThatThrownBy(() -> service.create(request))
                     .isInstanceOf(ConflictException.class)
                     // ИСПРАВЛЕНО: Текст приведен в соответствие с сообщением из FinalGradeService.create()
-                    .hasMessageContaining("Academic periods not found by academic year id " + ACADEMIC_YEAR_ID);
+                    .hasMessageContaining("Academic periods by id: " + ACADEMIC_YEAR_ID + " not found");
 
             verifyNoInteractions(teachingAssignmentRepository, finalGradeRepository);
         }
@@ -163,11 +163,11 @@ class FinalGradeServiceTest {
         @DisplayName("академический период не закрыт — бросает ConflictException")
         void academicPeriodNotClosed_throwsConflictException() {
             AcademicPeriod openPeriod = AcademicPeriod.builder().closed(false).build();
-            when(academicPeriodRepository.findAcademicPeriodsByAcademicYearId(ACADEMIC_YEAR_ID)).thenReturn(List.of(openPeriod));
+            when(academicPeriodRepository.getAcademicPeriodsByAcademicYearId(ACADEMIC_YEAR_ID)).thenReturn(List.of(openPeriod));
 
             assertThatThrownBy(() -> service.create(request))
                     .isInstanceOf(ConflictException.class)
-                    .hasMessageContaining("Academic period is not closed");
+                    .hasMessageContaining("is not closed");
 
             verifyNoInteractions(teachingAssignmentRepository, finalGradeRepository);
         }
@@ -176,12 +176,12 @@ class FinalGradeServiceTest {
         @DisplayName("привязка преподавателя (TeachingAssignment) не найдена — бросает NotFoundException")
         void assignmentNotFound_throwsNotFoundException() {
             AcademicPeriod closedPeriod = AcademicPeriod.builder().closed(true).build();
-            when(academicPeriodRepository.findAcademicPeriodsByAcademicYearId(ACADEMIC_YEAR_ID)).thenReturn(List.of(closedPeriod));
+            when(academicPeriodRepository.getAcademicPeriodsByAcademicYearId(ACADEMIC_YEAR_ID)).thenReturn(List.of(closedPeriod));
             when(teachingAssignmentRepository.findById(ASSIGNMENT_ID)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> service.create(request))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("Teaching assignment not found with id " + ASSIGNMENT_ID);
+                    .hasMessageContaining("Teaching assignment with id: " + ASSIGNMENT_ID);
 
             verifyNoInteractions(finalGradeRepository);
         }
@@ -203,7 +203,7 @@ class FinalGradeServiceTest {
 
             // ИСПРАВЛЕНО: Вызываем findWithAcademicYearById вместо findById
             when(finalGradeRepository.findWithAcademicYearById(GRADE_ID)).thenReturn(Optional.of(grade));
-            when(academicPeriodRepository.findAcademicPeriodsByAcademicYearId(ACADEMIC_YEAR_ID)).thenReturn(List.of(closedPeriod));
+            when(academicPeriodRepository.getAcademicPeriodsByAcademicYearId(ACADEMIC_YEAR_ID)).thenReturn(List.of(closedPeriod));
 
             service.delete(GRADE_ID);
 
@@ -218,7 +218,7 @@ class FinalGradeServiceTest {
 
             assertThatThrownBy(() -> service.delete(GRADE_ID))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("Final grade not found with id " + GRADE_ID);
+                    .hasMessageContaining("Final grade with id: " + GRADE_ID);
 
             verifyNoInteractions(academicPeriodRepository);
             verify(finalGradeRepository, never()).deleteById(any());
@@ -233,11 +233,11 @@ class FinalGradeServiceTest {
                     .build();
 
             when(finalGradeRepository.findWithAcademicYearById(GRADE_ID)).thenReturn(Optional.of(grade));
-            when(academicPeriodRepository.findAcademicPeriodsByAcademicYearId(1L)).thenReturn(Collections.emptyList());
+            when(academicPeriodRepository.getAcademicPeriodsByAcademicYearId(1L)).thenReturn(Collections.emptyList());
 
             assertThatThrownBy(() -> service.delete(GRADE_ID))
                     .isInstanceOf(ConflictException.class)
-                    .hasMessageContaining("Academic period not found with school year 1");
+                    .hasMessageContaining("Academic periods by academicYearId: " + 1L + " not found");
 
             verify(finalGradeRepository, never()).deleteById(any());
         }

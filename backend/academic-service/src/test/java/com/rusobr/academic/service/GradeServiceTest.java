@@ -2,6 +2,7 @@ package com.rusobr.academic.service;
 
 import com.rusobr.academic.application.mapper.GradeMapper;
 import com.rusobr.academic.application.mapper.LessonInstanceMapper;
+import com.rusobr.academic.application.service.AcademicPeriodService;
 import com.rusobr.academic.application.service.GradeService;
 import com.rusobr.academic.domain.enums.GradeType;
 import com.rusobr.academic.domain.model.AcademicPeriod;
@@ -39,6 +40,7 @@ class GradeServiceTest {
     @Mock private AcademicPeriodRepository academicPeriodRepository;
     @Mock private LessonInstanceRepository lessonInstanceRepository;
     @Mock private LessonInstanceMapper lessonInstanceMapper;
+    @Mock private AcademicPeriodService academicPeriodService;
 
     @InjectMocks private GradeService service;
 
@@ -89,7 +91,7 @@ class GradeServiceTest {
                     .build();
 
             // Имитируем среднее число, которое требует округления (например, 4.3333)
-            when(academicPeriodRepository.findById(PERIOD_ID)).thenReturn(Optional.of(period));
+            when(academicPeriodService.getById(PERIOD_ID)).thenReturn(period);
             when(gradeRepository.getAverageGrade(STUDENT_ID, period.getStartDate(), period.getEndDate()))
                     .thenReturn(4.3333333);
 
@@ -102,7 +104,7 @@ class GradeServiceTest {
         @DisplayName("если оценок нет — возвращает null")
         void returnsNull_whenNoGrades() {
             AcademicPeriod period = AcademicPeriod.builder().build();
-            when(academicPeriodRepository.findById(PERIOD_ID)).thenReturn(Optional.of(period));
+            when(academicPeriodService.getById(PERIOD_ID)).thenReturn(period);
             when(gradeRepository.getAverageGrade(anyLong(), any(), any())).thenReturn(0.0);
 
             Double result = service.getAverageByPeriod(STUDENT_ID, PERIOD_ID);
@@ -126,7 +128,7 @@ class GradeServiceTest {
             CreateGradeResponse expectedResponse = mock(CreateGradeResponse.class);
 
             when(lessonInstanceRepository.findById(LESSON_ID)).thenReturn(Optional.of(lesson));
-            when(academicPeriodRepository.findByDate(DATE)).thenReturn(Optional.of(period));
+            when(academicPeriodService.getByDate(DATE)).thenReturn(period);
             when(gradeMapper.toGrade(request)).thenReturn(grade);
             when(gradeRepository.save(grade)).thenReturn(grade);
             when(lessonInstanceMapper.toLessonInstanceDto(lesson)).thenReturn(lessonDto);
@@ -146,11 +148,11 @@ class GradeServiceTest {
             AcademicPeriod period = AcademicPeriod.builder().closed(true).build();
 
             when(lessonInstanceRepository.findById(LESSON_ID)).thenReturn(Optional.of(lesson));
-            when(academicPeriodRepository.findByDate(DATE)).thenReturn(Optional.of(period));
+            when(academicPeriodService.getByDate(DATE)).thenReturn(period);
 
             assertThatThrownBy(() -> service.create(request))
                     .isInstanceOf(ConflictException.class)
-                    .hasMessageContaining("Academic period is already closed");
+                    .hasMessageContaining("is already closed");
         }
     }
 
@@ -166,7 +168,7 @@ class GradeServiceTest {
             AcademicPeriod period = AcademicPeriod.builder().closed(false).build();
 
             when(gradeRepository.findWithLessonInstanceById(GRADE_ID)).thenReturn(Optional.of(grade));
-            when(academicPeriodRepository.findByDate(DATE)).thenReturn(Optional.of(period));
+            when(academicPeriodService.getByDate(DATE)).thenReturn(period);
 
             service.delete(GRADE_ID);
 
@@ -181,7 +183,7 @@ class GradeServiceTest {
             AcademicPeriod period = AcademicPeriod.builder().closed(true).build();
 
             when(gradeRepository.findWithLessonInstanceById(GRADE_ID)).thenReturn(Optional.of(grade));
-            when(academicPeriodRepository.findByDate(DATE)).thenReturn(Optional.of(period));
+            when(academicPeriodService.getByDate(DATE)).thenReturn(period);
 
             assertThatThrownBy(() -> service.delete(GRADE_ID))
                     .isInstanceOf(ConflictException.class);

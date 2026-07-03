@@ -11,6 +11,7 @@ import com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodResponse;
 import com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodUpdateRequest;
 import com.rusobr.academic.web.dto.academicYear.AcademicYearResponse;
 import com.rusobr.academic.web.exception.ConflictException;
+import com.rusobr.academic.web.exception.ExceptionCode;
 import com.rusobr.academic.web.exception.NotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,6 +23,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -71,7 +74,7 @@ class AcademicPeriodServiceTest {
         period.setId(PERIOD_ID);
         period.setName("Q1");
         period.setAcademicYear(buildAcademicYear());
-        period.setClosed(isClosed);
+        ReflectionTestUtils.setField(period, "closed", isClosed);
         period.setStartDate(LocalDate.of(2024, 9, 1));
         period.setEndDate(LocalDate.of(2024, 12, 31));
         return period;
@@ -185,7 +188,7 @@ class AcademicPeriodServiceTest {
 
         assertThatThrownBy(() -> academicPeriodService.openPeriod(PERIOD_ID))
                 .isInstanceOf(ConflictException.class)
-                .hasMessage("Academic period is already open");
+                .hasMessage("Academic period is already closed");
     }
 
     @Test
@@ -221,7 +224,7 @@ class AcademicPeriodServiceTest {
 
         assertThatThrownBy(() -> academicPeriodService.closePeriod(PERIOD_ID))
                 .isInstanceOf(ConflictException.class)
-                .hasMessage("Academic period is already closed");
+                .hasMessage("Academic period is already open");
     }
 
     @Test
@@ -295,7 +298,7 @@ class AcademicPeriodServiceTest {
 
         assertThatThrownBy(() -> academicPeriodService.update(PERIOD_ID, buildUpdateRequest()))
                 .isInstanceOf(ConflictException.class)
-                .hasMessage("Academic period is closed");
+                .hasMessage("Academic period is already closed");
     }
 
     @Test

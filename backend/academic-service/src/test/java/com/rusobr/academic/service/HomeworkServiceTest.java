@@ -1,7 +1,9 @@
 package com.rusobr.academic.service;
 
 import com.rusobr.academic.application.mapper.HomeworkMapper;
+import com.rusobr.academic.application.service.AcademicPeriodService;
 import com.rusobr.academic.application.service.HomeworkService;
+import com.rusobr.academic.application.service.LessonInstanceService;
 import com.rusobr.academic.domain.model.AcademicPeriod;
 import com.rusobr.academic.domain.model.Homework;
 import com.rusobr.academic.domain.model.LessonInstance;
@@ -38,9 +40,10 @@ import static org.mockito.Mockito.*;
 class HomeworkServiceTest {
 
     @Mock private HomeworkRepository homeworkRepository;
-    @Mock private LessonInstanceRepository lessonInstanceRepository;
     @Mock private HomeworkMapper homeworkMapper;
     @Mock private AcademicPeriodRepository academicPeriodRepository;
+    @Mock private AcademicPeriodService academicPeriodService;
+    @Mock private LessonInstanceService lessonInstanceService;
 
     @InjectMocks private HomeworkService service;
 
@@ -109,8 +112,8 @@ class HomeworkServiceTest {
             Homework savedHw = Homework.builder().id(HW_ID).text(request.text()).build();
             HomeworkResponse expectedResponse = mock(HomeworkResponse.class);
 
-            when(lessonInstanceRepository.findById(LESSON_ID)).thenReturn(Optional.of(lesson));
-            when(academicPeriodRepository.findByDate(DATE)).thenReturn(Optional.of(period));
+            when(lessonInstanceService.getById(LESSON_ID)).thenReturn(lesson);
+            when(academicPeriodService.getByDate(DATE)).thenReturn(period);
             when(homeworkRepository.save(any(Homework.class))).thenReturn(savedHw);
             when(homeworkMapper.toHomeworkResponse(savedHw)).thenReturn(expectedResponse);
 
@@ -126,12 +129,12 @@ class HomeworkServiceTest {
             LessonInstance lesson = LessonInstance.builder().lessonDate(DATE).build();
             AcademicPeriod closedPeriod = AcademicPeriod.builder().closed(true).build();
 
-            when(lessonInstanceRepository.findById(LESSON_ID)).thenReturn(Optional.of(lesson));
-            when(academicPeriodRepository.findByDate(DATE)).thenReturn(Optional.of(closedPeriod));
+            when(lessonInstanceService.getById(LESSON_ID)).thenReturn(lesson);
+            when(academicPeriodService.getByDate(DATE)).thenReturn(closedPeriod);
 
             assertThatThrownBy(() -> service.create(request))
                     .isInstanceOf(ConflictException.class)
-                    .hasMessageContaining("Academic Period is closed");
+                    .hasMessageContaining("is closed");
         }
     }
 
@@ -146,7 +149,7 @@ class HomeworkServiceTest {
             AcademicPeriod openPeriod = AcademicPeriod.builder().closed(false).build();
 
             when(homeworkRepository.findWithLessonInstanceById(HW_ID)).thenReturn(Optional.of(homework));
-            when(academicPeriodRepository.findByDate(DATE)).thenReturn(Optional.of(openPeriod));
+            when(academicPeriodService.getByDate(DATE)).thenReturn(openPeriod);
 
             service.delete(HW_ID);
 
@@ -170,7 +173,7 @@ class HomeworkServiceTest {
             AcademicPeriod closedPeriod = AcademicPeriod.builder().closed(true).build();
 
             when(homeworkRepository.findWithLessonInstanceById(HW_ID)).thenReturn(Optional.of(homework));
-            when(academicPeriodRepository.findByDate(DATE)).thenReturn(Optional.of(closedPeriod));
+            when(academicPeriodService.getByDate(DATE)).thenReturn(closedPeriod);
 
             assertThatThrownBy(() -> service.delete(HW_ID))
                     .isInstanceOf(ConflictException.class);

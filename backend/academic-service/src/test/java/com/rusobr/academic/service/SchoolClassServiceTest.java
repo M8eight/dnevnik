@@ -17,6 +17,7 @@ import com.rusobr.academic.web.dto.schoolClass.SchoolClassRequest;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassResponse;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassUpdateRequest;
 import com.rusobr.academic.web.exception.ConflictException;
+import com.rusobr.academic.web.exception.ExceptionCode;
 import com.rusobr.academic.web.exception.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -69,7 +70,6 @@ class SchoolClassServiceTest {
         AcademicYear ay = new AcademicYear();
         ay.setId(ACADEMIC_YEAR_ID);
         ay.setName("2026-2027");
-        ay.setIsActive(true);
         return ay;
     }
 
@@ -122,7 +122,7 @@ class SchoolClassServiceTest {
 
             assertThatThrownBy(() -> service.findById(CLASS_ID))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("SchoolClass Not Found by id: " + CLASS_ID);
+                    .hasMessageContaining("School class with id ");
 
             verify(schoolClassRepository).findById(CLASS_ID);
         }
@@ -222,7 +222,7 @@ class SchoolClassServiceTest {
 
             assertThatThrownBy(() -> service.findWithStudentsById(CLASS_ID))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("SchoolClass Not Found by id: " + CLASS_ID);
+                    .hasMessageContaining("School class with id ");
         }
     }
 
@@ -251,7 +251,7 @@ class SchoolClassServiceTest {
 
             assertThatThrownBy(() -> service.findByStudent(STUDENT_ID))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("SchoolClass not found for student: " + STUDENT_ID);
+                    .hasMessageContaining("School class with studentId ");
         }
     }
 
@@ -356,7 +356,7 @@ class SchoolClassServiceTest {
 
             assertThatThrownBy(() -> service.create(request))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("Academic year not found");
+                    .hasMessageContaining("Academic year with id ");
 
             verify(schoolClassRepository, never()).save(any());
         }
@@ -366,13 +366,13 @@ class SchoolClassServiceTest {
         void conflict_academicYearInactive() {
             SchoolClassRequest request = buildRequest();
             AcademicYear inactiveYear = buildAcademicYear();
-            inactiveYear.setIsActive(false);
+            ReflectionTestUtils.setField(inactiveYear, "closed", true);
 
             when(academicYearRepository.findById(ACADEMIC_YEAR_ID)).thenReturn(Optional.of(inactiveYear));
 
             assertThatThrownBy(() -> service.create(request))
                     .isInstanceOf(ConflictException.class)
-                    .hasMessageContaining("Academic year is not active");
+                    .hasMessageContaining("Academic year is closed");
 
             verify(schoolClassRepository, never()).save(any());
         }
@@ -402,7 +402,7 @@ class SchoolClassServiceTest {
         @Test
         @DisplayName("бросает исключение если учитель не найден")
         void notFound_teacher() {
-            when(userClient.getTeacherById(TEACHER_ID)).thenThrow(new NotFoundException("Teacher not found"));
+            when(userClient.getTeacherById(TEACHER_ID)).thenThrow(new NotFoundException("Teacher not found", ExceptionCode.USER_SERVICE_TEACHER_NOT_FOUND));
 
             assertThatThrownBy(() -> service.assignTeacher(CLASS_ID, TEACHER_ID))
                     .isInstanceOf(NotFoundException.class);
@@ -418,7 +418,7 @@ class SchoolClassServiceTest {
 
             assertThatThrownBy(() -> service.assignTeacher(CLASS_ID, TEACHER_ID))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("SchoolClass Not Found by id: " + CLASS_ID);
+                    .hasMessageContaining("School class with id ");
         }
 
         @Test
@@ -426,7 +426,7 @@ class SchoolClassServiceTest {
         void conflict_academicYearInactive() {
             SchoolClass schoolClass = SchoolClass.builder().id(CLASS_ID).build();
             AcademicYear inactiveYear = buildAcademicYear();
-            inactiveYear.setIsActive(false);
+            ReflectionTestUtils.setField(inactiveYear, "closed", true);
             schoolClass.setAcademicYear(inactiveYear);
 
             when(userClient.getTeacherById(TEACHER_ID)).thenReturn(mock(TeacherResponse.class));
@@ -434,7 +434,7 @@ class SchoolClassServiceTest {
 
             assertThatThrownBy(() -> service.assignTeacher(CLASS_ID, TEACHER_ID))
                     .isInstanceOf(ConflictException.class)
-                    .hasMessageContaining("Academic year is not active");
+                    .hasMessageContaining("Academic year is closed");
         }
     }
 
@@ -469,7 +469,7 @@ class SchoolClassServiceTest {
 
             assertThatThrownBy(() -> service.update(CLASS_ID, request))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("SchoolClass Not Found by id: " + CLASS_ID);
+                    .hasMessageContaining("School class with id ");
         }
 
         @Test
@@ -478,14 +478,14 @@ class SchoolClassServiceTest {
             SchoolClassUpdateRequest request = buildUpdateRequest();
             SchoolClass schoolClass = SchoolClass.builder().id(CLASS_ID).build();
             AcademicYear inactiveYear = buildAcademicYear();
-            inactiveYear.setIsActive(false);
+            ReflectionTestUtils.setField(inactiveYear, "closed", true);
             schoolClass.setAcademicYear(inactiveYear);
 
             when(schoolClassRepository.findWithAcademicYearById(CLASS_ID)).thenReturn(Optional.of(schoolClass));
 
             assertThatThrownBy(() -> service.update(CLASS_ID, request))
                     .isInstanceOf(ConflictException.class)
-                    .hasMessageContaining("Academic year is not active");
+                    .hasMessageContaining("Academic year is closed");
         }
     }
 
@@ -513,7 +513,7 @@ class SchoolClassServiceTest {
 
             assertThatThrownBy(() -> service.delete(CLASS_ID))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("SchoolClass Not Found by id: " + CLASS_ID);
+                    .hasMessageContaining("School class with id ");
 
             verify(schoolClassRepository, never()).delete(any());
         }
@@ -523,14 +523,14 @@ class SchoolClassServiceTest {
         void conflict_academicYearInactive() {
             SchoolClass schoolClass = SchoolClass.builder().id(CLASS_ID).build();
             AcademicYear inactiveYear = buildAcademicYear();
-            inactiveYear.setIsActive(false);
+            ReflectionTestUtils.setField(inactiveYear, "closed", true);
             schoolClass.setAcademicYear(inactiveYear);
 
             when(schoolClassRepository.findById(CLASS_ID)).thenReturn(Optional.of(schoolClass));
 
             assertThatThrownBy(() -> service.delete(CLASS_ID))
                     .isInstanceOf(ConflictException.class)
-                    .hasMessageContaining("Academic year is not active");
+                    .hasMessageContaining("Academic year is closed");
 
             verify(schoolClassRepository, never()).delete(any());
         }

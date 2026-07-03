@@ -7,6 +7,7 @@ import com.rusobr.academic.infrastructure.persistence.repository.AcademicYearRep
 import com.rusobr.academic.web.dto.academicYear.AcademicYearRequest;
 import com.rusobr.academic.web.dto.academicYear.AcademicYearResponse;
 import com.rusobr.academic.web.exception.ConflictException;
+import com.rusobr.academic.web.exception.ExceptionCode;
 import com.rusobr.academic.web.exception.NotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -47,7 +50,7 @@ class AcademicYearServiceTest {
         year.setDescription("Description");
         year.setStartDate(LocalDate.of(2024, 9, 1));
         year.setEndDate(LocalDate.of(2025, 5, 31));
-        year.setIsActive(isActive);
+        ReflectionTestUtils.setField(year, "closed", !isActive);
         return year;
     }
 
@@ -168,53 +171,73 @@ class AcademicYearServiceTest {
     }
 
     // ─────────────────────────────────────────────
-    // isActive
+    // open
     // ─────────────────────────────────────────────
 
     @Test
-    @DisplayName("isActive — возвращает true, если учебный год активен")
-    void isActive_ShouldReturnTrue_WhenYearIsActive() {
-        AcademicYear entity = buildAcademicYear(true);
+    @DisplayName("open — открывает закрытый учебный год")
+    void open_ShouldOpenYear_WhenYearIsClosed() {
+        AcademicYear entity = buildAcademicYear(false);
         when(academicYearRepository.findById(ACADEMIC_YEAR_ID)).thenReturn(Optional.of(entity));
 
-        boolean result = academicYearService.isActive(ACADEMIC_YEAR_ID);
+        academicYearService.open(ACADEMIC_YEAR_ID);
 
-        assertThat(result).isTrue();
+        assertThat(entity.isClosed()).isFalse();
     }
 
     @Test
-    @DisplayName("isActive — бросает NotFoundException, если учебный год не найден")
-    void isActive_ShouldThrowNotFoundException_WhenNotFound() {
+    @DisplayName("open — бросает ConflictException если год уже открыт")
+    void open_ShouldThrowConflictException_WhenAlreadyOpen() {
+        AcademicYear entity = buildAcademicYear(true);
+        when(academicYearRepository.findById(ACADEMIC_YEAR_ID)).thenReturn(Optional.of(entity));
+
+        assertThatThrownBy(() -> academicYearService.open(ACADEMIC_YEAR_ID))
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("Academic year is already open");
+    }
+
+    @Test
+    @DisplayName("open — бросает NotFoundException если год не найден")
+    void open_ShouldThrowNotFoundException_WhenNotFound() {
         when(academicYearRepository.findById(ACADEMIC_YEAR_ID)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> academicYearService.isActive(ACADEMIC_YEAR_ID))
+        assertThatThrownBy(() -> academicYearService.open(ACADEMIC_YEAR_ID))
                 .isInstanceOf(NotFoundException.class);
     }
 
     // ─────────────────────────────────────────────
-    // setActive
+    // close
     // ─────────────────────────────────────────────
 
     @Test
-    @DisplayName("setActive — успешно меняет статус активности")
-    void setActive_ShouldChangeStatus_WhenCurrentStatusIsDifferent() {
+    @DisplayName("close — закрывает открытый учебный год")
+    void close_ShouldCloseYear_WhenYearIsOpen() {
         AcademicYear entity = buildAcademicYear(true);
         when(academicYearRepository.findById(ACADEMIC_YEAR_ID)).thenReturn(Optional.of(entity));
 
-        academicYearService.setActive(ACADEMIC_YEAR_ID, false);
+        academicYearService.close(ACADEMIC_YEAR_ID);
 
-        assertThat(entity.getIsActive()).isFalse();
+        assertThat(entity.isClosed()).isTrue();
     }
 
     @Test
-    @DisplayName("setActive — бросает ConflictException, если статус уже соответствует запрашиваемому")
-    void setActive_ShouldThrowConflictException_WhenStatusIsAlreadySame() {
-        AcademicYear entity = buildAcademicYear(true);
+    @DisplayName("close — бросает ConflictException если год уже закрыт")
+    void close_ShouldThrowConflictException_WhenAlreadyClosed() {
+        AcademicYear entity = buildAcademicYear(false);
         when(academicYearRepository.findById(ACADEMIC_YEAR_ID)).thenReturn(Optional.of(entity));
 
-        assertThatThrownBy(() -> academicYearService.setActive(ACADEMIC_YEAR_ID, true))
+        assertThatThrownBy(() -> academicYearService.close(ACADEMIC_YEAR_ID))
                 .isInstanceOf(ConflictException.class)
-                .hasMessage("Academic year is already active");
+                .hasMessage("Academic year is already closed");
+    }
+
+    @Test
+    @DisplayName("close — бросает NotFoundException если год не найден")
+    void close_ShouldThrowNotFoundException_WhenNotFound() {
+        when(academicYearRepository.findById(ACADEMIC_YEAR_ID)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> academicYearService.close(ACADEMIC_YEAR_ID))
+                .isInstanceOf(NotFoundException.class);
     }
 
     // ─────────────────────────────────────────────

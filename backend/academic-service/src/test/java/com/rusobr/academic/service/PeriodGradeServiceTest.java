@@ -2,6 +2,7 @@ package com.rusobr.academic.service;
 
 import com.rusobr.academic.application.mapper.GradeMapper;
 import com.rusobr.academic.application.mapper.PeriodGradeMapper;
+import com.rusobr.academic.application.service.AcademicPeriodService;
 import com.rusobr.academic.application.service.PeriodGradeService;
 import com.rusobr.academic.application.service.TeachingAssignmentService;
 import com.rusobr.academic.domain.model.AcademicPeriod;
@@ -51,6 +52,7 @@ class PeriodGradeServiceTest {
     @Mock private TeachingAssignmentService teachingAssignmentService;
     @Mock private GradeRepository gradeRepository;
     @Mock private GradeMapper gradeMapper;
+    @Mock private AcademicPeriodService academicPeriodService;
 
     @InjectMocks private PeriodGradeService service;
 
@@ -117,7 +119,7 @@ class PeriodGradeServiceTest {
             StudentAverageProjection avgProjection = mock(StudentAverageProjection.class);
             StudentAverageDto avgDto = new StudentAverageDto(STUDENT_ID, 4.75);
 
-            when(academicPeriodRepository.findById(PERIOD_ID)).thenReturn(Optional.of(period));
+            when(academicPeriodService.getById(PERIOD_ID)).thenReturn(period);
             when(teachingAssignmentService.getStudentIdsByTeachingAssignmentId(ASSIGNMENT_ID)).thenReturn(List.of(STUDENT_ID));
             when(userClient.getBatchUsers(List.of(STUDENT_ID))).thenReturn(new BatchUserResponse(List.of(user), List.of()));
 
@@ -156,7 +158,7 @@ class PeriodGradeServiceTest {
             PeriodGrade savedGrade = PeriodGrade.builder().id(100L).value(5).build();
             PeriodGradeResponse response = mock(PeriodGradeResponse.class);
 
-            when(academicPeriodRepository.findById(PERIOD_ID)).thenReturn(Optional.of(period));
+            when(academicPeriodService.getById(PERIOD_ID)).thenReturn(period);
             when(teachingAssignmentRepository.findById(ASSIGNMENT_ID)).thenReturn(Optional.of(assignment));
             when(periodGradeRepository.save(any(PeriodGrade.class))).thenReturn(savedGrade);
             when(periodGradeMapper.toPeriodGradeResponse(savedGrade)).thenReturn(response);
@@ -171,11 +173,11 @@ class PeriodGradeServiceTest {
         @DisplayName("бросает ConflictException, если период закрыт")
         void closedPeriod_throwsException() {
             AcademicPeriod period = AcademicPeriod.builder().closed(true).build();
-            when(academicPeriodRepository.findById(PERIOD_ID)).thenReturn(Optional.of(period));
+            when(academicPeriodService.getById(PERIOD_ID)).thenReturn(period);
 
             assertThatThrownBy(() -> service.create(request))
                     .isInstanceOf(ConflictException.class)
-                    .hasMessageContaining("Period is already closed");
+                    .hasMessageContaining("is closed");
         }
     }
 

@@ -7,6 +7,7 @@ import com.rusobr.academic.web.dto.homework.HomeworkRequest;
 import com.rusobr.academic.web.dto.homework.HomeworkResponse;
 import com.rusobr.academic.web.dto.homework.HomeworkWithSubjectResponse;
 import com.rusobr.academic.web.dto.lessonInstance.LessonInstanceDto;
+import com.rusobr.academic.web.exception.ExceptionCode;
 import com.rusobr.academic.web.exception.NotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -122,7 +123,7 @@ public class HomeworkControllerTest {
     @Test
     @DisplayName("DELETE /homeworks/{id} — 404 when homework not found")
     void delete_ShouldReturn404_WhenNotFound() throws Exception {
-        doThrow(new NotFoundException("Homework with id " + HOMEWORK_ID + " not found"))
+        doThrow(new NotFoundException("Homework with id " + HOMEWORK_ID + " not found", ExceptionCode.HOMEWORK_NOT_FOUND))
                 .when(homeworkService).delete(HOMEWORK_ID);
 
         mockMvc.perform(delete("/api/v1/homeworks/{id}", HOMEWORK_ID))
