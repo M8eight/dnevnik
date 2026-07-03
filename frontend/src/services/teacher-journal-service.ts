@@ -1,5 +1,6 @@
 import api from "@/axios/axios";
 import type { AcademicYearResponse } from "./academic-year-service";
+import type { BatchUserResponse } from "./user-service";
 
 
 export interface StudentMetadata {
@@ -45,7 +46,7 @@ export interface TeacherJournalResponse {
         startDate: string;
         endDate: string;
     };
-    students: StudentMetadata[];
+    students: BatchUserResponse;
     lessonInstances: LessonInstanceDto[];
     studentsJournal: StudentJournalEntry[];
 }

@@ -19,9 +19,6 @@ interface GradePopoverProps {
   viewMode: ViewMode;
 }
 
-// Сколько "значков" (оценка/отметка вместе) показываем в самой ячейке,
-// прежде чем свернуть остальное в бейдж "+N". Подобрано под текущий
-// размер ячейки (min-w-16 / h-17.5) с уменьшенными кружками 22px.
 const MAX_VISIBLE_BADGES = 3;
 
 export default function GradePopover({
@@ -48,8 +45,6 @@ export default function GradePopover({
   const showAttendances = (viewMode === "ALL" || viewMode === "ATTENDANCE") ? attendances : [];
   const isEmpty = showGrades.length === 0 && showAttendances.length === 0;
 
-  // Единый список значков для отображения в ячейке: сначала оценки, потом посещаемость.
-  // При превышении лимита — обрезаем и считаем остаток для бейджа "+N".
   const allBadges = [
     ...showGrades.map((g) => ({ kind: "grade" as const, data: g })),
     ...showAttendances.map((a) => ({ kind: "attendance" as const, data: a })),
@@ -60,7 +55,6 @@ export default function GradePopover({
   const close = () => setOpen(false);
 
   const handleGradeClick = (value: number) => {
-    // Всегда добавляет новую оценку в список, не заменяет существующие.
     createGrade(
       { studentId, lessonInstanceId, academicPeriodId, value, weight: gradeWeight, gradeType },
       { onSuccess: close }
@@ -71,7 +65,6 @@ export default function GradePopover({
     createAttendance({ studentId, lessonInstanceId, status }, { onSuccess: close });
   };
 
-  // Компактный размер значков, когда их больше одного — чтобы 2-3 уместились в ряд без переполнения ячейки.
   const badgeSizeClass = visibleBadges.length > 1 ? "w-[22px] h-[22px] text-[12px]" : "w-[30px] h-[30px] text-[15px]";
 
   return (
@@ -129,7 +122,6 @@ export default function GradePopover({
 
       {!isReadOnly && (
         <PopoverContent className="w-57.5 p-3 rounded-2xl shadow-2xl border border-black/6 bg-white/95 backdrop-blur-xl flex flex-col gap-3">
-          {/* Что уже стоит на этом уроке — оценки и посещаемость вместе, как чипы с крестиком на удаление */}
           {!isEmpty && (
             <div className="space-y-1.5">
               <p className="text-[9px] font-extrabold uppercase tracking-[0.2em] text-black/30">
@@ -172,7 +164,6 @@ export default function GradePopover({
 
           {!isEmpty && <div className="h-px bg-black/6" />}
 
-          {/* Добавить ещё запись на этот урок — оценки и посещаемость в одном ряду */}
           <div className="space-y-1.5">
             <p className="text-[9px] font-extrabold uppercase tracking-[0.2em] text-black/30">
               {isEmpty ? "Поставить" : "Добавить ещё"}

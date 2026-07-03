@@ -34,7 +34,6 @@ const mapAttendanceStatus = (status?: string) => {
   if (status === "ABSENT") return "Н";
   if (status === "EXCUSED") return "ОП";
   if (status === "LATE") return "О";
-  if (status === "SICK") return "Б";
   return "";
 };
 
