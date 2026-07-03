@@ -1,24 +1,26 @@
 package com.rusobr.user.application.service.teacher;
 
 import com.rusobr.user.application.event.UserDeletedEvent;
+import com.rusobr.user.application.mapper.TeacherMapper;
 import com.rusobr.user.application.mapper.UserMapper;
+import com.rusobr.user.domain.enums.UserRole;
 import com.rusobr.user.domain.model.Teacher;
 import com.rusobr.user.domain.model.User;
-import com.rusobr.user.domain.enums.UserRole;
 import com.rusobr.user.infrastructure.client.feign.AcademicClient;
-import com.rusobr.user.infrastructure.persistence.repository.projection.UserProjection;
-import com.rusobr.user.web.dto.feign.BatchUserResponse;
-import com.rusobr.user.web.dto.feign.TeacherAcademicFeignDto;
-import com.rusobr.user.web.dto.teacher.TeacherInfoResponse;
-import com.rusobr.user.web.exception.NotFoundException;
-import com.rusobr.user.application.mapper.TeacherMapper;
 import com.rusobr.user.infrastructure.persistence.repository.TeacherRepository;
 import com.rusobr.user.infrastructure.persistence.repository.UserRepository;
+import com.rusobr.user.web.dto.feign.BatchUserResponse;
+import com.rusobr.user.web.dto.feign.TeacherAcademicFeignDto;
 import com.rusobr.user.web.dto.feign.UserFeignResponse;
 import com.rusobr.user.web.dto.teacher.TeacherDetails;
+import com.rusobr.user.web.dto.teacher.TeacherInfoResponse;
 import com.rusobr.user.web.dto.teacher.TeacherResponse;
+import com.rusobr.user.web.exception.ExceptionCode;
+import com.rusobr.user.web.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,17 +39,25 @@ public class TeacherService {
     private final UserMapper userMapper;
     private final AcademicClient academicClient;
 
+    @Lazy
+    @Autowired
+    private TeacherService self;
+
+    @Transactional(readOnly = true)
     public TeacherResponse getWithUserById(Long id) {
-        Teacher teacher = teacherRepository.findWithUserById(id).orElseThrow(() -> new NotFoundException("Teacher with id " + id + " not found"));
+        Teacher teacher = teacherRepository.findWithUserById(id)
+                .orElseThrow(() -> notFoundTeacher(id));
         return teacherMapper.toTeacherResponse(teacher);
     }
 
+    @Transactional(readOnly = true)
     public TeacherDetails getDetailsById(Long id) {
         Teacher teacher = teacherRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Teacher not found: " + id));
+                .orElseThrow(() -> notFoundTeacher(id));
         return teacherMapper.toTeacherDetails(teacher);
     }
 
+    @Transactional(readOnly = true)
     public BatchUserResponse getBatch(List<Long> ids) {
         if (ids == null || ids.isEmpty()) {
             return new BatchUserResponse(List.of(), List.of());
@@ -56,25 +66,30 @@ public class TeacherService {
         List<UserFeignResponse> teachers = teacherRepository.findAllTeachersByIds(ids).stream()
                 .map(userMapper::toUserFeignResponse).toList();
         List<Long> foundIds = teachers.stream().map(UserFeignResponse::id).toList();
-        List<Long> notFound = ids.stream().filter(id->!foundIds.contains(id)).toList();
+        List<Long> notFound = ids.stream().filter(id -> !foundIds.contains(id)).toList();
 
         return new BatchUserResponse(teachers, notFound);
     }
 
+    @Transactional(readOnly = true)
     public UserFeignResponse getSimpleById(Long id) {
         return userMapper.toUserFeignResponse(teacherRepository.getTeacherSimpleById(id));
     }
 
     public TeacherInfoResponse getInfoById(Long id) {
-        Teacher teacher = teacherRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Teacher not found: " + id));
-
         TeacherAcademicFeignDto teacherInfoFeignResponse = academicClient.getTeacherAcademicInfo(id);
+        return self.getInfoByIdTransactional(id, teacherInfoFeignResponse);
+    }
+
+    @Transactional(readOnly = true)
+    public TeacherInfoResponse getInfoByIdTransactional(Long id, TeacherAcademicFeignDto dto) {
+        Teacher teacher = teacherRepository.findById(id)
+                .orElseThrow(() -> notFoundTeacher(id));
 
         return TeacherInfoResponse.builder()
                 .phoneNumber(teacher.getPhoneNumber())
                 .email(teacher.getEmail())
-                .schoolDetails(teacherInfoFeignResponse)
+                .schoolDetails(dto)
                 .build();
     }
 
@@ -82,18 +97,19 @@ public class TeacherService {
         return teacherRepository.findByIdWithDeleted(id);
     }
 
+    @Transactional
     public void create(Long userId, TeacherDetails teacherDetails) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found: " + userId));
+        User user = userRepository.findById(userId).orElseThrow(() -> notFoundUser(userId));
         teacherRepository.save(teacherMapper.toEntity(user, teacherDetails));
     }
 
     @Transactional
     public void update(Long userId, TeacherDetails teacherDetails) {
         if (!userRepository.existsById(userId)) {
-            throw new NotFoundException("User not found: " + userId);
+            throw notFoundUser(userId);
         }
         Teacher teacher = teacherRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Teacher not found: " + userId));
+                .orElseThrow(() -> notFoundTeacher(userId));
 
         if (teacherDetails.phoneNumber() != null) {
             teacher.setPhoneNumber(teacherDetails.phoneNumber());
@@ -104,6 +120,9 @@ public class TeacherService {
     }
 
     public void delete(Long id) {
+        if (!teacherRepository.existsById(id)) {
+            throw notFoundTeacher(id);
+        }
         teacherRepository.deleteById(id);
     }
 
@@ -114,5 +133,12 @@ public class TeacherService {
         }
     }
 
+    // helpers
+    private NotFoundException notFoundTeacher(Long id) {
+        return new NotFoundException("Teacher by id: %d not found".formatted(id), ExceptionCode.TEACHER_NOT_FOUND);
+    }
 
+    private NotFoundException notFoundUser(Long id) {
+        return new NotFoundException("User by id: %d not found".formatted(id), ExceptionCode.USER_NOT_FOUND);
+    }
 }

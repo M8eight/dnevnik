@@ -9,6 +9,7 @@ import com.rusobr.user.domain.enums.UserRole;
 import com.rusobr.user.web.dto.feign.BatchUserResponse;
 import com.rusobr.user.web.dto.student.StudentInfoResponse;
 import com.rusobr.user.web.exception.ConflictException;
+import com.rusobr.user.web.exception.ExceptionCode;
 import com.rusobr.user.web.exception.NotFoundException;
 import com.rusobr.user.infrastructure.client.feign.AcademicClient;
 import com.rusobr.user.application.mapper.StudentMapper;
@@ -50,10 +51,11 @@ public class StudentService {
             return new BatchUserResponse(List.of(), List.of());
         }
 
-        List<UserFeignResponse> students = studentRepository.findAllStudentsByIds(ids).stream().map(userMapper::toUserFeignResponse).toList();
+        List<UserFeignResponse> students = studentRepository.findAllStudentsByIds(ids).stream()
+                .map(userMapper::toUserFeignResponse).toList();
 
         List<Long> foundIds = students.stream().map(UserFeignResponse::id).toList();
-        List<Long> notFound = ids.stream().filter(id->!foundIds.contains(id)).toList();
+        List<Long> notFound = ids.stream().filter(id -> !foundIds.contains(id)).toList();
 
         return new BatchUserResponse(students, notFound);
     }
@@ -70,23 +72,24 @@ public class StudentService {
     @Transactional(readOnly = true)
     public StudentDetails getDetailsById(Long id) {
         Student student = studentRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Student not found: " + id));
+                .orElseThrow(() -> notFoundStudent(id));
         return studentMapper.toStudentDetails(student);
     }
 
     @Transactional(readOnly = true)
     public StudentWithClassResponse getWithClassById(Long id) {
         Student student = studentRepository.findWithUserById(id)
-                .orElseThrow(() -> new NotFoundException("Student not found"));
+                .orElseThrow(() -> notFoundStudent(id));
         SchoolClassResponse schoolClass = academicClient.getSchoolClassByStudentId(student.getId());
         TeacherResponse teacher = teacherService.getWithUserById(schoolClass.classTeacherId());
 
         return studentMapper.toStudentDetailResponse(student, schoolClass, teacher);
     }
 
+    @Transactional(readOnly = true)
     public StudentInfoResponse getStudentInfoById(Long id) {
         Student student = studentRepository.findStudentInfoById(id)
-                .orElseThrow(() -> new NotFoundException("Student not found"));
+                .orElseThrow(() -> notFoundStudent(id));
         SchoolClassResponse schoolClass = academicClient.getSchoolClassByStudentId(student.getId());
         TeacherResponse teacher = teacherService.getWithUserById(schoolClass.classTeacherId());
 
@@ -97,18 +100,19 @@ public class StudentService {
         return studentRepository.findByIdWithDeleted(id);
     }
 
+    @Transactional
     public void create(Long userId, StudentDetails studentDetails) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found: " + userId));
+        User user = userRepository.findById(userId).orElseThrow(() -> notFoundUser(userId));
         studentRepository.save(studentMapper.toEntity(user, studentDetails));
     }
 
     @Transactional
     public void update(Long userId, StudentDetails studentDetails) {
         if (!userRepository.existsById(userId)) {
-            throw new NotFoundException("User not found: " + userId);
+            throw notFoundUser(userId);
         }
         Student student = studentRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Student not found: " + userId));
+                .orElseThrow(() -> notFoundStudent(userId));
 
         if (studentDetails.studyProfile() != null) {
             student.setStudyProfile(studentDetails.studyProfile());
@@ -118,15 +122,12 @@ public class StudentService {
     @Transactional
     public void assignToParent(Long studentId, Long parentId) {
         Parent parent = parentRepository.findById(parentId)
-                .orElseThrow(() -> new NotFoundException("Parent not found: " + parentId));
+                .orElseThrow(() -> notFoundParent(parentId));
         Student student = studentRepository.findById(studentId)
-                .orElseThrow(() -> new NotFoundException("Student not found: " + studentId));
+                .orElseThrow(() -> notFoundStudent(studentId));
 
-        if (student.getParent() != null && student.getParent().getId().equals(parentId)) {
-            throw new ConflictException("Student already has parent");
-        }
         if (student.getParent() != null) {
-            throw new ConflictException("Student already set parent");
+            throw conflictStudentAlreadyHasParent(studentId);
         }
 
         student.setParent(parent);
@@ -136,10 +137,10 @@ public class StudentService {
     @Transactional
     public void unassignFromParent(Long studentId) {
         Student student = studentRepository.findById(studentId)
-                .orElseThrow(() -> new NotFoundException("Student not found: " + studentId));
+                .orElseThrow(() -> notFoundStudent(studentId));
 
         if (student.getParent() == null) {
-            throw new ConflictException("Student has no parent");
+            throw conflictStudentHasNoParent(studentId);
         }
 
         student.setParent(null);
@@ -147,6 +148,9 @@ public class StudentService {
     }
 
     public void delete(Long studentId) {
+        if (!studentRepository.existsById(studentId)) {
+            throw notFoundStudent(studentId);
+        }
         studentRepository.deleteById(studentId);
     }
 
@@ -157,4 +161,24 @@ public class StudentService {
         }
     }
 
+    // helpers
+    private NotFoundException notFoundStudent(Long id) {
+        return new NotFoundException("Student by id: %d not found".formatted(id), ExceptionCode.STUDENT_NOT_FOUND);
+    }
+
+    private NotFoundException notFoundUser(Long id) {
+        return new NotFoundException("User by id: %d not found".formatted(id), ExceptionCode.USER_NOT_FOUND);
+    }
+
+    private NotFoundException notFoundParent(Long id) {
+        return new NotFoundException("Parent by id: %d not found".formatted(id), ExceptionCode.PARENT_NOT_FOUND);
+    }
+
+    private ConflictException conflictStudentAlreadyHasParent(Long studentId) {
+        return new ConflictException("Student by id: %d already has parent".formatted(studentId), ExceptionCode.STUDENT_ALREADY_HAS_PARENT);
+    }
+
+    private ConflictException conflictStudentHasNoParent(Long studentId) {
+        return new ConflictException("Student by id: %d has no parent".formatted(studentId), ExceptionCode.STUDENT_HAS_NO_PARENT);
+    }
 }

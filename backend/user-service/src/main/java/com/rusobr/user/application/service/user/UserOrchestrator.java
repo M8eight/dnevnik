@@ -19,6 +19,8 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import static com.rusobr.user.web.exception.ExceptionCode.*;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -40,7 +42,7 @@ public class UserOrchestrator {
             log.error("Rollback create user {}", userCreateRequest.user().username());
             keycloakRestClient.deleteKeyCloakUser(kId);
 
-            throw new ConflictException("Could not create user");
+            throw new ConflictException("Could not create user", USER_CREATE_CONFLICT);
         }
     }
 
@@ -73,7 +75,7 @@ public class UserOrchestrator {
             //Что бы вернуть данные мы должны поменять местами current и new роли
             updateKeycloakRoles(user, newRoles, currentRoles);
 
-            throw new ConflictException("Could not update user");
+            throw new ConflictException("Could not update user", USER_UPDATE_CONFLICT);
         }
     }
 
@@ -84,7 +86,7 @@ public class UserOrchestrator {
         }
 
         if (userService.isUsernameTaken(username, id)) {
-            throw new ConflictException("Username already exists");
+            throw new ConflictException("Username %s already exists".formatted(username), USERNAME_ALREADY_EXISTS);
         }
     }
 

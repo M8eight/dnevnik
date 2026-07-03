@@ -22,6 +22,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.rusobr.user.web.exception.ExceptionCode.INVALID_USER_ROLE;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -48,7 +50,7 @@ public class UserDbService {
         //Выбираем конкретную реализацию пользователя по роли
         UserRoleStrategy strategy = roleStrategies.get(createUserRequest.role());
         if (strategy == null) {
-            throw new ConflictException("Invalid user role");
+            throw new ConflictException("Invalid user role", INVALID_USER_ROLE);
         }
         strategy.save(userResponse.id(), createUserRequest.details());
 

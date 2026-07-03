@@ -17,6 +17,7 @@ dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
     implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j'
+    implementation 'io.github.resilience4j:resilience4j-spring-boot3'
     implementation('org.springframework.boot:spring-boot-starter-aop')
 
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'

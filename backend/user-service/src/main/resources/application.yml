@@ -1,4 +1,8 @@
 spring:
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
   jackson:
     serialization:
       write-dates-as-timestamps: false
@@ -43,7 +47,41 @@ logging:
     com.netflix.discovery: WARN
     com.netflix.eureka: WARN
 
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        sliding-window-size: 10
+        minimum-number-of-calls: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 5
+        automatic-transition-from-open-to-half-open-enabled: true
+    instances:
+      user-service:
+        base-config: default
+
+  retry:
+    instances:
+      user-service:
+        max-attempts: 3
+        wait-duration: 500ms
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+
+  timelimiter:
+    instances:
+      user-service:
+        timeout-duration: 3s
+
 management:
+  endpoints:
+    web:
+      exposure:
+        include: health,circuitbreakers,circuitbreakerevents,metrics
+  health:
+    circuitbreakers:
+      enabled: true
   tracing:
     sampling:
       probability: 1.0

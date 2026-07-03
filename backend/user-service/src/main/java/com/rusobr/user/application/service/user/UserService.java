@@ -23,6 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collections;
 import java.util.List;
 
+import static com.rusobr.user.web.exception.ExceptionCode.USER_NOT_FOUND;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -41,7 +43,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public User getByIdInternal(Long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("User not found with id: " + id));
+                .orElseThrow(() -> new NotFoundException("User by id: %d not found".formatted(id), USER_NOT_FOUND));
     }
 
     @Transactional(readOnly = true)
@@ -68,7 +70,7 @@ public class UserService {
     @Transactional
     public void deleteUserCascade(Long id) {
         User user = userRepository.findWithRolesById(id)
-                .orElseThrow(() -> new NotFoundException("User not found with id: " + id));
+                .orElseThrow(() -> new NotFoundException("User by id: %d not found".formatted(id), USER_NOT_FOUND));
         userRepository.delete(user);
 
         applicationEventPublisher.publishEvent(new UserDeletedEvent(user.getId(), user.getRoles()));

@@ -9,8 +9,7 @@ import com.rusobr.user.web.dto.keycloak.role.AssignRoleToUserRequest;
 import com.rusobr.user.web.dto.keycloak.role.KeycloakRole;
 import com.rusobr.user.web.dto.user.UserDataDto;
 import com.rusobr.user.web.dto.user.update.UserUpdateData;
-import com.rusobr.user.web.exception.KeycloakUserAlreadyExist;
-import com.rusobr.user.web.exception.NotFoundException;
+import com.rusobr.user.web.exception.KeycloakUserException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
@@ -23,6 +22,9 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Objects;
+
+import static com.rusobr.user.web.exception.ExceptionCode.KEYCLOAK_USER_BAD_REQUEST;
+import static com.rusobr.user.web.exception.ExceptionCode.KEYCLOAK_USER_NOT_FOUND;
 
 @Component
 @Slf4j
@@ -63,7 +65,7 @@ public class KeycloakRestClient {
                 .block();
 
         if (user == null) {
-            throw new NotFoundException("Keycloak User not found " + username);
+            throw new KeycloakUserException("Keycloak user %s not found".formatted(username), KEYCLOAK_USER_NOT_FOUND);
         }
 
         return user;
@@ -91,7 +93,7 @@ public class KeycloakRestClient {
                 .bodyValue(user)
                 .retrieve()
                 .onStatus(status -> status.value() == 409,
-                        clientResponse -> Mono.error(new KeycloakUserAlreadyExist(dto.username())))
+                        clientResponse -> Mono.error(new KeycloakUserException("Could not create user %s".formatted(dto.username()), KEYCLOAK_USER_BAD_REQUEST)))
                 .toBodilessEntity()
                 .flatMap(res -> {
                     String location = res.getHeaders().getFirst("Location");
@@ -204,7 +206,7 @@ public class KeycloakRestClient {
                 .bodyValue(List.of(role))
                 .retrieve()
                 .onStatus(status -> status.value() == 409,
-                        clientResponse -> Mono.error(new KeycloakUserAlreadyExist("Keycloak User role already assigned")))
+                        clientResponse -> Mono.error(new KeycloakUserException("Keycloak user role already assigned", KEYCLOAK_USER_BAD_REQUEST)))
                 .onStatus(HttpStatusCode::isError, resp ->
                         resp.bodyToMono(String.class)
                                 .flatMap(b -> Mono.error(new RuntimeException("Keycloak: " + b)))

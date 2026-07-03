@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(value = "academic-service")
+@FeignClient(value = "academic-service", fallbackFactory = AcademicClientFallbackFactory.class)
 public interface AcademicClient {
 
     @GetMapping("/api/v1/school-classes/search/by-student")
