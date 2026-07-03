@@ -14,6 +14,7 @@ import com.rusobr.academic.web.dto.schoolClass.SchoolClassRequest;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassResponse;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassUpdateRequest;
 import com.rusobr.academic.web.exception.ConflictException;
+import com.rusobr.academic.web.exception.ExceptionCode;
 import com.rusobr.academic.web.exception.NotFoundException;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
@@ -48,12 +49,13 @@ public class SchoolClassService {
     @Transactional(readOnly = true)
     public SchoolClassFullResponse findWithStudentsById(Long id) {
         SchoolClass schoolClass = schoolClassRepository.findWithClassStudentById(id)
-                .orElseThrow(() -> new NotFoundException("SchoolClass Not Found by id: " + id));
+                .orElseThrow(() -> new NotFoundException("School class with id " + id + " not found",
+                        ExceptionCode.SCHOOL_CLASS_NOT_FOUND));
 
-        return self.findWithStudentsFeign(schoolClass);
+        return self.findWithStudentsByIdFeign(schoolClass);
     }
 
-    public SchoolClassFullResponse findWithStudentsFeign(SchoolClass schoolClass) {
+    public SchoolClassFullResponse findWithStudentsByIdFeign(SchoolClass schoolClass) {
         BatchUserResponse users = new BatchUserResponse(List.of(), List.of());
         if (!schoolClass.getStudents().isEmpty()) {
             users = userClient.getBatchUsers(
@@ -77,7 +79,8 @@ public class SchoolClassService {
     @Transactional(readOnly = true)
     public SchoolClassResponse findByStudent(Long studentId) {
         SchoolClass schoolClass = schoolClassRepository.findSchoolClassByStudentId(studentId)
-                .orElseThrow(() -> new NotFoundException("SchoolClass not found for student: " + studentId));
+                .orElseThrow(() -> new NotFoundException("School class with studentId " + studentId + " not found",
+                        ExceptionCode.SCHOOL_CLASS_NOT_FOUND));
         return schoolClassMapper.toSchoolClassResponse(schoolClass);
     }
 
@@ -99,8 +102,8 @@ public class SchoolClassService {
         validateAcademicYearIsActive(academicYear);
 
         if (schoolClassRepository.existsByNameAndAcademicYearId(schoolClassReq.name(), schoolClassReq.academicYearId())) {
-            throw new ConflictException("School class with name " + schoolClassReq.name()
-                    + " and year " + schoolClassReq.academicYearId() + " already exists");
+            throw new ConflictException("School class with name " + schoolClassReq.name() + " already exists in this year"
+            , ExceptionCode.SCHOOL_CLASS_UNIQUE_CONFLICT);
         }
 
         SchoolClass schoolClass = schoolClassMapper.toSchoolClass(schoolClassReq, academicYear);
@@ -143,22 +146,25 @@ public class SchoolClassService {
     // helpers
     private SchoolClass getSchoolClassOrThrow(Long id) {
         return schoolClassRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("SchoolClass Not Found by id: " + id));
+                .orElseThrow(() -> new NotFoundException("School class with id " + id + " not found",
+                        ExceptionCode.SCHOOL_CLASS_NOT_FOUND));
     }
 
     private SchoolClass getSchoolClassWithAcademicYear(Long id) {
         return schoolClassRepository.findWithAcademicYearById(id)
-                .orElseThrow(() -> new NotFoundException("SchoolClass Not Found by id: " + id));
+                .orElseThrow(() -> new NotFoundException("School class with id " + id + " not found",
+                        ExceptionCode.SCHOOL_CLASS_NOT_FOUND));
     }
 
     private AcademicYear getAcademicYearOrThrow(Long academicYearId) {
         return academicYearRepository.findById(academicYearId)
-                .orElseThrow(() -> new NotFoundException("Academic year not found by id: " + academicYearId));
+                .orElseThrow(() -> new NotFoundException("Academic year with id " + academicYearId + " not found",
+                        ExceptionCode.ACADEMIC_YEAR_NOT_FOUND));
     }
 
     private void validateAcademicYearIsActive(AcademicYear academicYear) {
-        if (academicYear == null || !academicYear.getIsActive()) {
-            throw new ConflictException("Academic year is not active");
+        if (academicYear.isClosed()) {
+            throw new ConflictException("Academic year is closed", ExceptionCode.ACADEMIC_YEAR_CLOSED_CONFLICT);
         }
     }
 }

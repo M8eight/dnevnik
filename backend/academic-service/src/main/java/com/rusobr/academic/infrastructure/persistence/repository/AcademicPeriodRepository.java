@@ -31,7 +31,7 @@ public interface AcademicPeriodRepository extends JpaRepository<AcademicPeriod,L
     @EntityGraph(attributePaths = {"academicYear"})
     List<AcademicPeriod> findAllByAcademicYearIdOrderByStartDateAsc(Long academicYearId);
 
-    List<AcademicPeriod> findAcademicPeriodsByAcademicYearId(Long academicYearId);
+    List<AcademicPeriod> getAcademicPeriodsByAcademicYearId(Long academicYearId);
 
     Boolean existsByName(String name);
 

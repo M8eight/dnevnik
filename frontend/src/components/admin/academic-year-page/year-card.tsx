@@ -57,19 +57,18 @@ export default function YearCard({
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                        <p className="font-black text-[var(--navy)] text-[15px] leading-snug truncate">
+                        <p className="font-black text-(--navy) text-[15px] leading-snug truncate">
                             {year.name}
                         </p>
-                        {/* Status badge */}
                         <span
                             className={cn(
                                 "text-[10px] font-extrabold px-2.5 py-0.5 rounded-full tracking-wider uppercase",
-                                !year.isActive
+                                year.closed
                                     ? "bg-black/5 text-black/35"
                                     : "bg-emerald-50 text-emerald-600 ring-1 ring-emerald-200"
                             )}
                         >
-                            {year.isActive ? "Активен" : "Архив"}
+                            {year.closed ? "Архив" : "Активен"}
                         </span>
                     </div>
 
@@ -83,18 +82,18 @@ export default function YearCard({
                 {/* Actions */}
                 {(onToggleActive || onDelete) && (
                     <div className="flex items-center gap-1.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                        
+
                         {/* Toggle Active Button (Теперь показывается всегда) */}
                         {onToggleActive && (
                             <button
                                 onClick={() => onToggleActive(year)}
                                 disabled={isSettingActive}
-                                title={year.isActive ? "Перенести в архив (деактивировать)" : "Сделать год активным"}
+                                title={year.closed ? "Сделать год активным" : "Перенести в архив (деактивировать)"}
                                 className={cn(
                                     "w-8 h-8 rounded-[10px] flex items-center justify-center transition-all",
-                                    year.isActive
-                                        ? "bg-emerald-50 hover:bg-amber-50 text-emerald-600 hover:text-amber-500" // Зеленая, при наведении желтеет (типа отключаем)
-                                        : "bg-black/5 hover:bg-emerald-50 text-black/35 hover:text-emerald-500"   // Серая, при наведении зеленеет (включаем)
+                                    year.closed
+                                        ? "bg-black/5 hover:bg-emerald-50 text-black/35 hover:text-emerald-500"   // Серая, при наведении зеленеет (включаем)
+                                        : "bg-emerald-50 hover:bg-amber-50 text-emerald-600 hover:text-amber-500" // Зеленая, при наведении желтеет (типа отключаем)
                                 )}
                             >
                                 {isSettingActive ? (
@@ -114,8 +113,8 @@ export default function YearCard({
                                 className={cn(
                                     "w-8 h-8 rounded-[10px] flex items-center justify-center transition-all",
                                     confirmDelete
-                                        ? "bg-[var(--red)] text-white scale-105"
-                                        : "bg-black/5 hover:bg-red-50 text-black/25 hover:text-[var(--red)]"
+                                        ? "bg-(--red) text-white scale-105"
+                                        : "bg-black/5 hover:bg-red-50 text-black/25 hover:text-(--red)"
                                 )}
                             >
                                 {isDeleting ? (
@@ -131,7 +130,7 @@ export default function YearCard({
 
             {/* Подтверждение удаления */}
             {confirmDelete && onDelete && (
-                <p className="text-[11px] text-[var(--red)] font-bold mt-2 pl-[60px]">
+                <p className="text-[11px] text-(--red) font-bold mt-2 pl-15">
                     Нажмите ещё раз для удаления
                 </p>
             )}

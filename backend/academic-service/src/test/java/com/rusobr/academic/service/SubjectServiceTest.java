@@ -63,7 +63,7 @@ class SubjectServiceTest {
 
             assertThatThrownBy(() -> service.getById(SUBJECT_ID))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("Subject not found");
+                    .hasMessageContaining("Subject with id: " + SUBJECT_ID + " not found");
         }
     }
 
@@ -133,7 +133,7 @@ class SubjectServiceTest {
 
             assertThatThrownBy(() -> service.delete(SUBJECT_ID))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("Subject not found");
+                    .hasMessageContaining("Subject with id: " + SUBJECT_ID + " not found");
 
             verify(subjectRepository, never()).deleteById(any());
         }

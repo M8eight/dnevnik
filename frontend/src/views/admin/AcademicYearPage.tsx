@@ -16,32 +16,33 @@ import CreateYearForm from "@/components/admin/academic-year-page/create-year-fo
 import { 
     useGetAcademicYears, 
     useDeleteAcademicYear, 
-    useSetActiveAcademicYear 
+    useOpenAcademicYear,
+    useCloseAcademicYear
 } from "@/hooks/use-academic-year";
 import type { AcademicYearResponse } from "@/services/academic-year-service";
 
 export default function AcademicYearPage() {
     const [search, setSearch] = useState("");
 
-    // Получаем список годов
     const { data: academicYears = [], isLoading } = useGetAcademicYears();
 
-    // Мутации
-    const setActiveMutation = useSetActiveAcademicYear();
+    const openMutation = useOpenAcademicYear();
+    const closeMutation = useCloseAcademicYear();
     const deleteMutation = useDeleteAcademicYear();
 
-    // Обработчик активации/деактивации года
     const handleToggleActive = (year: AcademicYearResponse) => {
-        // Передаем объект согласно обновленному хуку
-        setActiveMutation.mutate({ id: year.id, active: !year.isActive });
+        if (year.closed) {
+            openMutation.mutate(year.id);
+        } else {
+            closeMutation.mutate(year.id);
+        }
     };
 
-    // Фильтрация для поиска
     const filteredYears = academicYears.filter((year) => 
         year.name.toLowerCase().includes(search.toLowerCase())
     );
 
-    const activeCount = academicYears.filter((y) => y.isActive).length;
+    const activeCount = academicYears.filter((y) => !y.closed).length;
 
     const getYearWord = (count: number) => {
         const rules = new Intl.PluralRules("ru-RU");
@@ -57,15 +58,15 @@ export default function AcademicYearPage() {
             <AdminNavbar />
 
             {/* ── Controls bar ── */}
-            <div className="max-w-[1400px] mx-auto mb-6">
+            <div className="max-w-350 mx-auto mb-6">
                 <div className="glass-card rounded-[24px] p-5 flex flex-col lg:flex-row justify-between lg:items-center gap-5 border-none shadow-lg backdrop-blur-md">
 
                     <div className="flex items-center gap-4">
-                        <div className="hidden sm:flex w-12 h-12 rounded-[18px] bg-[var(--red-light)]/60 items-center justify-center ring-1 ring-[var(--red)]/10">
-                            <CalendarDays className="w-6 h-6 text-[var(--red)]" />
+                        <div className="hidden sm:flex w-12 h-12 rounded-[18px] bg-(--red-light)/60 items-center justify-center ring-1 ring-(--red)/10">
+                            <CalendarDays className="w-6 h-6 text-(--red)" />
                         </div>
                         <div>
-                            <h1 className="font-serif font-black text-2xl lg:text-3xl text-[var(--navy)] tracking-tight">
+                            <h1 className="font-serif font-black text-2xl lg:text-3xl text-(--navy) tracking-tight">
                                 Учебные годы
                             </h1>
                             <p className="text-sm text-black/40 mt-0.5">
@@ -77,13 +78,13 @@ export default function AcademicYearPage() {
                     </div>
 
                     <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 w-full lg:w-auto">
-                        <div className="relative w-full lg:w-[280px] float-end">
+                        <div className="relative w-full lg:w-70 float-end">
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/30" />
                             <Input
                                 placeholder="Поиск года..."
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
-                                className="pl-10 h-11 bg-white/40 border-black/10 rounded-2xl text-sm font-semibold placeholder:font-normal focus-visible:ring-[var(--red)]"
+                                className="pl-10 h-11 bg-white/40 border-black/10 rounded-2xl text-sm font-semibold placeholder:font-normal focus-visible:ring-(--red)"
                             />
                         </div>
                     </div>
@@ -91,13 +92,13 @@ export default function AcademicYearPage() {
             </div>
 
             {/* ── Main grid ── */}
-            <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="max-w-350 mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                 <div className="lg:col-span-2">
-                    <div className="glass-card rounded-[32px] p-6 backdrop-blur-md min-h-[500px] flex flex-col">
+                    <div className="glass-card rounded-[32px] p-6 backdrop-blur-md min-h-125 flex flex-col">
 
-                        <h2 className="font-serif font-black text-lg text-[var(--navy)] tracking-tight flex items-center gap-2 mb-5">
-                            <CalendarDays className="w-5 h-5 text-[var(--red)]" />
+                        <h2 className="font-serif font-black text-lg text-(--navy) tracking-tight flex items-center gap-2 mb-5">
+                            <CalendarDays className="w-5 h-5 text-(--red)" />
                             Все учебные годы
                         </h2>
 
@@ -121,9 +122,8 @@ export default function AcademicYearPage() {
                                                 deleteMutation.variables === year.id
                                             }
                                             isSettingActive={
-                                                setActiveMutation.isPending && 
-                                                // Добавлено .id, так как variables теперь объект
-                                                setActiveMutation.variables?.id === year.id 
+                                                openMutation.isPending && 
+                                                openMutation.variables === year.id 
                                             }
                                         />
                                     ))}
@@ -144,8 +144,8 @@ export default function AcademicYearPage() {
                 <div className="lg:col-span-1">
                     <div className="sticky top-6">
                         <div className="glass-card rounded-[32px] p-6 backdrop-blur-md">
-                            <h2 className="text-base font-black text-[var(--navy)] flex items-center gap-2 mb-5">
-                                <Plus className="w-4 h-4 text-[var(--red)]" />
+                            <h2 className="text-base font-black text-(--navy) flex items-center gap-2 mb-5">
+                                <Plus className="w-4 h-4 text-(--red)" />
                                 Добавить учебный год
                             </h2>
                             

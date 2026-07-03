@@ -1,7 +1,7 @@
 package com.rusobr.academic.web.exception;
 
-public class BadRequestException extends RuntimeException {
-    public BadRequestException(String message) {
-        super(message);
+public class BadRequestException extends BaseException {
+    public BadRequestException(String message, ExceptionCode code) {
+        super(message, code);
     }
 }

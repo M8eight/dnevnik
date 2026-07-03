@@ -7,6 +7,7 @@ import com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodRequest;
 import com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodResponse;
 import com.rusobr.academic.web.dto.academicYear.AcademicYearResponse;
 import com.rusobr.academic.web.exception.ConflictException;
+import com.rusobr.academic.web.exception.ExceptionCode;
 import com.rusobr.academic.web.exception.NotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -125,7 +126,7 @@ public class AcademicPeriodControllerTest {
     @DisplayName("GET /academic-periods/{id} — 404 если период не найден")
     void getById_ShouldReturn404_WhenNotFound() throws Exception {
         when(academicPeriodService.findById(PERIOD_ID))
-                .thenThrow(new NotFoundException("Academic period with id " + PERIOD_ID + " not found"));
+                .thenThrow(new NotFoundException("Academic period with id " + PERIOD_ID + " not found", ExceptionCode.ACADEMIC_PERIOD_NOT_FOUND));
 
         mockMvc.perform(get("/api/v1/academic-periods/{id}", PERIOD_ID))
                 .andExpect(status().isNotFound())
@@ -150,7 +151,7 @@ public class AcademicPeriodControllerTest {
     @Test
     @DisplayName("PATCH /academic-periods/{id}/open — 404 если период не найден")
     void openPeriod_ShouldReturn404_WhenNotFound() throws Exception {
-        doThrow(new NotFoundException("Academic period with id " + PERIOD_ID + " not found"))
+        doThrow(new NotFoundException("Academic period with id " + PERIOD_ID + " not found", ExceptionCode.ACADEMIC_PERIOD_NOT_FOUND))
                 .when(academicPeriodService).openPeriod(PERIOD_ID);
 
         mockMvc.perform(patch("/api/v1/academic-periods/{id}/open", PERIOD_ID))
@@ -161,7 +162,7 @@ public class AcademicPeriodControllerTest {
     @Test
     @DisplayName("PATCH /academic-periods/{id}/open — 409 если период уже открыт")
     void openPeriod_ShouldReturn409_WhenAlreadyOpen() throws Exception {
-        doThrow(new ConflictException("Academic period is already open"))
+        doThrow(new ConflictException("Academic period is already open", ExceptionCode.ACADEMIC_PERIOD_OPEN_CONFLICT))
                 .when(academicPeriodService).openPeriod(PERIOD_ID);
 
         mockMvc.perform(patch("/api/v1/academic-periods/{id}/open", PERIOD_ID))
@@ -187,7 +188,7 @@ public class AcademicPeriodControllerTest {
     @Test
     @DisplayName("PATCH /academic-periods/{id}/close — 404 если период не найден")
     void closePeriod_ShouldReturn404_WhenNotFound() throws Exception {
-        doThrow(new NotFoundException("Academic period with id " + PERIOD_ID + " not found"))
+        doThrow(new NotFoundException("Academic period with id " + PERIOD_ID + " not found", ExceptionCode.ACADEMIC_PERIOD_NOT_FOUND))
                 .when(academicPeriodService).closePeriod(PERIOD_ID);
 
         mockMvc.perform(patch("/api/v1/academic-periods/{id}/close", PERIOD_ID))
@@ -198,7 +199,7 @@ public class AcademicPeriodControllerTest {
     @Test
     @DisplayName("PATCH /academic-periods/{id}/close — 409 если период уже закрыт")
     void closePeriod_ShouldReturn409_WhenAlreadyClosed() throws Exception {
-        doThrow(new ConflictException("Academic period is already closed"))
+        doThrow(new ConflictException("Academic period is already closed", ExceptionCode.ACADEMIC_PERIOD_CLOSE_CONFLICT))
                 .when(academicPeriodService).closePeriod(PERIOD_ID);
 
         mockMvc.perform(patch("/api/v1/academic-periods/{id}/close", PERIOD_ID))
@@ -235,7 +236,7 @@ public class AcademicPeriodControllerTest {
                 LocalDate.of(2025, 1, 1),
                 LocalDate.of(2024, 9, 1)
         );
-        doThrow(new ConflictException("Start date cannot be after end date"))
+        doThrow(new ConflictException("Start date cannot be after end date", ExceptionCode.ACADEMIC_PERIOD_DATES_CONFLICT))
                 .when(academicPeriodService).create(request);
 
         mockMvc.perform(post("/api/v1/academic-periods")
@@ -263,7 +264,7 @@ public class AcademicPeriodControllerTest {
     @Test
     @DisplayName("DELETE /academic-periods/{id} — 404 если период не найден")
     void delete_ShouldReturn404_WhenNotFound() throws Exception {
-        doThrow(new NotFoundException("Academic period with id " + PERIOD_ID + " not found"))
+        doThrow(new NotFoundException("Academic period with id " + PERIOD_ID + " not found", ExceptionCode.ACADEMIC_PERIOD_NOT_FOUND))
                 .when(academicPeriodService).delete(PERIOD_ID);
 
         mockMvc.perform(delete("/api/v1/academic-periods/{id}", PERIOD_ID))
@@ -274,7 +275,7 @@ public class AcademicPeriodControllerTest {
     @Test
     @DisplayName("DELETE /academic-periods/{id} — 409 если период открыт")
     void delete_ShouldReturn409_WhenPeriodIsOpen() throws Exception {
-        doThrow(new ConflictException("Cannot delete an open academic period"))
+        doThrow(new ConflictException("Cannot delete an open academic period", ExceptionCode.ACADEMIC_PERIOD_CLOSED_CONFLICT))
                 .when(academicPeriodService).delete(PERIOD_ID);
 
         mockMvc.perform(delete("/api/v1/academic-periods/{id}", PERIOD_ID))

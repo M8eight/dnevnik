@@ -2,6 +2,7 @@ package com.rusobr.academic.application.service;
 
 import com.rusobr.academic.domain.model.AcademicYear;
 import com.rusobr.academic.web.exception.ConflictException;
+import com.rusobr.academic.web.exception.ExceptionCode;
 import com.rusobr.academic.web.exception.NotFoundException;
 import com.rusobr.academic.application.mapper.AcademicYearMapper;
 import com.rusobr.academic.infrastructure.persistence.repository.AcademicYearRepository;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -34,29 +36,33 @@ public class AcademicYearService {
 
     @Transactional
     public AcademicYearResponse create(AcademicYearRequest request) {
-        validateRequest(request);
+        validateDates(request.startDate(), request.endDate());
         AcademicYear academicYear = academicYearMapper.toEntity(request);
         return academicYearMapper.toResponse(academicYearRepository.save(academicYear));
     }
 
     @Transactional
-    public boolean isActive(Long id) {
-        return findOrThrow(id).getIsActive();
+    public void open(Long id) {
+        AcademicYear academicYear = findOrThrow(id);
+
+        validateDates(academicYear.getStartDate(), academicYear.getEndDate());
+
+        academicYear.open();
     }
 
     @Transactional
-    public void setActive(Long id, Boolean active) {
+    public void close(Long id) {
         AcademicYear academicYear = findOrThrow(id);
-        if (academicYear.getIsActive().equals(active)) {
-            throw new ConflictException("Academic year is already " + (active ? "active" : "inactive"));
-        }
-        academicYear.setIsActive(active);
+
+        validateDates(academicYear.getStartDate(), academicYear.getEndDate());
+
+        academicYear.close();
     }
 
     @Transactional
     public AcademicYearResponse update(Long id, AcademicYearRequest request) {
         AcademicYear academicYear = findOrThrow(id);
-        validateRequest(request);
+        validateDates(request.startDate(), request.endDate());
 
         if (request.name() != null) {
             academicYear.setName(request.name());
@@ -83,14 +89,15 @@ public class AcademicYearService {
     // helpers
     private AcademicYear findOrThrow(Long id) {
         return academicYearRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Academic year with id " + id + " not found"));
+                .orElseThrow(() -> new NotFoundException("Academic year with id " + id + " not found", ExceptionCode.ACADEMIC_YEAR_NOT_FOUND));
     }
 
-    private void validateRequest(AcademicYearRequest request) {
-        if (request.startDate() != null && request.endDate() != null) {
-            if (request.startDate().isAfter(request.endDate())) {
-                throw new ConflictException("Start date cannot be after end date");
+    private void validateDates(LocalDate startDate, LocalDate endDate) {
+        if (startDate != null && endDate != null) {
+            if (startDate.isAfter(endDate)) {
+                throw new ConflictException("Start date cannot be after end date", ExceptionCode.ACADEMIC_YEAR_DATES_CONFLICT);
             }
         }
     }
+
 }

@@ -301,7 +301,7 @@ function ClassBlock({ schoolClass }: { schoolClass: SchoolClassResponse }) {
                 <div className="flex items-center justify-between">
                     <span className="text-xs font-semibold text-black/35 uppercase tracking-wider">Учебный год</span>
                     <div className="flex items-center gap-1.5">
-                        {academicYear.isActive && <span className="w-1.5 h-1.5 rounded-full bg-green-500" />}
+                        {academicYear.closed && <span className="w-1.5 h-1.5 rounded-full bg-green-500" />}
                         <span className="text-sm font-bold text-(--navy)">{academicYear.name}</span>
                     </div>
                 </div>

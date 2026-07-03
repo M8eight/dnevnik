@@ -2,6 +2,7 @@ package com.rusobr.academic.service;
 
 import com.rusobr.academic.application.mapper.AcademicPeriodMapper;
 import com.rusobr.academic.application.mapper.LessonInstanceMapper;
+import com.rusobr.academic.application.service.AcademicPeriodService;
 import com.rusobr.academic.application.service.JournalService;
 import com.rusobr.academic.domain.enums.AttendanceStatus;
 import com.rusobr.academic.domain.enums.GradeType;
@@ -52,6 +53,7 @@ class JournalServiceTest {
     @Mock private SchoolClassRepository schoolClassRepository;
     @Mock private UserClient userClient;
     @Mock private LessonInstanceMapper lessonInstanceMapper;
+    @Mock private AcademicPeriodService academicPeriodService;
 
     @InjectMocks private JournalService service;
 
@@ -77,7 +79,7 @@ class JournalServiceTest {
             GradeJournalDto journalDto = new GradeJournalDto("Математика", 10L, 5, 1, GradeType.CONTROL, START_DATE);
             List<LocalDate> dates = List.of(START_DATE);
 
-            when(academicPeriodRepository.findById(PERIOD_ID)).thenReturn(Optional.of(period));
+            when(academicPeriodService.getById(PERIOD_ID)).thenReturn(period);
             when(lessonInstanceRepository.findGradesLessonsByStudentId(STUDENT_ID, START_DATE, END_DATE))
                     .thenReturn(List.of(gradeJournalProjection));
             when(lessonInstanceMapper.toGradeJournalProjection(gradeJournalProjection)).thenReturn(journalDto);
@@ -96,7 +98,8 @@ class JournalServiceTest {
         @Test
         @DisplayName("период не найден — бросает NotFoundException")
         void periodNotFound_throwsNotFoundException() {
-            when(academicPeriodRepository.findById(PERIOD_ID)).thenReturn(Optional.empty());
+            when(academicPeriodService.getById(PERIOD_ID))
+                    .thenThrow(new NotFoundException("Academic period with id " + PERIOD_ID + " not found", null));
 
             assertThatThrownBy(() -> service.getGradesLessonsByStudentId(STUDENT_ID, PERIOD_ID))
                     .isInstanceOf(NotFoundException.class);
@@ -138,7 +141,7 @@ class JournalServiceTest {
             when(mockAttendanceDto.lessonInstanceId()).thenReturn(LESSON_INSTANCE_ID);
 
             // Обучаем репозитории возвращать списки проекций
-            when(academicPeriodRepository.findById(PERIOD_ID)).thenReturn(Optional.of(period));
+            when(academicPeriodService.getById(PERIOD_ID)).thenReturn(period);
             when(lessonInstanceRepository.findLessonInstanceByTeachingAssignmentId(ASSIGNMENT_ID, START_DATE, END_DATE))
                     .thenReturn(List.of(lessonProjection));
             when(lessonInstanceMapper.toLessonInstanceDto(lessonProjection)).thenReturn(lessonDto);
@@ -178,7 +181,7 @@ class JournalServiceTest {
             LessonInstanceProjection lessonProjection = mock(LessonInstanceProjection.class);
             LessonInstanceDto lessonDto = new LessonInstanceDto(LESSON_INSTANCE_ID, START_DATE);
 
-            when(academicPeriodRepository.findById(PERIOD_ID)).thenReturn(Optional.of(period));
+            when(academicPeriodService.getById(PERIOD_ID)).thenReturn(period);
             when(lessonInstanceRepository.findLessonInstanceByTeachingAssignmentId(ASSIGNMENT_ID, START_DATE, END_DATE))
                     .thenReturn(List.of(lessonProjection));
             when(lessonInstanceMapper.toLessonInstanceDto(lessonProjection)).thenReturn(lessonDto);

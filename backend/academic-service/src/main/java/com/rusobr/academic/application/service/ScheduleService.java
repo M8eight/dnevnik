@@ -4,6 +4,7 @@ import com.rusobr.academic.domain.model.LessonInstance;
 import com.rusobr.academic.domain.model.ScheduleLesson;
 import com.rusobr.academic.domain.model.TeachingAssignment;
 import com.rusobr.academic.web.exception.ConflictException;
+import com.rusobr.academic.web.exception.ExceptionCode;
 import com.rusobr.academic.web.exception.NotFoundException;
 import com.rusobr.academic.infrastructure.client.UserClient;
 import com.rusobr.academic.application.mapper.LessonInstanceMapper;
@@ -156,7 +157,7 @@ public class ScheduleService {
                 scheduleLessonRequest.lessonNumber(),
                 scheduleLessonRequest.validFrom()
         )) {
-            throw new ConflictException("Slot is already taken for this class");
+            throw new ConflictException("Slot is already taken for this class", ExceptionCode.SCHEDULE_SLOT_ALREADY_TAKEN);
         }
 
         // Проверяем что учитель не ведёт другой урок в этот же слот
@@ -166,7 +167,7 @@ public class ScheduleService {
             scheduleLessonRequest.lessonNumber(),
             scheduleLessonRequest.validFrom()
         )) {
-            throw new ConflictException("Schedule lesson already exists");
+            throw new ConflictException("Schedule lesson already exists", ExceptionCode.SCHEDULE_ALREADY_EXIST);
         }
 
         ScheduleLesson scheduleLesson = scheduleLessonMapper.toEntity(scheduleLessonRequest, teachingAssignment);
@@ -179,10 +180,12 @@ public class ScheduleService {
     @Transactional
     public void close(Long scheduleId, LocalDate closeDate) {
         ScheduleLesson scheduleLesson = scheduleLessonRepository.findWithTeachingAssignmentById(scheduleId)
-                .orElseThrow(() -> new NotFoundException("Schedule with id " + scheduleId + " not found"));
+                .orElseThrow(() -> new NotFoundException("Schedule with id: %d not found".formatted(scheduleId),
+                        ExceptionCode.SCHEDULE_NOT_FOUND));
 
         if (scheduleLesson.getValidTo() != null && !scheduleLesson.getValidTo().isAfter(LocalDate.now())) {
-            throw new ConflictException("Schedule with id " + scheduleId + " is already closed");
+            throw new ConflictException("Schedule with id: %d is already closed".formatted(scheduleId),
+                    ExceptionCode.SCHEDULE_ALREADY_CLOSED);
         }
 
         scheduleLesson.setValidTo(closeDate);

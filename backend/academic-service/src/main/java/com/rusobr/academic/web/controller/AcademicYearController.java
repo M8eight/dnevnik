@@ -30,9 +30,14 @@ public class AcademicYearController {
         return academicYearService.create(academicYearRequest);
     }
 
-    @PatchMapping("/active/{id}")
-    public void setActive(@PathVariable Long id, @RequestParam Boolean active) {
-        academicYearService.setActive(id, active);
+    @PatchMapping("/{id}/open")
+    public void openPeriod(@PathVariable Long id) {
+        academicYearService.open(id);
+    }
+
+    @PatchMapping("/{id}/close")
+    public void closePeriod(@PathVariable Long id) {
+        academicYearService.close(id);
     }
 
     @PutMapping("/{id}")

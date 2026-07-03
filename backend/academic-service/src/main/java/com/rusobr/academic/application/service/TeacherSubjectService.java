@@ -11,6 +11,7 @@ import com.rusobr.academic.web.dto.feign.UserFeignResponse;
 import com.rusobr.academic.web.dto.teacherSubject.TeacherSubjectRequest;
 import com.rusobr.academic.web.dto.teacherSubject.TeacherSubjectResponse;
 import com.rusobr.academic.web.exception.ConflictException;
+import com.rusobr.academic.web.exception.ExceptionCode;
 import com.rusobr.academic.web.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -61,7 +62,8 @@ public class TeacherSubjectService {
         if (teacherSubjectOptional.isPresent()) {
             TeacherSubject teacherSubject = teacherSubjectOptional.get();
             if (teacherSubject.getDeletedAt() == null)
-                throw new ConflictException("Teacher subject relation already exist");
+                throw new ConflictException("Teacher subject relation with teacherId: %d subjectId: %d already exist".formatted(id.getTeacherId(), id.getSubjectId()),
+                        ExceptionCode.TEACHER_SUBJECT_ALREADY_EXISTS);
 
             teacherSubject.setDeletedAt(null);
             return teacherSubjectMapper.toResponse(teacherSubjectRepository.save(teacherSubject), teacher);
@@ -69,7 +71,8 @@ public class TeacherSubjectService {
 
         //Иначе создаем новую
         Subject subject = subjectRepository.findById(request.subjectId())
-                .orElseThrow(() -> new NotFoundException("Subject not found with id: " + request.subjectId()));
+                .orElseThrow(() -> new NotFoundException("Subject with id: %d not found".formatted(request.subjectId()),
+                        ExceptionCode.SUBJECT_NOT_FOUND));
 
         TeacherSubject teacherSubject = TeacherSubject.builder().id(id).subject(subject).build();
         return teacherSubjectMapper.toResponse(teacherSubjectRepository.save(teacherSubject), teacher);
@@ -81,7 +84,8 @@ public class TeacherSubjectService {
                 .subjectId(request.subjectId()).teacherId(request.teacherId()).build();
 
         if (!teacherSubjectRepository.existsById(id)) {
-            throw new ConflictException("Teacher subject relation not found");
+            throw new ConflictException("Teacher subject relation with id: %s not found".formatted(id),
+                    ExceptionCode.TEACHER_SUBJECT_NOT_FOUND);
         }
 
         teacherSubjectRepository.softDelete(id.getSubjectId(), id.getTeacherId());

@@ -1,19 +1,19 @@
 package com.rusobr.academic.application.service;
 
+import com.rusobr.academic.application.mapper.GradeMapper;
+import com.rusobr.academic.application.mapper.LessonInstanceMapper;
 import com.rusobr.academic.domain.model.AcademicPeriod;
 import com.rusobr.academic.domain.model.Grade;
 import com.rusobr.academic.domain.model.LessonInstance;
-import com.rusobr.academic.web.exception.ConflictException;
-import com.rusobr.academic.web.exception.NotFoundException;
-import com.rusobr.academic.application.mapper.GradeMapper;
-import com.rusobr.academic.application.mapper.LessonInstanceMapper;
-import com.rusobr.academic.infrastructure.persistence.repository.AcademicPeriodRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.GradeRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.LessonInstanceRepository;
 import com.rusobr.academic.web.dto.grade.GradeResponse;
 import com.rusobr.academic.web.dto.grade.GradeWithSubjectNameResponse;
 import com.rusobr.academic.web.dto.grade.createGrade.CreateGradeRequest;
 import com.rusobr.academic.web.dto.grade.createGrade.CreateGradeResponse;
+import com.rusobr.academic.web.exception.ConflictException;
+import com.rusobr.academic.web.exception.ExceptionCode;
+import com.rusobr.academic.web.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,20 +29,20 @@ public class GradeService {
 
     private final GradeRepository gradeRepository;
     private final GradeMapper gradeMapper;
-    private final AcademicPeriodRepository academicPeriodRepository;
     private final LessonInstanceRepository lessonInstanceRepository;
     private final LessonInstanceMapper lessonInstanceMapper;
+    private final AcademicPeriodService academicPeriodService;
 
     @Transactional(readOnly = true)
-    public GradeResponse getById(Long gradeId) {
-        Grade grade = gradeRepository.findById(gradeId).orElseThrow(() -> new NotFoundException("Grade not found gradeId: " + gradeId));
+    public GradeResponse getById(Long id) {
+        Grade grade = gradeRepository.findById(id).orElseThrow(() -> new NotFoundException("Grade with id: %d not found".formatted(id),
+                ExceptionCode.GRADE_NOT_FOUND));
         return gradeMapper.toGradeResponseDto(grade);
     }
 
     @Transactional(readOnly = true)
     public Double getAverageByPeriod(Long studentId, Long academicPeriodId) {
-        AcademicPeriod academicPeriod = academicPeriodRepository.findById(academicPeriodId)
-                .orElseThrow(() -> new NotFoundException("Academic period not found academicPeriodId: " + academicPeriodId));
+        AcademicPeriod academicPeriod = academicPeriodService.getById(academicPeriodId);
         Double avg = gradeRepository.getAverageGrade(studentId, academicPeriod.getStartDate(), academicPeriod.getEndDate());
         if (avg == null) return 0.0;
 
@@ -59,11 +59,12 @@ public class GradeService {
     @Transactional
     public CreateGradeResponse create(CreateGradeRequest gradeDto) {
         LessonInstance lessonInstance = lessonInstanceRepository.findById(gradeDto.lessonInstanceId())
-                .orElseThrow(() -> new NotFoundException("Lesson instance not found"));
-        AcademicPeriod academicPeriod = academicPeriodRepository.findByDate(lessonInstance.getLessonDate())
-                .orElseThrow(() -> new NotFoundException("Academic period not found"));
+                .orElseThrow(() -> new NotFoundException("Lesson instance with id: %d".formatted(gradeDto.lessonInstanceId()),
+                        ExceptionCode.LESSON_INSTANCE_NOT_FOUND));
+        AcademicPeriod academicPeriod = academicPeriodService.getByDate(lessonInstance.getLessonDate());
         if (academicPeriod.isClosed()) {
-            throw new ConflictException("Academic period is already closed");
+            throw new ConflictException("Academic period with id: %d is already closed".formatted(academicPeriod.getId()),
+                    ExceptionCode.ACADEMIC_PERIOD_CLOSED_CONFLICT);
         }
 
         Grade grade = gradeMapper.toGrade(gradeDto);
@@ -76,12 +77,11 @@ public class GradeService {
     @Transactional
     public void delete(Long id) {
         Grade grade = gradeRepository.findWithLessonInstanceById(id)
-                .orElseThrow(() -> new NotFoundException("Grade not found gradeId: " + id));
+                .orElseThrow(() -> new NotFoundException("Grade with id: %d".formatted(id), ExceptionCode.GRADE_NOT_FOUND));
 
-        AcademicPeriod academicPeriod = academicPeriodRepository.findByDate(grade.getLessonInstance().getLessonDate())
-                .orElseThrow(() -> new NotFoundException("Academic period not found"));
+        AcademicPeriod academicPeriod = academicPeriodService.getByDate(grade.getLessonInstance().getLessonDate());
         if (academicPeriod.isClosed()) {
-            throw new ConflictException("Academic period is closed");
+            throw new ConflictException("Academic period is closed", ExceptionCode.ACADEMIC_PERIOD_CLOSED_CONFLICT);
         }
 
         gradeRepository.delete(grade);

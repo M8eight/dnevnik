@@ -138,7 +138,7 @@ class TeacherSubjectServiceTest {
 
             assertThatThrownBy(() -> service.create(request))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("Subject not found");
+                    .hasMessageContaining("Subject with id: " + SUBJECT_ID + " not found");
         }
     }
 
@@ -164,7 +164,7 @@ class TeacherSubjectServiceTest {
 
             assertThatThrownBy(() -> service.delete(request))
                     .isInstanceOf(ConflictException.class)
-                    .hasMessageContaining("relation not found");
+                    .hasMessageContaining("not found");
 
             verify(teacherSubjectRepository, never()).softDelete(any(), any());
         }

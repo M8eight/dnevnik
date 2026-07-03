@@ -17,6 +17,7 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now(),
                 HttpStatus.NOT_FOUND.value(),
                 ex.getMessage(),
+                ex.getCode(),
                 req.getRequestURI()
         );
 
@@ -30,6 +31,7 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now(),
                 HttpStatus.CONFLICT.value(),
                 ex.getMessage(),
+                ex.getCode(),
                 req.getRequestURI()
         );
 
@@ -43,6 +45,7 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now(),
                 HttpStatus.SERVICE_UNAVAILABLE.value(),
                 ex.getMessage(),
+                ex.getCode(),
                 req.getRequestURI()
         );
 
@@ -56,6 +59,7 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now(),
                 HttpStatus.BAD_REQUEST.value(),
                 ex.getMessage(),
+                ex.getCode(),
                 req.getRequestURI()
         );
 

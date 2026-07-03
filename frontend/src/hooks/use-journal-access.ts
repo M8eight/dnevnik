@@ -24,7 +24,7 @@ export function JournalAccessProvider({
   
   const value: JournalAccessContextType = useMemo(() => {
     const isPeriodClosed = Boolean(currentPeriod?.isClosed);
-    const isYearClosed = currentYear ? !currentYear.isActive : false;
+    const isYearClosed = currentYear ? currentYear.closed : false;
     const isReadOnly = isPeriodClosed || isYearClosed;
     
     let closedReason: "year" | "period" | null = null;
@@ -39,7 +39,6 @@ export function JournalAccessProvider({
     };
   }, [currentPeriod, currentYear]);
 
-  // Оборачиваем провайдер
   return createElement(JournalAccessContext.Provider, { value }, children);
 }
 

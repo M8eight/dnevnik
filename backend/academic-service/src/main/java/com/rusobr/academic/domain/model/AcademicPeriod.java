@@ -1,5 +1,7 @@
 package com.rusobr.academic.domain.model;
 
+import com.rusobr.academic.web.exception.ConflictException;
+import com.rusobr.academic.web.exception.ExceptionCode;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
@@ -25,10 +27,11 @@ public class AcademicPeriod extends BaseEntity {
     private String name;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "academic_year_id",  nullable = false)
+    @JoinColumn(name = "academic_year_id", nullable = false)
     private AcademicYear academicYear;
 
     @Builder.Default
+    @Setter(AccessLevel.NONE)
     private boolean closed = false;
 
     private LocalDate startDate;
@@ -39,11 +42,18 @@ public class AcademicPeriod extends BaseEntity {
         return !date.isBefore(startDate) && !date.isAfter(endDate);
     }
 
-    @PrePersist
-    @PreUpdate
-    private void validate() {
-        if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
-            throw new IllegalArgumentException("Start date cannot be after end date");
+    public void close() {
+        if (this.closed) {
+            throw new ConflictException("Academic period is already open", ExceptionCode.ACADEMIC_PERIOD_CLOSE_CONFLICT);
         }
+        this.closed = true;
     }
+
+    public void open() {
+        if (!this.closed) {
+            throw new ConflictException("Academic period is already closed", ExceptionCode.ACADEMIC_PERIOD_OPEN_CONFLICT);
+        }
+        this.closed = false;
+    }
+
 }

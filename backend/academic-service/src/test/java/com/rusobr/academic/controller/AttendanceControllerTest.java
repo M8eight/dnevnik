@@ -8,6 +8,7 @@ import com.rusobr.academic.web.dto.attendances.AttendanceRequest;
 import com.rusobr.academic.web.dto.attendances.AttendanceResponse;
 import com.rusobr.academic.web.dto.lessonInstance.LessonInstanceDto;
 import com.rusobr.academic.web.exception.ConflictException;
+import com.rusobr.academic.web.exception.ExceptionCode;
 import com.rusobr.academic.web.exception.NotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -83,7 +84,7 @@ public class AttendanceControllerTest {
     @DisplayName("POST /attendances — 404 если не найдено занятие")
     void createAttendance_ShouldReturn404_WhenLessonInstanceNotFound() throws Exception {
         AttendanceRequest request = buildRequest();
-        doThrow(new NotFoundException("Lesson Instance Not Found " + LESSON_INSTANCE_ID))
+        doThrow(new NotFoundException("Lesson Instance Not Found " + LESSON_INSTANCE_ID, ExceptionCode.LESSON_INSTANCE_NOT_FOUND))
                 .when(attendanceService).create(request);
 
         mockMvc.perform(post("/api/v1/attendances")
@@ -97,7 +98,7 @@ public class AttendanceControllerTest {
     @DisplayName("POST /attendances — 409 если академический период закрыт")
     void createAttendance_ShouldReturn409_WhenAcademicPeriodClosed() throws Exception {
         AttendanceRequest request = buildRequest();
-        doThrow(new ConflictException("Academic Period is closed"))
+        doThrow(new ConflictException("Academic Period is closed", ExceptionCode.ACADEMIC_PERIOD_CLOSED_CONFLICT))
                 .when(attendanceService).create(request);
 
         mockMvc.perform(post("/api/v1/attendances")
@@ -121,7 +122,7 @@ public class AttendanceControllerTest {
     @Test
     @DisplayName("DELETE /attendances/{id} — 404 если посещение не найдено")
     void deleteAttendance_ShouldReturn404_WhenNotFound() throws Exception {
-        doThrow(new NotFoundException("Attendance with id " + ATTENDANCE_ID + " not found"))
+        doThrow(new NotFoundException("Attendance with id " + ATTENDANCE_ID + " not found", ExceptionCode.ACADEMIC_PERIOD_NOT_FOUND))
                 .when(attendanceService).delete(ATTENDANCE_ID);
 
         mockMvc.perform(delete("/api/v1/attendances/{id}", ATTENDANCE_ID))
@@ -132,7 +133,7 @@ public class AttendanceControllerTest {
     @Test
     @DisplayName("DELETE /attendances/{id} — 409 если удаление запрещено")
     void deleteAttendance_ShouldReturn409_WhenConflict() throws Exception {
-        doThrow(new ConflictException("Cannot delete attendance record"))
+        doThrow(new ConflictException("Cannot delete attendance record", ExceptionCode.ACADEMIC_PERIOD_CLOSED_CONFLICT))
                 .when(attendanceService).delete(ATTENDANCE_ID);
 
         mockMvc.perform(delete("/api/v1/attendances/{id}", ATTENDANCE_ID))

@@ -7,6 +7,7 @@ import com.rusobr.academic.infrastructure.persistence.repository.ClassStudentRep
 import com.rusobr.academic.infrastructure.persistence.repository.SchoolClassRepository;
 import com.rusobr.academic.web.dto.feign.UserFeignResponse;
 import com.rusobr.academic.web.exception.ConflictException;
+import com.rusobr.academic.web.exception.ExceptionCode;
 import com.rusobr.academic.web.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,10 +43,10 @@ public class ClassStudentService {
     @Transactional
     public void addStudentTransactional(Long classId, Long studentId) {
         if (!schoolClassRepository.existsById(classId)) {
-            throw new NotFoundException("SchoolClass Not Found by id: " + classId);
+            throw new NotFoundException("SchoolClass with id " + classId + " not found", ExceptionCode.SCHOOL_CLASS_NOT_FOUND);
         }
         if (classStudentRepository.existsByStudentId(studentId)) {
-            throw new ConflictException("Student already exists in class");
+            throw new ConflictException("Student already exists in class", ExceptionCode.SCHOOL_CLASS_STUDENT_ALREADY_PRESENT);
         }
 
         SchoolClass schoolClass = schoolClassRepository.getReferenceById(classId);
@@ -59,7 +60,8 @@ public class ClassStudentService {
     @Transactional
     public void removeStudent(Long classId, Long studentId) {
         ClassStudent classStudent = classStudentRepository.findBySchoolClassIdAndStudentId(classId, studentId)
-                .orElseThrow(() -> new NotFoundException("ClassStudent Not Found by classId: " + classId + " and studentId: " + studentId));
+                .orElseThrow(() -> new NotFoundException("Class student not found by classId: %d and studentId: %d"
+                        .formatted(classId, studentId), ExceptionCode.CLASS_STUDENT_NOT_FOUND));
 
         classStudentRepository.delete(classStudent);
     }

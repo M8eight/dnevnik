@@ -6,7 +6,7 @@ export interface AcademicYearResponse {
     description?: string;
     startDate: string;
     endDate: string;
-    isActive: boolean;
+    closed: boolean;
 }
 
 export interface AcademicYearRequest {
@@ -31,9 +31,14 @@ export const createAcademicYear = async (request: AcademicYearRequest): Promise<
     return data;
 };
 
-export const setActiveAcademicYear = async (id: number, active: boolean): Promise<void> => {
-    await api.patch(`/academic-service/api/v1/academic-years/active/${id}?active=${active}`);
-};
+export const openAcademicYear = async (id: number): Promise<void> => {
+    await api.patch(`/academic-service/api/v1/academic-years/${id}/open`);
+}
+
+export const closeAcademicYear = async (id: number): Promise<void> => {
+    await api.patch(`/academic-service/api/v1/academic-years/${id}/close`);
+}
+
 
 export const updateAcademicYear = async (id: number, request: Partial<AcademicYearRequest>): Promise<void> => {
     await api.put(`/academic-service/api/v1/academic-years/${id}`, request);

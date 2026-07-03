@@ -95,8 +95,6 @@ export default function JournalTable({
                       </p>
                     </td>
                     {sortedLessons.map((lesson) => {
-                      // БЫЛО: .find(...) — брал только одну (первую попавшуюся) запись.
-                      // СТАЛО: .filter(...) — берём ВСЕ оценки/отметки посещаемости для этого урока.
                       const grades = entry?.grades.filter((g) => g.lessonInstanceId === lesson.id) ?? [];
                       const attendances = entry?.attendances.filter((a) => a.lessonInstanceId === lesson.id) ?? [];
 
@@ -104,12 +102,16 @@ export default function JournalTable({
                         <td key={lesson.id} className="h-17.5 p-0 text-center border-r border-black/5">
                           {isReadOnly ? (
                             <div className="flex flex-wrap items-center justify-center gap-0.5 w-full h-full px-1 text-[12px] font-bold text-(--navy)/60 select-none">
-                              {grades.map((g) => (
-                                <span key={`g-${g.gradeId}`}>{g.value}</span>
-                              ))}
-                              {attendances.map((a) => (
-                                <span key={`a-${a.attendanceId}`}>{a.status}</span>
-                              ))}
+                              <GradePopover
+                                grades={grades}
+                                attendances={attendances}
+                                studentId={student.id}
+                                lessonInstanceId={lesson.id}
+                                academicPeriodId={academicPeriodId}
+                                gradeType={gradeType}
+                                gradeWeight={gradeWeight}
+                                viewMode={viewMode}
+                              />
                             </div>
                           ) : (
                             <GradePopover

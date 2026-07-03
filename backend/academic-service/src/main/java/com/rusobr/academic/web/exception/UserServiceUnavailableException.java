@@ -1,7 +1,7 @@
 package com.rusobr.academic.web.exception;
 
-public class UserServiceUnavailableException extends RuntimeException {
-    public UserServiceUnavailableException(String message, Throwable cause) {
-        super(message, cause);
+public class UserServiceUnavailableException extends BaseException {
+    public UserServiceUnavailableException(String message, Throwable cause, ExceptionCode code) {
+        super(message, cause, code);
     }
 }

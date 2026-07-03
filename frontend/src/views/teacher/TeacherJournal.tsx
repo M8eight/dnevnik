@@ -109,16 +109,15 @@ export default function TeacherJournal() {
       });
   }, [data]);
 
-  const sortedStudents = useMemo(() => {
-    const students = [...(data?.students ?? [])].sort((a, b) =>
-      a.lastName.localeCompare(b.lastName, "ru")
-    );
+  const filteredStudents = useMemo(() => {
+    const students = data?.students?.found ?? [];
     if (!searchQuery.trim()) return students;
+
     const q = searchQuery.toLowerCase();
     return students.filter((s) =>
       `${s.lastName} ${s.firstName}`.toLowerCase().includes(q)
     );
-  }, [data, searchQuery]);
+  }, [data?.students, searchQuery]);
 
   const journalMap = useMemo(() => {
     const m: Record<number, StudentJournalEntry> = {};
@@ -133,6 +132,7 @@ export default function TeacherJournal() {
   return (
     <JournalAccessProvider currentPeriod={currentSelectedPeriod} currentYear={currentAcademicYear}>
       <div className="relative z-10 min-h-screen px-4 md:px-10 pt-5 pb-14">
+
         <TeacherNavbar />
 
         <header className="sticky top-5 z-50 max-w-350 mx-auto mb-6">
@@ -164,7 +164,7 @@ export default function TeacherJournal() {
               <SelectContent className="rounded-2xl border-none shadow-2xl bg-white/95 backdrop-blur-xl max-h-87.5">
                 {academicYears?.map((academicYear) => (
                   <SelectItem key={academicYear.id} value={academicYear.id.toString()} className="font-bold text-[13px] py-3 rounded-xl cursor-pointer">
-                    {academicYear.name} {!academicYear.isActive && "(Архив)"}
+                    {academicYear.name} {academicYear.closed && "(Архив)"}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -275,7 +275,7 @@ export default function TeacherJournal() {
                 onExport={() => console.log("export")}
               />
               <JournalTable
-                sortedStudents={sortedStudents}
+                sortedStudents={filteredStudents}
                 sortedLessons={sortedLessons}
                 journalMap={journalMap}
                 isLoading={isLoading}
@@ -300,7 +300,7 @@ export default function TeacherJournal() {
             <FinalGradesView
               teachingAssignmentId={assignmentId}
               academicYearId={parseInt(resolvedAcademicYearId, 10) || 0}
-              students={sortedStudents}
+              students={filteredStudents}
               currentAcademicPeriodId={academicPeriodId}
             />
           )}

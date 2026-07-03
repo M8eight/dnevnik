@@ -8,7 +8,7 @@ export interface AcademicPeriod {
 
 export interface AcademicYear {
   id: number;
-  isActive: boolean;
+  closed: boolean;
   name: string;
 }
 
@@ -19,5 +19,4 @@ export interface JournalAccessContextType {
   closedReason: "year" | "period" | null;
 }
 
-// Создаем контекст ОДИН раз
 export const JournalAccessContext = createContext<JournalAccessContextType | null>(null);

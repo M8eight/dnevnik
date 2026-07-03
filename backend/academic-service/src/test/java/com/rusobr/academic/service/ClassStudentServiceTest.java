@@ -95,7 +95,7 @@ class ClassStudentServiceTest {
 
             assertThatThrownBy(() -> service.addStudentTransactional(CLASS_ID, STUDENT_ID))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("SchoolClass Not Found by id: " + CLASS_ID);
+                    .hasMessageContaining("SchoolClass with id " + CLASS_ID + " not found");
 
             verify(classStudentRepository, never()).existsByStudentId(any());
             verify(classStudentRepository, never()).save(any());
@@ -145,7 +145,7 @@ class ClassStudentServiceTest {
 
             assertThatThrownBy(() -> service.removeStudent(CLASS_ID, STUDENT_ID))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("ClassStudent Not Found by classId: " + CLASS_ID + " and studentId: " + STUDENT_ID);
+                    .hasMessageContaining("Class student not found by classId: " + CLASS_ID + " and studentId: " + STUDENT_ID);
 
             verify(classStudentRepository, never()).delete(any());
         }

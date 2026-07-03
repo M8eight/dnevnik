@@ -37,7 +37,7 @@ export default function SchoolClassPage() {
         return academicYears?.find(year => year.id.toString() === resolvedAcademicYearId);
     }, [academicYears, resolvedAcademicYearId]);
 
-    const isYearClosed = currentAcademicYear ? !currentAcademicYear.isActive : false;
+    const isYearClosed = currentAcademicYear ? currentAcademicYear.closed : false;
 
     const { data: classes = [], isLoading } = useGetAllClassesByAcademicYear(parseInt(resolvedAcademicYearId, 10));
     
@@ -101,7 +101,7 @@ export default function SchoolClassPage() {
                             <SelectContent className="rounded-2xl border-none shadow-2xl bg-white/95 backdrop-blur-xl max-h-87.5">
                                 {academicYears?.map((academicYear) => (
                                     <SelectItem key={academicYear.id} value={academicYear.id.toString()} className="font-bold text-[13px] py-3 rounded-xl cursor-pointer">
-                                        {academicYear.name} {!academicYear.isActive && "(Архив)"}
+                                        {academicYear.name} {academicYear.closed && "(Архив)"}
                                     </SelectItem>
                                 ))}
                             </SelectContent>

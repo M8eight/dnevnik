@@ -6,9 +6,9 @@ import com.rusobr.academic.domain.enums.AttendanceStatus;
 import com.rusobr.academic.domain.model.AcademicPeriod;
 import com.rusobr.academic.domain.model.Attendance;
 import com.rusobr.academic.domain.model.LessonInstance;
-import com.rusobr.academic.infrastructure.persistence.repository.AcademicPeriodRepository;
+import com.rusobr.academic.application.service.AcademicPeriodService;
+import com.rusobr.academic.application.service.LessonInstanceService;
 import com.rusobr.academic.infrastructure.persistence.repository.AttendanceRepository;
-import com.rusobr.academic.infrastructure.persistence.repository.LessonInstanceRepository;
 import com.rusobr.academic.web.dto.attendances.AttendanceRequest;
 import com.rusobr.academic.web.dto.attendances.AttendanceResponse;
 import com.rusobr.academic.web.exception.ConflictException;
@@ -33,8 +33,8 @@ class AttendanceServiceTest {
 
     @Mock private AttendanceRepository attendanceRepository;
     @Mock private AttendanceMapper attendanceMapper;
-    @Mock private LessonInstanceRepository lessonInstanceRepository;
-    @Mock private AcademicPeriodRepository academicPeriodRepository;
+    @Mock private LessonInstanceService lessonInstanceService;
+    @Mock private AcademicPeriodService academicPeriodService;
 
     @InjectMocks private AttendanceService service;
 
@@ -51,13 +51,14 @@ class AttendanceServiceTest {
         @DisplayName("lesson instance не найден — бросает NotFoundException")
         void lessonInstanceNotFound_throwsException() {
             AttendanceRequest request = new AttendanceRequest(STUDENT_ID, AttendanceStatus.ABSENT, LESSON_INSTANCE_ID);
-            when(lessonInstanceRepository.findById(LESSON_INSTANCE_ID)).thenReturn(Optional.empty());
+            when(lessonInstanceService.getById(LESSON_INSTANCE_ID))
+                    .thenThrow(new NotFoundException("Lesson instance with id " + LESSON_INSTANCE_ID + " not found", null));
 
             assertThatThrownBy(() -> service.create(request))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("Lesson Instance Not Found" + LESSON_INSTANCE_ID);
+                    .hasMessageContaining("Lesson instance with id " + LESSON_INSTANCE_ID + " not found");
 
-            verifyNoInteractions(academicPeriodRepository, attendanceRepository, attendanceMapper);
+            verifyNoInteractions(attendanceRepository, attendanceMapper);
         }
 
         @Test
@@ -66,12 +67,13 @@ class AttendanceServiceTest {
             AttendanceRequest request = new AttendanceRequest(STUDENT_ID, AttendanceStatus.ABSENT, LESSON_INSTANCE_ID);
             LessonInstance lessonInstance = LessonInstance.builder().id(LESSON_INSTANCE_ID).lessonDate(LESSON_DATE).build();
 
-            when(lessonInstanceRepository.findById(LESSON_INSTANCE_ID)).thenReturn(Optional.of(lessonInstance));
-            when(academicPeriodRepository.findByDate(LESSON_DATE)).thenReturn(Optional.empty());
+            when(lessonInstanceService.getById(LESSON_INSTANCE_ID)).thenReturn(lessonInstance);
+            when(academicPeriodService.getByDate(LESSON_DATE))
+                    .thenThrow(new NotFoundException("Academic period by date " + LESSON_DATE + " not found", null));
 
             assertThatThrownBy(() -> service.create(request))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("Academic Period Not Found");
+                    .hasMessageContaining("Academic period by date " + LESSON_DATE + " not found");
 
             verifyNoInteractions(attendanceRepository, attendanceMapper);
         }
@@ -83,12 +85,12 @@ class AttendanceServiceTest {
             LessonInstance lessonInstance = LessonInstance.builder().id(LESSON_INSTANCE_ID).lessonDate(LESSON_DATE).build();
             AcademicPeriod closedPeriod = AcademicPeriod.builder().closed(true).build();
 
-            when(lessonInstanceRepository.findById(LESSON_INSTANCE_ID)).thenReturn(Optional.of(lessonInstance));
-            when(academicPeriodRepository.findByDate(LESSON_DATE)).thenReturn(Optional.of(closedPeriod));
+            when(lessonInstanceService.getById(LESSON_INSTANCE_ID)).thenReturn(lessonInstance);
+            when(academicPeriodService.getByDate(LESSON_DATE)).thenReturn(closedPeriod);
 
             assertThatThrownBy(() -> service.create(request))
                     .isInstanceOf(ConflictException.class)
-                    .hasMessageContaining("Academic Period is closed");
+                    .hasMessageContaining("is closed");
 
             verifyNoInteractions(attendanceRepository, attendanceMapper);
         }
@@ -109,8 +111,8 @@ class AttendanceServiceTest {
 
             AttendanceResponse expectedResponse = mock(AttendanceResponse.class);
 
-            when(lessonInstanceRepository.findById(LESSON_INSTANCE_ID)).thenReturn(Optional.of(lessonInstance));
-            when(academicPeriodRepository.findByDate(LESSON_DATE)).thenReturn(Optional.of(openPeriod));
+            when(lessonInstanceService.getById(LESSON_INSTANCE_ID)).thenReturn(lessonInstance);
+            when(academicPeriodService.getByDate(LESSON_DATE)).thenReturn(openPeriod);
             when(attendanceRepository.findByStudentIdAndLessonInstanceId(STUDENT_ID, LESSON_INSTANCE_ID))
                     .thenReturn(Optional.of(existingAttendance));
             when(attendanceRepository.save(existingAttendance)).thenReturn(existingAttendance);
@@ -145,8 +147,8 @@ class AttendanceServiceTest {
 
             AttendanceResponse expectedResponse = mock(AttendanceResponse.class);
 
-            when(lessonInstanceRepository.findById(LESSON_INSTANCE_ID)).thenReturn(Optional.of(lessonInstance));
-            when(academicPeriodRepository.findByDate(LESSON_DATE)).thenReturn(Optional.of(openPeriod));
+            when(lessonInstanceService.getById(LESSON_INSTANCE_ID)).thenReturn(lessonInstance);
+            when(academicPeriodService.getByDate(LESSON_DATE)).thenReturn(openPeriod);
             when(attendanceRepository.findByStudentIdAndLessonInstanceId(STUDENT_ID, LESSON_INSTANCE_ID))
                     .thenReturn(Optional.empty());
             when(attendanceMapper.toAttendance(request, lessonInstance)).thenReturn(newAttendance);

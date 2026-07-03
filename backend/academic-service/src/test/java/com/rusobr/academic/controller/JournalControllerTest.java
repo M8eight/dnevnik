@@ -14,6 +14,7 @@ import com.rusobr.academic.web.dto.lessonInstance.GradesLessonsResponse;
 import com.rusobr.academic.web.dto.lessonInstance.LessonInstanceDto;
 import com.rusobr.academic.web.dto.lessonInstance.teacher.TeacherJournalResponse;
 import com.rusobr.academic.web.dto.lessonInstance.teacher.StudentJournalDto;
+import com.rusobr.academic.web.exception.ExceptionCode;
 import com.rusobr.academic.web.exception.NotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -107,7 +108,7 @@ public class JournalControllerTest {
     @DisplayName("GET /grades/by-student — 404 when period not found")
     void getGradesByStudentId_ShouldReturn404_WhenPeriodNotFound() throws Exception {
         when(lessonInstanceService.getGradesLessonsByStudentId(STUDENT_ID, PERIOD_ID))
-                .thenThrow(new NotFoundException("Academic period with id " + PERIOD_ID + " not found"));
+                .thenThrow(new NotFoundException("Academic period with id " + PERIOD_ID + " not found", ExceptionCode.ACADEMIC_PERIOD_NOT_FOUND));
 
         mockMvc.perform(get("/api/v1/grades/by-student")
                         .param("studentId", String.valueOf(STUDENT_ID))

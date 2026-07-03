@@ -1,5 +1,7 @@
 package com.rusobr.academic.domain.model;
 
+import com.rusobr.academic.web.exception.ConflictException;
+import com.rusobr.academic.web.exception.ExceptionCode;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -35,32 +37,24 @@ public class AcademicYear extends BaseEntity {
     private LocalDate endDate;
 
     @Builder.Default
-    private Boolean isActive = true;
-
-    @PrePersist
-    @PreUpdate
-    public void normalize() {
-        normalizeAndValidateDates();
-        normalizeName();
-    }
-
-    private void normalizeAndValidateDates() {
-        if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
-            throw new IllegalArgumentException("Start date cannot be after end date");
-        }
-    }
-
-    private void normalizeName() {
-        if (name == null || name.isBlank()) {
-            if (startDate != null && endDate != null) {
-                name = String.format("%d-%d", startDate.getYear(), endDate.getYear());
-            }
-        } else {
-            name = name.trim();
-        }
-    }
+    @Setter(AccessLevel.NONE)
+    private boolean closed = false;
 
     public boolean contains(LocalDate date) {
         return !date.isBefore(startDate) && !date.isAfter(endDate);
+    }
+
+    public void close() {
+        if (this.closed) {
+            throw new ConflictException("Academic year is already closed", ExceptionCode.ACADEMIC_YEAR_CLOSE_CONFLICT);
+        }
+        this.closed = true;
+    }
+
+    public void open() {
+        if (!this.closed) {
+            throw new ConflictException("Academic year is already open", ExceptionCode.ACADEMIC_YEAR_OPEN_CONFLICT);
+        }
+        this.closed = false;
     }
 }
