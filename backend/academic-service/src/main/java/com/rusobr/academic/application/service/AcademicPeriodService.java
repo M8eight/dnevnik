@@ -9,6 +9,7 @@ import com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodRequest;
 import com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodResponse;
 import com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodUpdateRequest;
 import com.rusobr.academic.web.exception.ConflictException;
+import com.rusobr.academic.web.exception.ExceptionCode;
 import com.rusobr.academic.web.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,19 @@ public class AcademicPeriodService {
     private final AcademicPeriodRepository academicPeriodRepository;
     private final AcademicPeriodMapper academicPeriodMapper;
     private final AcademicYearRepository academicYearRepository;
+
+    @Transactional(readOnly = true)
+    public AcademicPeriod getById(Long id) {
+        return academicPeriodRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Academic period with id %d not found".formatted(id),
+                        ExceptionCode.ACADEMIC_PERIOD_NOT_FOUND));
+    }
+
+    public AcademicPeriod getByDate(LocalDate date) {
+        return academicPeriodRepository.findByDate(date)
+                .orElseThrow(() -> new NotFoundException("Academic period by date %s not found".formatted(date),
+                        ExceptionCode.ACADEMIC_PERIOD_NOT_FOUND));
+    }
 
     @Transactional(readOnly = true)
     public List<AcademicPeriodResponse> getAll() {
@@ -52,11 +66,7 @@ public class AcademicPeriodService {
 
         validateAcademicYear(academicPeriod.getAcademicYear());
 
-        if (!academicPeriod.isClosed()) {
-            throw new ConflictException("Academic period is already open");
-        }
-
-        academicPeriod.setClosed(false);
+        academicPeriod.open();
     }
 
     @Transactional
@@ -65,16 +75,11 @@ public class AcademicPeriodService {
 
         validateAcademicYear(academicPeriod.getAcademicYear());
 
-        if (academicPeriod.isClosed()) {
-            throw new ConflictException("Academic period is already closed");
-        }
-
-        academicPeriod.setClosed(true);
+        academicPeriod.close();
     }
 
     @Transactional
     public AcademicPeriodResponse create(AcademicPeriodRequest request) {
-
         validateDates(request.startDate(), request.endDate());
 
         AcademicYear academicYear = getAcademicYearOrThrow(request.academicYearId());
@@ -93,16 +98,15 @@ public class AcademicPeriodService {
         validateAcademicYear(academicPeriod.getAcademicYear());
 
         if (academicPeriod.isClosed()) {
-            throw new ConflictException("Academic period is closed");
+            throw new ConflictException("Academic period is already closed", ExceptionCode.ACADEMIC_PERIOD_CLOSE_CONFLICT);
         }
 
         if (academicPeriodRepository.existsByName(request.name())) {
-            throw new ConflictException("Academic period with name " + request.name() + " already exists");
+            throw new ConflictException("Academic period with name " + request.name() + " already exists"
+            , ExceptionCode.ACADEMIC_PERIOD_ALREADY_EXISTS);
         }
 
         if (request.name() != null) academicPeriod.setName(request.name());
-
-
     }
 
     @Transactional
@@ -117,23 +121,26 @@ public class AcademicPeriodService {
     // helpers
     private AcademicYear getAcademicYearOrThrow(Long id) {
         return academicYearRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Academic year with id " + id + " not found"));
+                .orElseThrow(() -> new NotFoundException("Academic year with id " + id + " not found"
+                , ExceptionCode.ACADEMIC_YEAR_NOT_FOUND));
     }
 
     private AcademicPeriod getWithAcademicYearOrThrow(Long id) {
         return academicPeriodRepository.findWithAcademicYearById(id)
-                .orElseThrow(() -> new NotFoundException("Academic period with id " + id + " not found"));
+                .orElseThrow(() -> new NotFoundException("Academic period with id " + id + " not found"
+                , ExceptionCode.ACADEMIC_PERIOD_NOT_FOUND));
     }
 
     private void validateDates(LocalDate start, LocalDate end) {
         if (start != null && end != null && !start.isBefore(end)) {
-            throw new ConflictException("Start date must be before end date");
+            throw new ConflictException("Start date must be before end date", ExceptionCode.ACADEMIC_PERIOD_DATES_CONFLICT);
         }
     }
 
     private void validateAcademicYear(AcademicYear academicYear) {
-        if (!academicYear.getIsActive()) {
-            throw new ConflictException("AcademicYear with id " + academicYear.getId() + " is not active");
+        if (academicYear.isClosed()) {
+            throw new ConflictException("Academic year with id " + academicYear.getId() + " is closed"
+            , ExceptionCode.ACADEMIC_YEAR_CLOSED_CONFLICT);
         }
     }
 

@@ -85,7 +85,6 @@ public class DebugDataInitializer implements CommandLineRunner {
                 .description("Год")
                 .startDate(LocalDate.of(2025, 1, 1))
                 .endDate(LocalDate.of(2026, 6, 26))
-                .isActive(true)
                 .build());
 
         ClassBundle c8a = buildClass("8А", 24L, range(27L, 54L), S, academicYear);

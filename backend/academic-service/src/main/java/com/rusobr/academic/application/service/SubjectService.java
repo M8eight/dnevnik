@@ -1,6 +1,7 @@
 package com.rusobr.academic.application.service;
 
 import com.rusobr.academic.domain.model.Subject;
+import com.rusobr.academic.web.exception.ExceptionCode;
 import com.rusobr.academic.web.exception.NotFoundException;
 import com.rusobr.academic.application.mapper.SubjectMapper;
 import com.rusobr.academic.infrastructure.persistence.repository.SubjectRepository;
@@ -21,7 +22,8 @@ public class SubjectService {
 
     @Transactional(readOnly = true)
     public SubjectResponseDto getById(Long id) {
-        Subject subject = subjectRepository.findById(id).orElseThrow(() -> new NotFoundException("Subject not found " + id));
+        Subject subject = subjectRepository.findById(id).orElseThrow(() -> new NotFoundException("Subject with id: %d not found".formatted(id),
+                ExceptionCode.SUBJECT_NOT_FOUND));
         return subjectMapper.toSubjectResponseDto(subject);
     }
 
@@ -39,7 +41,8 @@ public class SubjectService {
     @Transactional
     public void delete(Long id) {
         if (!subjectRepository.existsById(id)) {
-            throw new NotFoundException("Subject not found " + id);
+            throw new NotFoundException("Subject with id: %d not found".formatted(id),
+                    ExceptionCode.SUBJECT_NOT_FOUND);
         }
         subjectRepository.deleteById(id);
     }

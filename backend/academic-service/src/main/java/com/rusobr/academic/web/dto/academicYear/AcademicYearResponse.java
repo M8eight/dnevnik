@@ -8,6 +8,6 @@ public record AcademicYearResponse(
         String description,
         LocalDate startDate,
         LocalDate endDate,
-        Boolean isActive
+        Boolean closed
 ) {
 }

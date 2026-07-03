@@ -5,7 +5,7 @@ create table academic_years
     description     varchar(255),
     start_date      date not null,
     end_date        date not null,
-    is_active       boolean not null default false,
+    closed       boolean not null,
     created_at      timestamptz,
     updated_at      timestamptz,
     deleted_at      timestamptz,

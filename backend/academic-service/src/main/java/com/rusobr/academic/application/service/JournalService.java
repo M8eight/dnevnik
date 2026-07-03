@@ -6,7 +6,6 @@ import com.rusobr.academic.domain.model.AcademicPeriod;
 import com.rusobr.academic.domain.model.LessonInstance;
 import com.rusobr.academic.domain.model.ScheduleLesson;
 import com.rusobr.academic.infrastructure.client.UserClient;
-import com.rusobr.academic.infrastructure.persistence.repository.AcademicPeriodRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.LessonInstanceRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.SchoolClassRepository;
 import com.rusobr.academic.web.dto.feign.BatchUserResponse;
@@ -15,7 +14,6 @@ import com.rusobr.academic.web.dto.lessonInstance.teacher.AttendanceStudentDto;
 import com.rusobr.academic.web.dto.lessonInstance.teacher.GradeStudentDto;
 import com.rusobr.academic.web.dto.lessonInstance.teacher.StudentJournalDto;
 import com.rusobr.academic.web.dto.lessonInstance.teacher.TeacherJournalResponse;
-import com.rusobr.academic.web.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,17 +31,16 @@ import java.util.stream.Collectors;
 public class JournalService {
 
     private final LessonInstanceRepository lessonInstanceRepository;
-    private final AcademicPeriodRepository academicPeriodRepository;
     private final AcademicPeriodMapper academicPeriodMapper;
     private final SchoolClassRepository schoolClassRepository;
     private final UserClient userClient;
     private final LessonInstanceMapper lessonInstanceMapper;
+    private final AcademicPeriodService academicPeriodService;
 
     @Transactional(readOnly = true)
     public GradesLessonsResponse getGradesLessonsByStudentId(Long studentId, Long academicPeriodId) {
         //Получаем Academic period
-        AcademicPeriod academicPeriod = academicPeriodRepository.findById(academicPeriodId)
-                .orElseThrow(() -> new NotFoundException("Academic period not found: " + academicPeriodId));
+        AcademicPeriod academicPeriod = academicPeriodService.getById(academicPeriodId);
 
         //Получаем плоский список оценок по предметам
         List<GradeJournalDto> gradeJournal = lessonInstanceRepository.findGradesLessonsByStudentId(studentId,
@@ -81,8 +78,7 @@ public class JournalService {
     public TeacherJournalResponse getJournalByAssignment(Long teachingAssignmentId,
                                                          Long academicPeriodId) {
         //Получаем Academic period
-        AcademicPeriod academicPeriod = academicPeriodRepository.findById(academicPeriodId)
-                .orElseThrow(() -> new NotFoundException("Academic period not found: " + academicPeriodId));
+        AcademicPeriod academicPeriod = academicPeriodService.getById(academicPeriodId);
 
         //Получаем экземпляры lessonInstance для верхней строки таблицы
         List<LessonInstanceDto> lessonInstances = lessonInstanceRepository.findLessonInstanceByTeachingAssignmentId(teachingAssignmentId,
@@ -145,8 +141,7 @@ public class JournalService {
     }
 
     public List<LessonInstanceDto> getInstancesByAssignment(Long teachingAssignmentId, Long academicPeriodId) {
-        AcademicPeriod academicPeriod = academicPeriodRepository.findById(academicPeriodId)
-                .orElseThrow(() -> new NotFoundException("Academic period not found: " + academicPeriodId));
+        AcademicPeriod academicPeriod = academicPeriodService.getById(academicPeriodId);
 
         return lessonInstanceRepository.findLessonInstanceByTeachingAssignmentId(teachingAssignmentId,
                 academicPeriod.getStartDate(), academicPeriod.getEndDate())
