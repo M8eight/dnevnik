@@ -14,6 +14,7 @@ import com.rusobr.user.web.dto.user.UserResponse;
 import com.rusobr.user.web.dto.user.update.UserUpdateData;
 import com.rusobr.user.web.dto.user.update.UserUpdateRequest;
 import com.rusobr.user.web.exception.ConflictException;
+import com.rusobr.user.web.exception.ExceptionCode;
 import com.rusobr.user.web.exception.NotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -137,7 +138,7 @@ public class UserControllerTest {
         UserCreateRequest<StudentDetails> request = new UserCreateRequest<>(
                 validUserDataDto(), UserRole.STUDENT, new StudentDetails("math")
         );
-        when(userOrchestrator.create(any())).thenThrow(new ConflictException("Could not create user"));
+        when(userOrchestrator.create(any())).thenThrow(new ConflictException("Could not create user", ExceptionCode.USER_CREATE_CONFLICT));
 
         mockMvc.perform(post("/api/v1/users/students")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -207,7 +208,7 @@ public class UserControllerTest {
         UserCreateRequest<ParentDetails> request = new UserCreateRequest<>(
                 validUserDataDto(), UserRole.PARENT, new ParentDetails()
         );
-        when(userOrchestrator.create(any())).thenThrow(new ConflictException("Could not create user"));
+        when(userOrchestrator.create(any())).thenThrow(new ConflictException("Could not create user", ExceptionCode.USER_CREATE_CONFLICT));
 
         mockMvc.perform(post("/api/v1/users/parents")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -250,7 +251,7 @@ public class UserControllerTest {
                 Map.of(UserRole.STUDENT, new StudentDetails("math"))
         );
         when(userOrchestrator.update(eq(USER_ID), any()))
-                .thenThrow(new ConflictException("Username already exists"));
+                .thenThrow(new ConflictException("Username already exists", ExceptionCode.USERNAME_ALREADY_EXISTS));
 
         mockMvc.perform(put("/api/v1/users/{id}", USER_ID)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -269,7 +270,7 @@ public class UserControllerTest {
                 Map.of(UserRole.STUDENT, new StudentDetails("math"))
         );
         when(userOrchestrator.update(eq(USER_ID), any()))
-                .thenThrow(new NotFoundException("User not found with id: " + USER_ID));
+                .thenThrow(new NotFoundException("User not found with id: " + USER_ID, ExceptionCode.USER_NOT_FOUND));
 
         mockMvc.perform(put("/api/v1/users/{id}", USER_ID)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -296,7 +297,7 @@ public class UserControllerTest {
     @Test
     @DisplayName("DELETE /users/{id} — 404 если пользователь не найден")
     void delete_ShouldReturn404_WhenUserNotFound() throws Exception {
-        doThrow(new NotFoundException("User not found with id: " + USER_ID))
+        doThrow(new NotFoundException("User not found with id: " + USER_ID, ExceptionCode.USER_NOT_FOUND))
                 .when(userService).deleteUserCascade(USER_ID);
 
         mockMvc.perform(delete("/api/v1/users/{id}", USER_ID))

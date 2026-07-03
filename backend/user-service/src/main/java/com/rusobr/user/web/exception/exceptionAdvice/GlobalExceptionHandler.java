@@ -1,9 +1,6 @@
 package com.rusobr.user.web.exception.exceptionAdvice;
 
-import com.rusobr.user.web.exception.ConflictException;
-import com.rusobr.user.web.exception.ErrorResponse;
-import com.rusobr.user.web.exception.KeycloakUserAlreadyExist;
-import com.rusobr.user.web.exception.NotFoundException;
+import com.rusobr.user.web.exception.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,19 +17,21 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now(),
                 HttpStatus.NOT_FOUND.value(),
                 ex.getMessage(),
+                ex.getCode(),
                 req.getRequestURI()
         );
 
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(KeycloakUserAlreadyExist.class)
-    public ResponseEntity<ErrorResponse> handleUserExists(KeycloakUserAlreadyExist ex, HttpServletRequest req) {
+    @ExceptionHandler(KeycloakUserException.class)
+    public ResponseEntity<ErrorResponse> handleUserExists(KeycloakUserException ex, HttpServletRequest req) {
 
         ErrorResponse errorResponse = new ErrorResponse(
                 LocalDateTime.now(),
                 HttpStatus.CONFLICT.value(),
                 ex.getMessage(),
+                ex.getCode(),
                 req.getRequestURI()
         );
 
@@ -46,9 +45,24 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now(),
                 HttpStatus.CONFLICT.value(),
                 ex.getMessage(),
+                ex.getCode(),
                 req.getRequestURI()
         );
 
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(AcademicServiceUnavailableException.class)
+    public ResponseEntity<ErrorResponse> handleConflict(AcademicServiceUnavailableException ex, HttpServletRequest req) {
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.SERVICE_UNAVAILABLE.value(),
+                ex.getMessage(),
+                ex.getCode(),
+                req.getRequestURI()
+        );
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.SERVICE_UNAVAILABLE);
     }
 }

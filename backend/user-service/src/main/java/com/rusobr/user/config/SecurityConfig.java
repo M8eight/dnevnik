@@ -1,4 +1,4 @@
-package com.rusobr.user.config.security;
+package com.rusobr.user.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

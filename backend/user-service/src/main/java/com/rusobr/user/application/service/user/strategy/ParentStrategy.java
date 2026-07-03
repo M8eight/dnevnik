@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
+import static com.rusobr.user.web.exception.ExceptionCode.PARENT_PROFILE_DETAILS_CONFLICT;
+
 @Slf4j
 @RequiredArgsConstructor
 @Component
@@ -30,7 +32,7 @@ public class ParentStrategy implements UserRoleStrategy {
                 parentService.create(userId, parentDetails);
             }
         } else {
-            throw new ConflictException("Invalid user profile details");
+            throw new ConflictException("Invalid parent profile details", PARENT_PROFILE_DETAILS_CONFLICT);
         }
     }
 
@@ -44,7 +46,7 @@ public class ParentStrategy implements UserRoleStrategy {
         if (userDetails instanceof ParentDetails parentDetails) {
             parentService.update(userId, parentDetails);
         } else {
-            throw new ConflictException("Invalid user profile details");
+            throw new ConflictException("Invalid parent profile details", PARENT_PROFILE_DETAILS_CONFLICT);
         }
     }
 

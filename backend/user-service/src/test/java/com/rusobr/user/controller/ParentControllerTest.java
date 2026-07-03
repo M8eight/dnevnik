@@ -6,6 +6,7 @@ import com.rusobr.user.web.controller.ParentController;
 import com.rusobr.user.web.dto.parent.ParentDetails;
 import com.rusobr.user.web.dto.parent.ParentResponse;
 import com.rusobr.user.web.dto.user.UserResponse;
+import com.rusobr.user.web.exception.ExceptionCode;
 import com.rusobr.user.web.exception.NotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -90,7 +91,7 @@ public class ParentControllerTest {
     @DisplayName("GET /parents/{id} — 404 если родитель не найден")
     void getWithUserById_ShouldReturn404_WhenNotFound() throws Exception {
         when(parentService.getWithUserById(PARENT_ID))
-                .thenThrow(new NotFoundException("Parent not found: " + PARENT_ID));
+                .thenThrow(new NotFoundException("Parent not found: " + PARENT_ID, ExceptionCode.PARENT_NOT_FOUND));
 
         mockMvc.perform(get("/api/v1/parents/{id}", PARENT_ID))
                 .andExpect(status().isNotFound())
@@ -115,7 +116,7 @@ public class ParentControllerTest {
     @DisplayName("GET /parents/{id}/details — 404 если родитель не найден")
     void getDetailsById_ShouldReturn404_WhenNotFound() throws Exception {
         when(parentService.getDetailsById(PARENT_ID))
-                .thenThrow(new NotFoundException("Parent not found: " + PARENT_ID));
+                .thenThrow(new NotFoundException("Parent not found: " + PARENT_ID, ExceptionCode.PARENT_NOT_FOUND));
 
         mockMvc.perform(get("/api/v1/parents/{id}/details", PARENT_ID))
                 .andExpect(status().isNotFound())

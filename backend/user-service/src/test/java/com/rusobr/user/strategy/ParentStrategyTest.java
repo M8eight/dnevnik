@@ -70,7 +70,7 @@ class ParentStrategyTest {
 
             assertThatThrownBy(() -> strategy.save(USER_ID, wrongDetails))
                     .isInstanceOf(ConflictException.class)
-                    .hasMessageContaining("Invalid user profile details");
+                    .hasMessageContaining("Invalid parent profile details");
 
             verifyNoInteractions(parentService);
         }
@@ -105,7 +105,7 @@ class ParentStrategyTest {
         void wrongDetails_throwsConflict() {
             assertThatThrownBy(() -> strategy.update(USER_ID, new StudentDetails("math")))
                     .isInstanceOf(ConflictException.class)
-                    .hasMessageContaining("Invalid user profile details");
+                    .hasMessageContaining("Invalid parent profile details");
 
             verifyNoInteractions(parentService);
         }

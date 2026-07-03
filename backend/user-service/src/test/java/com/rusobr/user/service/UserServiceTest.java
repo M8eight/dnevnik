@@ -71,7 +71,7 @@ class UserServiceTest {
 
             assertThatThrownBy(() -> service.getByIdInternal(USER_ID))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("User not found with id: " + USER_ID);
+                    .hasMessageContaining("User by id: " + USER_ID + " not found");
         }
     }
 
@@ -219,7 +219,7 @@ class UserServiceTest {
 
             assertThatThrownBy(() -> service.deleteUserCascade(USER_ID))
                     .isInstanceOf(NotFoundException.class)
-                    .hasMessageContaining("User not found with id: " + USER_ID);
+                    .hasMessageContaining("User by id: " + USER_ID + " not found");
 
             verify(userRepository, never()).delete(any(User.class));
             verify(applicationEventPublisher, never()).publishEvent(any());

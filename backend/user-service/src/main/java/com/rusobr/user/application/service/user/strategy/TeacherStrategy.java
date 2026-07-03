@@ -1,16 +1,18 @@
 package com.rusobr.user.application.service.user.strategy;
 
-import com.rusobr.user.domain.model.Teacher;
-import com.rusobr.user.domain.enums.UserRole;
-import com.rusobr.user.web.exception.ConflictException;
 import com.rusobr.user.application.service.teacher.TeacherService;
-import com.rusobr.user.web.dto.user.UserProfileDetails;
+import com.rusobr.user.domain.enums.UserRole;
+import com.rusobr.user.domain.model.Teacher;
 import com.rusobr.user.web.dto.teacher.TeacherDetails;
+import com.rusobr.user.web.dto.user.UserProfileDetails;
 import com.rusobr.user.web.dto.user.UserRoleStrategy;
+import com.rusobr.user.web.exception.ConflictException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
+
+import static com.rusobr.user.web.exception.ExceptionCode.TEACHER_PROFILE_DETAILS_CONFLICT;
 
 @RequiredArgsConstructor
 @Component
@@ -31,7 +33,7 @@ public class TeacherStrategy implements UserRoleStrategy {
                 teacherService.create(userId, teacherDetails);
             }
         } else {
-            throw new ConflictException("Invalid user profile details");
+            throw new ConflictException("Invalid teacher profile details", TEACHER_PROFILE_DETAILS_CONFLICT);
         }
     }
 
@@ -45,7 +47,7 @@ public class TeacherStrategy implements UserRoleStrategy {
         if (userDetails instanceof TeacherDetails teacherDetails) {
             teacherService.update(userId, teacherDetails);
         } else {
-            throw new ConflictException("Invalid user profile details");
+            throw new ConflictException("Invalid teacher profile details", TEACHER_PROFILE_DETAILS_CONFLICT);
         }
     }
 
