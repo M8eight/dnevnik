@@ -1,5 +1,6 @@
 package com.rusobr.academic.infrastructure.client;
 
+import com.rusobr.academic.config.FeignAuthInterceptor;
 import com.rusobr.academic.web.dto.feign.BatchUserResponse;
 import com.rusobr.academic.web.dto.feign.TeacherResponse;
 import com.rusobr.academic.web.dto.feign.UserFeignResponse;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.util.List;
 import java.util.Set;
 
-@FeignClient(value = "user-service", fallbackFactory = UserClientFallbackFactory.class)
+@FeignClient(value = "user-service", fallbackFactory = UserClientFallbackFactory.class, configuration = FeignAuthInterceptor.class)
 public interface UserClient {
 
     @GetMapping("/api/v1/teachers/{id}")

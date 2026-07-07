@@ -103,7 +103,7 @@ export default function CreateUserForm() {
 
         if (values.role === "STUDENT") {
             studentMutation.mutate(
-                { user: userBase, role: "STUDENT", details: { studentDetails: values.studentDetails! } },
+                { user: userBase, role: "STUDENT", details: { studyProfile: values.studentDetails! } },
                 { onSuccess: handleSuccess }
             );
         } else if (values.role === "PARENT") {

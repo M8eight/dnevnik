@@ -13,24 +13,41 @@ import SchedulePage from './views/admin/SchedulePage'
 import Index from './views'
 import AcademicYearPage from './views/admin/AcademicYearPage'
 import UserInfo from './views/user/UserInfo'
+import LoginPage from './views/user/Login'
+// import { ProtectedRoute } from './routes/ProtectedRoute'
+import ForbiddenPage from './views/statusPage/ForbiddenPage'
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+
         <Route path="/" element={<Index />} />
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/user/:id/info" element={<UserInfo />} />
-        <Route path="/student/home" element={<Home />} />
-        <Route path="/student/diary" element={<Diary />} />
-        <Route path="/student/grade" element={<GradeTablePage />} />
-        <Route path="/teacher/journal" element={<TeacherJournal />} />
-        <Route path="/teacher/homework" element={<HomeworkJournal />} />
-        <Route path="/admin/subject" element={<SubjectPage />} />
-        <Route path="/admin/period" element={<PeriodPage />} />
-        <Route path="/admin/user" element={<UserAdminPage />} />
-        <Route path="/admin/school-class" element={<SchoolClassPage />} />
-        <Route path="/admin/schedule" element={<SchedulePage />} />
-        <Route path="/admin/academic-year" element={<AcademicYearPage />} />
+
+        <Route path="/forbidden" element={<ForbiddenPage />} />
+
+        {/* <Route element={<ProtectedRoute roles={["STUDENT"]} />}> */}
+          <Route path="/student/home" element={<Home />} />
+          <Route path="/student/diary" element={<Diary />} />
+          <Route path="/student/grade" element={<GradeTablePage />} />
+        {/* </Route> */}
+
+        {/* <Route element={<ProtectedRoute roles={["TEACHER"]} />}> */}
+          <Route path="/teacher/journal" element={<TeacherJournal />} />
+          <Route path="/teacher/homework" element={<HomeworkJournal />} />
+        {/* </Route> */}
+
+        {/* <Route element={<ProtectedRoute roles={["ADMIN"]} />}> */}
+          <Route path="/admin/subject" element={<SubjectPage />} />
+          <Route path="/admin/period" element={<PeriodPage />} />
+          <Route path="/admin/user" element={<UserAdminPage />} />
+          <Route path="/admin/school-class" element={<SchoolClassPage />} />
+          <Route path="/admin/schedule" element={<SchedulePage />} />
+          <Route path="/admin/academic-year" element={<AcademicYearPage />} />
+        {/* </Route> */}
+
       </Routes>
     </BrowserRouter>
   )

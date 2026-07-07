@@ -1,3 +1,4 @@
+import { keycloak } from '@/lib/keycloak';
 import axios from 'axios';
 
 const api = axios.create({
@@ -8,13 +9,19 @@ const api = axios.create({
     timeout: 10000,
 });
 
-//todo написать интерцепторы для авторизации
+api.interceptors.request.use( async (config) => {
+  if (keycloak.token) {
+    await keycloak.updateToken(30).catch(() => {keycloak.login()});
+    config.headers.Authorization = `Bearer ${keycloak.token}`;
+  }
+  return config;
+});
 
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // редирект на логин
+      keycloak.login();
     }
     return Promise.reject(error)
   }
