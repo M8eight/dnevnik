@@ -1,10 +1,12 @@
 import { configureStore } from "@reduxjs/toolkit";
 import scheduleReducer from "./slices/scheduleSlice";
+import authSlice from "./slices/authSlice";
 
 
 export const store = configureStore({
     reducer: {
         schedule: scheduleReducer,
+        auth: authSlice
     },
 });
 

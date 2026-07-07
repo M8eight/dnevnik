@@ -1,5 +1,8 @@
 spring:
   cloud:
+    circuitbreaker:
+      resilience4j:
+        enable-semaphore-default-bulkhead: true
     openfeign:
       circuitbreaker:
         enabled: true
@@ -67,11 +70,6 @@ resilience4j:
         wait-duration: 500ms
         enable-exponential-backoff: true
         exponential-backoff-multiplier: 2
-
-  timelimiter:
-    instances:
-      user-service:
-        timeout-duration: 3s
 
 management:
   endpoints:

@@ -16,7 +16,7 @@ export const getParent = async (parentId: number): Promise<ParentResponse> => {
 }
 
 export const getParentInfo = async (parentId: number): Promise<ParentInfoResponse> => {
-    const { data } = await api.get<ParentInfoResponse>(`/user-service/api/v1/parent/${parentId}/info`);
+    const { data } = await api.get<ParentInfoResponse>(`/user-service/api/v1/parents/${parentId}/info`);
     return data;
 }
 

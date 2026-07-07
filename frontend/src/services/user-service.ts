@@ -14,7 +14,7 @@ export interface UserBase {
 }
 
 export interface StudentDetails {
-    studentDetails: string;
+    studyProfile: string;
 }
 
 export interface TeacherDetails {
