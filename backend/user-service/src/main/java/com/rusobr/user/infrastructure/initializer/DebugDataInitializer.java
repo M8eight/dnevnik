@@ -1,15 +1,15 @@
 package com.rusobr.user.infrastructure.initializer;
 
+import com.rusobr.user.domain.enums.UserRole;
 import com.rusobr.user.domain.model.Parent;
 import com.rusobr.user.domain.model.Student;
 import com.rusobr.user.domain.model.Teacher;
 import com.rusobr.user.domain.model.User;
-import com.rusobr.user.domain.enums.UserRole;
+import com.rusobr.user.infrastructure.client.webClient.KeycloakRestClient;
 import com.rusobr.user.infrastructure.persistence.repository.ParentRepository;
 import com.rusobr.user.infrastructure.persistence.repository.StudentRepository;
 import com.rusobr.user.infrastructure.persistence.repository.TeacherRepository;
 import com.rusobr.user.infrastructure.persistence.repository.UserRepository;
-import com.rusobr.user.infrastructure.client.webClient.KeycloakRestClient;
 import com.rusobr.user.web.dto.keycloak.role.AssignRoleToUserRequest;
 import com.rusobr.user.web.dto.user.UserDataDto;
 import jakarta.transaction.Transactional;
@@ -243,10 +243,17 @@ public class DebugDataInitializer implements CommandLineRunner {
             default -> throw new IllegalArgumentException("Invalid role: " + role);
         }
 
+        User user = userRepository.save(User.builder()
+                .username(username)
+                .firstName(firstName)
+                .lastName(lastName)
+                .roles(new HashSet<>(Set.of(userRole)))
+                .build());
+
         String keycloakId;
         try {
             keycloakId = keycloakRestClient.createKeyCloakUser(
-                    new UserDataDto(username, password, firstName, lastName));
+                    new UserDataDto(username, password, firstName, lastName), user.getId());
         } catch (Exception e) {
             if (e.getMessage().contains("Keycloak User already exists") || e.getMessage().contains("409")) {
                 keycloakId = keycloakRestClient.getKeycloakUserByUsername(username).id();
@@ -260,13 +267,8 @@ public class DebugDataInitializer implements CommandLineRunner {
             keycloakRestClient.assignRoleToUser(new AssignRoleToUserRequest(keycloakId, userRole.toString(), roleId));
         } catch (Exception ignored) {}
 
-        User user = userRepository.save(User.builder()
-                .username(username)
-                .keycloakId(keycloakId)
-                .firstName(firstName)
-                .lastName(lastName)
-                .roles(new HashSet<>(Set.of(userRole)))
-                .build());
+        user.setKeycloakId(keycloakId);
+        userRepository.save(user);
 
         log.info("Created user: username={} id={} role={}", username, user.getId(), role);
 

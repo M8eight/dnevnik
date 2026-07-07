@@ -2,6 +2,8 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Layers, Menu, X } from "lucide-react";
 import { NavLink } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { selectUsername } from "@/store/slices/authSlice";
 
 const NAV_LINKS = [
     { to: "/admin/subject", label: "Предмет" },
@@ -51,6 +53,7 @@ function MobileNavItem({ to, label, onClick }: { to: string; label: string; onCl
 
 export default function AdminNavbar() {
     const [open, setOpen] = useState(false);
+    const username = useSelector(selectUsername);
 
     return (
         <header className="mb-6 relative">
@@ -74,7 +77,7 @@ export default function AdminNavbar() {
                     <div className="flex items-center gap-4">
                         <div className="text-right hidden sm:block">
                             <p className="text-[13px] font-black text-(--navy) leading-none mb-1">
-                                Администратор
+                                {username}
                             </p>
                             <p className="text-[9px] font-extrabold tracking-[0.2em] uppercase text-black/25">
                                 Admin

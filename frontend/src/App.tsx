@@ -14,8 +14,8 @@ import Index from './views'
 import AcademicYearPage from './views/admin/AcademicYearPage'
 import UserInfo from './views/user/UserInfo'
 import LoginPage from './views/user/Login'
-// import { ProtectedRoute } from './routes/ProtectedRoute'
 import ForbiddenPage from './views/statusPage/ForbiddenPage'
+import { ProtectedRoute } from './routes/ProtectedRoute'
 
 function App() {
   return (
@@ -28,11 +28,11 @@ function App() {
 
         <Route path="/forbidden" element={<ForbiddenPage />} />
 
-        {/* <Route element={<ProtectedRoute roles={["STUDENT"]} />}> */}
+        <Route element={<ProtectedRoute roles={["STUDENT"]} />}>
           <Route path="/student/home" element={<Home />} />
+        </Route>
           <Route path="/student/diary" element={<Diary />} />
           <Route path="/student/grade" element={<GradeTablePage />} />
-        {/* </Route> */}
 
         {/* <Route element={<ProtectedRoute roles={["TEACHER"]} />}> */}
           <Route path="/teacher/journal" element={<TeacherJournal />} />

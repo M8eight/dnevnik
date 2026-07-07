@@ -1,28 +1,23 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import { useAvgGrade, useGradesByDate } from "@/hooks/use-grade";
-import { useScheduleByDate, useScheduleByStudentId } from "@/hooks/use-schedule";
-import { useHomeworkByDate } from "@/hooks/use-homework";
 import { useStudentFullDetails } from "@/hooks/use-student";
 import { CurrentDate } from "@/helpers/student-helpers";
 import { UserCard, RatingCard, TeacherCard, TodayScheduleCard, TodayGradesCard, HomeworkCard, WeekScheduleCard } from "@/components/student/home/home-cards";
 import StudentNavbar from "@/components/layout/navbars/StudentNavbar";
+import { useHomeAggregation } from "@/hooks/bff/use-student-bff";
 
 
 function Home() {
   const studentId = 27;
   const today = new Date();
   
+  // const username = useSelector(selectUsername);
   const todayDateStr = today.toISOString().split("T")[0];
   const currentDayOfWeek = new Intl.DateTimeFormat("en-US", { weekday: "long" })
     .format(today)
     .toUpperCase();
 
   const { data: user, isLoading, isError } = useStudentFullDetails(studentId);
-  const { data: avgGrade }      = useAvgGrade(studentId, 4);
-  const { data: todayGrades }   = useGradesByDate(studentId, todayDateStr);
-  const { data: todaySchedule } = useScheduleByDate(studentId, currentDayOfWeek, todayDateStr);
-  const { data: fullSchedule }  = useScheduleByStudentId(studentId);
-  const { data: homework }      = useHomeworkByDate(todayDateStr, studentId);
+  const { data: academicAggregation} = useHomeAggregation(todayDateStr);
 
   return (
     <div className="relative z-10 min-h-screen px-6 md:px-10 pt-2 pb-14">
@@ -69,14 +64,14 @@ function Home() {
           <UserCard user={user} />
         )}
 
-        <RatingCard avgGrade={avgGrade} />
+        <RatingCard avgGrade={academicAggregation?.todayAverage} />
         <TeacherCard user={user} />
 
-        <TodayScheduleCard schedule={todaySchedule} />
-        <TodayGradesCard grades={todayGrades} />
-        <HomeworkCard homework={homework} />
+        <TodayScheduleCard schedule={academicAggregation?.todaySchedule} />
+        <TodayGradesCard grades={academicAggregation?.todayGrades} />
+        <HomeworkCard homework={academicAggregation?.todayHomework} />
 
-        <WeekScheduleCard fullSchedule={fullSchedule} currentDayOfWeek={currentDayOfWeek} />
+        <WeekScheduleCard fullSchedule={academicAggregation?.weekSchedule} currentDayOfWeek={currentDayOfWeek} />
       </main>
     </div>
   );

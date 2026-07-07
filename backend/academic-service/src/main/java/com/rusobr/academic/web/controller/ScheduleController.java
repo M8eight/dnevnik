@@ -20,12 +20,12 @@ public class ScheduleController {
 
     private final ScheduleService scheduleService;
 
-    @GetMapping("/schedule/by-date")
-    public List<ScheduleLessonResponse> getScheduleByDate(@RequestParam Long studentId,
-                                                          @RequestParam DayOfWeek dayOfWeek,
-                                                          @RequestParam LocalDate date) {
-        return scheduleService.getByDate(studentId, dayOfWeek, date);
-    }
+//    @GetMapping("/schedule/by-date")
+//    public List<ScheduleLessonResponse> getScheduleByDate(@RequestParam Long studentId,
+//                                                          @RequestParam DayOfWeek dayOfWeek,
+//                                                          @RequestParam LocalDate date) {
+//        return scheduleService.getByDate(studentId, dayOfWeek, date);
+//    }
 
     @GetMapping("/schedules/diary")
     public List<DiaryScheduleDto> getDiaryScheduleByStudentId(@RequestParam Long studentId,
@@ -34,10 +34,10 @@ public class ScheduleController {
         return scheduleService.getByStudentId(studentId, startDate, endDate);
     }
 
-    @GetMapping("/schedules/by-student")
-    public Map<DayOfWeek, List<SchoolLessonResponse>> getWeekSchedule(@RequestParam Long studentId) {
-        return scheduleService.getWeekSchedule(studentId);
-    }
+//    @GetMapping("/schedules/by-student")
+//    public Map<DayOfWeek, List<SchoolLessonResponse>> getWeekSchedule(@RequestParam Long studentId) {
+//        return scheduleService.getWeekSchedule(studentId);
+//    }
 
     @GetMapping("/schedules/by-class")
     public Map<DayOfWeek, List<ScheduleLessonDto>> getClassSchedule(@RequestParam Long classId,

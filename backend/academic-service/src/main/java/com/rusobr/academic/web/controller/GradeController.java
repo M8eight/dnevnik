@@ -27,16 +27,16 @@ public class GradeController {
         return gradeService.getById(id);
     }
 
-    @GetMapping("/avg/by-student/{id}")
-    public Double getAverageByPeriod(@PathVariable Long id, @RequestParam @NotNull Long academicPeriodId) {
-        return gradeService.getAverageByPeriod(id, academicPeriodId);
-    }
+//    @GetMapping("/avg/by-student/{id}")
+//    public Double getAverageByPeriod(@PathVariable Long id, @RequestParam @NotNull Long academicPeriodId) {
+//        return gradeService.getAverageByPeriod(id, academicPeriodId);
+//    }
 
-    @GetMapping("/by-date")
-    public List<GradeWithSubjectNameResponse> findAllByDate(@RequestParam @NotNull Long studentId,
-                                                            @RequestParam @NotNull LocalDate date) {
-        return gradeService.findAllByDate(studentId, date);
-    }
+//    @GetMapping("/by-date")
+//    public List<GradeWithSubjectNameResponse> findAllByDate(@RequestParam @NotNull Long studentId,
+//                                                            @RequestParam @NotNull LocalDate date) {
+//        return gradeService.findAllByDate(studentId, date);
+//    }
 
     @PostMapping
     public CreateGradeResponse create(@RequestBody @Valid CreateGradeRequest createGradeRequest) {

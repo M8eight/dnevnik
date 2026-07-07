@@ -21,6 +21,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import static com.rusobr.user.web.exception.ExceptionCode.KEYCLOAK_USER_BAD_REQUEST;
@@ -71,11 +72,13 @@ public class KeycloakRestClient {
         return user;
     }
 
-    public String createKeyCloakUser(UserDataDto dto) {
+    public String createKeyCloakUser(UserDataDto dto, Long userId) {
         String uri = UriComponentsBuilder.fromUriString(keycloakUrl)
                 .path("/admin/realms/{realm}/users")
                 .buildAndExpand(keycloakRealm)
                 .toUriString();
+
+        Map<String, List<String>> userAttributes = Map.of("userId", List.of(userId.toString()));
 
         KeycloakUserRequest user = new KeycloakUserRequest(
                 dto.username(),
@@ -83,7 +86,8 @@ public class KeycloakRestClient {
                 dto.lastName(),
                 true,
                 true,
-                List.of(new KeycloakCredential("password", dto.password(), false))
+                List.of(new KeycloakCredential("password", dto.password(), false)),
+                userAttributes
         );
 
         return webClient.post()
@@ -92,8 +96,10 @@ public class KeycloakRestClient {
                 .header("Authorization", token())
                 .bodyValue(user)
                 .retrieve()
-                .onStatus(status -> status.value() == 409,
-                        clientResponse -> Mono.error(new KeycloakUserException("Could not create user %s".formatted(dto.username()), KEYCLOAK_USER_BAD_REQUEST)))
+                .onStatus(HttpStatusCode::isError, resp ->
+                        resp.bodyToMono(String.class)
+                                .flatMap(b -> Mono.error(new RuntimeException("Keycloak create user: " + b)))
+                )
                 .toBodilessEntity()
                 .flatMap(res -> {
                     String location = res.getHeaders().getFirst("Location");
@@ -114,7 +120,7 @@ public class KeycloakRestClient {
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, resp ->
                         resp.bodyToMono(String.class)
-                                .flatMap(b -> Mono.error(new RuntimeException("Keycloak: " + b)))
+                                .flatMap(b -> Mono.error(new RuntimeException("Keycloak delete user: " + b)))
                 )
                 .bodyToMono(Void.class)
                 .block();
@@ -209,7 +215,7 @@ public class KeycloakRestClient {
                         clientResponse -> Mono.error(new KeycloakUserException("Keycloak user role already assigned", KEYCLOAK_USER_BAD_REQUEST)))
                 .onStatus(HttpStatusCode::isError, resp ->
                         resp.bodyToMono(String.class)
-                                .flatMap(b -> Mono.error(new RuntimeException("Keycloak: " + b)))
+                                .flatMap(b -> Mono.error(new RuntimeException("Keycloak assign role: " + b)))
                 )
                 .bodyToMono(Void.class)
                 .block();
@@ -249,7 +255,7 @@ public class KeycloakRestClient {
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, resp ->
                         resp.bodyToMono(String.class)
-                                .flatMap(b -> Mono.error(new RuntimeException("Keycloak: " + b)))
+                                .flatMap(b -> Mono.error(new RuntimeException("Keycloak get role by name: " + b)))
                 )
                 .bodyToMono(KeycloakRole.class)
                 .block();

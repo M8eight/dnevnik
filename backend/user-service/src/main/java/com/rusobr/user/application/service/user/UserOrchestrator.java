@@ -1,8 +1,7 @@
 package com.rusobr.user.application.service.user;
 
-import com.rusobr.user.domain.model.User;
 import com.rusobr.user.domain.enums.UserRole;
-import com.rusobr.user.web.exception.ConflictException;
+import com.rusobr.user.domain.model.User;
 import com.rusobr.user.infrastructure.client.webClient.KeycloakRestClient;
 import com.rusobr.user.web.dto.keycloak.role.AssignRoleToUserRequest;
 import com.rusobr.user.web.dto.keycloak.role.KeycloakRole;
@@ -11,6 +10,7 @@ import com.rusobr.user.web.dto.user.UserProfileDetails;
 import com.rusobr.user.web.dto.user.UserResponse;
 import com.rusobr.user.web.dto.user.update.UserUpdateData;
 import com.rusobr.user.web.dto.user.update.UserUpdateRequest;
+import com.rusobr.user.web.exception.ConflictException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,18 +30,27 @@ public class UserOrchestrator {
     private final UserDbService userDbService;
     private final UserService userService;
 
-    public UserResponse create(UserCreateRequest<? extends UserProfileDetails> userCreateRequest) {
-        String kId = keycloakRestClient.createKeyCloakUser(userCreateRequest.user());
+    public void create(UserCreateRequest<? extends UserProfileDetails> userCreateRequest) {
+        UserResponse user = userDbService.create(userCreateRequest);
 
+        String kId = null;
         try {
+            kId = keycloakRestClient.createKeyCloakUser(userCreateRequest.user(), user.id());
             KeycloakRole kRole = keycloakRestClient.getRoleByName(userCreateRequest.role().name());
             keycloakRestClient.assignRoleToUser(new AssignRoleToUserRequest(kId, kRole.name(), kRole.id()));
 
-            return userDbService.create(userCreateRequest, kId);
-        } catch (Exception e) {
-            log.error("Rollback create user {}", userCreateRequest.user().username());
-            keycloakRestClient.deleteKeyCloakUser(kId);
+            userService.setKeycloakId(kId, user.id());
 
+        } catch (Exception e) {
+            log.error("Rollback create user: {} keycloakId: {}", user, kId, e);
+            if (kId != null) {
+                try {
+                    keycloakRestClient.deleteKeyCloakUser(kId);
+                } catch (Exception ex) {
+                    log.error("Could not delete keycloak user", ex);
+                }
+            }
+            userService.deleteUserCascade(user.id());
             throw new ConflictException("Could not create user", USER_CREATE_CONFLICT);
         }
     }

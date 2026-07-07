@@ -42,8 +42,8 @@ public class ScheduleService {
     @Autowired
     private ScheduleService self;
 
-    public List<ScheduleLessonResponse> getByDate(Long studentId, DayOfWeek dayOfWeek, LocalDate date) {
-        return scheduleLessonRepository.getScheduleByDate(studentId, dayOfWeek, date)
+    public List<ScheduleLessonResponse> getByDate(Long studentId, LocalDate date) {
+        return scheduleLessonRepository.getScheduleByDate(studentId, date.getDayOfWeek(), date)
                 .stream().map(scheduleLessonMapper::toScheduleLessonResponse).toList();
     }
 
