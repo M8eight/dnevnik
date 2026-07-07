@@ -14,6 +14,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -37,18 +38,21 @@ public class UserController {
     }
 
     @PostMapping("/students")
-    public UserResponse createStudent(@RequestBody @Valid UserCreateRequest<StudentDetails> userRequest) {
-        return userOrchestrator.create(userRequest);
+    @ResponseStatus(HttpStatus.CREATED)
+    public void createStudent(@RequestBody @Valid UserCreateRequest<StudentDetails> userRequest) {
+        userOrchestrator.create(userRequest);
     }
 
     @PostMapping("/teachers")
-    public UserResponse createTeacher(@RequestBody @Valid UserCreateRequest<TeacherDetails> userRequest) {
-        return userOrchestrator.create(userRequest);
+    @ResponseStatus(HttpStatus.CREATED)
+    public void createTeacher(@RequestBody @Valid UserCreateRequest<TeacherDetails> userRequest) {
+        userOrchestrator.create(userRequest);
     }
 
     @PostMapping("/parents")
-    public UserResponse createParent(@RequestBody @Valid UserCreateRequest<ParentDetails> userRequest) {
-        return userOrchestrator.create(userRequest);
+    @ResponseStatus(HttpStatus.CREATED)
+    public void createParent(@RequestBody @Valid UserCreateRequest<ParentDetails> userRequest) {
+        userOrchestrator.create(userRequest);
     }
 
     @PutMapping("/{id}")

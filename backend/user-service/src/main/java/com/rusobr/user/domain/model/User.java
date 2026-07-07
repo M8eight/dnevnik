@@ -34,7 +34,6 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private String lastName;
 
-    @Column(nullable = false)
     private String keycloakId;
 
     @Builder.Default

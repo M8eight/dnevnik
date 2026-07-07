@@ -1,6 +1,7 @@
 package com.rusobr.user.infrastructure.client.webClient.keycloak;
 
 import java.util.List;
+import java.util.Map;
 
 public record KeycloakUserRequest(
         String username,
@@ -8,6 +9,7 @@ public record KeycloakUserRequest(
         String lastName,
         boolean enabled,
         boolean emailVerified,
-        List<KeycloakCredential> credentials
+        List<KeycloakCredential> credentials,
+        Map<String, List<String>> attributes
 ) {
 }

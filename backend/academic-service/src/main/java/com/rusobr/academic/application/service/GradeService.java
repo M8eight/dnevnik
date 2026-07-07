@@ -5,6 +5,7 @@ import com.rusobr.academic.application.mapper.LessonInstanceMapper;
 import com.rusobr.academic.domain.model.AcademicPeriod;
 import com.rusobr.academic.domain.model.Grade;
 import com.rusobr.academic.domain.model.LessonInstance;
+import com.rusobr.academic.infrastructure.persistence.repository.AcademicPeriodRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.GradeRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.LessonInstanceRepository;
 import com.rusobr.academic.web.dto.grade.GradeResponse;
@@ -32,6 +33,7 @@ public class GradeService {
     private final LessonInstanceRepository lessonInstanceRepository;
     private final LessonInstanceMapper lessonInstanceMapper;
     private final AcademicPeriodService academicPeriodService;
+    private final AcademicPeriodRepository academicPeriodRepository;
 
     @Transactional(readOnly = true)
     public GradeResponse getById(Long id) {
@@ -41,8 +43,10 @@ public class GradeService {
     }
 
     @Transactional(readOnly = true)
-    public Double getAverageByPeriod(Long studentId, Long academicPeriodId) {
-        AcademicPeriod academicPeriod = academicPeriodService.getById(academicPeriodId);
+    public Double getAverageByPeriod(Long studentId, LocalDate date) {
+        AcademicPeriod academicPeriod = academicPeriodRepository.findByDate(date)
+                .orElse(null);
+        if (academicPeriod == null) return 0.0;
         Double avg = gradeRepository.getAverageGrade(studentId, academicPeriod.getStartDate(), academicPeriod.getEndDate());
         if (avg == null) return 0.0;
 

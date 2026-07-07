@@ -58,9 +58,14 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponse create(UserDataDto reqDto, String keycloakUserId, UserRole role) {
-            User user = userMapper.toUser(reqDto, keycloakUserId, Collections.singleton(role));
+    public UserResponse create(UserDataDto reqDto, UserRole role) {
+            User user = userMapper.toUser(reqDto, Collections.singleton(role));
             return userMapper.toCreateUserResponse(userRepository.save(user));
+    }
+
+    @Transactional
+    public void setKeycloakId(String kId, Long userId) {
+        userRepository.setKeycloakId(kId, userId);
     }
 
     public List<KeycloakRole> getAllRoles() {

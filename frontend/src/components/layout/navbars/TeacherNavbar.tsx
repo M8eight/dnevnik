@@ -2,6 +2,8 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { GraduationCap, Menu, X } from "lucide-react";
 import { NavLink } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { selectUsername } from "@/store/slices/authSlice";
 
 const NAV_LINKS = [
     { to: "/teacher/journal", label: "Табель" },
@@ -47,6 +49,7 @@ function MobileNavItem({ to, label, onClick }: { to: string; label: string; onCl
 
 export default function TeacherNavbar() {
     const [open, setOpen] = useState(false);
+    const username = useSelector(selectUsername);
 
     return (
         <header className="mb-6 relative z-100">
@@ -70,7 +73,7 @@ export default function TeacherNavbar() {
                     <div className="flex items-center gap-4">
                         <div className="text-right hidden sm:block">
                             <p className="text-[13px] font-black text-(--navy) leading-none mb-1">
-                                Алексей
+                                {username}
                             </p>
                             <p className="text-[9px] font-extrabold tracking-[0.2em] uppercase text-black/25">
                                 Преподаватель
