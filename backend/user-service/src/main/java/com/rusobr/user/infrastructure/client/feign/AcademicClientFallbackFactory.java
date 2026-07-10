@@ -16,6 +16,7 @@ public class AcademicClientFallbackFactory implements FallbackFactory<AcademicCl
     @Override
     public AcademicClient create(Throwable cause) {
         return new AcademicClient() {
+
             @Override
             public SchoolClassResponse getSchoolClassByStudentId(Long studentId) {
                 if (cause instanceof FeignException.NotFound) {
@@ -23,7 +24,7 @@ public class AcademicClientFallbackFactory implements FallbackFactory<AcademicCl
                             ExceptionCode.SCHOOL_CLASS_BY_STUDENT_NOT_FOUND);
                 }
                 log.error("Fallback: getSchoolClassByStudentId id={}", studentId, cause);
-                throw new AcademicServiceUnavailableException("Не класс по studentId %s".formatted(studentId), cause,
+                throw new AcademicServiceUnavailableException("Не удалось получить класс по studentId %s".formatted(studentId), cause,
                         ExceptionCode.ACADEMIC_SERVICE_UNAVAILABLE);
             }
 
@@ -37,6 +38,7 @@ public class AcademicClientFallbackFactory implements FallbackFactory<AcademicCl
                 throw new AcademicServiceUnavailableException("Не удалось получить информацию о учителе с id: %s".formatted(teacherId), cause,
                         ExceptionCode.ACADEMIC_SERVICE_UNAVAILABLE);
             }
+
         };
     }
 }

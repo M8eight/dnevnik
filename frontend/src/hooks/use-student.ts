@@ -4,11 +4,10 @@ import type { StudentDetailsResponse } from "@/services/user-service";
 
 const QUERY_KEY = ["student"];
 
-export const useStudentFullDetails = (id: number) => {
+export const useStudentFullDetails = () => {
     return useQuery<StudentFullDetailsResponse>({
-        queryKey: [QUERY_KEY, id],
-        queryFn: () => getStudentFullDetails(id),
-        enabled: !!id,
+        queryKey: [QUERY_KEY],
+        queryFn: () => getStudentFullDetails(),
     })
 }
 

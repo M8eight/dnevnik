@@ -83,7 +83,7 @@ class ScheduleServiceTest {
                     .thenReturn(List.of(projection));
             when(scheduleLessonMapper.toScheduleLessonResponse(projection)).thenReturn(response);
 
-            List<ScheduleLessonResponse> result = service.getByDate(STUDENT_ID, DayOfWeek.MONDAY, DATE);
+            List<ScheduleLessonResponse> result = service.getByDate(STUDENT_ID, DATE);
 
             assertThat(result).hasSize(1).containsExactly(response);
         }

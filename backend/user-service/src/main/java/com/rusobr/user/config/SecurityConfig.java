@@ -3,6 +3,7 @@ package com.rusobr.user.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -20,6 +21,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import static com.rusobr.user.domain.enums.UserRole.*;
+import static org.springframework.http.HttpMethod.*;
+
 @Configuration
 @EnableMethodSecurity
 @EnableWebSecurity
@@ -36,6 +40,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(req -> {
                     req
                             .requestMatchers("/public/**", "/actuator/health").permitAll()
+                            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                            .requestMatchers(GET, "/api/v1/students/with-class").hasRole(STUDENT.name())
+
                             .anyRequest().permitAll();
                 })
                 .oauth2ResourceServer(oauth2 -> {

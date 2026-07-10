@@ -8,6 +8,8 @@ import com.rusobr.user.web.dto.student.StudentInfoResponse;
 import com.rusobr.user.web.dto.student.StudentWithClassResponse;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -51,9 +53,10 @@ public class StudentController {
         studentService.unassignFromParent(studentId);
     }
 
-    @GetMapping("/{id}/with-class")
-    public StudentWithClassResponse getWithClassById(@PathVariable Long id) {
-        return studentService.getWithClassById(id);
+    @GetMapping("/with-class")
+    public StudentWithClassResponse getWithClassById(@AuthenticationPrincipal Jwt jwt) {
+        Long userId = jwt.getClaim("user_id");
+        return studentService.getWithClassById(userId);
     }
 
 }

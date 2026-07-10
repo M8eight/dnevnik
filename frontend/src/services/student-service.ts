@@ -32,8 +32,8 @@ export interface StudentInfoResponse {
 }
 
 
-export const getStudentFullDetails = async (studentId: number): Promise<StudentFullDetailsResponse> => {
-    const { data } = await api.get<StudentFullDetailsResponse>(`/user-service/api/v1/students/${studentId}/with-class`);
+export const getStudentFullDetails = async (): Promise<StudentFullDetailsResponse> => {
+    const { data } = await api.get<StudentFullDetailsResponse>(`/user-service/api/v1/students/with-class`);
     return data;
 }
 

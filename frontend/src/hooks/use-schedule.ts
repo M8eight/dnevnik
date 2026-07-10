@@ -17,11 +17,11 @@ export const useScheduleByStudentId = (studentId: number) => {
     })
 }
 
-export const useDiaryScheduleByStudentId = (studentId: number, startDate: string, endDate: string) => {
+export const useDiaryScheduleByStudentId = (startDate: string, endDate: string) => {
     return useQuery<DiaryScheduleDto[]>({
-        queryKey: ['schedule', studentId, startDate, endDate],
-        queryFn: () => getDiaryScheduleByStudentId(studentId, startDate, endDate),
-        enabled: !!studentId && !!startDate && !!endDate,
+        queryKey: ['schedule', startDate, endDate],
+        queryFn: () => getDiaryScheduleByStudentId(startDate, endDate),
+        enabled: !!startDate && !!endDate,
     })
 }
 

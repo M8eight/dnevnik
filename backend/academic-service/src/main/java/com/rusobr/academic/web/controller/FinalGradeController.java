@@ -6,6 +6,8 @@ import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeRequest;
 import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeResponse;
 import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeTeacherResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,8 +21,9 @@ public class FinalGradeController {
     private final FinalGradeService finalGradeService;
 
     @GetMapping("/by-student")
-    public Map<String, FinalGradeResponse> getByStudentId(@RequestParam Long studentId, @RequestParam Long academicYearId) {
-        return finalGradeService.getByStudentId(studentId, academicYearId);
+    public Map<String, FinalGradeResponse> getByStudentId(@AuthenticationPrincipal Jwt jwt, @RequestParam Long academicYearId) {
+        Long userId = jwt.getClaim("user_id");
+        return finalGradeService.getByStudentId(userId, academicYearId);
     }
 
     @GetMapping("/by-assignment")

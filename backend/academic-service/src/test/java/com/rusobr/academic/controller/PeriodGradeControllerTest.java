@@ -9,6 +9,7 @@ import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeResponse;
 import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeStudentResponse;
 import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeTeacherResponse;
 import jakarta.validation.constraints.NotNull;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -55,6 +59,15 @@ public class PeriodGradeControllerTest {
     private static final String SCHOOL_YEAR = "2025/2026";
     private static final Integer VALUE = 5;
 
+    @BeforeEach
+    void setUpJwt() {
+        Jwt jwt = Jwt.withTokenValue("test-token")
+                .header("alg", "none")
+                .claim("user_id", STUDENT_ID)
+                .build();
+        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+    }
+
     private PeriodGradeStudentResponse buildStudentResponse() {
         return new PeriodGradeStudentResponse(PERIOD_GRADE_ID, VALUE, "Excellent work", "Mathematics", ACADEMIC_PERIOD_ID);
     }
@@ -82,7 +95,6 @@ public class PeriodGradeControllerTest {
                 .thenReturn(Map.of("Mathematics", List.of(buildStudentResponse())));
 
         mockMvc.perform(get("/api/v1/period-grades/by-student")
-                        .param("studentId", String.valueOf(STUDENT_ID))
                         .param("academicYearId", String.valueOf(1L)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.Mathematics[0].id").value(PERIOD_GRADE_ID))

@@ -9,15 +9,11 @@ import { useGradesLessonsByStudentId } from "@/hooks/use-grade";
 import { useHorizontalScrollDrag } from "@/helpers/teacher-helpers";
 
 export interface GradeJournalGradeTabProps {
-    studentId: number;
     academicPeriodId: number;
 }
 
 type GradesResponse = NonNullable<ReturnType<typeof useGradesLessonsByStudentId>['data']>;
 
-/* ---------------------------------------------------------------------- */
-/*  Кастомный горизонтальный скроллбар-индикатор                          */
-/* ---------------------------------------------------------------------- */
 function CustomScrollbar({ scrollRef }: { scrollRef: React.RefObject<HTMLDivElement | null> }) {
     const trackRef = useRef<HTMLDivElement>(null);
     const [thumb, setThumb] = useState({ widthPct: 100, leftPct: 0 });
@@ -244,9 +240,6 @@ function GradeTableScrollArea({
     );
 }
 
-/* ---------------------------------------------------------------------- */
-/*  Карточка-обёртка: создаёт общий scrollRef для таблицы и скроллбара     */
-/* ---------------------------------------------------------------------- */
 function GradeTableCard({ response, filteredDates }: {
     response: GradesResponse;
     filteredDates: string[];
@@ -270,11 +263,8 @@ function GradeTableCard({ response, filteredDates }: {
     );
 }
 
-/* ---------------------------------------------------------------------- */
-/*  Страница                                                               */
-/* ---------------------------------------------------------------------- */
-export default function GradeJournalGradeTab({ studentId, academicPeriodId }: GradeJournalGradeTabProps) {
-    const { data: response, isLoading, isError } = useGradesLessonsByStudentId(studentId, academicPeriodId);
+export default function GradeJournalGradeTab({ academicPeriodId }: GradeJournalGradeTabProps) {
+    const { data: response, isLoading, isError } = useGradesLessonsByStudentId(academicPeriodId);
 
     const today = new Date();
     const localTodayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;

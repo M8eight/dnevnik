@@ -67,12 +67,12 @@ class UserDbServiceTest {
             UserCreateRequest<StudentDetails> request = new UserCreateRequest<>(userDataDto, UserRole.STUDENT, details);
             UserResponse userResponse = UserResponse.builder().id(USER_ID).build();
 
-            when(userService.create(userDataDto, KEYCLOAK_ID, UserRole.STUDENT)).thenReturn(userResponse);
+            when(userService.create(userDataDto, UserRole.STUDENT)).thenReturn(userResponse);
 
-            UserResponse result = service.create(request, KEYCLOAK_ID);
+            UserResponse result = service.create(request);
 
             assertThat(result).isEqualTo(userResponse);
-            verify(userService).create(userDataDto, KEYCLOAK_ID, UserRole.STUDENT);
+            verify(userService).create(userDataDto, UserRole.STUDENT);
             verify(studentStrategy).save(USER_ID, details);
         }
 
@@ -85,9 +85,9 @@ class UserDbServiceTest {
             );
             UserResponse userResponse = UserResponse.builder().id(USER_ID).build();
 
-            when(userService.create(userDataDto, KEYCLOAK_ID, UserRole.ADMIN)).thenReturn(userResponse);
+            when(userService.create(userDataDto, UserRole.ADMIN)).thenReturn(userResponse);
 
-            assertThatThrownBy(() -> service.create(request, KEYCLOAK_ID))
+            assertThatThrownBy(() -> service.create(request))
                     .isInstanceOf(ConflictException.class)
                     .hasMessageContaining("Invalid user role");
 

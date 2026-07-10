@@ -33,11 +33,10 @@ export interface PeriodGradeRequest {
 
 export type PeriodGradesStudentResponse = Record<string, PeriodGradeStudentResponse[]>;
 
-export const getPeriodGradesByStudent = async (studentId: number, academicYearId: number): Promise<PeriodGradesStudentResponse> => {
+export const getPeriodGradesByStudent = async (academicYearId: number): Promise<PeriodGradesStudentResponse> => {
     const { data } = await api.get<PeriodGradesStudentResponse>(
         `/academic-service/api/v1/period-grades/by-student`, {
         params: {
-            studentId,
             academicYearId,
         }
     }

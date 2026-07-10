@@ -81,10 +81,10 @@ export const findAllGradesByDate = async (studentId: number, date: string): Prom
     return data;
 };
 
-export const getGradesLessonsByStudentId = async (studentId: number, academicPeriodId: number): Promise<GradesLessonsResponse> => {
+export const getGradesLessonsByStudentId = async (academicPeriodId: number): Promise<GradesLessonsResponse> => {
     const { data } = await api.get<GradesLessonsResponse>(
         `/academic-service/api/v1/grades/by-student`, 
-        { params: { academicPeriodId, studentId } }
+        { params: { academicPeriodId } }
     );
     return data;
 };

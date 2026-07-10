@@ -9,11 +9,11 @@ import {
 } from "@/services/period-grade-service";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
  
-export const usePeriodGradesByStudent = (studentId: number, academicYearId: number) => {
+export const usePeriodGradesByStudent = (academicYearId: number) => {
   return useQuery<PeriodGradesStudentResponse>({
-    queryKey: ["studentPeriodGrades", studentId, academicYearId],
-    queryFn: () => getPeriodGradesByStudent(studentId, academicYearId),
-    enabled: !!studentId && !!academicYearId,
+    queryKey: ["studentPeriodGrades", academicYearId],
+    queryFn: () => getPeriodGradesByStudent(academicYearId),
+    enabled: !!academicYearId,
   });
 };
 

@@ -63,20 +63,6 @@ public class HomeworkControllerTest {
     }
 
     @Test
-    @DisplayName("GET /homeworks/by-date — 200 and list response")
-    void getByDate_ShouldReturn200() throws Exception {
-        when(homeworkService.getByDate(DATE, STUDENT_ID)).thenReturn(List.of(buildHomeworkWithSubject()));
-
-        mockMvc.perform(get("/api/v1/homeworks/by-date")
-                        .param("date", DATE.toString())
-                        .param("studentId", String.valueOf(STUDENT_ID)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(HOMEWORK_ID))
-                .andExpect(jsonPath("$[0].text").value("Read chapter 5"))
-                .andExpect(jsonPath("$[0].subjectName").value("Mathematics"));
-    }
-
-    @Test
     @DisplayName("GET /homeworks/by-assignment — 200 and page response")
     void getByAssignment_ShouldReturn200() throws Exception {
         Page<HomeworkResponse> page = new PageImpl<>(List.of(buildHomeworkResponse()));

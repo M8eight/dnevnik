@@ -5,6 +5,8 @@ import com.rusobr.academic.web.dto.lessonInstance.GradesLessonsResponse;
 import com.rusobr.academic.web.dto.lessonInstance.LessonInstanceDto;
 import com.rusobr.academic.web.dto.lessonInstance.teacher.TeacherJournalResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,9 +22,10 @@ public class JournalController {
     private final JournalService lessonInstanceService;
 
     @GetMapping("/grades/by-student")
-    public GradesLessonsResponse getGradesByStudentId(@RequestParam("studentId") Long studentId,
+    public GradesLessonsResponse getGradesByStudentId(@AuthenticationPrincipal Jwt jwt,
                                                       @RequestParam("academicPeriodId") Long academicPeriodId) {
-        return lessonInstanceService.getGradesLessonsByStudentId(studentId, academicPeriodId);
+        Long userId = jwt.getClaim("user_id");
+        return lessonInstanceService.getGradesLessonsByStudentId(userId, academicPeriodId);
     }
 
     @GetMapping("/journal/by-assignment")
