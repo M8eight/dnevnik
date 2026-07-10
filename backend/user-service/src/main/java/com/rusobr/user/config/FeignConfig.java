@@ -1,4 +1,4 @@
-package com.rusobr.academic.config;
+package com.rusobr.user.config;
 
 import feign.RequestInterceptor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,16 +11,18 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 
 @Slf4j
 @Configuration
-public class FeignAuthInterceptor {
+public class FeignConfig {
 
     @Bean
-    public RequestInterceptor requestInterceptor() {
+    public RequestInterceptor oauth2FeignRequestInterceptor() {
         return requestTemplate -> {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-            if (authentication instanceof JwtAuthenticationToken jwtAuth) {
-                String tokenValue = jwtAuth.getToken().getTokenValue();
-                requestTemplate.header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenValue);
+            if (authentication instanceof JwtAuthenticationToken jwt) {
+                String token = jwt.getToken().getTokenValue();
+                requestTemplate.header(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+            } else {
+                log.error("No authentication found in SecurityContext");
             }
         };
     }

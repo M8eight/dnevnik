@@ -142,7 +142,7 @@ export default function Diary() {
   const startDate = format(currentWeekStart, "yyyy-MM-dd");
   const endDate = format(addDays(currentWeekStart, 6), "yyyy-MM-dd");
 
-  const { data, isLoading } = useDiaryScheduleByStudentId(27, startDate, endDate);
+  const { data, isLoading } = useDiaryScheduleByStudentId(startDate, endDate);
 
   const weekEnd = addDays(currentWeekStart, 6);
   const startDay = format(currentWeekStart, "dd");
@@ -150,7 +150,6 @@ export default function Diary() {
   const fullMonthYear = format(currentWeekStart, "LLLL yyyy", { locale: ru });
   const capitalizedMonth = fullMonthYear.charAt(0).toUpperCase() + fullMonthYear.slice(1);
 
-  // группируем по dayOfWeek и сортируем по порядку дней
   const grouped = data ? groupByDay(data) : {};
   const sortedDays = DAY_ORDER
     .filter(day => grouped[day])

@@ -4,6 +4,8 @@ import com.rusobr.academic.application.service.PeriodGradeService;
 import com.rusobr.academic.web.dto.grade.periodGrade.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,9 +18,10 @@ public class PeriodGradeController {
     private final PeriodGradeService periodGradeService;
 
     @GetMapping("/by-student")
-    public Map<String, List<PeriodGradeStudentResponse>> getByStudentId(@RequestParam Long studentId,
+    public Map<String, List<PeriodGradeStudentResponse>> getByStudentId(@AuthenticationPrincipal Jwt jwt,
                                                                         @RequestParam Long academicYearId) {
-        return periodGradeService.getByStudentId(studentId, academicYearId);
+        Long userId = jwt.getClaim("user_id");
+        return periodGradeService.getByStudentId(userId, academicYearId);
     }
 
     @GetMapping("/by-assignment")

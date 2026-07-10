@@ -26,7 +26,8 @@ keycloak.init({
     if (auth) {
       store.dispatch(setAuth({
         username: keycloak.tokenParsed?.preferred_username ?? null,
-        roles: keycloak.tokenParsed?.realm_access?.roles ?? []
+        roles: keycloak.tokenParsed?.realm_access?.roles ?? [],
+        user_id: keycloak.tokenParsed?.user_id ?? null
       }));
     }
 

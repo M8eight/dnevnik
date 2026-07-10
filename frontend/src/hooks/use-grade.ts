@@ -51,10 +51,10 @@ export const useGradesByDate = (studentId: number, date: string) => {
     });
 };
 
-export const useGradesLessonsByStudentId = (studentId: number, academicPeriodId: number) => {
+export const useGradesLessonsByStudentId = (academicPeriodId: number) => {
     return useQuery({
-        queryKey: ['gradesLessonsByStudentId', studentId, academicPeriodId],
-        queryFn: () => getGradesLessonsByStudentId(studentId, academicPeriodId),
-        enabled: !!studentId && !!academicPeriodId,
+        queryKey: ['gradesLessonsByStudentId', academicPeriodId],
+        queryFn: () => getGradesLessonsByStudentId(academicPeriodId),
+        enabled: !!academicPeriodId,
     });
 };

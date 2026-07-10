@@ -24,8 +24,6 @@ public class StudentBffController {
     @GetMapping("/home")
     public HomeAggregation getHomeAggregation(@RequestParam LocalDate date, @AuthenticationPrincipal Jwt jwt) {
         Long userId = jwt.getClaim("user_id");
-        log.info(jwt.getClaims().toString());
-        log.info("User ID: {}", userId);
         return studentBffService.getHomeAggregation(date, userId);
     }
 

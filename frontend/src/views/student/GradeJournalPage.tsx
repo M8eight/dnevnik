@@ -11,7 +11,6 @@ import GradeJournalPeriodGradeTab from "./GradeJournalPeriodGradeTab";
 import GradeJournalGradeTab from "./GradeJournalGradeTab";
 import { useGetAcademicYears } from "@/hooks/use-academic-year";
 
-const STUDENT_ID = 27;
 type Tab = "current" | "period";
 
 function TabSwitcher({ active, onChange }: { active: Tab; onChange: (t: Tab) => void }) {
@@ -143,10 +142,10 @@ export default function GradeTablePage() {
             </div>
 
             {activeTab === "current" && academicPeriodId > 0 && (
-                <GradeJournalGradeTab studentId={STUDENT_ID} academicPeriodId={academicPeriodId} />
+                <GradeJournalGradeTab academicPeriodId={academicPeriodId} />
             )}
             {activeTab === "period" && academicYearIdNumber > 0 && (
-                <GradeJournalPeriodGradeTab studentId={STUDENT_ID} academicYearId={academicYearIdNumber} />
+                <GradeJournalPeriodGradeTab academicYearId={academicYearIdNumber} />
             )}
 
             {/* Легенда */}

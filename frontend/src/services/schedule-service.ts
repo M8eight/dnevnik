@@ -98,9 +98,9 @@ export type ScheduleResponse = Record<string, ScheduleItem[]>;
 export type ScheduleClassResponse = Record<string, ScheduleLessonDto[]>;
 
 
-export const getDiaryScheduleByStudentId = async (studentId: number, startDate: string, endDate: string): Promise<DiaryScheduleDto[]> => {
+export const getDiaryScheduleByStudentId = async (startDate: string, endDate: string): Promise<DiaryScheduleDto[]> => {
     const { data } = await api.get<DiaryScheduleDto[]>(`/academic-service/api/v1/schedules/diary`, {
-        params: { studentId, startDate, endDate }
+        params: { startDate, endDate }
     });
     return data;
 }

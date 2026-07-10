@@ -7,16 +7,13 @@ import { useHomeAggregation } from "@/hooks/bff/use-student-bff";
 
 
 function Home() {
-  const studentId = 27;
   const today = new Date();
-  
-  // const username = useSelector(selectUsername);
   const todayDateStr = today.toISOString().split("T")[0];
   const currentDayOfWeek = new Intl.DateTimeFormat("en-US", { weekday: "long" })
     .format(today)
     .toUpperCase();
 
-  const { data: user, isLoading, isError } = useStudentFullDetails(studentId);
+  const { data: user, isLoading, isError } = useStudentFullDetails();
   const { data: academicAggregation} = useHomeAggregation(todayDateStr);
 
   return (
