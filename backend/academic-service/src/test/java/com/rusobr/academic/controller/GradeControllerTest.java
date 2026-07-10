@@ -5,7 +5,7 @@ import com.rusobr.academic.application.service.GradeService;
 import com.rusobr.academic.domain.enums.GradeType;
 import com.rusobr.academic.web.controller.GradeController;
 import com.rusobr.academic.web.dto.grade.GradeResponse;
-import com.rusobr.academic.web.dto.grade.GradeWithSubjectNameResponse;
+
 import com.rusobr.academic.web.dto.grade.createGrade.CreateGradeRequest;
 import com.rusobr.academic.web.dto.grade.createGrade.CreateGradeResponse;
 import com.rusobr.academic.web.dto.lessonInstance.LessonInstanceDto;
@@ -23,7 +23,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
-import java.util.List;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -53,10 +52,6 @@ public class GradeControllerTest {
 
     private GradeResponse buildGradeResponse() {
         return new GradeResponse(GRADE_ID, STUDENT_ID, 5, 2, GradeType.TEST);
-    }
-
-    private GradeWithSubjectNameResponse buildGradeWithSubjectResponse() {
-        return new GradeWithSubjectNameResponse(GRADE_ID, 5, GradeType.CONTROL, "Mathematics");
     }
 
     private CreateGradeRequest buildCreateRequest() {
@@ -89,32 +84,6 @@ public class GradeControllerTest {
         mockMvc.perform(get("/api/v1/grades/{id}", GRADE_ID))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Grade with id " + GRADE_ID + " not found"));
-    }
-
-    @Test
-    @DisplayName("GET /grades/avg/by-student/{id} — 200 and average value")
-    void getAverageByPeriod_ShouldReturn200() throws Exception {
-        when(gradeService.getAverageByPeriod(STUDENT_ID, PERIOD_ID)).thenReturn(4.33);
-
-        mockMvc.perform(get("/api/v1/grades/avg/by-student/{id}", STUDENT_ID)
-                        .param("academicPeriodId", String.valueOf(PERIOD_ID)))
-                .andExpect(status().isOk())
-                .andExpect(content().string("4.33"));
-    }
-
-    @Test
-    @DisplayName("GET /grades/by-date — 200 and list of grades")
-    void findAllByDate_ShouldReturn200() throws Exception {
-        when(gradeService.findAllByDate(STUDENT_ID, DATE)).thenReturn(List.of(buildGradeWithSubjectResponse()));
-
-        mockMvc.perform(get("/api/v1/grades/by-date")
-                        .param("studentId", String.valueOf(STUDENT_ID))
-                        .param("date", DATE.toString()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(GRADE_ID))
-                .andExpect(jsonPath("$[0].value").value(5))
-                .andExpect(jsonPath("$[0].gradeType").value("CONTROL"))
-                .andExpect(jsonPath("$[0].subjectName").value("Mathematics"));
     }
 
     @Test

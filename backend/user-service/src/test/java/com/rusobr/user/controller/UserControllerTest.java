@@ -106,14 +106,12 @@ public class UserControllerTest {
         UserCreateRequest<StudentDetails> request = new UserCreateRequest<>(
                 validUserDataDto(), UserRole.STUDENT, new StudentDetails("math")
         );
-        UserResponse expected = UserResponse.builder().id(USER_ID).build();
-        when(userOrchestrator.create(any())).thenReturn(expected);
+        doNothing().when(userOrchestrator).create(any());
 
         mockMvc.perform(post("/api/v1/users/students")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(USER_ID));
+                .andExpect(status().isCreated());
     }
 
     @Test
@@ -138,7 +136,7 @@ public class UserControllerTest {
         UserCreateRequest<StudentDetails> request = new UserCreateRequest<>(
                 validUserDataDto(), UserRole.STUDENT, new StudentDetails("math")
         );
-        when(userOrchestrator.create(any())).thenThrow(new ConflictException("Could not create user", ExceptionCode.USER_CREATE_CONFLICT));
+        doThrow(new ConflictException("Could not create user", ExceptionCode.USER_CREATE_CONFLICT)).when(userOrchestrator).create(any());
 
         mockMvc.perform(post("/api/v1/users/students")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -157,14 +155,12 @@ public class UserControllerTest {
         UserCreateRequest<TeacherDetails> request = new UserCreateRequest<>(
                 validUserDataDto(), UserRole.TEACHER, new TeacherDetails("t@mail.com", "+7999")
         );
-        UserResponse expected = UserResponse.builder().id(USER_ID).build();
-        when(userOrchestrator.create(any())).thenReturn(expected);
+        doNothing().when(userOrchestrator).create(any());
 
         mockMvc.perform(post("/api/v1/users/teachers")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(USER_ID));
+                .andExpect(status().isCreated());
     }
 
     @Test
@@ -192,14 +188,12 @@ public class UserControllerTest {
         UserCreateRequest<ParentDetails> request = new UserCreateRequest<>(
                 validUserDataDto(), UserRole.PARENT, new ParentDetails()
         );
-        UserResponse expected = UserResponse.builder().id(USER_ID).build();
-        when(userOrchestrator.create(any())).thenReturn(expected);
+        doNothing().when(userOrchestrator).create(any());
 
         mockMvc.perform(post("/api/v1/users/parents")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(USER_ID));
+                .andExpect(status().isCreated());
     }
 
     @Test
@@ -208,7 +202,7 @@ public class UserControllerTest {
         UserCreateRequest<ParentDetails> request = new UserCreateRequest<>(
                 validUserDataDto(), UserRole.PARENT, new ParentDetails()
         );
-        when(userOrchestrator.create(any())).thenThrow(new ConflictException("Could not create user", ExceptionCode.USER_CREATE_CONFLICT));
+        doThrow(new ConflictException("Could not create user", ExceptionCode.USER_CREATE_CONFLICT)).when(userOrchestrator).create(any());
 
         mockMvc.perform(post("/api/v1/users/parents")
                         .contentType(MediaType.APPLICATION_JSON)

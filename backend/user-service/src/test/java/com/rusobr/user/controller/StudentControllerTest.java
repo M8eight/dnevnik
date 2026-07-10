@@ -15,6 +15,8 @@ import com.rusobr.user.web.dto.user.UserResponse;
 import com.rusobr.user.web.exception.ConflictException;
 import com.rusobr.user.web.exception.ExceptionCode;
 import com.rusobr.user.web.exception.NotFoundException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -30,6 +35,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -51,6 +57,22 @@ public class StudentControllerTest {
 
     private static final Long STUDENT_ID = 1L;
     private static final Long PARENT_ID = 2L;
+
+    @BeforeEach
+    void setUpSecurityContext() {
+        Jwt jwt = Jwt.withTokenValue("token")
+                .header("alg", "RS256")
+                .claim("user_id", STUDENT_ID)
+                .build();
+        SecurityContextHolder.getContext().setAuthentication(
+                new JwtAuthenticationToken(jwt, List.of())
+        );
+    }
+
+    @AfterEach
+    void tearDownSecurityContext() {
+        SecurityContextHolder.clearContext();
+    }
 
     private AcademicYearResponse buildAcademicYearResponse() {
         return new AcademicYearResponse(
@@ -253,7 +275,7 @@ public class StudentControllerTest {
     // ─────────────────────────────────────────────
 
     @Test
-    @DisplayName("GET /students/{id}/with-class — 200 и тело ответа")
+    @DisplayName("GET /students/with-class — 200 и тело ответа")
     void getWithClassById_ShouldReturn200() throws Exception {
         SchoolClassResponse schoolClass = new SchoolClassResponse(10L, "10А", buildAcademicYearResponse(), 5L);
         TeacherResponse teacher = new TeacherResponse(
@@ -265,7 +287,8 @@ public class StudentControllerTest {
         );
         when(studentService.getWithClassById(STUDENT_ID)).thenReturn(response);
 
-        mockMvc.perform(get("/api/v1/students/{id}/with-class", STUDENT_ID))
+        mockMvc.perform(get("/api/v1/students/with-class")
+                        .with(jwt().jwt(builder -> builder.claim("user_id", STUDENT_ID))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(STUDENT_ID))
                 .andExpect(jsonPath("$.firstName").value("Ivan"))
@@ -278,12 +301,13 @@ public class StudentControllerTest {
     }
 
     @Test
-    @DisplayName("GET /students/{id}/with-class — 404 если студент не найден")
+    @DisplayName("GET /students/with-class — 404 если студент не найден")
     void getWithClassById_ShouldReturn404_WhenNotFound() throws Exception {
         when(studentService.getWithClassById(STUDENT_ID))
                 .thenThrow(new NotFoundException("Student not found", ExceptionCode.STUDENT_NOT_FOUND));
 
-        mockMvc.perform(get("/api/v1/students/{id}/with-class", STUDENT_ID))
+        mockMvc.perform(get("/api/v1/students/with-class")
+                        .with(jwt().jwt(builder -> builder.claim("user_id", STUDENT_ID))))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Student not found"));
     }

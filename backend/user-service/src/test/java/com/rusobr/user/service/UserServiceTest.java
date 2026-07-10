@@ -145,11 +145,11 @@ class UserServiceTest {
             User user = User.builder().id(USER_ID).build();
             UserResponse expected = UserResponse.builder().id(USER_ID).build();
 
-            when(userMapper.toUser(dto, "kc-123", Collections.singleton(UserRole.STUDENT))).thenReturn(user);
+            when(userMapper.toUser(dto, Collections.singleton(UserRole.STUDENT))).thenReturn(user);
             when(userRepository.save(user)).thenReturn(user);
             when(userMapper.toCreateUserResponse(user)).thenReturn(expected);
 
-            UserResponse result = service.create(dto, "kc-123", UserRole.STUDENT);
+            UserResponse result = service.create(dto, UserRole.STUDENT);
 
             assertThat(result).isEqualTo(expected);
             verify(userRepository).save(user);
@@ -161,13 +161,13 @@ class UserServiceTest {
             UserDataDto dto = mock(UserDataDto.class);
             User user = User.builder().id(USER_ID).build();
 
-            when(userMapper.toUser(any(), any(), any())).thenReturn(user);
+            when(userMapper.toUser(any(), any())).thenReturn(user);
             when(userRepository.save(user)).thenReturn(user);
             when(userMapper.toCreateUserResponse(user)).thenReturn(UserResponse.builder().id(USER_ID).build());
 
-            service.create(dto, "kc-123", UserRole.TEACHER);
+            service.create(dto, UserRole.TEACHER);
 
-            verify(userMapper).toUser(dto, "kc-123", Collections.singleton(UserRole.TEACHER));
+            verify(userMapper).toUser(dto, Collections.singleton(UserRole.TEACHER));
         }
     }
 

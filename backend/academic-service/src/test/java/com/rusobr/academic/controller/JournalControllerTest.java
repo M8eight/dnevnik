@@ -16,12 +16,16 @@ import com.rusobr.academic.web.dto.lessonInstance.teacher.TeacherJournalResponse
 import com.rusobr.academic.web.dto.lessonInstance.teacher.StudentJournalDto;
 import com.rusobr.academic.web.exception.ExceptionCode;
 import com.rusobr.academic.web.exception.NotFoundException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -53,6 +57,15 @@ public class JournalControllerTest {
     private static final Long ASSIGNMENT_ID = 7L;
     private static final Long LESSON_INSTANCE_ID = 100L;
     private static final LocalDate START_DATE = LocalDate.of(2026, 9, 1);
+
+    @BeforeEach
+    void setUpJwt() {
+        Jwt jwt = Jwt.withTokenValue("test-token")
+                .header("alg", "none")
+                .claim("user_id", STUDENT_ID)
+                .build();
+        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+    }
 
     private AcademicYearResponse buildAcademicYearResponse() {
         return new AcademicYearResponse(
@@ -94,7 +107,6 @@ public class JournalControllerTest {
         when(lessonInstanceService.getGradesLessonsByStudentId(STUDENT_ID, PERIOD_ID)).thenReturn(response);
 
         mockMvc.perform(get("/api/v1/grades/by-student")
-                        .param("studentId", String.valueOf(STUDENT_ID))
                         .param("academicPeriodId", String.valueOf(PERIOD_ID)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.academicPeriod.id").value(PERIOD_ID))
@@ -111,7 +123,6 @@ public class JournalControllerTest {
                 .thenThrow(new NotFoundException("Academic period with id " + PERIOD_ID + " not found", ExceptionCode.ACADEMIC_PERIOD_NOT_FOUND));
 
         mockMvc.perform(get("/api/v1/grades/by-student")
-                        .param("studentId", String.valueOf(STUDENT_ID))
                         .param("academicPeriodId", String.valueOf(PERIOD_ID)))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Academic period with id " + PERIOD_ID + " not found"));

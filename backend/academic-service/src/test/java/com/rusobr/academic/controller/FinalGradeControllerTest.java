@@ -12,9 +12,13 @@ import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeTeacherResponse;
 import com.rusobr.academic.web.exception.ConflictException;
 import com.rusobr.academic.web.exception.ExceptionCode;
 import com.rusobr.academic.web.exception.NotFoundException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
@@ -49,6 +53,15 @@ public class FinalGradeControllerTest {
     private static final Long STUDENT_ID = 10L;
     private static final Long TEACHING_ASSIGNMENT_ID = 20L;
     private static final Long FINAL_GRADE_ID = 30L;
+
+    @BeforeEach
+    void setUpJwt() {
+        Jwt jwt = Jwt.withTokenValue("test-token")
+                .header("alg", "none")
+                .claim("user_id", STUDENT_ID)
+                .build();
+        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+    }
 
     private AcademicYearResponse buildAcademicYearResponse() {
         return new AcademicYearResponse(
@@ -110,7 +123,6 @@ public class FinalGradeControllerTest {
                 .thenReturn(Map.of("Mathematics", buildGradeResponse()));
 
         mockMvc.perform(get("/api/v1/final-grades/by-student")
-                        .param("studentId", String.valueOf(STUDENT_ID))
                         .param("academicYearId", String.valueOf(1L)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.Mathematics.id").value(FINAL_GRADE_ID))

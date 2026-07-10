@@ -11,6 +11,7 @@ import com.rusobr.academic.web.dto.scheduleLesson.ScheduleLessonResponse;
 import com.rusobr.academic.web.dto.scheduleLesson.SchoolLessonResponse;
 import com.rusobr.academic.web.dto.subject.SubjectResponseDto;
 import jakarta.validation.constraints.NotNull;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -52,6 +56,15 @@ public class ScheduleControllerTest {
     private static final Long SUBJECT_ID = 31L;
     private static final Long TEACHER_ID = 41L;
     private static final LocalDate DATE = LocalDate.of(2026, 10, 10);
+
+    @BeforeEach
+    void setUpJwt() {
+        Jwt jwt = Jwt.withTokenValue("test-token")
+                .header("alg", "none")
+                .claim("user_id", STUDENT_ID)
+                .build();
+        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+    }
 
     private ScheduleLessonResponse buildScheduleLessonResponse() {
         return new ScheduleLessonResponse(SCHEDULE_ID, 2, "Mathematics", "101");
@@ -100,47 +113,17 @@ public class ScheduleControllerTest {
     }
 
     @Test
-    @DisplayName("GET /schedule/by-date — 200 and schedule list")
-    void getScheduleByDate_ShouldReturn200() throws Exception {
-        when(scheduleService.getByDate(STUDENT_ID, DayOfWeek.MONDAY, DATE))
-                .thenReturn(List.of(buildScheduleLessonResponse()));
-
-        mockMvc.perform(get("/api/v1/schedule/by-date")
-                        .param("studentId", String.valueOf(STUDENT_ID))
-                        .param("dayOfWeek", DayOfWeek.MONDAY.name())
-                        .param("date", DATE.toString()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(SCHEDULE_ID))
-                .andExpect(jsonPath("$[0].lessonNumber").value(2))
-                .andExpect(jsonPath("$[0].subjectName").value("Mathematics"));
-    }
-
-    @Test
     @DisplayName("GET /schedules/diary — 200 and diary schedule list")
     void getDiaryScheduleByStudentId_ShouldReturn200() throws Exception {
         when(scheduleService.getByStudentId(STUDENT_ID, DATE, DATE.plusDays(1)))
                 .thenReturn(List.of(buildDiaryScheduleDto()));
 
         mockMvc.perform(get("/api/v1/schedules/diary")
-                        .param("studentId", String.valueOf(STUDENT_ID))
                         .param("startDate", DATE.toString())
                         .param("endDate", DATE.plusDays(1).toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(SCHEDULE_ID))
                 .andExpect(jsonPath("$[0].subject.name").value("Mathematics"));
-    }
-
-    @Test
-    @DisplayName("GET /schedules/by-student — 200 and weekly schedule map")
-    void getWeekSchedule_ShouldReturn200() throws Exception {
-        when(scheduleService.getWeekSchedule(STUDENT_ID))
-                .thenReturn(Map.of(DayOfWeek.MONDAY, List.of(buildSchoolLessonResponse())));
-
-        mockMvc.perform(get("/api/v1/schedules/by-student")
-                        .param("studentId", String.valueOf(STUDENT_ID)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.MONDAY[0].id").value(SCHEDULE_ID))
-                .andExpect(jsonPath("$.MONDAY[0].dayOfWeek").value("MONDAY"));
     }
 
     @Test

@@ -59,51 +59,47 @@ class UserOrchestratorTest {
             KeycloakRole keycloakRole = new KeycloakRole(KEYCLOAK_ROLE_ID, "STUDENT");
             UserResponse expected = UserResponse.builder().id(USER_ID).build();
 
-            when(keycloakRestClient.createKeyCloakUser(userDataDto)).thenReturn(KEYCLOAK_ID);
+            when(userDbService.create(request)).thenReturn(expected);
+            when(keycloakRestClient.createKeyCloakUser(userDataDto, USER_ID)).thenReturn(KEYCLOAK_ID);
             when(keycloakRestClient.getRoleByName("STUDENT")).thenReturn(keycloakRole);
-            when(userDbService.create(request, KEYCLOAK_ID)).thenReturn(expected);
 
-            UserResponse result = orchestrator.create(request);
+            orchestrator.create(request);
 
-            assertThat(result).isEqualTo(expected);
-            verify(keycloakRestClient).createKeyCloakUser(userDataDto);
+            verify(userDbService).create(request);
+            verify(keycloakRestClient).createKeyCloakUser(userDataDto, USER_ID);
             verify(keycloakRestClient).getRoleByName("STUDENT");
             verify(keycloakRestClient).assignRoleToUser(new AssignRoleToUserRequest(KEYCLOAK_ID, "STUDENT", KEYCLOAK_ROLE_ID));
-            verify(userDbService).create(request, KEYCLOAK_ID);
         }
 
         @Test
-        @DisplayName("ошибка при создании в БД — откатывает пользователя из Keycloak и бросает ConflictException")
+        @DisplayName("ошибка при создании в БД — пробрасывает исключение")
         void dbFails_rollbackKeycloakUser() {
             UserDataDto userDataDto = mock(UserDataDto.class);
-            when(userDataDto.username()).thenReturn("ivan");
 
             StudentDetails details = new StudentDetails("math");
             UserCreateRequest<StudentDetails> request = new UserCreateRequest<>(userDataDto, UserRole.STUDENT, details);
-            KeycloakRole keycloakRole = new KeycloakRole(KEYCLOAK_ROLE_ID, "STUDENT");
 
-            when(keycloakRestClient.createKeyCloakUser(userDataDto)).thenReturn(KEYCLOAK_ID);
-            when(keycloakRestClient.getRoleByName("STUDENT")).thenReturn(keycloakRole);
-            when(userDbService.create(any(), any())).thenThrow(new RuntimeException("DB error"));
+            when(userDbService.create(any())).thenThrow(new RuntimeException("DB error"));
 
             assertThatThrownBy(() -> orchestrator.create(request))
-                    .isInstanceOf(ConflictException.class)
-                    .hasMessageContaining("Could not create user");
+                    .isInstanceOf(RuntimeException.class)
+                    .hasMessageContaining("DB error");
 
-            verify(keycloakRestClient).deleteKeyCloakUser(KEYCLOAK_ID);
+            verifyNoInteractions(keycloakRestClient);
         }
 
         @Test
         @DisplayName("ошибка при назначении роли в Keycloak — откатывает пользователя и бросает ConflictException")
         void assignRoleFails_rollbackKeycloakUser() {
             UserDataDto userDataDto = mock(UserDataDto.class);
-            when(userDataDto.username()).thenReturn("ivan");
 
             StudentDetails details = new StudentDetails("math");
             UserCreateRequest<StudentDetails> request = new UserCreateRequest<>(userDataDto, UserRole.STUDENT, details);
             KeycloakRole keycloakRole = new KeycloakRole(KEYCLOAK_ROLE_ID, "STUDENT");
+            UserResponse expected = UserResponse.builder().id(USER_ID).build();
 
-            when(keycloakRestClient.createKeyCloakUser(userDataDto)).thenReturn(KEYCLOAK_ID);
+            when(userDbService.create(request)).thenReturn(expected);
+            when(keycloakRestClient.createKeyCloakUser(userDataDto, USER_ID)).thenReturn(KEYCLOAK_ID);
             when(keycloakRestClient.getRoleByName("STUDENT")).thenReturn(keycloakRole);
             doThrow(new RuntimeException("Keycloak error")).when(keycloakRestClient).assignRoleToUser(any());
 
@@ -112,7 +108,7 @@ class UserOrchestratorTest {
                     .hasMessageContaining("Could not create user");
 
             verify(keycloakRestClient).deleteKeyCloakUser(KEYCLOAK_ID);
-            verifyNoInteractions(userDbService);
+            verify(userService).deleteUserCascade(USER_ID);
         }
     }
 

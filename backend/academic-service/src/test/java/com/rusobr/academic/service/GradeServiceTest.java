@@ -90,24 +90,23 @@ class GradeServiceTest {
                     .endDate(DATE.plusMonths(1))
                     .build();
 
-            // Имитируем среднее число, которое требует округления (например, 4.3333)
-            when(academicPeriodService.getById(PERIOD_ID)).thenReturn(period);
+            when(academicPeriodRepository.findByDate(DATE)).thenReturn(Optional.of(period));
             when(gradeRepository.getAverageGrade(STUDENT_ID, period.getStartDate(), period.getEndDate()))
                     .thenReturn(4.3333333);
 
-            Double result = service.getAverageByPeriod(STUDENT_ID, PERIOD_ID);
+            Double result = service.getAverageByPeriod(STUDENT_ID, DATE);
 
             assertThat(result).isEqualTo(4.33);
         }
 
         @Test
-        @DisplayName("если оценок нет — возвращает null")
-        void returnsNull_whenNoGrades() {
+        @DisplayName("если оценок нет — возвращает 0.0")
+        void returnsZero_whenNoGrades() {
             AcademicPeriod period = AcademicPeriod.builder().build();
-            when(academicPeriodService.getById(PERIOD_ID)).thenReturn(period);
+            when(academicPeriodRepository.findByDate(DATE)).thenReturn(Optional.of(period));
             when(gradeRepository.getAverageGrade(anyLong(), any(), any())).thenReturn(0.0);
 
-            Double result = service.getAverageByPeriod(STUDENT_ID, PERIOD_ID);
+            Double result = service.getAverageByPeriod(STUDENT_ID, DATE);
 
             assertThat(result).isEqualTo(0.0);
         }
