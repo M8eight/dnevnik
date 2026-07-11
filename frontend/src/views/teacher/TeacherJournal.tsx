@@ -21,7 +21,6 @@ import { JournalAccessProvider } from "@/hooks/use-journal-access";
 import ClosedPeriodAlert from "@/components/teacher/teacher-journal/closed-period-alert";
 import JournalTable from "./TeacherJournalGradeTab";
 
-const TEACHER_ID = 17;
 const DEFAULT_GRADE_TYPE = "TEST";
 const DEFAULT_GRADE_WEIGHT = 1;
 
@@ -55,7 +54,7 @@ function TabSwitcher({ active, onChange }: { active: Tab; onChange: (t: Tab) => 
 }
 
 export default function TeacherJournal() {
-  const { data: assignments } = useTeachingAssignmentDetail(TEACHER_ID);
+  const { data: assignments } = useTeachingAssignmentDetail();
   const { data: academicYears } = useGetAcademicYears();
 
   const [selectedAcademicYearId, setSelectedAcademicYearId] = useState<string>("");
@@ -130,7 +129,7 @@ export default function TeacherJournal() {
   );
 
   return (
-    <JournalAccessProvider currentPeriod={currentSelectedPeriod} currentYear={currentAcademicYear}>
+    <JournalAccessProvider currentPeriod={currentSelectedPeriod} currentYear={currentAcademicYear} periods={periods}>
       <div className="relative z-10 min-h-screen px-4 md:px-10 pt-5 pb-14">
 
         <TeacherNavbar />
@@ -202,29 +201,29 @@ export default function TeacherJournal() {
                   </Select>
 
                   <Select value={resolvedPeriodId} onValueChange={setSelectedPeriodId}>
-                  <SelectTrigger className={cn(
-                    "glass-pill w-60 h-11 font-bold text-[13px] rounded-2xl px-4 border-0 shadow-none transition-all text-(--navy)"
-                  )}>
-                    <div className="flex items-center gap-2">
-                      <CalendarDays className="w-4 h-4 text-(--red) shrink-0" />
-                      <SelectValue placeholder="Выберите четверть" />
-                    </div>
-                  </SelectTrigger>
-                  <SelectContent className="rounded-2xl border border-white/60 shadow-2xl p-1 bg-white/90 backdrop-blur-2xl">
-                    {periods?.map((p) => (
-                      <SelectItem
-                        key={p.id}
-                        value={p.id.toString()}
-                        className="font-bold text-[13px] text-(--navy) py-2.5 px-3 rounded-xl cursor-pointer"
-                      >
-                        <div className="flex items-center gap-2">
-                          {p.name}
-                          {p.isClosed && <Lock className='w-3 h-3 text-(--red)' />}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                    <SelectTrigger className={cn(
+                      "glass-pill w-60 h-11 font-bold text-[13px] rounded-2xl px-4 border-0 shadow-none transition-all text-(--navy)"
+                    )}>
+                      <div className="flex items-center gap-2">
+                        <CalendarDays className="w-4 h-4 text-(--red) shrink-0" />
+                        <SelectValue placeholder="Выберите четверть" />
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent className="rounded-2xl border border-white/60 shadow-2xl p-1 bg-white/90 backdrop-blur-2xl">
+                      {periods?.map((p) => (
+                        <SelectItem
+                          key={p.id}
+                          value={p.id.toString()}
+                          className="font-bold text-[13px] text-(--navy) py-2.5 px-3 rounded-xl cursor-pointer"
+                        >
+                          <div className="flex items-center gap-2">
+                            {p.name}
+                            {p.isClosed && <Lock className='w-3 h-3 text-(--red)' />}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </>
               )}
 
@@ -253,10 +252,13 @@ export default function TeacherJournal() {
         <div className="max-w-350 mx-auto">
           <TabSwitcher active={activeTab} onChange={setActiveTab} />
 
-          <ClosedPeriodAlert 
-            periodName={currentSelectedPeriod?.name} 
-            yearName={currentAcademicYear?.name} 
-          />
+          {(activeTab === "journal" || activeTab === "period") && (
+            <ClosedPeriodAlert
+              periodName={currentSelectedPeriod?.name}
+              yearName={currentAcademicYear?.name}
+            />
+          )}
+
 
           {activeTab === "journal" && (
             <>

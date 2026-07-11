@@ -81,7 +81,6 @@ public class DebugDataInitializer implements CommandLineRunner {
         createUser("teacher_art",      "12345678", "Полина",      "Юрьевна",                 "teacher"); // 24
         createUser("teacher_music",    "12345678", "Борис",       "Семёнович",               "teacher"); // 25
         createUser("teacher_tech",     "12345678", "Михаил",      "Захарович",               "teacher"); // 26
-        // ИСПРАВЛЕНО: удалён дублирующийся createUser("teacher_tech", ...) — он сдвигал ID студентов
 
         // ── 8А класс (ID 27–54, 28 учеников) ─────────────────────────────────
         createUser("ivanov_i",         "12345678", "Иван",        "Иванов",        "student"); // 27

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import {
     BookOpen,
     Users,
@@ -22,37 +22,35 @@ import TeacherNavbar from "@/components/layout/navbars/TeacherNavbar";
 
 
 export default function HomeworkJournal() {
-    const teacherId = 17;
-
     const { data: periods } = useGetAcademicPeriods();
     const [selectedPeriodId, setSelectedPeriodId] = useState<string>("");
 
-    useEffect(() => {
-        if (periods && periods.length > 0 && !selectedPeriodId) {
-            const active = periods.find((p) => !p.isClosed) ?? periods[periods.length - 1];
-            setSelectedPeriodId(active.id.toString());
-        }
-    }, [periods, selectedPeriodId]);
+    const defaultPeriodId = useMemo(() => {
+        if (!periods?.length) return "";
+        const active = periods.find((p) => !p.isClosed) ?? periods[periods.length - 1];
+        return active.id.toString();
+    }, [periods]);
 
-    const periodIdToFetch = selectedPeriodId ? parseInt(selectedPeriodId, 10) : null;
+    const resolvedPeriodId = selectedPeriodId || defaultPeriodId;
+    const periodIdToFetch = resolvedPeriodId ? parseInt(resolvedPeriodId, 10) : null;
 
-    const { data: assignments } = useTeachingAssignmentDetail(teacherId);
+    const { data: assignments } = useTeachingAssignmentDetail();
     const [selectedAssignmentId, setSelectedAssignmentId] = useState<string>("");
 
-    useEffect(() => {
-        if (assignments && assignments.length > 0 && !selectedAssignmentId) {
-            setSelectedAssignmentId(assignments[0].teachingAssignmentId.toString());
-        }
-    }, [assignments, selectedAssignmentId]);
+    const defaultAssignmentId = useMemo(() => {
+        if (!assignments?.length) return "";
+        return assignments[0].teachingAssignmentId.toString();
+    }, [assignments]);
+
+    const resolvedAssignmentId = selectedAssignmentId || defaultAssignmentId;
 
     const { data: lessonInstances = [] } = useLessonInstancesByTeachingAssignment(
-        selectedAssignmentId ? parseInt(selectedAssignmentId) : 0,
+        resolvedAssignmentId ? parseInt(resolvedAssignmentId) : 0,
         periodIdToFetch ?? 0
     );
 
-    // Load all homeworks for calendar (large page size)
     const { data: pageData, isLoading: homeworksLoading } = useHomeworksByTeachingAssignment(
-        selectedAssignmentId ? parseInt(selectedAssignmentId) : 0,
+        resolvedAssignmentId ? parseInt(resolvedAssignmentId) : 0,
         0,
         500
     );
@@ -65,20 +63,18 @@ export default function HomeworkJournal() {
     const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
 
     const handleCreateHomework = (text: string, lessonInstanceId: number) => {
-        if (!selectedAssignmentId) return;
+        if (!resolvedAssignmentId) return;
         createMutation.mutate({ text, lessonInstanceId });
     };
 
     const currentAssignment = assignments?.find(
-        (a) => a.teachingAssignmentId.toString() === selectedAssignmentId
+        (a) => a.teachingAssignmentId.toString() === resolvedAssignmentId
     );
 
     return (
         <div className="relative z-10 min-h-screen px-4 md:px-10 pt-5 pb-14">
-            {/* ── Header & controls ── */}
             <TeacherNavbar />
 
-            {/* ── Controls bar ── */}
             <div className="max-w-350 mx-auto mb-6">
                 <div className="glass-card rounded-[24px] p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-5 border-none shadow-lg backdrop-blur-md">
                     <div className="flex items-center gap-4">
@@ -101,8 +97,7 @@ export default function HomeworkJournal() {
                     </div>
 
                     <div className="flex flex-wrap gap-3 items-center">
-                        {/* Period select */}
-                        <Select value={selectedPeriodId} onValueChange={setSelectedPeriodId}>
+                        <Select value={resolvedPeriodId} onValueChange={setSelectedPeriodId}>
                             <SelectTrigger className="glass-pill w-55 h-11 font-bold text-[13px] rounded-2xl text-(--navy) px-4 border-0 shadow-none">
                                 <div className="flex items-center gap-2">
                                     <CalendarDays className="w-4 h-4 text-(--red) shrink-0" />
@@ -122,8 +117,7 @@ export default function HomeworkJournal() {
                             </SelectContent>
                         </Select>
 
-                        {/* Assignment select */}
-                        <Select value={selectedAssignmentId} onValueChange={setSelectedAssignmentId}>
+                        <Select value={resolvedAssignmentId} onValueChange={setSelectedAssignmentId}>
                             <SelectTrigger className="glass-pill h-11 px-5 text-[13px] font-bold rounded-2xl text-(--navy) border-0 shadow-sm gap-2 min-w-55">
                                 <Users className="w-4 h-4 text-(--red)" />
                                 <SelectValue placeholder="Выберите группу" />
@@ -145,9 +139,7 @@ export default function HomeworkJournal() {
                 </div>
             </div>
 
-            {/* ── Main grid ── */}
             <div className="max-w-350 mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Calendar — 2 cols */}
                 <div className="lg:col-span-2">
                     {homeworksLoading ? (
                         <div className="glass-card rounded-[32px] p-6 backdrop-blur-md h-full flex items-center justify-center min-h-125">
@@ -165,7 +157,6 @@ export default function HomeworkJournal() {
                     )}
                 </div>
 
-                {/* Side panel — 1 col */}
                 <div className="lg:col-span-1">
                     <div className="sticky top-6">
                         <DayDetailPanel

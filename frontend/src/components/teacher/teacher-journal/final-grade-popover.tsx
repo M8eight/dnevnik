@@ -20,7 +20,7 @@ export default function FinalGradePopover({
   academicYearId,
 }: FinalGradePopoverProps) {
   const [open, setOpen] = useState(false);
-  const { isReadOnly } = useJournalAccess();
+  const { isFinalGradeReadOnly, isYearClosed } = useJournalAccess();
   const { mutate: create, isPending: isCreating } = useCreateFinalGrade();
   const { mutate: remove, isPending: isDeleting } = useDeleteFinalGrade();
   const isPending = isCreating || isDeleting;
@@ -46,32 +46,41 @@ export default function FinalGradePopover({
   };
 
   return (
-    <Popover open={open && !isReadOnly} onOpenChange={(newOpen) => {
-      if (isReadOnly) {
+    <Popover open={open && !isFinalGradeReadOnly} onOpenChange={(newOpen) => {
+      if (isFinalGradeReadOnly) {
         setOpen(false);
       } else {
         setOpen(newOpen);
       }
     }}>
       <PopoverTrigger asChild>
-        <div className="w-full h-full flex items-center justify-center cursor-pointer group">
+        <div
+          className="w-full h-full flex items-center justify-center cursor-pointer group"
+          title={
+            isFinalGradeReadOnly
+              ? isYearClosed
+                ? "Учебный год закрыт"
+                : "Дождитесь закрытия всех четвертей"
+              : undefined
+          }
+        >
           {finalGrade ? (
             <span className={cn(
-              "w-[34px] h-[34px] rounded-[10px] flex items-center justify-center font-serif text-[16px] font-bold ring-1 ring-black/[0.06] transition-transform group-hover:scale-110 shadow-sm",
+              "w-8.5 h-8.5 rounded-[10px] flex items-center justify-center font-serif text-[16px] font-bold ring-1 ring-black/6 transition-transform group-hover:scale-110 shadow-sm",
               GRADE_STYLE[finalGrade.value]
             )}>
               {finalGrade.value}
             </span>
           ) : (
-            <span className="w-[34px] h-[34px] rounded-[10px] flex items-center justify-center ring-1 ring-black/[0.06] bg-black/[0.02] opacity-0 group-hover:opacity-100 transition-opacity text-black/20 text-[13px] font-bold">
+            <span className="w-8.5 h-8.5 rounded-[10px] flex items-center justify-center ring-1 ring-black/6 bg-black/2 opacity-0 group-hover:opacity-100 transition-opacity text-black/20 text-[13px] font-bold">
               +
             </span>
           )}
         </div>
       </PopoverTrigger>
 
-      {!isReadOnly && (
-        <PopoverContent className="w-[160px] p-3 rounded-2xl shadow-2xl border border-black/[0.06] bg-white/95 backdrop-blur-xl flex flex-col gap-3">
+      {!isFinalGradeReadOnly && (
+        <PopoverContent className="w-40 p-3 rounded-2xl shadow-2xl border border-black/6 bg-white/95 backdrop-blur-xl flex flex-col gap-3">
           <p className="text-[9px] font-extrabold uppercase tracking-[0.2em] text-black/30 text-center">
             Годовая оценка
           </p>
@@ -83,8 +92,8 @@ export default function FinalGradePopover({
                 onClick={() => handleGradeClick(val)}
                 disabled={isPending}
                 className={cn(
-                  "h-9 rounded-lg flex items-center justify-center font-serif text-[14px] font-bold border border-black/[0.05] transition-all hover:scale-105 active:scale-95 disabled:opacity-50",
-                  finalGrade?.value === val ? "ring-2 ring-[var(--navy)] ring-offset-1" : "",
+                  "h-9 rounded-lg flex items-center justify-center font-serif text-[14px] font-bold border border-black/5 transition-all hover:scale-105 active:scale-95 disabled:opacity-50",
+                  finalGrade?.value === val ? "ring-2 ring-(--navy) ring-offset-1" : "",
                   GRADE_STYLE[val]
                 )}
               >

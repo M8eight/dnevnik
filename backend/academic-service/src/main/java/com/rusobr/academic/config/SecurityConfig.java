@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.rusobr.academic.domain.enums.UserRole.*;
-import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.*;
 
 @Configuration
 @EnableMethodSecurity
@@ -43,14 +43,34 @@ public class SecurityConfig {
                             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                             .requestMatchers(GET, "/api/v1/academic-years").hasAnyRole(STUDENT.name(), TEACHER.name(), PARENT.name(), ADMIN.name())
                             .requestMatchers(GET, "/api/v1/academic-periods").hasAnyRole(STUDENT.name(), TEACHER.name(), PARENT.name(), ADMIN.name())
+                            .requestMatchers(GET, "/api/v1/academic-periods/by-academic-year/*").hasAnyRole(STUDENT.name(), TEACHER.name())
+
 
                             .requestMatchers(GET, "/api/v1/bff/students/home").hasRole(STUDENT.name())
                             .requestMatchers(GET, "/api/v1/schedules/diary").hasRole(STUDENT.name())
-                            .requestMatchers(GET, "/api/v1/academic-periods/by-academic-year/*").hasRole(STUDENT.name())
                             .requestMatchers(GET, "/api/v1/grades/by-student").hasRole(STUDENT.name())
                             .requestMatchers(GET, "/api/v1/final-grades/by-student").hasRole(STUDENT.name())
                             .requestMatchers(GET, "/api/v1/period-grades/by-student").hasRole(STUDENT.name())
                             .requestMatchers(GET, "/api/v1/school-classes/search/by-student").hasRole(STUDENT.name())
+
+
+                            .requestMatchers(GET, "/api/v1/teaching-assignments").hasRole(TEACHER.name())
+                            .requestMatchers(GET, "/api/v1/journal/by-assignment").hasRole(TEACHER.name())
+                            .requestMatchers(GET, "/api/v1/period-grades/by-assignment").hasRole(TEACHER.name())
+                            .requestMatchers(GET, "/api/v1/final-grades/by-assignment").hasRole(TEACHER.name())
+                            .requestMatchers(POST, "/api/v1/attendances").hasRole(TEACHER.name())
+                            .requestMatchers(POST, "/api/v1/grades").hasRole(TEACHER.name())
+                            .requestMatchers(DELETE, "/api/v1/attendances/*").hasRole(TEACHER.name())
+                            .requestMatchers(DELETE, "/api/v1/grades/*").hasRole(TEACHER.name())
+                            .requestMatchers(POST, "/api/v1/period-grades").hasRole(TEACHER.name())
+                            .requestMatchers(DELETE, "/api/v1/period-grades/*").hasRole(TEACHER.name())
+                            .requestMatchers(POST, "/api/v1/final-grades").hasRole(TEACHER.name())
+                            .requestMatchers(DELETE, "/api/v1/final-grades/*").hasRole(TEACHER.name())
+
+                            .requestMatchers(GET, "/api/v1/homeworks/by-assignment").hasRole(TEACHER.name())
+                            .requestMatchers(GET, "/api/v1/lesson-instances/by-assignment").hasRole(TEACHER.name())
+                            .requestMatchers(POST, "/api/v1/homeworks").hasRole(TEACHER.name())
+                            .requestMatchers(DELETE, "/api/v1/homeworks/*").hasRole(TEACHER.name())
 
                             .anyRequest().permitAll();
                 })
@@ -74,7 +94,7 @@ public class SecurityConfig {
                     .ifPresent(roles -> roles.forEach(r ->
                             authorities.add(new SimpleGrantedAuthority("ROLE_" + r))));
 
-            return new JwtAuthenticationToken(jwt,authorities);
+            return new JwtAuthenticationToken(jwt, authorities);
         };
     }
 }

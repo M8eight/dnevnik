@@ -1,10 +1,9 @@
 import { getTeachingAssignmentDetail, type TeachingAssignmentDetail } from "@/services/teaching-assignment-service";
 import { useQuery } from "@tanstack/react-query"
 
-export const useTeachingAssignmentDetail = (teacherId: number) => {
+export const useTeachingAssignmentDetail = () => {
     return useQuery<TeachingAssignmentDetail[]>({
-        queryKey: ['teachingAssignmentDetail', teacherId],
-        queryFn: () => getTeachingAssignmentDetail(teacherId),
-        enabled: !!teacherId,
+        queryKey: ['teachingAssignmentDetail'],
+        queryFn: () => getTeachingAssignmentDetail(),
     })
 }

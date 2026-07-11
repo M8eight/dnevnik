@@ -1,8 +1,10 @@
 package com.rusobr.academic.application.service;
 
 import com.rusobr.academic.domain.model.AcademicPeriod;
+import com.rusobr.academic.domain.model.AcademicYear;
 import com.rusobr.academic.domain.model.FinalGrade;
 import com.rusobr.academic.domain.model.TeachingAssignment;
+import com.rusobr.academic.infrastructure.persistence.repository.AcademicYearRepository;
 import com.rusobr.academic.web.exception.ConflictException;
 import com.rusobr.academic.web.exception.ExceptionCode;
 import com.rusobr.academic.web.exception.NotFoundException;
@@ -35,6 +37,7 @@ public class FinalGradeService {
     private final AcademicPeriodRepository academicPeriodRepository;
     private final TeachingAssignmentService teachingAssignmentService;
     private final UserClient userClient;
+    private final AcademicYearRepository academicYearRepository;
 
     @Transactional(readOnly = true)
     public Map<String, FinalGradeResponse> getByStudentId(Long studentId, Long academicYearId) {
@@ -81,8 +84,12 @@ public class FinalGradeService {
         TeachingAssignment teachingAssignment = teachingAssignmentRepository.findById(finalGradeRequest.teachingAssignmentId())
                 .orElseThrow(() -> new NotFoundException("Teaching assignment with id: %d".formatted(
                         finalGradeRequest.teachingAssignmentId()), ExceptionCode.TEACHING_ASSIGNMENT_NOT_FOUND));
+        AcademicYear academicYear = academicYearRepository.findById(finalGradeRequest.academicYearId())
+                .orElseThrow(() -> new NotFoundException("Academic year with id: %d".formatted(
+                        finalGradeRequest.academicYearId()), ExceptionCode.ACADEMIC_YEAR_NOT_FOUND));
         FinalGrade finalGrade = finalGradeMapper.toFinalGrade(finalGradeRequest);
         finalGrade.setTeachingAssignment(teachingAssignment);
+        finalGrade.setAcademicYear(academicYear);
         return finalGradeMapper.toFinalGradeCreateResponse(finalGradeRepository.save(finalGrade));
     }
 
