@@ -41,7 +41,10 @@ public class SecurityConfig {
                     req
                             .requestMatchers("/public/**", "/actuator/health").permitAll()
                             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
                             .requestMatchers(GET, "/api/v1/students/with-class").hasRole(STUDENT.name())
+
+                            .requestMatchers(POST, "/api/v1/students/batch").hasRole(TEACHER.name())
 
                             .anyRequest().permitAll();
                 })

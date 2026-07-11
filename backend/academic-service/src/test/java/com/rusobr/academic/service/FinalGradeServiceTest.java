@@ -9,6 +9,7 @@ import com.rusobr.academic.domain.model.FinalGrade;
 import com.rusobr.academic.domain.model.TeachingAssignment;
 import com.rusobr.academic.infrastructure.client.UserClient;
 import com.rusobr.academic.infrastructure.persistence.repository.AcademicPeriodRepository;
+import com.rusobr.academic.infrastructure.persistence.repository.AcademicYearRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.FinalGradeRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.TeachingAssignmentRepository;
 import com.rusobr.academic.web.dto.academicYear.AcademicYearResponse;
@@ -45,6 +46,7 @@ class FinalGradeServiceTest {
     @Mock private FinalGradeMapper finalGradeMapper;
     @Mock private TeachingAssignmentRepository teachingAssignmentRepository;
     @Mock private AcademicPeriodRepository academicPeriodRepository;
+    @Mock private AcademicYearRepository academicYearRepository;
     @Mock private TeachingAssignmentService teachingAssignmentService;
     @Mock private UserClient userClient;
 
@@ -119,7 +121,6 @@ class FinalGradeServiceTest {
     @DisplayName("create")
     class Create {
 
-        // ИСПРАВЛЕНО: Теперь используется ACADEMIC_YEAR_ID (2L) вместо захардкоженного 1L
         private final FinalGradeRequest request = new FinalGradeRequest(
                 STUDENT_ID, ACADEMIC_YEAR_ID, 5, "Отлично", ASSIGNMENT_ID
         );
@@ -134,6 +135,7 @@ class FinalGradeServiceTest {
             FinalGradeCreateResponse expectedResponse = mock(FinalGradeCreateResponse.class);
 
             when(academicPeriodRepository.getAcademicPeriodsByAcademicYearId(ACADEMIC_YEAR_ID)).thenReturn(List.of(closedPeriod));
+            when(academicYearRepository.findById(ACADEMIC_YEAR_ID)).thenReturn(Optional.of(new AcademicYear()));
             when(teachingAssignmentRepository.findById(ASSIGNMENT_ID)).thenReturn(Optional.of(assignment));
             when(finalGradeMapper.toFinalGrade(request)).thenReturn(mappedGrade);
             when(finalGradeRepository.save(mappedGrade)).thenReturn(savedGrade);

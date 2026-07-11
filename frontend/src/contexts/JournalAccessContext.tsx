@@ -16,6 +16,8 @@ export interface JournalAccessContextType {
   isReadOnly: boolean;
   isPeriodClosed: boolean;
   isYearClosed: boolean;
+  areAllPeriodsClosed: boolean;
+  isFinalGradeReadOnly: boolean;
   closedReason: "year" | "period" | null;
 }
 

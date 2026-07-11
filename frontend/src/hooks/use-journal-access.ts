@@ -1,8 +1,6 @@
 import { useContext, useMemo, createElement } from "react";
 import type { ReactNode } from "react";
 
-// ВАЖНО: Импортируем контекст и типы из первого файла!
-// (Проверь путь, чтобы он соответствовал твоей структуре папок)
 import { 
   JournalAccessContext, 
   type JournalAccessContextType,
@@ -14,19 +12,27 @@ interface JournalAccessProviderProps {
   children: ReactNode;
   currentPeriod?: AcademicPeriod | null;
   currentYear?: AcademicYear | null;
+  periods?: AcademicPeriod[] | null;
 }
 
 export function JournalAccessProvider({
   children,
   currentPeriod,
   currentYear,
+  periods,
 }: JournalAccessProviderProps) {
   
   const value: JournalAccessContextType = useMemo(() => {
     const isPeriodClosed = Boolean(currentPeriod?.isClosed);
     const isYearClosed = currentYear ? currentYear.closed : false;
     const isReadOnly = isPeriodClosed || isYearClosed;
-    
+
+    const areAllPeriodsClosed = Boolean(
+      periods && periods.length > 0 && periods.every((p) => p.isClosed)
+    );
+
+    const isFinalGradeReadOnly = isYearClosed || !areAllPeriodsClosed;
+
     let closedReason: "year" | "period" | null = null;
     if (isYearClosed) closedReason = "year";
     else if (isPeriodClosed) closedReason = "period";
@@ -35,9 +41,11 @@ export function JournalAccessProvider({
       isReadOnly,
       isPeriodClosed,
       isYearClosed,
+      areAllPeriodsClosed,
+      isFinalGradeReadOnly,
       closedReason,
     };
-  }, [currentPeriod, currentYear]);
+  }, [currentPeriod, currentYear, periods]);
 
   return createElement(JournalAccessContext.Provider, { value }, children);
 }

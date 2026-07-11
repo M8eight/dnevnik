@@ -16,12 +16,6 @@ public class HomeworkController {
 
     private final HomeworkService homeworkService;
 
-//    @GetMapping("/by-date")
-//    public List<HomeworkWithSubjectResponse> getByDate(@RequestParam @NotNull LocalDate date,
-//                                                       @RequestParam @NotNull Long studentId) {
-//        return homeworkService.getByDate(date, studentId);
-//    }
-
     @GetMapping("/by-assignment")
     public Page<HomeworkResponse> getByAssignment(@RequestParam Long teachingAssignmentId, Pageable pageable) {
         return homeworkService.getByAssignment(teachingAssignmentId, pageable);

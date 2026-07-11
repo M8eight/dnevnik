@@ -96,12 +96,12 @@ export default function FinalGradesView({
       <div className="grid grid-cols-3 gap-4 mb-6">
         {stats.map(({ icon: Icon, label, value, sub }) => (
           <div key={label} className="glass-card rounded-[22px] p-5 flex items-center gap-4">
-            <div className="w-11 h-11 rounded-[13px] bg-[var(--navy-light)]/40 flex items-center justify-center flex-shrink-0">
-              <Icon className="w-5 h-5 text-[var(--navy)]" />
+            <div className="w-11 h-11 rounded-[13px] bg-(--navy-light)/40 flex items-center justify-center shrink-0">
+              <Icon className="w-5 h-5 text-(--navy)" />
             </div>
             <div>
               <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-black/30 mb-0.5">{label}</p>
-              <p className="font-serif text-[1.6rem] font-black text-[var(--navy)] leading-none">{value}</p>
+              <p className="font-serif text-[1.6rem] font-black text-(--navy) leading-none">{value}</p>
               <p className="text-[11px] font-medium text-black/40 mt-0.5">{sub}</p>
             </div>
           </div>
@@ -109,8 +109,8 @@ export default function FinalGradesView({
       </div>
 
       <div className="glass-card rounded-[22px] overflow-hidden border-none shadow-xl">
-        <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-black/[0.05]">
-          <Chip className="border-[var(--navy)]/20 text-[var(--navy)]">
+        <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-black/5">
+          <Chip className="border-(--navy)/20 text-(--navy)">
             Годовые результаты и история периодов
           </Chip>
           <span className="text-[10px] font-bold text-black/20 uppercase tracking-widest">
@@ -121,23 +121,23 @@ export default function FinalGradesView({
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="bg-slate-50/80 border-b border-black/[0.05]">
-                <th className="text-left px-6 py-4 border-r border-black/[0.05] min-w-[200px]">
-                  <Chip className="border-[var(--navy)]/20 text-[var(--navy)]">Ученик</Chip>
+              <tr className="bg-slate-50/80 border-b border-black/5">
+                <th className="text-left px-6 py-4 border-r border-black/5 min-w-50">
+                  <Chip className="border-(--navy)/20 text-(--navy)">Ученик</Chip>
                 </th>
                 {academicPeriods.map((period) => (
-                  <th key={period.id} className="text-center px-2 py-4 border-r border-black/[0.05] w-[60px]">
+                  <th key={period.id} className="text-center px-2 py-4 border-r border-black/5 w-15">
                     <span className="text-[9px] font-extrabold uppercase tracking-wider text-black/40">
                       {period.name}
                     </span>
                   </th>
                 ))}
-                <th className="text-center px-4 py-4 border-r border-black/[0.05] w-[100px]">
+                <th className="text-center px-4 py-4 border-r border-black/5 w-25">
                   <span className="text-[9px] font-extrabold uppercase tracking-[0.15em] text-black/40">
                     Ср. четвертей
                   </span>
                 </th>
-                <th className="text-center px-4 py-4 w-[130px]">
+                <th className="text-center px-4 py-4 w-32.5">
                   <Chip className="border-red-200 text-red-600 bg-red-50/50">Итоговая</Chip>
                 </th>
               </tr>
@@ -165,10 +165,10 @@ export default function FinalGradesView({
                   return (
                     <tr
                       key={student.id}
-                      className="group hover:bg-slate-50/80 transition-colors border-b border-b-black/[0.03]"
+                      className="group hover:bg-slate-50/80 transition-colors border-b border-b-black/3"
                     >
-                      <td className="px-6 py-4 border-r border-black/[0.05]">
-                        <p className="text-[13px] font-bold text-[var(--navy)] leading-tight">
+                      <td className="px-6 py-4 border-r border-black/5">
+                        <p className="text-[13px] font-bold text-(--navy) leading-tight">
                           {student.lastName} {student.firstName}
                         </p>
                       </td>
@@ -178,9 +178,9 @@ export default function FinalGradesView({
 
                         if (grade !== null) {
                           return (
-                            <td key={period.id} className="text-center px-2 border-r border-black/[0.05] h-[64px]">
+                            <td key={period.id} className="text-center px-2 border-r border-black/5 h-16">
                               <span className={cn(
-                                "inline-flex w-[28px] h-[28px] rounded-lg items-center justify-center font-serif text-[13px] font-bold ring-1 ring-black/[0.04] shadow-sm",
+                                "inline-flex w-7 h-7 rounded-lg items-center justify-center font-serif text-[13px] font-bold ring-1 ring-black/4 shadow-sm",
                                 GRADE_STYLE[grade.value]
                               )}>
                                 {grade.value}
@@ -190,19 +190,19 @@ export default function FinalGradesView({
                         }
 
                         return (
-                          <td key={period.id} className="text-center px-2 border-r border-black/[0.05] h-[64px]">
+                          <td key={period.id} className="text-center px-2 border-r border-black/5 h-16">
                             <span className="text-black/15 text-[12px] font-bold">—</span>
                           </td>
                         );
                       })}
 
-                      <td className="text-center px-4 border-r border-black/[0.05]">
+                      <td className="text-center px-4 border-r border-black/5">
                         <span className={`font-serif text-[15px] font-black ${avgColor(periodAvg)}`}>
                           {periodAvg !== null ? periodAvg.toFixed(2) : "—"}
                         </span>
                       </td>
 
-                      <td className="p-0 h-[64px] text-center">
+                      <td className="p-0 h-16 text-center">
                         <FinalGradePopover
                           finalGrade={finalGrade}
                           studentId={student.id}
