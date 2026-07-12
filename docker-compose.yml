@@ -41,6 +41,7 @@ services:
     volumes:
       - keycloak_data:/opt/keycloak/data
       - ./configs/dnevnik-realm-realm.json:/opt/keycloak/data/import/realm.json:ro
+      - ./keycloak/themes/my-theme:/opt/keycloak/themes/my-theme
     networks:
       - micro-net
     depends_on:
