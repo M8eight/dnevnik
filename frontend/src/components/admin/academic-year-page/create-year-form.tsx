@@ -15,11 +15,14 @@ import { format } from "date-fns";
 const formSchema = z.object({
     name: z
         .string()
-        .min(3, "Название года не может быть меньше 3 символов")
-        .max(50, "Слишком длинное название")
-        .trim(),
+        .trim()
+        .regex(/^\d{4}-\d{4}$/, "Формат: ГГГГ-ГГГГ, например 2024-2025"),
     startDate: z.date({ message: "Укажите дату начала" }),
     endDate: z.date({ message: "Укажите дату окончания" }),
+    
+}).refine((data) => data.startDate < data.endDate, {
+        message: "Дата окончания должна быть позже даты начала",
+        path: ["endDate"],
 });
 
 type FormValues = z.infer<typeof formSchema>;

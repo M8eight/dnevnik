@@ -1,5 +1,6 @@
 package com.rusobr.academic.config;
 
+import jakarta.servlet.DispatcherType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
@@ -39,13 +40,13 @@ public class SecurityConfig {
                 .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(req -> {
                     req
-                            .requestMatchers("/public/**", "/actuator/health").permitAll()
+                            .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll().requestMatchers("/public/**", "/actuator/health").permitAll()
                             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                             .requestMatchers(GET, "/api/v1/academic-years").hasAnyRole(STUDENT.name(), TEACHER.name(), PARENT.name(), ADMIN.name())
                             .requestMatchers(GET, "/api/v1/academic-periods").hasAnyRole(STUDENT.name(), TEACHER.name(), PARENT.name(), ADMIN.name())
-                            .requestMatchers(GET, "/api/v1/academic-periods/by-academic-year/*").hasAnyRole(STUDENT.name(), TEACHER.name())
+                            .requestMatchers(GET, "/api/v1/academic-periods/by-academic-year/*").hasAnyRole(STUDENT.name(), TEACHER.name(), ADMIN.name())
 
-
+                            //STUDENT SCOPE
                             .requestMatchers(GET, "/api/v1/bff/students/home").hasRole(STUDENT.name())
                             .requestMatchers(GET, "/api/v1/schedules/diary").hasRole(STUDENT.name())
                             .requestMatchers(GET, "/api/v1/grades/by-student").hasRole(STUDENT.name())
@@ -53,7 +54,7 @@ public class SecurityConfig {
                             .requestMatchers(GET, "/api/v1/period-grades/by-student").hasRole(STUDENT.name())
                             .requestMatchers(GET, "/api/v1/school-classes/search/by-student").hasRole(STUDENT.name())
 
-
+                            //TEACHER SCOPE
                             .requestMatchers(GET, "/api/v1/teaching-assignments").hasRole(TEACHER.name())
                             .requestMatchers(GET, "/api/v1/journal/by-assignment").hasRole(TEACHER.name())
                             .requestMatchers(GET, "/api/v1/period-grades/by-assignment").hasRole(TEACHER.name())
@@ -72,7 +73,44 @@ public class SecurityConfig {
                             .requestMatchers(POST, "/api/v1/homeworks").hasRole(TEACHER.name())
                             .requestMatchers(DELETE, "/api/v1/homeworks/*").hasRole(TEACHER.name())
 
-                            .anyRequest().permitAll();
+                            //ADMIN SCOPE
+                            .requestMatchers(GET, "/api/v1/subjects").hasRole(ADMIN.name())
+                            .requestMatchers(POST, "/api/v1/subjects").hasRole(ADMIN.name())
+                            .requestMatchers(DELETE, "/api/v1/subjects/*").hasRole(ADMIN.name())
+
+                            .requestMatchers(POST, "/api/v1/academic-periods").hasRole(ADMIN.name())
+                            .requestMatchers(PATCH, "/api/v1/academic-periods/*/close").hasRole(ADMIN.name())
+                            .requestMatchers(PATCH, "/api/v1/academic-periods/*/open").hasRole(ADMIN.name())
+                            .requestMatchers(PATCH, "/api/v1/academic-periods/*").hasRole(ADMIN.name())
+                            .requestMatchers(DELETE, "/api/v1/academic-periods/*").hasRole(ADMIN.name())
+
+                            .requestMatchers(GET, "/api/v1/school-classes/by-academic-year/*").hasRole(ADMIN.name())
+                            .requestMatchers(POST, "/api/v1/school-classes").hasRole(ADMIN.name())
+                            .requestMatchers(PATCH, "/api/v1/school-classes/*").hasRole(ADMIN.name())
+                            .requestMatchers(GET, "/api/v1/school-classes/unassigned-students").hasRole(ADMIN.name())
+                            .requestMatchers(GET, "/api/v1/school-classes/*/details").hasRole(ADMIN.name())
+                            .requestMatchers(POST, "/api/v1/school-classes/*/students/*").hasRole(ADMIN.name())
+                            .requestMatchers(DELETE, "/api/v1/school-classes/*/students/*").hasRole(ADMIN.name())
+                            .requestMatchers(PUT, "/api/v1/school-classes/*/teacher/*").hasRole(ADMIN.name())
+
+                            .requestMatchers(GET, "/api/v1/schedules").hasRole(ADMIN.name())
+                            .requestMatchers(POST, "/api/v1/schedules").hasRole(ADMIN.name())
+                            .requestMatchers(GET, "/api/v1/schedules/by-class").hasRole(ADMIN.name())
+                            .requestMatchers(PATCH, "/api/v1/schedules/load").hasRole(ADMIN.name())
+                            .requestMatchers(PATCH, "/api/v1/schedules/*/close").hasRole(ADMIN.name())
+                            .requestMatchers(GET, "/api/v1/teacher-subjects").hasRole(ADMIN.name())
+
+                            .requestMatchers(GET, "/api/v1/academic-years").hasRole(ADMIN.name())
+                            .requestMatchers(POST, "/api/v1/academic-years").hasRole(ADMIN.name())
+                            .requestMatchers(PATCH, "/api/v1/academic-years/*/open").hasRole(ADMIN.name())
+                            .requestMatchers(PATCH, "/api/v1/academic-years/*/close").hasRole(ADMIN.name())
+                            .requestMatchers(DELETE, "/api/v1/academic-years/*").hasRole(ADMIN.name())
+
+                            .requestMatchers(POST, "/api/v1/teacher-subjects").hasRole(ADMIN.name())
+                            .requestMatchers(DELETE, "/api/v1/teacher-subjects").hasRole(ADMIN.name())
+
+
+                            .anyRequest().denyAll();
                 })
                 .oauth2ResourceServer(oauth2 -> {
                     oauth2.jwt(jwt-> {

@@ -42,11 +42,27 @@ public class SecurityConfig {
                             .requestMatchers("/public/**", "/actuator/health").permitAll()
                             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
+                            .requestMatchers(POST, "/api/v1/students/batch").hasAnyRole(TEACHER.name(), ADMIN.name())
+
+                            //STUDENT SCOPE
                             .requestMatchers(GET, "/api/v1/students/with-class").hasRole(STUDENT.name())
 
-                            .requestMatchers(POST, "/api/v1/students/batch").hasRole(TEACHER.name())
+                            //ADMIN SCOPE
+                            .requestMatchers(GET, "/api/v1/users").hasRole(ADMIN.name())
+                            .requestMatchers(POST, "/api/v1/users/students").hasRole(ADMIN.name())
+                            .requestMatchers(POST, "/api/v1/users/parents").hasRole(ADMIN.name())
+                            .requestMatchers(POST, "/api/v1/users/teachers").hasRole(ADMIN.name())
+                            .requestMatchers(DELETE, "/api/v1/users/*").hasRole(ADMIN.name())
+                            .requestMatchers(PUT, "/api/v1/users/*").hasRole(ADMIN.name())
+                            .requestMatchers(POST, "/api/v1/students/exclude-assigned").hasRole(ADMIN.name())
+                            .requestMatchers(GET, "/api/v1/students/*/details").hasRole(ADMIN.name())
+                            .requestMatchers(GET, "/api/v1/parents/*/details").hasRole(ADMIN.name())
+                            .requestMatchers(GET, "/api/v1/teachers/*/details").hasRole(ADMIN.name())
+                            .requestMatchers(GET, "/api/v1/teachers/*").hasRole(ADMIN.name())
+                            .requestMatchers(POST, "/api/v1/teachers/batch").hasRole(ADMIN.name())
+                            .requestMatchers(GET, "/api/v1/teachers/*/simple").hasRole(ADMIN.name())
 
-                            .anyRequest().permitAll();
+                            .anyRequest().denyAll();
                 })
                 .oauth2ResourceServer(oauth2 -> {
                     oauth2.jwt(jwt-> {

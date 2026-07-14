@@ -3,6 +3,7 @@ package com.rusobr.academic.web.controller;
 import com.rusobr.academic.application.service.AcademicYearService;
 import com.rusobr.academic.web.dto.academicYear.AcademicYearRequest;
 import com.rusobr.academic.web.dto.academicYear.AcademicYearResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,7 +27,7 @@ public class AcademicYearController {
     }
 
     @PostMapping
-    public AcademicYearResponse create(@RequestBody AcademicYearRequest academicYearRequest) {
+    public AcademicYearResponse create(@RequestBody @Valid AcademicYearRequest academicYearRequest) {
         return academicYearService.create(academicYearRequest);
     }
 
@@ -41,7 +42,7 @@ public class AcademicYearController {
     }
 
     @PutMapping("/{id}")
-    public void update(@PathVariable Long id, @RequestBody AcademicYearRequest request) {
+    public void update(@PathVariable Long id, @RequestBody @Valid AcademicYearRequest request) {
         academicYearService.update(id, request);
     }
 

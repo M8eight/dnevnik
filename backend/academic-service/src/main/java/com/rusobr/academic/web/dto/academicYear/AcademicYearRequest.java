@@ -6,7 +6,7 @@ import java.time.LocalDate;
 
 public record AcademicYearRequest(
         @NotBlank(message = "Название года не может быть пустым")
-        @Size(max = 9, message = "Название года не может быть больше 9 символов")
+        @Pattern(regexp = "^\\d{4}-\\d{4}$", message = "Название года должно быть в формате YYYY-YYYY")
         String name,
         String description,
         @NotNull LocalDate startDate,

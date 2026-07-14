@@ -22,7 +22,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${KC_URL:http://localhost:9090}/realms/${KC_REALM:dnevnik-realm}
+          issuer-uri: ${KC_PUBLIC_URL:http://localhost:9090}/realms/${KC_REALM:dnevnik-realm}
+          jwk-set-uri: ${KC_URL:http://localhost:9090}/realms/${KC_REALM:dnevnik-realm}/protocol/openid-connect/certs
   datasource:
     url: ${PSQL_URL:jdbc:postgresql://localhost:5432}/${PSQL_USER_DB:user_db}
     username: ${PSQL_USER_USERNAME:school_user}
@@ -54,7 +55,7 @@ resilience4j:
   circuitbreaker:
     configs:
       default:
-        sliding-window-size: 50
+        sliding-window-size: 100
         minimum-number-of-calls: 10
         failure-rate-threshold: 50
         wait-duration-in-open-state: 10s

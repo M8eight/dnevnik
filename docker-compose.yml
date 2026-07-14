@@ -120,6 +120,7 @@ services:
       retries: 10
     environment:
       - KC_URL=http://keycloak:8080
+      - KC_PUBLIC_URL=http://localhost:9090
       - KC_REALM=dnevnik-realm
       - EUREKA_URL=http://eureka-server:8761
       - APP_NAME=api-gateway
@@ -144,6 +145,7 @@ services:
         condition: service_healthy
     environment:
       - KC_URL=http://keycloak:8080
+      - KC_PUBLIC_URL=http://localhost:9090
       - KC_REALM=dnevnik-realm
       - KC_CLIENT_SECRET=lFpKKXUky4yFUuAHQm1sbkAG2BcoY2kv
       - PSQL_URL=jdbc:postgresql://postgres:5432
@@ -174,6 +176,7 @@ services:
         condition: service_healthy
     environment:
       - KC_URL=http://keycloak:8080
+      - KC_PUBLIC_URL=http://localhost:9090
       - KC_REALM=dnevnik-realm
       - KC_CLIENT_SECRET=lFpKKXUky4yFUuAHQm1sbkAG2BcoY2kv
       - PSQL_URL=jdbc:postgresql://postgres:5432
