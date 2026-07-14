@@ -9,6 +9,9 @@ import {
     Send,
     Loader2,
     RefreshCw,
+    AlertTriangle,
+    CalendarClock,
+
 } from "lucide-react";
 import {
     Select,
@@ -21,11 +24,13 @@ import AdminNavbar from "@/components/layout/navbars/AdminNavbar";
 import { useGetTeacherSubjects } from "@/hooks/use-teacher-subject";
 import { useScheduleByClassId, useCreateSchedule, useCloseSchedule, useLoadLessonInstance } from "@/hooks/use-schedule";
 import type { ScheduleLessonDto } from "@/services/schedule-service";
-import { useGetAllClasses } from "@/hooks/use-school-class";
+import { useGetAllClassesByAcademicYear } from "@/hooks/use-school-class";
 import { DAYS_MAP, LESSON_SLOTS } from "@/constants/component-constants";
 import LessonCell from "@/components/admin/schedule-page/lesson-cell";
 import ConfirmCloseModal from "@/components/admin/schedule-page/confirm-close-modal";
 import GenerateModal from "@/components/admin/schedule-page/generate-modal";
+import { useGetAcademicYears } from "@/hooks/use-academic-year";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function SchedulePage() {
     const todayStr = useMemo(() => {
@@ -34,10 +39,28 @@ export default function SchedulePage() {
     }, []);
 
     const [date, setDate] = useState<string>(todayStr);
-    
+
+    //academicYear
+    const { data: academicYears } = useGetAcademicYears();
+    const [selectedAcademicYearId, setSelectedAcademicYearId] = useState<string>("");
+
+    const defaultAcademicYearId = useMemo(() => {
+        if (!academicYears?.length) return "";
+        return academicYears[0].id.toString();
+    }, [academicYears]);
+
+    const resolvedAcademicYearId = selectedAcademicYearId || defaultAcademicYearId;
+
+    const currentAcademicYear = useMemo(() => {
+        return academicYears?.find(year => year.id.toString() === resolvedAcademicYearId);
+    }, [academicYears, resolvedAcademicYearId]);
+
+    const isYearClosed = currentAcademicYear ? currentAcademicYear.closed : false;
+
+
     const [viewClassId, setViewClassId] = useState<string>("");
 
-    const { data: classes = [], isLoading: isClassesLoading } = useGetAllClasses();
+    const { data: classes = [], isLoading: isClassesLoading } = useGetAllClassesByAcademicYear(parseInt(resolvedAcademicYearId, 10));
 
     const activeClassId = viewClassId || (classes.length > 0 ? String(classes[0].id) : "");
 
@@ -200,6 +223,23 @@ export default function SchedulePage() {
                             Загрузить уроки
                         </button>
 
+                        <Select
+                            value={resolvedAcademicYearId}
+                            onValueChange={setSelectedAcademicYearId}
+                        >
+                            <SelectTrigger className="glass-pill h-10 px-5 text-[12px] font-bold rounded-2xl text-(--navy) border-0 shadow-sm gap-2 min-w-45">
+                                <CalendarClock className="w-4 h-4 text-(--red)" />
+                                <SelectValue placeholder="Выберите год" />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-2xl border-none shadow-2xl bg-white/95 backdrop-blur-xl max-h-87.5">
+                                {academicYears?.map((academicYear) => (
+                                    <SelectItem key={academicYear.id} value={academicYear.id.toString()} className="font-bold text-[13px] py-3 rounded-xl cursor-pointer">
+                                        {academicYear.name} {academicYear.closed && "(Архив)"}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+
                         <Select value={activeClassId} onValueChange={setViewClassId}>
                             <SelectTrigger className="w-35 h-10 text-xs font-bold rounded-2xl bg-white/40 border-white/60 text-(--navy)">
                                 <div className="flex items-center gap-2">
@@ -218,6 +258,26 @@ export default function SchedulePage() {
                     </div>
                 </div>
             </div>
+
+            {isYearClosed && (
+                <div className="max-w-350 mx-auto mb-6 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <Alert variant="destructive" className="rounded-[24px] bg-linear-to-r from-red-50 to-red-50/50 border-red-200/80 shadow-lg backdrop-blur-sm">
+                        <div className="flex items-start gap-4">
+                            <div className="shrink-0 mt-0.5 w-10 h-10 rounded-[14px] bg-red-100/60 flex items-center justify-center">
+                                <AlertTriangle className="h-5 w-5 text-yellow-600" />
+                            </div>
+                            <div className="flex-1">
+                                <AlertTitle className="font-serif font-black tracking-tight text-base text-yellow-900 mb-1">
+                                    Учебный год <span className="font-bold text-yellow-900">({currentAcademicYear?.name})</span> закрыт
+                                </AlertTitle>
+                                <AlertDescription className="text-sm text-yellow-800/85 font-medium leading-relaxed">
+                                    Операции удаления и редактирования классов запрещены
+                                </AlertDescription>
+                            </div>
+                        </div>
+                    </Alert>
+                </div>
+            )}
 
             {/* Grid */}
             <div className="max-w-350 mx-auto">
@@ -309,8 +369,8 @@ export default function SchedulePage() {
                                 <label className="text-[11px] font-black uppercase tracking-widest text-black/30">
                                     Шаг 1 · Преподаватель
                                 </label>
-                                <Select 
-                                    value={formTeacherId} 
+                                <Select
+                                    value={formTeacherId}
                                     onValueChange={(val) => {
                                         setFormTeacherId(val);
                                         setFormSubjectId("");

@@ -14,7 +14,7 @@ export default function Index() {
             keycloak.login();
         } else {
             if (roles.includes("ADMIN")) {
-                navigate("/admin", { replace: true });
+                navigate("/admin/subject", { replace: true });
             } else if (roles.includes("STUDENT")) {
                 navigate("/student/home", { replace: true });
             } else if (roles.includes("TEACHER")) {

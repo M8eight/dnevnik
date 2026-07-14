@@ -29,7 +29,7 @@ export default function NavbarComponent({
   };
 
   return (
-    <header className="mb-6 relative z-100">
+    <header className="mb-6 relative z-30">
       <div className="max-w-350 mx-auto px-4 md:px-10 pt-6">
         <div className="glass-card rounded-[24px] px-6 h-16 flex items-center justify-between border-none shadow-lg backdrop-blur-md">
           <div className="flex items-center gap-3">
