@@ -80,7 +80,7 @@ export interface DiaryLessonInstanceDto {
         studentId: number ;    
     }[];
     grades: {
-        gradeId: number;
+        id: number;
         studentId: number;
         value: number;
         weight: number;

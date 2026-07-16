@@ -1,6 +1,7 @@
 package com.rusobr.academic.application.mapper;
 
 import com.rusobr.academic.domain.model.Grade;
+import com.rusobr.academic.infrastructure.persistence.projection.GradeDetailProjection;
 import com.rusobr.academic.infrastructure.persistence.projection.GradeJournalItemProjection;
 import com.rusobr.academic.infrastructure.persistence.projection.GradeWithSubjectNameProjection;
 import com.rusobr.academic.infrastructure.persistence.projection.StudentAverageProjection;
@@ -21,8 +22,8 @@ public interface GradeMapper {
     @Mapping(target = "lessonInstance", source = "lessonInstanceDto")
     CreateGradeResponse toCreateGradeResponseDto(Grade grade, LessonInstanceDto lessonInstanceDto);
 
-    @Mapping(target = "gradeId", source = "grade.id")
-    @Mapping(target = "gradeType", source = "grade.type")
+    @Mapping(target = "id", source = "grade.id")
+    @Mapping(target = "type", source = "grade.type")
     GradeResponse toGradeResponseDto(Grade grade);
 
     @Mapping(target = "type", source = "gradeType")
@@ -38,5 +39,9 @@ public interface GradeMapper {
     GradeWithSubjectNameResponse toWithSubjectNameResponse(GradeWithSubjectNameProjection projection);
 
     StudentAverageDto toStudentAverageDto(StudentAverageProjection projection);
+
+    @Mapping(target = "id", source = "gradeProjection.id")
+    @Mapping(target = "type", source = "gradeProjection.gradeType")
+    GradeDetailResponse toGradeDetailResponse(GradeDetailProjection gradeProjection, UserFeignResponse teacher);
 
 }

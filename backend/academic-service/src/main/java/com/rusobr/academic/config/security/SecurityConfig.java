@@ -1,4 +1,4 @@
-package com.rusobr.academic.config;
+package com.rusobr.academic.config.security;
 
 import jakarta.servlet.DispatcherType;
 import org.springframework.context.annotation.Bean;
@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.rusobr.academic.domain.enums.UserRole.*;
-import static org.springframework.http.HttpMethod.*;
+import static jakarta.ws.rs.HttpMethod.*;
 
 @Configuration
 @EnableMethodSecurity
@@ -50,6 +50,7 @@ public class SecurityConfig {
                             .requestMatchers(GET, "/api/v1/bff/students/home").hasRole(STUDENT.name())
                             .requestMatchers(GET, "/api/v1/schedules/diary").hasRole(STUDENT.name())
                             .requestMatchers(GET, "/api/v1/grades/by-student").hasRole(STUDENT.name())
+                            .requestMatchers(GET, "/api/v1/grades/*/detail").hasRole(STUDENT.name())
                             .requestMatchers(GET, "/api/v1/final-grades/by-student").hasRole(STUDENT.name())
                             .requestMatchers(GET, "/api/v1/period-grades/by-student").hasRole(STUDENT.name())
                             .requestMatchers(GET, "/api/v1/school-classes/search/by-student").hasRole(STUDENT.name())

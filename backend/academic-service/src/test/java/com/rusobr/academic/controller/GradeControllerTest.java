@@ -69,11 +69,11 @@ public class GradeControllerTest {
 
         mockMvc.perform(get("/api/v1/grades/{id}", GRADE_ID))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.gradeId").value(GRADE_ID))
+                .andExpect(jsonPath("$.id").value(GRADE_ID))
                 .andExpect(jsonPath("$.studentId").value(STUDENT_ID))
                 .andExpect(jsonPath("$.value").value(5))
                 .andExpect(jsonPath("$.weight").value(2))
-                .andExpect(jsonPath("$.gradeType").value("TEST"));
+                .andExpect(jsonPath("$.type").value("TEST"));
     }
 
     @Test

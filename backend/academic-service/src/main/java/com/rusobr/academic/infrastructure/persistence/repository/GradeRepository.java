@@ -1,6 +1,7 @@
 package com.rusobr.academic.infrastructure.persistence.repository;
 
 import com.rusobr.academic.domain.model.Grade;
+import com.rusobr.academic.infrastructure.persistence.projection.GradeDetailProjection;
 import com.rusobr.academic.infrastructure.persistence.projection.GradeJournalItemProjection;
 import com.rusobr.academic.infrastructure.persistence.projection.GradeWithSubjectNameProjection;
 import com.rusobr.academic.infrastructure.persistence.projection.StudentAverageProjection;
@@ -82,4 +83,22 @@ public interface GradeRepository extends JpaRepository<Grade, Long> {
     """, nativeQuery = true)
     List<StudentAverageProjection> findAverageStudentsByTeachingAssignment(@Param("teachingAssignmentId") Long teachingAssignmentId,
                                                                            @Param("from") LocalDate from, @Param("to") LocalDate to);
+
+    @Query("""
+        select
+            g.id id,
+            g.updatedAt date,
+            g.type gradeType,
+            g.value value,
+            g.weight weight,
+            ta.teacherId teacherId
+        from Grade g
+            join g.lessonInstance li
+            join li.scheduleLesson sl
+            join sl.teachingAssignment ta
+        where g.id = :id
+    """)
+    Optional<GradeDetailProjection> findDetailById(@Param("id") Long id);
+
+    boolean existsByIdAndStudentId(Long id, Long studentId);
 }

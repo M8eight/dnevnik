@@ -5,9 +5,13 @@ import com.rusobr.academic.application.mapper.LessonInstanceMapper;
 import com.rusobr.academic.domain.model.AcademicPeriod;
 import com.rusobr.academic.domain.model.Grade;
 import com.rusobr.academic.domain.model.LessonInstance;
+import com.rusobr.academic.infrastructure.client.UserClient;
+import com.rusobr.academic.infrastructure.persistence.projection.GradeDetailProjection;
 import com.rusobr.academic.infrastructure.persistence.repository.AcademicPeriodRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.GradeRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.LessonInstanceRepository;
+import com.rusobr.academic.web.dto.feign.UserFeignResponse;
+import com.rusobr.academic.web.dto.grade.GradeDetailResponse;
 import com.rusobr.academic.web.dto.grade.GradeResponse;
 import com.rusobr.academic.web.dto.grade.GradeWithSubjectNameResponse;
 import com.rusobr.academic.web.dto.grade.createGrade.CreateGradeRequest;
@@ -34,6 +38,7 @@ public class GradeService {
     private final LessonInstanceMapper lessonInstanceMapper;
     private final AcademicPeriodService academicPeriodService;
     private final AcademicPeriodRepository academicPeriodRepository;
+    private final UserClient userClient;
 
     @Transactional(readOnly = true)
     public GradeResponse getById(Long id) {
@@ -58,6 +63,13 @@ public class GradeService {
     @Transactional(readOnly = true)
     public List<GradeWithSubjectNameResponse> findAllByDate(Long studentId, LocalDate date) {
         return gradeRepository.findAllByDateAndStudentId(studentId, date).stream().map(gradeMapper::toWithSubjectNameResponse).toList();
+    }
+
+    public GradeDetailResponse getDetail(Long id) {
+        GradeDetailProjection gradeProjection = gradeRepository.findDetailById(id)
+                .orElseThrow(() -> new NotFoundException("Grade with id: %d not found".formatted(id), ExceptionCode.GRADE_NOT_FOUND));
+        UserFeignResponse teacher = userClient.getTeacherSimpleById(gradeProjection.getTeacherId());
+        return gradeMapper.toGradeDetailResponse(gradeProjection, teacher);
     }
 
     @Transactional

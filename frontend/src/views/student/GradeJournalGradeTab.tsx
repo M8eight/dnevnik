@@ -7,6 +7,7 @@ import StatCard from "@/components/student/grades-page/stat-card";
 import { Award, BookOpen, Star, TrendingUp } from "lucide-react";
 import { useGradesLessonsByStudentId } from "@/hooks/use-grade";
 import { useHorizontalScrollDrag } from "@/helpers/teacher-helpers";
+import { GradePopover } from "@/components/student/diary/grade-detail-popover";
 
 export interface GradeJournalGradeTabProps {
     academicPeriodId: number;
@@ -145,7 +146,7 @@ function GradeTableScrollArea({
         if (!targetEl) return;
 
         const stickyColWidth = el.querySelector<HTMLElement>("[data-sticky-col]")?.getBoundingClientRect().width ?? 0;
-        const offset = targetEl.offsetLeft - stickyColWidth - 24; // небольшой отступ, чтобы дата не липла к sticky-столбцу
+        const offset = targetEl.offsetLeft - stickyColWidth - 24;
         el.scrollLeft = Math.max(0, offset);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [filteredDates.length]);
@@ -204,8 +205,10 @@ function GradeTableScrollArea({
                                                     <div className={`flex items-center justify-center ${dayGrades.length > 1 ? "gap-0.5" : ""}`}>
                                                         {dayGrades.map((g, idx) => (
                                                             <React.Fragment key={g.gradeId}>
-                                                                <GradeBadge
-                                                                    grade={g.value}
+                                                                <GradePopover
+                                                                    gradeId={g.gradeId}
+                                                                    value={g.value}
+                                                                    
                                                                     size={dayGrades.length > 1 ? "sm" : "md"}
                                                                 />
                                                                 {dayGrades.length > 1 && idx === 0 && (

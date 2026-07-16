@@ -1,5 +1,6 @@
 import api from "@/axios/axios";
 import type { AcademicPeriodResponse } from "./academic-period-service";
+import type { UserSimpleResponse } from "./user-service";
 
 export type AvgGrade = number;
 
@@ -59,17 +60,14 @@ export interface GradeWithSubjectNameResponse {
     subjectName: string
 }
 
-export const createGrade = async (request: CreateGradeRequest): Promise<CreateGradeResponse> => {
-    const { data } = await api.post<CreateGradeResponse>(
-        `/academic-service/api/v1/grades`,
-        request
-    );
-    return data;
-};
-
-export const deleteGrade = async (id: number): Promise<void> => {
-    await api.delete(`/academic-service/api/v1/grades/${id}`);
-};
+export interface GradeDetailResponse {
+    id: number;
+    date: string;
+    type: string;
+    value: number;
+    weight: number;
+    teacher: UserSimpleResponse
+}
 
 export const getAvgGradeByStudentId = async (studentId: number, academicPeriodId: number): Promise<number> => {
     const {data} = await api.get<number>(`/academic-service/api/v1/grades/avg/by-student/${studentId}?academicPeriodId=${academicPeriodId}`);
@@ -87,4 +85,21 @@ export const getGradesLessonsByStudentId = async (academicPeriodId: number): Pro
         { params: { academicPeriodId } }
     );
     return data;
+};
+
+export const getGradeDetail = async (gradeId: number): Promise<GradeDetailResponse> => {
+    const {data} = await api.get<GradeDetailResponse>(`/academic-service/api/v1/grades/${gradeId}/detail`);
+    return data;
+};
+
+export const createGrade = async (request: CreateGradeRequest): Promise<CreateGradeResponse> => {
+    const { data } = await api.post<CreateGradeResponse>(
+        `/academic-service/api/v1/grades`,
+        request
+    );
+    return data;
+};
+
+export const deleteGrade = async (id: number): Promise<void> => {
+    await api.delete(`/academic-service/api/v1/grades/${id}`);
 };
