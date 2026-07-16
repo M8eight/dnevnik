@@ -10,7 +10,8 @@ import { ru } from "date-fns/locale";
 import { nextWeek, prevWeek } from "@/store/slices/scheduleSlice";
 import Chip from "@/components/student/chip";
 import { RUSSIAN_DAYS } from "@/constants/component-constants";
-import { AttendanceBadge, GradeBadge } from "@/components/student/diary/badges";
+import { AttendanceBadge } from "@/components/student/diary/badges";
+import { GradePopover } from "@/components/student/diary/grade-detail-popover";
 import StudentNavbar from "@/components/layout/navbars/StudentNavbar";
 import type { DiaryScheduleDto } from "@/services/schedule-service";
 
@@ -120,7 +121,9 @@ function DayCard({
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <AttendanceBadge status={mapAttendanceStatus(attendance?.status)} />
-                      <GradeBadge grade={grade?.value ?? null} />
+                      {grade?.id != null && grade.value != null && (
+                        <GradePopover gradeId={grade.id} value={grade.value} />
+                      )}
                     </div>
                   </div>
                 </div>

@@ -1,7 +1,7 @@
 export default function GradeBadge({ grade, size = "md" }: { grade?: number; size?: "sm" | "md" }) {
   if (!grade) {
     return (
-      <div className="w-full flex justify-center items-center h-[32px]">
+      <div className="w-full flex justify-center items-center h-8">
         <span className="text-black/10 font-serif text-lg">·</span>
       </div>
     );
@@ -17,7 +17,7 @@ export default function GradeBadge({ grade, size = "md" }: { grade?: number; siz
   const sizeClass = size === "md" ? "w-[36px] h-[36px] text-[17px]" : "w-[28px] h-[28px] text-[14px]";
 
   return (
-    <span className={`${sizeClass} ${styles[grade] ?? "bg-gray-50 text-gray-500"} rounded-[10px] flex items-center justify-center font-serif font-bold flex-shrink-0 ring-1 ring-black/[0.06] transition-all duration-200 cursor-default active:scale-90`}>
+    <span className={`${sizeClass} ${styles[grade] ?? "bg-gray-50 text-gray-500"} rounded-[10px] flex items-center justify-center font-serif font-bold shrink-0 ring-1 ring-black/6 transition-all duration-200 cursor-default active:scale-90`}>
       {grade}
     </span>
   );
