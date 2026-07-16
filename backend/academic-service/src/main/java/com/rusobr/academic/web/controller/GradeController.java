@@ -1,18 +1,15 @@
 package com.rusobr.academic.web.controller;
 
 import com.rusobr.academic.application.service.GradeService;
+import com.rusobr.academic.web.dto.grade.GradeDetailResponse;
 import com.rusobr.academic.web.dto.grade.GradeResponse;
-import com.rusobr.academic.web.dto.grade.GradeWithSubjectNameResponse;
 import com.rusobr.academic.web.dto.grade.createGrade.CreateGradeRequest;
 import com.rusobr.academic.web.dto.grade.createGrade.CreateGradeResponse;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDate;
-import java.util.List;
 
 @Slf4j
 @RestController
@@ -25,6 +22,12 @@ public class GradeController {
     @GetMapping("/{id}")
     public GradeResponse getById(@PathVariable Long id) {
         return gradeService.getById(id);
+    }
+
+    @PreAuthorize("@gradeSecurity.canViewStudent(#id, authentication)")
+    @GetMapping("/{id}/detail")
+    public GradeDetailResponse getDetailById(@PathVariable Long id) {
+        return gradeService.getDetail(id);
     }
 
     @PostMapping

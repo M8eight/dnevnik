@@ -43,6 +43,7 @@ public class SecurityConfig {
                             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                             .requestMatchers(POST, "/api/v1/students/batch").hasAnyRole(TEACHER.name(), ADMIN.name())
+                            .requestMatchers(GET, "/api/v1/teachers/*/simple").hasAnyRole(ADMIN.name(), STUDENT.name())
 
                             //STUDENT SCOPE
                             .requestMatchers(GET, "/api/v1/students/with-class").hasRole(STUDENT.name())
@@ -60,7 +61,6 @@ public class SecurityConfig {
                             .requestMatchers(GET, "/api/v1/teachers/*/details").hasRole(ADMIN.name())
                             .requestMatchers(GET, "/api/v1/teachers/*").hasRole(ADMIN.name())
                             .requestMatchers(POST, "/api/v1/teachers/batch").hasRole(ADMIN.name())
-                            .requestMatchers(GET, "/api/v1/teachers/*/simple").hasRole(ADMIN.name())
 
                             .anyRequest().denyAll();
                 })
