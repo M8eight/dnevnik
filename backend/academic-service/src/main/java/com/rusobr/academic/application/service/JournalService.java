@@ -17,6 +17,7 @@ import com.rusobr.academic.web.dto.lessonInstance.teacher.TeacherJournalResponse
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -36,6 +37,15 @@ public class JournalService {
     private final UserClient userClient;
     private final LessonInstanceMapper lessonInstanceMapper;
     private final AcademicPeriodService academicPeriodService;
+    private final TransactionTemplate readOnlyTransactionTemplate;
+
+    private record JournalDbData(
+            AcademicPeriod academicPeriod,
+            List<LessonInstanceDto> lessonInstances,
+            List<Long> studentsIds,
+            List<GradeStudentDto> grades,
+            List<AttendanceStudentDto> attendances
+    ) {}
 
     @Transactional(readOnly = true)
     public GradesLessonsResponse getGradesLessonsByStudentId(Long studentId, Long academicPeriodId) {
@@ -75,69 +85,75 @@ public class JournalService {
         return new GradesLessonsResponse(academicPeriodMapper.toResponse(academicPeriod), dates, subjects);
     }
 
-    public TeacherJournalResponse getJournalByAssignment(Long teachingAssignmentId,
-                                                         Long academicPeriodId) {
-        //Получаем Academic period
+    public TeacherJournalResponse getJournalByAssignment(Long teachingAssignmentId, Long academicPeriodId) {
+        JournalDbData data = Objects.requireNonNull(readOnlyTransactionTemplate.execute(status ->
+                fetchJournalData(teachingAssignmentId, academicPeriodId)));
+
+        BatchUserResponse students = userClient.getBatchUsers(data.studentsIds());
+
+        List<StudentJournalDto> studentJournal = buildStudentJournal(data.grades(), data.attendances());
+
+        return new TeacherJournalResponse(
+                academicPeriodMapper.toResponse(data.academicPeriod()),
+                students,
+                data.lessonInstances(),
+                studentJournal
+        );
+    }
+
+    private JournalDbData fetchJournalData(Long teachingAssignmentId, Long academicPeriodId) {
         AcademicPeriod academicPeriod = academicPeriodService.getById(academicPeriodId);
 
-        //Получаем экземпляры lessonInstance для верхней строки таблицы
-        List<LessonInstanceDto> lessonInstances = lessonInstanceRepository.findLessonInstanceByTeachingAssignmentId(teachingAssignmentId,
-                academicPeriod.getStartDate(), academicPeriod.getEndDate())
+        List<LessonInstanceDto> lessonInstances = lessonInstanceRepository
+                .findLessonInstanceByTeachingAssignmentId(teachingAssignmentId, academicPeriod.getStartDate(), academicPeriod.getEndDate())
                 .stream().map(lessonInstanceMapper::toLessonInstanceDto).toList();
 
-        //Получаем список учеников с именами
         List<Long> studentsIds = schoolClassRepository.findStudentsIdsByTeachingAssignment(teachingAssignmentId);
-        BatchUserResponse students = userClient.getBatchUsers(studentsIds);
 
-        //Получаем оценки и посещаемость из базы данных
-        List<GradeStudentDto> grades = lessonInstanceRepository.findGradesByTeachingAssignment(teachingAssignmentId,
-                academicPeriod.getStartDate(), academicPeriod.getEndDate())
+        List<GradeStudentDto> grades = lessonInstanceRepository
+                .findGradesByTeachingAssignment(teachingAssignmentId, academicPeriod.getStartDate(), academicPeriod.getEndDate())
                 .stream().map(lessonInstanceMapper::toGradeStudentDto).toList();
 
-        List<AttendanceStudentDto> attendances = lessonInstanceRepository.findAttendancesByTeachingAssignment(
-                teachingAssignmentId,
-                academicPeriod.getStartDate(), academicPeriod.getEndDate())
+        List<AttendanceStudentDto> attendances = lessonInstanceRepository
+                .findAttendancesByTeachingAssignment(teachingAssignmentId, academicPeriod.getStartDate(), academicPeriod.getEndDate())
                 .stream().map(lessonInstanceMapper::toAttendanceStudentDto).toList();
 
-        //Группируем оценки и посещаемость по id ученика
+        return new JournalDbData(academicPeriod, lessonInstances, studentsIds, grades, attendances);
+    }
+
+    private List<StudentJournalDto> buildStudentJournal(List<GradeStudentDto> grades, List<AttendanceStudentDto> attendances) {
         var gradeJournal = grades.stream()
                 .collect(Collectors.groupingBy(GradeStudentDto::studentId, LinkedHashMap::new, Collectors.mapping(
-                        p -> new StudentJournalDto.GradeLessonTeacherDto(
-                                p.gradeId(), p.value(), p.weight(), p.gradeType(), p.lessonInstanceId()
-                        ),
-                Collectors.toList())));
+                        p -> new StudentJournalDto.GradeLessonTeacherDto(p.gradeId(), p.value(), p.weight(), p.gradeType(), p.lessonInstanceId()),
+                        Collectors.toList())));
 
         var attendanceJournal = attendances.stream()
                 .collect(Collectors.groupingBy(AttendanceStudentDto::studentId, LinkedHashMap::new, Collectors.mapping(
-                        p -> new StudentJournalDto.AttendanceLessonTeacherDto(
-                                p.attendanceId(), p.status(), p.lessonInstanceId()
-                        ),
-                Collectors.toList())));
+                        p -> new StudentJournalDto.AttendanceLessonTeacherDto(p.attendanceId(), p.status(), p.lessonInstanceId()),
+                        Collectors.toList())));
 
-        //Собираем все в один список
         Set<Long> allStudentIds = new LinkedHashSet<>();
         allStudentIds.addAll(gradeJournal.keySet());
         allStudentIds.addAll(attendanceJournal.keySet());
 
-        //Преобразуем в dto с studentId и списком оценок и посещаемости
-        List <StudentJournalDto > studentJournal = allStudentIds.stream().map(studentId -> {
+        return allStudentIds.stream()
+                .map(studentId -> {
                     var studentGrades = gradeJournal.getOrDefault(studentId, List.of());
-                    //считаем среднее взвешенное и округляем до 2-х знаков
-                    double gradeTop = studentGrades.stream().mapToDouble(g -> g.value() * g.weight()).sum();
-                    double gradeBottom = studentGrades.stream().mapToDouble(StudentJournalDto.GradeLessonTeacherDto::weight).sum();
-                    double average = (gradeBottom > 0)
-                            ? BigDecimal.valueOf(gradeTop / gradeBottom)
-                              .setScale(2, RoundingMode.HALF_UP)
-                              .doubleValue()
-                            : 0.0;
-
                     return new StudentJournalDto(
-                            studentId, gradeJournal.getOrDefault(studentId, List.of()),
-                            average, attendanceJournal.getOrDefault(studentId, List.of())
+                            studentId,
+                            studentGrades,
+                            calculateWeightedAverage(studentGrades),
+                            attendanceJournal.getOrDefault(studentId, List.of())
                     );
-        }).toList();
+                }).toList();
+    }
 
-        return new TeacherJournalResponse(academicPeriodMapper.toResponse(academicPeriod), students, lessonInstances, studentJournal);
+    private double calculateWeightedAverage(List<StudentJournalDto.GradeLessonTeacherDto> grades) {
+        double top = grades.stream().mapToDouble(g -> g.value() * g.weight()).sum();
+        double bottom = grades.stream().mapToDouble(StudentJournalDto.GradeLessonTeacherDto::weight).sum();
+        return bottom > 0
+                ? BigDecimal.valueOf(top / bottom).setScale(2, RoundingMode.HALF_UP).doubleValue()
+                : 0.0;
     }
 
     public List<LessonInstanceDto> getInstancesByAssignment(Long teachingAssignmentId, Long academicPeriodId) {

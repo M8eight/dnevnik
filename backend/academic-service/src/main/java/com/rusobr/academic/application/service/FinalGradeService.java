@@ -19,6 +19,8 @@ import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeRequest;
 import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeResponse;
 import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeTeacherResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +41,13 @@ public class FinalGradeService {
     private final UserClient userClient;
     private final AcademicYearRepository academicYearRepository;
 
+    record DbData(List<FinalGrade> finalGrades, List<Long> studentIds) {}
+
+    @Lazy
+    @Autowired
+    private FinalGradeService self;
+
+
     @Transactional(readOnly = true)
     public Map<String, FinalGradeResponse> getByStudentId(Long studentId, Long academicYearId) {
         List<FinalGrade> finalGrades = finalGradeRepository.findFinalGradesByStudentId(studentId, academicYearId);
@@ -50,21 +59,26 @@ public class FinalGradeService {
                 ));
     }
 
-    @Transactional(readOnly = true)
     public List<FinalGradeTeacherResponse> getByAssignmentId(Long teachingAssignmentId, Long academicYearId) {
-        List<FinalGrade> finalGrades = finalGradeRepository.findFinalGradesByTeachingAssignmentId(teachingAssignmentId, academicYearId);
-        List<FinalGradeResponse> mappedFinalGrades = finalGrades.stream().map(finalGradeMapper::toFinalGradeResponse).toList();
+        DbData data = self.getByAssignmentTransactional(teachingAssignmentId, academicYearId);
+        List<FinalGradeResponse> mappedFinalGrades = data.finalGrades().stream().map(finalGradeMapper::toFinalGradeResponse).toList();
         Map<Long, List<FinalGradeResponse>> finalGradesMap = mappedFinalGrades.stream().collect(Collectors.groupingBy(
                 FinalGradeResponse::studentId,
                 HashMap::new,
                 Collectors.toList()
         ));
 
-        List<Long> studentIds = teachingAssignmentService.getStudentIdsByTeachingAssignmentId(teachingAssignmentId);
-        List<UserFeignResponse> students = userClient.getBatchUsers(studentIds).found();
+        List<UserFeignResponse> students = userClient.getBatchUsers(data.studentIds()).found();
 
         return students.stream().map(user ->
                 new FinalGradeTeacherResponse(user, finalGradesMap.get(user.id()))).toList();
+    }
+
+    @Transactional
+    DbData getByAssignmentTransactional(Long teachingAssignmentId, Long academicYearId) {
+        List<FinalGrade> finalGrades = finalGradeRepository.findFinalGradesByTeachingAssignmentId(teachingAssignmentId, academicYearId);
+        List<Long> studentIds = teachingAssignmentService.getStudentIdsByTeachingAssignmentId(teachingAssignmentId);
+        return new DbData(finalGrades, studentIds);
     }
 
     @Transactional

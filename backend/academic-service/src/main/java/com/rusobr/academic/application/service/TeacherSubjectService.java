@@ -14,6 +14,8 @@ import com.rusobr.academic.web.exception.ConflictException;
 import com.rusobr.academic.web.exception.ExceptionCode;
 import com.rusobr.academic.web.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +32,10 @@ public class TeacherSubjectService {
     private final TeacherSubjectMapper teacherSubjectMapper;
     private final UserClient userClient;
     private final SubjectRepository subjectRepository;
+
+    @Lazy
+    @Autowired
+    private TeacherSubjectService self;
 
     public List<TeacherSubjectResponse> findAll() {
         //Получаем учителей из базы academic потом идем в user-service и упаковываем в map, где ключ это id пользователя
@@ -56,6 +62,11 @@ public class TeacherSubjectService {
 
         UserFeignResponse teacher = userClient.getTeacherSimpleById(request.teacherId());
 
+        return self.createTransactional(request, id, teacher);
+    }
+
+    @Transactional
+    TeacherSubjectResponse createTransactional(TeacherSubjectRequest request, TeacherSubjectId id, UserFeignResponse teacher) {
         //Если запись уже существует (safe_delete) восстанавливаем
         Optional<TeacherSubject> teacherSubjectOptional = teacherSubjectRepository
                 .findByIdWithDeleted(id.getSubjectId(), id.getTeacherId());

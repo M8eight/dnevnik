@@ -46,16 +46,8 @@ public class SchoolClassService {
         return schoolClassMapper.toSchoolClassResponse(schoolClass);
     }
 
-    @Transactional(readOnly = true)
     public SchoolClassFullResponse findWithStudentsById(Long id) {
-        SchoolClass schoolClass = schoolClassRepository.findWithClassStudentById(id)
-                .orElseThrow(() -> new NotFoundException("School class with id " + id + " not found",
-                        ExceptionCode.SCHOOL_CLASS_NOT_FOUND));
-
-        return self.findWithStudentsByIdFeign(schoolClass);
-    }
-
-    public SchoolClassFullResponse findWithStudentsByIdFeign(SchoolClass schoolClass) {
+        SchoolClass schoolClass = self.findWithClassStudentByIdTransactional(id);
         BatchUserResponse users = new BatchUserResponse(List.of(), List.of());
         if (!schoolClass.getStudents().isEmpty()) {
             users = userClient.getBatchUsers(
@@ -74,6 +66,13 @@ public class SchoolClassService {
         }
 
         return schoolClassMapper.toSchoolClassFullResponse(schoolClass, users, teacher, schoolClass.getClassTeacherId());
+    }
+
+    @Transactional(readOnly = true)
+    SchoolClass findWithClassStudentByIdTransactional(Long id) {
+        return schoolClassRepository.findWithClassStudentById(id)
+                .orElseThrow(() -> new NotFoundException("School class with id " + id + " not found",
+                        ExceptionCode.SCHOOL_CLASS_NOT_FOUND));
     }
 
     @Transactional(readOnly = true)

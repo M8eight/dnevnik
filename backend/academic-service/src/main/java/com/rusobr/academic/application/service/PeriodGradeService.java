@@ -20,6 +20,8 @@ import com.rusobr.academic.web.exception.ConflictException;
 import com.rusobr.academic.web.exception.ExceptionCode;
 import com.rusobr.academic.web.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,7 +36,6 @@ import java.util.stream.Collectors;
 public class PeriodGradeService {
 
     private final PeriodGradeRepository periodGradeRepository;
-    private final AcademicPeriodRepository academicPeriodRepository;
     private final TeachingAssignmentRepository teachingAssignmentRepository;
     private final PeriodGradeMapper periodGradeMapper;
     private final UserClient userClient;
@@ -42,6 +43,16 @@ public class PeriodGradeService {
     private final GradeRepository gradeRepository;
     private final GradeMapper gradeMapper;
     private final AcademicPeriodService academicPeriodService;
+
+    private record PeriodGradeDbData(
+            List<Long> studentIds,
+            Map<Long, List<PeriodGradeResponse>> periodGradesMap,
+            Map<Long, Double> averageGradesMap
+    ) {}
+
+    @Lazy
+    @Autowired
+    private PeriodGradeService self;
 
     @Transactional(readOnly = true)
     public Map<String, List<PeriodGradeStudentResponse>> getByStudentId(Long studentId, Long academicYearId) {
@@ -59,34 +70,37 @@ public class PeriodGradeService {
         );
     }
 
-    @Transactional(readOnly = true)
     public List<PeriodGradeTeacherResponse> getByAssignmentWithAverage(Long teachingAssignmentId, Long currentAcademicPeriodId, Long academicYearId) {
+        PeriodGradeDbData data = self.getByAssignmentWithAverageTransactional(teachingAssignmentId, currentAcademicPeriodId, academicYearId);
+
+        List<UserFeignResponse> students = userClient.getBatchUsers(data.studentIds()).found();
+
+        return students.stream()
+                .map(user -> new PeriodGradeTeacherResponse(
+                        user,
+                        data.periodGradesMap().get(user.id()),
+                        data.averageGradesMap().get(user.id())
+                )).toList();
+    }
+
+    @Transactional(readOnly = true)
+    PeriodGradeDbData getByAssignmentWithAverageTransactional(Long teachingAssignmentId, Long currentAcademicPeriodId, Long academicYearId) {
         AcademicPeriod academicPeriod = academicPeriodService.getById(currentAcademicPeriodId);
         List<Long> studentIds = teachingAssignmentService.getStudentIdsByTeachingAssignmentId(teachingAssignmentId);
-        List<UserFeignResponse> students = userClient.getBatchUsers(studentIds).found();
 
         List<PeriodGradeResponse> periodGrades = periodGradeRepository
                 .findPeriodGradesByTeachingAssignmentId(teachingAssignmentId, academicYearId)
                 .stream().map(periodGradeMapper::toPeriodGradeResponse).toList();
         Map<Long, List<PeriodGradeResponse>> periodGradesMap = periodGrades.stream().collect(Collectors.groupingBy(
-                PeriodGradeResponse::studentId,
-                HashMap::new,
-                Collectors.toList()
-        ));
+                PeriodGradeResponse::studentId, HashMap::new, Collectors.toList()));
 
         List<StudentAverageDto> averageGrades = gradeRepository.findAverageStudentsByTeachingAssignment(
-                teachingAssignmentId,
-                academicPeriod.getStartDate(),
-                academicPeriod.getEndDate())
+                        teachingAssignmentId, academicPeriod.getStartDate(), academicPeriod.getEndDate())
                 .stream().map(gradeMapper::toStudentAverageDto).toList();
         Map<Long, Double> averageGradesMap = averageGrades.stream().collect(Collectors.toMap(
-                        StudentAverageDto::studentId,
-                        StudentAverageDto::average
-        ));
+                StudentAverageDto::studentId, StudentAverageDto::average));
 
-        return students.stream().map(user ->
-                new PeriodGradeTeacherResponse(user, periodGradesMap.get(user.id()), averageGradesMap.get(user.id()))
-        ).toList();
+        return new PeriodGradeDbData(studentIds, periodGradesMap, averageGradesMap);
     }
 
     @Transactional
