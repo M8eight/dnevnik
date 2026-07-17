@@ -9,7 +9,6 @@ import com.rusobr.academic.infrastructure.persistence.repository.SchoolClassRepo
 import com.rusobr.academic.web.dto.feign.UserFeignResponse;
 import com.rusobr.academic.web.exception.ConflictException;
 import com.rusobr.academic.web.exception.NotFoundException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -17,7 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +24,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,16 +33,18 @@ class ClassStudentServiceTest {
     @Mock private SchoolClassRepository schoolClassRepository;
     @Mock private ClassStudentRepository classStudentRepository;
     @Mock private UserClient userClient;
-    @Mock private ClassStudentService self;
+    @Mock private TransactionTemplate transactionalTemplate;
 
     @InjectMocks private ClassStudentService service;
 
     private static final Long CLASS_ID = 1L;
     private static final Long STUDENT_ID = 42L;
 
-    @BeforeEach
-    void setUp() {
-        ReflectionTestUtils.setField(service, "self", self);
+    private void stubTransactionTemplateToExecuteCallback() {
+        lenient().when(transactionalTemplate.execute(any())).thenAnswer(invocation -> {
+            var callback = invocation.getArgument(0, org.springframework.transaction.support.TransactionCallback.class);
+            return callback.doInTransaction(null);
+        });
     }
 
     @Nested
@@ -72,28 +74,37 @@ class ClassStudentServiceTest {
     class AddStudent {
 
         @Test
-        @DisplayName("успешно проверяет студента во внешнем клиенте и делегирует вызов в транзакционный метод")
+        @DisplayName("успешно проверяет студента во внешнем клиенте и делегирует в транзакционный блок")
         void success() {
-            // В addStudent() сначала дергается feign-клиент, а затем метод через self-прокси
+            stubTransactionTemplateToExecuteCallback();
+            SchoolClass schoolClass = mock(SchoolClass.class);
+
             doNothing().when(userClient).existStudentById(STUDENT_ID);
+            when(schoolClassRepository.existsById(CLASS_ID)).thenReturn(true);
+            when(classStudentRepository.existsByStudentId(STUDENT_ID)).thenReturn(false);
+            when(schoolClassRepository.getReferenceById(CLASS_ID)).thenReturn(schoolClass);
 
             service.addStudent(CLASS_ID, STUDENT_ID);
 
             verify(userClient).existStudentById(STUDENT_ID);
-            verify(self).addStudentTransactional(CLASS_ID, STUDENT_ID);
+            verify(transactionalTemplate).execute(any());
+            verify(classStudentRepository).save(argThat(cs ->
+                    cs.getStudentId().equals(STUDENT_ID) && cs.getSchoolClass() == schoolClass));
         }
     }
 
     @Nested
-    @DisplayName("addStudentTransactional")
+    @DisplayName("addStudent — транзакционная логика")
     class AddStudentTransactional {
 
         @Test
         @DisplayName("школьный класс не найден — бросает NotFoundException")
         void classNotFound_throwsNotFoundException() {
+            stubTransactionTemplateToExecuteCallback();
+            doNothing().when(userClient).existStudentById(STUDENT_ID);
             when(schoolClassRepository.existsById(CLASS_ID)).thenReturn(false);
 
-            assertThatThrownBy(() -> service.addStudentTransactional(CLASS_ID, STUDENT_ID))
+            assertThatThrownBy(() -> service.addStudent(CLASS_ID, STUDENT_ID))
                     .isInstanceOf(NotFoundException.class)
                     .hasMessageContaining("SchoolClass with id " + CLASS_ID + " not found");
 
@@ -104,10 +115,12 @@ class ClassStudentServiceTest {
         @Test
         @DisplayName("студент уже привязан к классу — бросает ConflictException")
         void studentAlreadyExists_throwsConflictException() {
+            stubTransactionTemplateToExecuteCallback();
+            doNothing().when(userClient).existStudentById(STUDENT_ID);
             when(schoolClassRepository.existsById(CLASS_ID)).thenReturn(true);
             when(classStudentRepository.existsByStudentId(STUDENT_ID)).thenReturn(true);
 
-            assertThatThrownBy(() -> service.addStudentTransactional(CLASS_ID, STUDENT_ID))
+            assertThatThrownBy(() -> service.addStudent(CLASS_ID, STUDENT_ID))
                     .isInstanceOf(ConflictException.class)
                     .hasMessageContaining("Student already exists in class");
 
@@ -118,13 +131,15 @@ class ClassStudentServiceTest {
         @Test
         @DisplayName("успешно находит класс, проверяет дубликаты и сохраняет студента в класс")
         void success() {
+            stubTransactionTemplateToExecuteCallback();
             SchoolClass schoolClass = mock(SchoolClass.class);
 
+            doNothing().when(userClient).existStudentById(STUDENT_ID);
             when(schoolClassRepository.existsById(CLASS_ID)).thenReturn(true);
             when(classStudentRepository.existsByStudentId(STUDENT_ID)).thenReturn(false);
             when(schoolClassRepository.getReferenceById(CLASS_ID)).thenReturn(schoolClass);
 
-            service.addStudentTransactional(CLASS_ID, STUDENT_ID);
+            service.addStudent(CLASS_ID, STUDENT_ID);
 
             verify(classStudentRepository).save(argThat(classStudent ->
                     classStudent.getStudentId().equals(STUDENT_ID) &&

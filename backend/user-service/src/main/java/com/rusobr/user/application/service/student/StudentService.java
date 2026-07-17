@@ -24,6 +24,8 @@ import com.rusobr.user.web.dto.student.StudentWithClassResponse;
 import com.rusobr.user.web.dto.teacher.TeacherResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +46,10 @@ public class StudentService {
     private final TeacherService teacherService;
     private final ParentRepository parentRepository;
     private final UserMapper userMapper;
+
+    @Lazy
+    @Autowired
+    private StudentService self;
 
     @Transactional(readOnly = true)
     public BatchUserResponse getBatch(List<Long> ids) {
@@ -76,10 +82,8 @@ public class StudentService {
         return studentMapper.toStudentDetails(student);
     }
 
-    @Transactional(readOnly = true)
     public StudentWithClassResponse getWithClassById(Long id) {
-        Student student = studentRepository.findWithUserById(id)
-                .orElseThrow(() -> notFoundStudent(id));
+        Student student = self.getStudentTransactional(id);
         SchoolClassResponse schoolClass = academicClient.getSchoolClassByStudentId(student.getId());
         TeacherResponse teacher = teacherService.getWithUserById(schoolClass.classTeacherId());
 
@@ -87,13 +91,23 @@ public class StudentService {
     }
 
     @Transactional(readOnly = true)
-    public StudentInfoResponse getStudentInfoById(Long id) {
-        Student student = studentRepository.findStudentInfoById(id)
+    Student getStudentTransactional(Long id) {
+        return studentRepository.findWithUserById(id)
                 .orElseThrow(() -> notFoundStudent(id));
+    }
+
+    public StudentInfoResponse getStudentInfoById(Long id) {
+        Student student = self.getStudentInfoTransactional(id);
         SchoolClassResponse schoolClass = academicClient.getSchoolClassByStudentId(student.getId());
         TeacherResponse teacher = teacherService.getWithUserById(schoolClass.classTeacherId());
 
         return studentMapper.toStudentInfoResponse(student, schoolClass, teacher);
+    }
+
+    @Transactional(readOnly = true)
+    Student getStudentInfoTransactional(Long id) {
+        return studentRepository.findStudentInfoById(id)
+                .orElseThrow(() -> notFoundStudent(id));
     }
 
     public Optional<Student> findByIdWithDeleted(Long id) {

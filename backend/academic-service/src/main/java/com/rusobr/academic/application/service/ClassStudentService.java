@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 import java.util.Set;
@@ -25,6 +26,7 @@ public class ClassStudentService {
     private final SchoolClassRepository schoolClassRepository;
     private final ClassStudentRepository classStudentRepository;
     private final UserClient userClient;
+    private final TransactionTemplate writeTransactionTemplate;
 
     @Lazy
     @Autowired
@@ -37,24 +39,22 @@ public class ClassStudentService {
 
     public void addStudent(Long classId, Long studentId) {
         userClient.existStudentById(studentId);
-        self.addStudentTransactional(classId, studentId);
-    }
+        writeTransactionTemplate.execute(status -> {
+            if (!schoolClassRepository.existsById(classId)) {
+                throw new NotFoundException("SchoolClass with id " + classId + " not found", ExceptionCode.SCHOOL_CLASS_NOT_FOUND);
+            }
+            if (classStudentRepository.existsByStudentId(studentId)) {
+                throw new ConflictException("Student already exists in class", ExceptionCode.SCHOOL_CLASS_STUDENT_ALREADY_PRESENT);
+            }
 
-    @Transactional
-    public void addStudentTransactional(Long classId, Long studentId) {
-        if (!schoolClassRepository.existsById(classId)) {
-            throw new NotFoundException("SchoolClass with id " + classId + " not found", ExceptionCode.SCHOOL_CLASS_NOT_FOUND);
-        }
-        if (classStudentRepository.existsByStudentId(studentId)) {
-            throw new ConflictException("Student already exists in class", ExceptionCode.SCHOOL_CLASS_STUDENT_ALREADY_PRESENT);
-        }
+            SchoolClass schoolClass = schoolClassRepository.getReferenceById(classId);
 
-        SchoolClass schoolClass = schoolClassRepository.getReferenceById(classId);
-
-        classStudentRepository.save(ClassStudent.builder()
-                .schoolClass(schoolClass)
-                .studentId(studentId)
-                .build());
+            classStudentRepository.save(ClassStudent.builder()
+                    .schoolClass(schoolClass)
+                    .studentId(studentId)
+                    .build());
+            return null;
+        });
     }
 
     @Transactional

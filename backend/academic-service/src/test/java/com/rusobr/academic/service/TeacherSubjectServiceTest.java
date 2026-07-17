@@ -15,6 +15,7 @@ import com.rusobr.academic.web.dto.teacherSubject.TeacherSubjectRequest;
 import com.rusobr.academic.web.dto.teacherSubject.TeacherSubjectResponse;
 import com.rusobr.academic.web.exception.ConflictException;
 import com.rusobr.academic.web.exception.NotFoundException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -22,6 +23,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Instant;
 import java.util.List;
@@ -41,6 +43,11 @@ class TeacherSubjectServiceTest {
     @Mock private SubjectRepository subjectRepository;
 
     @InjectMocks private TeacherSubjectService service;
+
+    @BeforeEach
+    void setUp() {
+        ReflectionTestUtils.setField(service, "self", service);
+    }
 
     private static final Long TEACHER_ID = 5L;
     private static final Long SUBJECT_ID = 10L;

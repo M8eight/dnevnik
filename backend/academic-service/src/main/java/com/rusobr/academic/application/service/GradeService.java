@@ -22,11 +22,13 @@ import com.rusobr.academic.web.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +41,7 @@ public class GradeService {
     private final AcademicPeriodService academicPeriodService;
     private final AcademicPeriodRepository academicPeriodRepository;
     private final UserClient userClient;
+    private final TransactionTemplate readOnlyTransactionTemplate;
 
     @Transactional(readOnly = true)
     public GradeResponse getById(Long id) {
@@ -66,8 +69,10 @@ public class GradeService {
     }
 
     public GradeDetailResponse getDetail(Long id) {
-        GradeDetailProjection gradeProjection = gradeRepository.findDetailById(id)
-                .orElseThrow(() -> new NotFoundException("Grade with id: %d not found".formatted(id), ExceptionCode.GRADE_NOT_FOUND));
+        GradeDetailProjection gradeProjection = Objects.requireNonNull(readOnlyTransactionTemplate.execute(status ->
+             gradeRepository.findDetailById(id)
+                    .orElseThrow(() -> new NotFoundException("Grade with id: %d not found".formatted(id), ExceptionCode.GRADE_NOT_FOUND))
+        ));
         UserFeignResponse teacher = userClient.getTeacherSimpleById(gradeProjection.getTeacherId());
         return gradeMapper.toGradeDetailResponse(gradeProjection, teacher);
     }

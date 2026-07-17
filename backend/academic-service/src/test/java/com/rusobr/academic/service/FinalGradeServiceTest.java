@@ -21,6 +21,7 @@ import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeResponse;
 import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeTeacherResponse;
 import com.rusobr.academic.web.exception.ConflictException;
 import com.rusobr.academic.web.exception.NotFoundException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -28,6 +29,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -51,6 +53,11 @@ class FinalGradeServiceTest {
     @Mock private UserClient userClient;
 
     @InjectMocks private FinalGradeService service;
+
+    @BeforeEach
+    void setUp() {
+        ReflectionTestUtils.setField(service, "self", service);
+    }
 
     private static final Long STUDENT_ID = 42L;
     private static final Long GRADE_ID = 100L;

@@ -25,6 +25,7 @@ import com.rusobr.user.web.dto.teacher.TeacherResponse;
 import com.rusobr.user.web.dto.user.UserResponse;
 import com.rusobr.user.web.exception.ConflictException;
 import com.rusobr.user.web.exception.NotFoundException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -32,6 +33,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -181,6 +183,11 @@ class StudentServiceTest {
     @Nested
     @DisplayName("getWithClassById")
     class GetWithClassById {
+
+        @BeforeEach
+        void setUp() {
+            ReflectionTestUtils.setField(service, "self", service);
+        }
 
         @Test
         @DisplayName("успешно возвращает StudentWithClassResponse с данными класса и учителя")

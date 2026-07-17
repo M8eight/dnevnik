@@ -33,6 +33,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -54,6 +56,7 @@ class JournalServiceTest {
     @Mock private UserClient userClient;
     @Mock private LessonInstanceMapper lessonInstanceMapper;
     @Mock private AcademicPeriodService academicPeriodService;
+    @Mock private TransactionTemplate readOnlyTransactionTemplate;
 
     @InjectMocks private JournalService service;
 
@@ -63,6 +66,14 @@ class JournalServiceTest {
     private static final Long LESSON_INSTANCE_ID = 100L;
     private static final LocalDate START_DATE = LocalDate.of(2026, 9, 1);
     private static final LocalDate END_DATE = LocalDate.of(2026, 11, 30);
+
+    @SuppressWarnings("unchecked")
+    private void stubReadOnlyTransactionTemplate() {
+        lenient().when(readOnlyTransactionTemplate.execute(any())).thenAnswer(invocation -> {
+            TransactionCallback<?> callback = invocation.getArgument(0);
+            return callback.doInTransaction(null);
+        });
+    }
 
     @Nested
     @DisplayName("getGradesLessonsByStudentId")
@@ -113,6 +124,7 @@ class JournalServiceTest {
         @Test
         @DisplayName("успешно собирает журнал учителя и корректно считает средневзвешенный балл")
         void success() {
+            stubReadOnlyTransactionTemplate();
             AcademicPeriod period = AcademicPeriod.builder().startDate(START_DATE).endDate(END_DATE).build();
             AcademicPeriodResponse periodResponse = mock(AcademicPeriodResponse.class);
 
