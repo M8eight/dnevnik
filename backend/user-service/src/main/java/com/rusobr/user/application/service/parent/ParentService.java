@@ -1,12 +1,12 @@
 package com.rusobr.user.application.service.parent;
 
+import com.rusobr.common.enums.UserRole;
+import com.rusobr.common.exception.NotFoundException;
 import com.rusobr.user.application.event.UserDeletedEvent;
 import com.rusobr.user.domain.model.Parent;
 import com.rusobr.user.domain.model.User;
-import com.rusobr.user.domain.enums.UserRole;
 import com.rusobr.user.web.dto.parent.ParentInfoResponse;
-import com.rusobr.user.web.exception.ExceptionCode;
-import com.rusobr.user.web.exception.NotFoundException;
+import com.rusobr.user.web.exception.UserExceptionCode;
 import com.rusobr.user.application.mapper.ParentMapper;
 import com.rusobr.user.infrastructure.persistence.repository.ParentRepository;
 import com.rusobr.user.infrastructure.persistence.repository.UserRepository;
@@ -81,11 +81,11 @@ public class ParentService {
 
     //helpers
     private NotFoundException notFoundParent(Long id) {
-        return new NotFoundException("Parent by id: %d not found".formatted(id), ExceptionCode.PARENT_NOT_FOUND);
+        return new NotFoundException("Parent by id: %d not found".formatted(id), UserExceptionCode.PARENT_NOT_FOUND);
     }
 
     private NotFoundException notFoundUser(Long id) {
-        return new NotFoundException("User by id: %d not found".formatted(id), ExceptionCode.USER_NOT_FOUND);
+        return new NotFoundException("User by id: %d not found".formatted(id), UserExceptionCode.USER_NOT_FOUND);
     }
 
 }

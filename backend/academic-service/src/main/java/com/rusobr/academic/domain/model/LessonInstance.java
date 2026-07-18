@@ -7,6 +7,7 @@ import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDate;
 import java.util.Set;
+import com.rusobr.common.entity.BaseEntity;
 
 @Entity
 @NoArgsConstructor

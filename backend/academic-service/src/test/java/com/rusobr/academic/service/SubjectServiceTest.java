@@ -7,7 +7,7 @@ import com.rusobr.academic.infrastructure.persistence.projection.SubjectResponse
 import com.rusobr.academic.infrastructure.persistence.repository.SubjectRepository;
 import com.rusobr.academic.web.dto.subject.SubjectRequest;
 import com.rusobr.academic.web.dto.subject.SubjectResponseDto;
-import com.rusobr.academic.web.exception.NotFoundException;
+import com.rusobr.common.exception.NotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

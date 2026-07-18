@@ -1,11 +1,13 @@
 package com.rusobr.user.service;
 
+import com.rusobr.common.enums.UserRole;
+import com.rusobr.common.exception.ConflictException;
+import com.rusobr.common.exception.NotFoundException;
 import com.rusobr.user.application.event.UserDeletedEvent;
 import com.rusobr.user.application.mapper.StudentMapper;
 import com.rusobr.user.application.mapper.UserMapper;
 import com.rusobr.user.application.service.student.StudentService;
 import com.rusobr.user.application.service.teacher.TeacherService;
-import com.rusobr.user.domain.enums.UserRole;
 import com.rusobr.user.domain.model.Parent;
 import com.rusobr.user.domain.model.Student;
 import com.rusobr.user.domain.model.User;
@@ -23,8 +25,6 @@ import com.rusobr.user.web.dto.student.StudentWithClassResponse;
 import com.rusobr.user.web.dto.teacher.TeacherDetails;
 import com.rusobr.user.web.dto.teacher.TeacherResponse;
 import com.rusobr.user.web.dto.user.UserResponse;
-import com.rusobr.user.web.exception.ConflictException;
-import com.rusobr.user.web.exception.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

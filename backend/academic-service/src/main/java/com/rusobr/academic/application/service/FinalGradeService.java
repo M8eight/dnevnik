@@ -5,9 +5,9 @@ import com.rusobr.academic.domain.model.AcademicYear;
 import com.rusobr.academic.domain.model.FinalGrade;
 import com.rusobr.academic.domain.model.TeachingAssignment;
 import com.rusobr.academic.infrastructure.persistence.repository.AcademicYearRepository;
-import com.rusobr.academic.web.exception.ConflictException;
-import com.rusobr.academic.web.exception.ExceptionCode;
-import com.rusobr.academic.web.exception.NotFoundException;
+import com.rusobr.common.exception.ConflictException;
+import com.rusobr.academic.web.exception.AcademicExceptionCode;
+import com.rusobr.common.exception.NotFoundException;
 import com.rusobr.academic.infrastructure.client.UserClient;
 import com.rusobr.academic.application.mapper.FinalGradeMapper;
 import com.rusobr.academic.infrastructure.persistence.repository.AcademicPeriodRepository;
@@ -86,21 +86,21 @@ public class FinalGradeService {
 
         List<AcademicPeriod> academicPeriods = academicPeriodRepository.getAcademicPeriodsByAcademicYearId(finalGradeRequest.academicYearId());
         if (academicPeriods.isEmpty()) {
-            throw new ConflictException("Academic periods by id: %d not found".formatted(finalGradeRequest.academicYearId()), ExceptionCode.ACADEMIC_PERIODS_NOT_FOUND);
+            throw new ConflictException("Academic periods by id: %d not found".formatted(finalGradeRequest.academicYearId()), AcademicExceptionCode.ACADEMIC_PERIODS_NOT_FOUND);
         }
         academicPeriods.forEach(ap -> {
             if (!ap.isClosed()) {
                 throw new ConflictException("Academic period with id: %d is not closed".formatted(ap.getId()),
-                        ExceptionCode.FINAL_GRADE_YEAR_NOT_CLOSED_CONFLICT);
+                        AcademicExceptionCode.FINAL_GRADE_YEAR_NOT_CLOSED_CONFLICT);
             }
         });
 
         TeachingAssignment teachingAssignment = teachingAssignmentRepository.findById(finalGradeRequest.teachingAssignmentId())
                 .orElseThrow(() -> new NotFoundException("Teaching assignment with id: %d".formatted(
-                        finalGradeRequest.teachingAssignmentId()), ExceptionCode.TEACHING_ASSIGNMENT_NOT_FOUND));
+                        finalGradeRequest.teachingAssignmentId()), AcademicExceptionCode.TEACHING_ASSIGNMENT_NOT_FOUND));
         AcademicYear academicYear = academicYearRepository.findById(finalGradeRequest.academicYearId())
                 .orElseThrow(() -> new NotFoundException("Academic year with id: %d".formatted(
-                        finalGradeRequest.academicYearId()), ExceptionCode.ACADEMIC_YEAR_NOT_FOUND));
+                        finalGradeRequest.academicYearId()), AcademicExceptionCode.ACADEMIC_YEAR_NOT_FOUND));
         FinalGrade finalGrade = finalGradeMapper.toFinalGrade(finalGradeRequest);
         finalGrade.setTeachingAssignment(teachingAssignment);
         finalGrade.setAcademicYear(academicYear);
@@ -111,17 +111,17 @@ public class FinalGradeService {
     public void delete(Long id) {
         FinalGrade finalGrade = finalGradeRepository.findWithAcademicYearById(id)
                 .orElseThrow(() -> new NotFoundException("Final grade with id: %d".formatted(id),
-                        ExceptionCode.FINAL_GRADE_NOT_FOUND));
+                        AcademicExceptionCode.FINAL_GRADE_NOT_FOUND));
 
         List<AcademicPeriod> academicPeriods = academicPeriodRepository
                 .getAcademicPeriodsByAcademicYearId(finalGrade.getAcademicYear().getId());
         if (academicPeriods.isEmpty()) {
             throw new ConflictException("Academic periods by academicYearId: %d not found"
-                    .formatted(finalGrade.getAcademicYear().getId()), ExceptionCode.ACADEMIC_PERIODS_NOT_FOUND);
+                    .formatted(finalGrade.getAcademicYear().getId()), AcademicExceptionCode.ACADEMIC_PERIODS_NOT_FOUND);
         }
         academicPeriods.forEach(ap -> {
             if (!ap.isClosed()) {
-                throw new ConflictException("Academic period is not closed", ExceptionCode.FINAL_GRADE_YEAR_NOT_CLOSED_CONFLICT);
+                throw new ConflictException("Academic period is not closed", AcademicExceptionCode.FINAL_GRADE_YEAR_NOT_CLOSED_CONFLICT);
             }
         });
 

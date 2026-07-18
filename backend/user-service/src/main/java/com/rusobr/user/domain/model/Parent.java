@@ -1,5 +1,6 @@
 package com.rusobr.user.domain.model;
 
+import com.rusobr.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;

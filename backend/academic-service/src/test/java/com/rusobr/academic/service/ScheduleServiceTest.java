@@ -23,7 +23,7 @@ import com.rusobr.academic.web.dto.homework.HomeworkDiaryResponse;
 import com.rusobr.academic.web.dto.lessonInstance.DiaryLessonInstanceDto;
 import com.rusobr.academic.web.dto.scheduleLesson.*;
 import com.rusobr.academic.web.dto.teachingAssignment.TeachingAssignmentRequest;
-import com.rusobr.academic.web.exception.ConflictException;
+import com.rusobr.common.exception.ConflictException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

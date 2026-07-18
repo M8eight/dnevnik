@@ -6,7 +6,6 @@ import com.rusobr.academic.domain.model.AcademicPeriod;
 import com.rusobr.academic.domain.model.PeriodGrade;
 import com.rusobr.academic.domain.model.TeachingAssignment;
 import com.rusobr.academic.infrastructure.client.UserClient;
-import com.rusobr.academic.infrastructure.persistence.repository.AcademicPeriodRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.GradeRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.PeriodGradeRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.TeachingAssignmentRepository;
@@ -16,9 +15,9 @@ import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeRequest;
 import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeResponse;
 import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeStudentResponse;
 import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeTeacherResponse;
-import com.rusobr.academic.web.exception.ConflictException;
-import com.rusobr.academic.web.exception.ExceptionCode;
-import com.rusobr.academic.web.exception.NotFoundException;
+import com.rusobr.common.exception.ConflictException;
+import com.rusobr.academic.web.exception.AcademicExceptionCode;
+import com.rusobr.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -108,12 +107,12 @@ public class PeriodGradeService {
         AcademicPeriod academicPeriod = academicPeriodService.getById(dto.academicPeriodId());
         if (academicPeriod.isClosed()) {
             throw new ConflictException("Academic period with id: %d is closed".formatted(academicPeriod.getId()),
-                    ExceptionCode.ACADEMIC_PERIOD_CLOSED_CONFLICT);
+                    AcademicExceptionCode.ACADEMIC_PERIOD_CLOSED_CONFLICT);
         }
 
         TeachingAssignment teachingAssignment = teachingAssignmentRepository.findById(dto.teachingAssignmentId())
                 .orElseThrow(() -> new NotFoundException("Teaching assignment with id: %d not found".formatted(dto.teachingAssignmentId()),
-                        ExceptionCode.TEACHING_ASSIGNMENT_NOT_FOUND));
+                        AcademicExceptionCode.TEACHING_ASSIGNMENT_NOT_FOUND));
 
         PeriodGrade periodGrade = PeriodGrade.builder()
                 .value(dto.value())
@@ -131,11 +130,11 @@ public class PeriodGradeService {
     public void delete(Long periodGradeId) {
         PeriodGrade periodGrade = periodGradeRepository.findWithAcademicPeriodById(periodGradeId)
                 .orElseThrow(() -> new NotFoundException("Period grade with id: %d not found".formatted(periodGradeId),
-                        ExceptionCode.PERIOD_GRADE_NOT_FOUND));
+                        AcademicExceptionCode.PERIOD_GRADE_NOT_FOUND));
 
         if (periodGrade.getAcademicPeriod().isClosed()) {
             throw new ConflictException("Academic period with id: %d is closed".formatted(periodGrade.getAcademicPeriod().getId()),
-                    ExceptionCode.ACADEMIC_PERIOD_CLOSED_CONFLICT);
+                    AcademicExceptionCode.ACADEMIC_PERIOD_CLOSED_CONFLICT);
         }
 
         periodGradeRepository.delete(periodGrade);

@@ -8,9 +8,9 @@ import com.rusobr.academic.infrastructure.persistence.repository.HomeworkReposit
 import com.rusobr.academic.web.dto.homework.HomeworkRequest;
 import com.rusobr.academic.web.dto.homework.HomeworkResponse;
 import com.rusobr.academic.web.dto.homework.HomeworkWithSubjectResponse;
-import com.rusobr.academic.web.exception.ConflictException;
-import com.rusobr.academic.web.exception.ExceptionCode;
-import com.rusobr.academic.web.exception.NotFoundException;
+import com.rusobr.common.exception.ConflictException;
+import com.rusobr.academic.web.exception.AcademicExceptionCode;
+import com.rusobr.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -47,7 +47,7 @@ public class HomeworkService {
         AcademicPeriod academicPeriod = academicPeriodService.getByDate(lessonInstance.getLessonDate());
         if (academicPeriod.isClosed()) {
             throw new ConflictException("Academic period with id: %d is closed".formatted(academicPeriod.getId()),
-                    ExceptionCode.ACADEMIC_PERIOD_CLOSED_CONFLICT);
+                    AcademicExceptionCode.ACADEMIC_PERIOD_CLOSED_CONFLICT);
         }
 
         Homework homework = Homework.builder()
@@ -61,12 +61,12 @@ public class HomeworkService {
     @Transactional
     public void delete(Long id) {
         Homework homework = homeworkRepository.findWithLessonInstanceById(id)
-                .orElseThrow(() -> new NotFoundException("Homework with id: %d not found".formatted(id), ExceptionCode.HOMEWORK_NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException("Homework with id: %d not found".formatted(id), AcademicExceptionCode.HOMEWORK_NOT_FOUND));
 
         AcademicPeriod academicPeriod = academicPeriodService.getByDate(homework.getLessonInstance().getLessonDate());
         if (academicPeriod.isClosed()) {
             throw new ConflictException("Academic period with id: %d is closed".formatted(academicPeriod.getId()),
-                    ExceptionCode.ACADEMIC_PERIOD_CLOSED_CONFLICT);
+                    AcademicExceptionCode.ACADEMIC_PERIOD_CLOSED_CONFLICT);
         }
 
         homeworkRepository.delete(homework);

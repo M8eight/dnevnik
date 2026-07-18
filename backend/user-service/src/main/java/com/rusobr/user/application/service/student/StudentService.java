@@ -1,16 +1,16 @@
 package com.rusobr.user.application.service.student;
 
+import com.rusobr.common.enums.UserRole;
+import com.rusobr.common.exception.ConflictException;
+import com.rusobr.common.exception.NotFoundException;
 import com.rusobr.user.application.event.UserDeletedEvent;
 import com.rusobr.user.application.mapper.UserMapper;
 import com.rusobr.user.domain.model.Parent;
 import com.rusobr.user.domain.model.Student;
 import com.rusobr.user.domain.model.User;
-import com.rusobr.user.domain.enums.UserRole;
 import com.rusobr.user.web.dto.feign.BatchUserResponse;
 import com.rusobr.user.web.dto.student.StudentInfoResponse;
-import com.rusobr.user.web.exception.ConflictException;
-import com.rusobr.user.web.exception.ExceptionCode;
-import com.rusobr.user.web.exception.NotFoundException;
+import com.rusobr.user.web.exception.UserExceptionCode;
 import com.rusobr.user.infrastructure.client.feign.AcademicClient;
 import com.rusobr.user.application.mapper.StudentMapper;
 import com.rusobr.user.infrastructure.persistence.repository.ParentRepository;
@@ -177,22 +177,22 @@ public class StudentService {
 
     // helpers
     private NotFoundException notFoundStudent(Long id) {
-        return new NotFoundException("Student by id: %d not found".formatted(id), ExceptionCode.STUDENT_NOT_FOUND);
+        return new NotFoundException("Student by id: %d not found".formatted(id), UserExceptionCode.STUDENT_NOT_FOUND);
     }
 
     private NotFoundException notFoundUser(Long id) {
-        return new NotFoundException("User by id: %d not found".formatted(id), ExceptionCode.USER_NOT_FOUND);
+        return new NotFoundException("User by id: %d not found".formatted(id), UserExceptionCode.USER_NOT_FOUND);
     }
 
     private NotFoundException notFoundParent(Long id) {
-        return new NotFoundException("Parent by id: %d not found".formatted(id), ExceptionCode.PARENT_NOT_FOUND);
+        return new NotFoundException("Parent by id: %d not found".formatted(id), UserExceptionCode.PARENT_NOT_FOUND);
     }
 
     private ConflictException conflictStudentAlreadyHasParent(Long studentId) {
-        return new ConflictException("Student by id: %d already has parent".formatted(studentId), ExceptionCode.STUDENT_ALREADY_HAS_PARENT);
+        return new ConflictException("Student by id: %d already has parent".formatted(studentId), UserExceptionCode.STUDENT_ALREADY_HAS_PARENT);
     }
 
     private ConflictException conflictStudentHasNoParent(Long studentId) {
-        return new ConflictException("Student by id: %d has no parent".formatted(studentId), ExceptionCode.STUDENT_HAS_NO_PARENT);
+        return new ConflictException("Student by id: %d has no parent".formatted(studentId), UserExceptionCode.STUDENT_HAS_NO_PARENT);
     }
 }

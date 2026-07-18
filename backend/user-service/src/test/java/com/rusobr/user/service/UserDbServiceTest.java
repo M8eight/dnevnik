@@ -1,9 +1,10 @@
 package com.rusobr.user.service;
 
+import com.rusobr.common.enums.UserRole;
+import com.rusobr.common.exception.ConflictException;
 import com.rusobr.user.application.mapper.UserMapper;
 import com.rusobr.user.application.service.user.UserDbService;
 import com.rusobr.user.application.service.user.UserService;
-import com.rusobr.user.domain.enums.UserRole;
 import com.rusobr.user.domain.model.User;
 import com.rusobr.user.infrastructure.persistence.repository.UserRepository;
 import com.rusobr.user.web.dto.student.StudentDetails;
@@ -12,7 +13,6 @@ import com.rusobr.user.web.dto.user.UserDataDto;
 import com.rusobr.user.web.dto.user.UserResponse;
 import com.rusobr.user.web.dto.user.UserRoleStrategy;
 import com.rusobr.user.web.dto.user.update.UserUpdateData;
-import com.rusobr.user.web.exception.ConflictException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

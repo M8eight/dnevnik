@@ -7,8 +7,8 @@ import com.rusobr.academic.domain.model.LessonInstance;
 import com.rusobr.academic.infrastructure.persistence.repository.AttendanceRepository;
 import com.rusobr.academic.web.dto.attendances.AttendanceRequest;
 import com.rusobr.academic.web.dto.attendances.AttendanceResponse;
-import com.rusobr.academic.web.exception.ConflictException;
-import com.rusobr.academic.web.exception.ExceptionCode;
+import com.rusobr.common.exception.ConflictException;
+import com.rusobr.academic.web.exception.AcademicExceptionCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +28,7 @@ public class AttendanceService {
 
         AcademicPeriod academicPeriod = academicPeriodService.getByDate(lessonInstance.getLessonDate());
         if (academicPeriod.isClosed()) {
-            throw new ConflictException("Academic period with id: %d is closed".formatted(academicPeriod.getId()), ExceptionCode.ACADEMIC_PERIOD_CLOSED_CONFLICT);
+            throw new ConflictException("Academic period with id: %d is closed".formatted(academicPeriod.getId()), AcademicExceptionCode.ACADEMIC_PERIOD_CLOSED_CONFLICT);
         }
 
         //Выполняем upsert, если нашли то map, если нет создаем новый экземпляр

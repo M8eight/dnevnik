@@ -13,9 +13,9 @@ import com.rusobr.academic.web.dto.schoolClass.SchoolClassFullResponse;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassRequest;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassResponse;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassUpdateRequest;
-import com.rusobr.academic.web.exception.ConflictException;
-import com.rusobr.academic.web.exception.ExceptionCode;
-import com.rusobr.academic.web.exception.NotFoundException;
+import com.rusobr.common.exception.ConflictException;
+import com.rusobr.academic.web.exception.AcademicExceptionCode;
+import com.rusobr.common.exception.NotFoundException;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -72,14 +72,14 @@ public class SchoolClassService {
     SchoolClass findWithClassStudentByIdTransactional(Long id) {
         return schoolClassRepository.findWithClassStudentById(id)
                 .orElseThrow(() -> new NotFoundException("School class with id " + id + " not found",
-                        ExceptionCode.SCHOOL_CLASS_NOT_FOUND));
+                        AcademicExceptionCode.SCHOOL_CLASS_NOT_FOUND));
     }
 
     @Transactional(readOnly = true)
     public SchoolClassResponse findByStudent(Long studentId) {
         SchoolClass schoolClass = schoolClassRepository.findSchoolClassByStudentId(studentId)
                 .orElseThrow(() -> new NotFoundException("School class with studentId " + studentId + " not found",
-                        ExceptionCode.SCHOOL_CLASS_NOT_FOUND));
+                        AcademicExceptionCode.SCHOOL_CLASS_NOT_FOUND));
         return schoolClassMapper.toSchoolClassResponse(schoolClass);
     }
 
@@ -102,7 +102,7 @@ public class SchoolClassService {
 
         if (schoolClassRepository.existsByNameAndAcademicYearId(schoolClassReq.name(), schoolClassReq.academicYearId())) {
             throw new ConflictException("School class with name " + schoolClassReq.name() + " already exists in this year"
-            , ExceptionCode.SCHOOL_CLASS_UNIQUE_CONFLICT);
+            , AcademicExceptionCode.SCHOOL_CLASS_UNIQUE_CONFLICT);
         }
 
         SchoolClass schoolClass = schoolClassMapper.toSchoolClass(schoolClassReq, academicYear);
@@ -146,24 +146,24 @@ public class SchoolClassService {
     private SchoolClass getSchoolClassOrThrow(Long id) {
         return schoolClassRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("School class with id " + id + " not found",
-                        ExceptionCode.SCHOOL_CLASS_NOT_FOUND));
+                        AcademicExceptionCode.SCHOOL_CLASS_NOT_FOUND));
     }
 
     private SchoolClass getSchoolClassWithAcademicYear(Long id) {
         return schoolClassRepository.findWithAcademicYearById(id)
                 .orElseThrow(() -> new NotFoundException("School class with id " + id + " not found",
-                        ExceptionCode.SCHOOL_CLASS_NOT_FOUND));
+                        AcademicExceptionCode.SCHOOL_CLASS_NOT_FOUND));
     }
 
     private AcademicYear getAcademicYearOrThrow(Long academicYearId) {
         return academicYearRepository.findById(academicYearId)
                 .orElseThrow(() -> new NotFoundException("Academic year with id " + academicYearId + " not found",
-                        ExceptionCode.ACADEMIC_YEAR_NOT_FOUND));
+                        AcademicExceptionCode.ACADEMIC_YEAR_NOT_FOUND));
     }
 
     private void validateAcademicYearIsActive(AcademicYear academicYear) {
         if (academicYear.isClosed()) {
-            throw new ConflictException("Academic year is closed", ExceptionCode.ACADEMIC_YEAR_CLOSED_CONFLICT);
+            throw new ConflictException("Academic year is closed", AcademicExceptionCode.ACADEMIC_YEAR_CLOSED_CONFLICT);
         }
     }
 }

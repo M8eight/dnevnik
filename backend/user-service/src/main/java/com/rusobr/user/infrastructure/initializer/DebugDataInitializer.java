@@ -1,6 +1,6 @@
 package com.rusobr.user.infrastructure.initializer;
 
-import com.rusobr.user.domain.enums.UserRole;
+import com.rusobr.common.enums.UserRole;
 import com.rusobr.user.domain.model.Parent;
 import com.rusobr.user.domain.model.Student;
 import com.rusobr.user.domain.model.Teacher;

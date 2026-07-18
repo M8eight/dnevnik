@@ -1,9 +1,9 @@
 package com.rusobr.academic.application.service;
 
 import com.rusobr.academic.domain.model.AcademicYear;
-import com.rusobr.academic.web.exception.ConflictException;
-import com.rusobr.academic.web.exception.ExceptionCode;
-import com.rusobr.academic.web.exception.NotFoundException;
+import com.rusobr.common.exception.ConflictException;
+import com.rusobr.academic.web.exception.AcademicExceptionCode;
+import com.rusobr.common.exception.NotFoundException;
 import com.rusobr.academic.application.mapper.AcademicYearMapper;
 import com.rusobr.academic.infrastructure.persistence.repository.AcademicYearRepository;
 import com.rusobr.academic.web.dto.academicYear.AcademicYearRequest;
@@ -89,13 +89,13 @@ public class AcademicYearService {
     // helpers
     private AcademicYear findOrThrow(Long id) {
         return academicYearRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Academic year with id " + id + " not found", ExceptionCode.ACADEMIC_YEAR_NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException("Academic year with id " + id + " not found", AcademicExceptionCode.ACADEMIC_YEAR_NOT_FOUND));
     }
 
     private void validateDates(LocalDate startDate, LocalDate endDate) {
         if (startDate != null && endDate != null) {
             if (startDate.isAfter(endDate)) {
-                throw new ConflictException("Start date cannot be after end date", ExceptionCode.ACADEMIC_YEAR_DATES_CONFLICT);
+                throw new ConflictException("Start date cannot be after end date", AcademicExceptionCode.ACADEMIC_YEAR_DATES_CONFLICT);
             }
         }
     }

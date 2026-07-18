@@ -9,9 +9,9 @@ import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeCreateResponse;
 import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeRequest;
 import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeResponse;
 import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeTeacherResponse;
-import com.rusobr.academic.web.exception.ConflictException;
-import com.rusobr.academic.web.exception.ExceptionCode;
-import com.rusobr.academic.web.exception.NotFoundException;
+import com.rusobr.common.exception.ConflictException;
+import com.rusobr.academic.web.exception.AcademicExceptionCode;
+import com.rusobr.common.exception.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -168,7 +168,7 @@ public class FinalGradeControllerTest {
     @DisplayName("POST /final-grades — 409 if school year is invalid")
     void create_ShouldReturn409_WhenSchoolYearInvalid() throws Exception {
         FinalGradeRequest request = buildRequest();
-        doThrow(new ConflictException("Academic period not found with school year " + 1L, ExceptionCode.ACADEMIC_PERIOD_NOT_FOUND))
+        doThrow(new ConflictException("Academic period not found with school year " + 1L, AcademicExceptionCode.ACADEMIC_PERIOD_NOT_FOUND))
                 .when(finalGradeService).create(request);
 
         mockMvc.perform(post("/api/v1/final-grades")
@@ -192,7 +192,7 @@ public class FinalGradeControllerTest {
     @Test
     @DisplayName("DELETE /final-grades/{id} — 404 if not found")
     void delete_ShouldReturn404_WhenNotFound() throws Exception {
-        doThrow(new NotFoundException("Final grade with id " + FINAL_GRADE_ID + " not found", ExceptionCode.FINAL_GRADE_NOT_FOUND))
+        doThrow(new NotFoundException("Final grade with id " + FINAL_GRADE_ID + " not found", AcademicExceptionCode.FINAL_GRADE_NOT_FOUND))
                 .when(finalGradeService).delete(FINAL_GRADE_ID);
 
         mockMvc.perform(delete("/api/v1/final-grades/{id}", FINAL_GRADE_ID))

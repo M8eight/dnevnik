@@ -1,6 +1,6 @@
 package com.rusobr.user.web.dto.user;
 
-import com.rusobr.user.domain.enums.UserRole;
+import com.rusobr.common.enums.UserRole;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 

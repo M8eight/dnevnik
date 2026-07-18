@@ -1,8 +1,8 @@
 package com.rusobr.user.application.service.user.strategy;
 
+import com.rusobr.common.enums.UserRole;
+import com.rusobr.common.exception.ConflictException;
 import com.rusobr.user.domain.model.Parent;
-import com.rusobr.user.domain.enums.UserRole;
-import com.rusobr.user.web.exception.ConflictException;
 import com.rusobr.user.application.service.parent.ParentService;
 import com.rusobr.user.web.dto.user.UserProfileDetails;
 import com.rusobr.user.web.dto.parent.ParentDetails;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
-import static com.rusobr.user.web.exception.ExceptionCode.PARENT_PROFILE_DETAILS_CONFLICT;
+import static com.rusobr.user.web.exception.UserExceptionCode.PARENT_PROFILE_DETAILS_CONFLICT;
 
 @Slf4j
 @RequiredArgsConstructor

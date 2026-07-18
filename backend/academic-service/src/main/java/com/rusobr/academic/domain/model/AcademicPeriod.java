@@ -1,13 +1,14 @@
 package com.rusobr.academic.domain.model;
 
-import com.rusobr.academic.web.exception.ConflictException;
-import com.rusobr.academic.web.exception.ExceptionCode;
+import com.rusobr.common.exception.ConflictException;
+import com.rusobr.academic.web.exception.AcademicExceptionCode;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDate;
+import com.rusobr.common.entity.BaseEntity;
 
 @Entity
 @NoArgsConstructor
@@ -44,14 +45,14 @@ public class AcademicPeriod extends BaseEntity {
 
     public void close() {
         if (this.closed) {
-            throw new ConflictException("Academic period is already open", ExceptionCode.ACADEMIC_PERIOD_CLOSE_CONFLICT);
+            throw new ConflictException("Academic period is already open", AcademicExceptionCode.ACADEMIC_PERIOD_CLOSE_CONFLICT);
         }
         this.closed = true;
     }
 
     public void open() {
         if (!this.closed) {
-            throw new ConflictException("Academic period is already closed", ExceptionCode.ACADEMIC_PERIOD_OPEN_CONFLICT);
+            throw new ConflictException("Academic period is already closed", AcademicExceptionCode.ACADEMIC_PERIOD_OPEN_CONFLICT);
         }
         this.closed = false;
     }

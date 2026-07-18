@@ -1,9 +1,10 @@
 package com.rusobr.user.application.service.teacher;
 
+import com.rusobr.common.enums.UserRole;
+import com.rusobr.common.exception.NotFoundException;
 import com.rusobr.user.application.event.UserDeletedEvent;
 import com.rusobr.user.application.mapper.TeacherMapper;
 import com.rusobr.user.application.mapper.UserMapper;
-import com.rusobr.user.domain.enums.UserRole;
 import com.rusobr.user.domain.model.Teacher;
 import com.rusobr.user.domain.model.User;
 import com.rusobr.user.infrastructure.client.feign.AcademicClient;
@@ -15,8 +16,7 @@ import com.rusobr.user.web.dto.feign.UserFeignResponse;
 import com.rusobr.user.web.dto.teacher.TeacherDetails;
 import com.rusobr.user.web.dto.teacher.TeacherInfoResponse;
 import com.rusobr.user.web.dto.teacher.TeacherResponse;
-import com.rusobr.user.web.exception.ExceptionCode;
-import com.rusobr.user.web.exception.NotFoundException;
+import com.rusobr.user.web.exception.UserExceptionCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -135,10 +135,10 @@ public class TeacherService {
 
     // helpers
     private NotFoundException notFoundTeacher(Long id) {
-        return new NotFoundException("Teacher by id: %d not found".formatted(id), ExceptionCode.TEACHER_NOT_FOUND);
+        return new NotFoundException("Teacher by id: %d not found".formatted(id), UserExceptionCode.TEACHER_NOT_FOUND);
     }
 
     private NotFoundException notFoundUser(Long id) {
-        return new NotFoundException("User by id: %d not found".formatted(id), ExceptionCode.USER_NOT_FOUND);
+        return new NotFoundException("User by id: %d not found".formatted(id), UserExceptionCode.USER_NOT_FOUND);
     }
 }

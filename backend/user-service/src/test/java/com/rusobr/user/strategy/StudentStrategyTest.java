@@ -1,12 +1,12 @@
 package com.rusobr.user.strategy;
 
+import com.rusobr.common.enums.UserRole;
+import com.rusobr.common.exception.ConflictException;
 import com.rusobr.user.application.service.student.StudentService;
 import com.rusobr.user.application.service.user.strategy.StudentStrategy;
-import com.rusobr.user.domain.enums.UserRole;
 import com.rusobr.user.domain.model.Student;
 import com.rusobr.user.web.dto.parent.ParentDetails;
 import com.rusobr.user.web.dto.student.StudentDetails;
-import com.rusobr.user.web.exception.ConflictException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
