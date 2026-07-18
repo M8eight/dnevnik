@@ -24,10 +24,6 @@ function Home() {
       {/* ── Header ── */}
       <header className="flex items-end justify-between mb-10 pb-6 border-b border-black/8 max-w-6xl mx-auto anim-in">
         <div>
-          <p className="text-[10px] font-extrabold tracking-[0.25em] text-(--red) uppercase mb-2 flex items-center gap-2">
-            <span className="inline-block w-4 h-0.5 bg-(--red) rounded-full" />
-            Академический год 25/26
-          </p>
           <h1 className="font-serif font-black text-[clamp(2rem,4vw,3rem)] text-(--navy) leading-[0.95]">
             Учебный{" "}
             <em className="not-italic relative">
