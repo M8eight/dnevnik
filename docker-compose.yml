@@ -123,6 +123,7 @@ services:
       - KC_PUBLIC_URL=http://localhost:9090
       - KC_REALM=dnevnik-realm
       - EUREKA_URL=http://eureka-server:8761
+      - FRONTEND_URL=http://localhost:5173
       - APP_NAME=api-gateway
     volumes:
       - ./logs/api-gateway:/app/logs
@@ -134,8 +135,6 @@ services:
       context: ./backend
       dockerfile: ./user-service/Dockerfile
     container_name: user-service
-    ports:
-      - "9001:9001"
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -165,8 +164,6 @@ services:
       context: ./backend
       dockerfile: ./academic-service/Dockerfile
     container_name: academic-service
-    ports:
-      - "9002:9002"
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -186,7 +183,6 @@ services:
       - LOKI_URL=http://loki:3100
       - EUREKA_URL=http://eureka-server:8761
       - APP_NAME=academic-service
-      # - SPRING_PROFILES_ACTIVE=docker
     volumes:
       - ./logs/academic-service:/app/logs
     networks:
