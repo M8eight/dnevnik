@@ -1,11 +1,12 @@
 package com.rusobr.user.domain.model;
 
-import com.rusobr.user.domain.enums.UserRole;
+import com.rusobr.common.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
+import com.rusobr.common.entity.BaseEntity;
 
 import java.util.HashSet;
 import java.util.Set;

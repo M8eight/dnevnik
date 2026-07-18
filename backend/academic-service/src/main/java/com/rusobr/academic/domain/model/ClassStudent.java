@@ -5,6 +5,7 @@ import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import com.rusobr.common.entity.BaseEntity;
 
 @Entity
 @NoArgsConstructor

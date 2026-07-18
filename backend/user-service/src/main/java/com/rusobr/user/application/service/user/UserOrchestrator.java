@@ -1,6 +1,7 @@
 package com.rusobr.user.application.service.user;
 
-import com.rusobr.user.domain.enums.UserRole;
+import com.rusobr.common.enums.UserRole;
+import com.rusobr.common.exception.ConflictException;
 import com.rusobr.user.domain.model.User;
 import com.rusobr.user.infrastructure.client.webClient.KeycloakRestClient;
 import com.rusobr.user.web.dto.keycloak.role.AssignRoleToUserRequest;
@@ -10,7 +11,6 @@ import com.rusobr.user.web.dto.user.UserProfileDetails;
 import com.rusobr.user.web.dto.user.UserResponse;
 import com.rusobr.user.web.dto.user.update.UserUpdateData;
 import com.rusobr.user.web.dto.user.update.UserUpdateRequest;
-import com.rusobr.user.web.exception.ConflictException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,7 +19,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import static com.rusobr.user.web.exception.ExceptionCode.*;
+import static com.rusobr.user.web.exception.UserExceptionCode.*;
 
 @Slf4j
 @Service

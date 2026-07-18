@@ -1,6 +1,6 @@
 package com.rusobr.user.web.controller;
 
-import com.rusobr.user.domain.enums.UserRole;
+import com.rusobr.common.enums.UserRole;
 import com.rusobr.user.application.service.user.UserOrchestrator;
 import com.rusobr.user.application.service.user.UserService;
 import com.rusobr.user.web.dto.parent.ParentDetails;

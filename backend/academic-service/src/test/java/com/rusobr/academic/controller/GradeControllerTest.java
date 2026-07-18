@@ -9,9 +9,9 @@ import com.rusobr.academic.web.dto.grade.GradeResponse;
 import com.rusobr.academic.web.dto.grade.createGrade.CreateGradeRequest;
 import com.rusobr.academic.web.dto.grade.createGrade.CreateGradeResponse;
 import com.rusobr.academic.web.dto.lessonInstance.LessonInstanceDto;
-import com.rusobr.academic.web.exception.ConflictException;
-import com.rusobr.academic.web.exception.ExceptionCode;
-import com.rusobr.academic.web.exception.NotFoundException;
+import com.rusobr.common.exception.ConflictException;
+import com.rusobr.academic.web.exception.AcademicExceptionCode;
+import com.rusobr.common.exception.NotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,7 +79,7 @@ public class GradeControllerTest {
     @Test
     @DisplayName("GET /grades/{id} — 404 when grade not found")
     void getById_ShouldReturn404_WhenNotFound() throws Exception {
-        when(gradeService.getById(GRADE_ID)).thenThrow(new NotFoundException("Grade with id " + GRADE_ID + " not found", ExceptionCode.GRADE_NOT_FOUND));
+        when(gradeService.getById(GRADE_ID)).thenThrow(new NotFoundException("Grade with id " + GRADE_ID + " not found", AcademicExceptionCode.GRADE_NOT_FOUND));
 
         mockMvc.perform(get("/api/v1/grades/{id}", GRADE_ID))
                 .andExpect(status().isNotFound())
@@ -109,7 +109,7 @@ public class GradeControllerTest {
     @DisplayName("POST /grades — 409 when academic period is closed")
     void create_ShouldReturn409_WhenPeriodClosed() throws Exception {
         CreateGradeRequest request = buildCreateRequest();
-        doThrow(new ConflictException("Academic period is already closed", ExceptionCode.ACADEMIC_PERIOD_CLOSED_CONFLICT))
+        doThrow(new ConflictException("Academic period is already closed", AcademicExceptionCode.ACADEMIC_PERIOD_CLOSED_CONFLICT))
                 .when(gradeService).create(request);
 
         mockMvc.perform(post("/api/v1/grades")
@@ -133,7 +133,7 @@ public class GradeControllerTest {
     @Test
     @DisplayName("DELETE /grades/{id} — 404 when grade not found")
     void delete_ShouldReturn404_WhenNotFound() throws Exception {
-        doThrow(new NotFoundException("Grade with id " + GRADE_ID + " not found", ExceptionCode.GRADE_NOT_FOUND))
+        doThrow(new NotFoundException("Grade with id " + GRADE_ID + " not found", AcademicExceptionCode.GRADE_NOT_FOUND))
                 .when(gradeService).delete(GRADE_ID);
 
         mockMvc.perform(delete("/api/v1/grades/{id}", GRADE_ID))

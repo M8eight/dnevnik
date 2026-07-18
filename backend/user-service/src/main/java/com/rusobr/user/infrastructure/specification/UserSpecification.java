@@ -1,8 +1,8 @@
 package com.rusobr.user.infrastructure.specification;
 
+import com.rusobr.common.enums.UserRole;
 import com.rusobr.user.domain.model.User;
 import com.rusobr.user.domain.model.User_;
-import com.rusobr.user.domain.enums.UserRole;
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;

@@ -1,8 +1,8 @@
 package com.rusobr.user.application.service.user;
 
+import com.rusobr.common.enums.UserRole;
+import com.rusobr.common.exception.ConflictException;
 import com.rusobr.user.domain.model.User;
-import com.rusobr.user.domain.enums.UserRole;
-import com.rusobr.user.web.exception.ConflictException;
 import com.rusobr.user.application.mapper.UserMapper;
 import com.rusobr.user.infrastructure.persistence.repository.UserRepository;
 import com.rusobr.user.web.dto.user.UserProfileDetails;
@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.rusobr.user.web.exception.ExceptionCode.INVALID_USER_ROLE;
+import static com.rusobr.user.web.exception.UserExceptionCode.INVALID_USER_ROLE;
 
 @Slf4j
 @Service

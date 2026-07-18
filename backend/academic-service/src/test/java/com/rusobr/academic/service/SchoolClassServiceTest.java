@@ -16,9 +16,9 @@ import com.rusobr.academic.web.dto.schoolClass.SchoolClassFullResponse;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassRequest;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassResponse;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassUpdateRequest;
-import com.rusobr.academic.web.exception.ConflictException;
-import com.rusobr.academic.web.exception.ExceptionCode;
-import com.rusobr.academic.web.exception.NotFoundException;
+import com.rusobr.common.exception.ConflictException;
+import com.rusobr.academic.web.exception.AcademicExceptionCode;
+import com.rusobr.common.exception.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -402,7 +402,7 @@ class SchoolClassServiceTest {
         @Test
         @DisplayName("бросает исключение если учитель не найден")
         void notFound_teacher() {
-            when(userClient.getTeacherById(TEACHER_ID)).thenThrow(new NotFoundException("Teacher not found", ExceptionCode.USER_SERVICE_TEACHER_NOT_FOUND));
+            when(userClient.getTeacherById(TEACHER_ID)).thenThrow(new NotFoundException("Teacher not found", AcademicExceptionCode.USER_SERVICE_TEACHER_NOT_FOUND));
 
             assertThatThrownBy(() -> service.assignTeacher(CLASS_ID, TEACHER_ID))
                     .isInstanceOf(NotFoundException.class);

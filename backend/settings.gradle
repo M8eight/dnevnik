@@ -1,7 +1,11 @@
 rootProject.name = 'dnevnik'
 
+include("common")
+
 include("eureka-server")
 include("api-gateway")
 
 include("user-service")
 include('academic-service')
+
+include 'common'

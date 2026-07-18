@@ -39,14 +39,14 @@ function App() {
           <Route path="/teacher/homework" element={<HomeworkJournal />} />
         </Route>
 
-        {/* <Route element={<ProtectedRoute roles={["ADMIN"]} />}> */}
+        <Route element={<ProtectedRoute roles={["ADMIN"]} />}>
           <Route path="/admin/subject" element={<SubjectPage />} />
           <Route path="/admin/period" element={<PeriodPage />} />
           <Route path="/admin/user" element={<UserAdminPage />} />
           <Route path="/admin/school-class" element={<SchoolClassPage />} />
           <Route path="/admin/schedule" element={<SchedulePage />} />
           <Route path="/admin/academic-year" element={<AcademicYearPage />} />
-        {/* </Route> */}
+        </Route>
 
       </Routes>
     </BrowserRouter>

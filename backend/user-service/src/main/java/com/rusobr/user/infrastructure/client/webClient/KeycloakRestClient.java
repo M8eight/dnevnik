@@ -24,8 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.rusobr.user.web.exception.ExceptionCode.KEYCLOAK_USER_BAD_REQUEST;
-import static com.rusobr.user.web.exception.ExceptionCode.KEYCLOAK_USER_NOT_FOUND;
+import static com.rusobr.user.web.exception.UserExceptionCode.KEYCLOAK_USER_BAD_REQUEST;
+import static com.rusobr.user.web.exception.UserExceptionCode.KEYCLOAK_USER_NOT_FOUND;
 
 @Component
 @Slf4j

@@ -1,6 +1,8 @@
 package com.rusobr.academic.web.exception;
 
-public enum ExceptionCode {
+import com.rusobr.common.enums.IExceptionCode;
+
+public enum AcademicExceptionCode implements IExceptionCode {
     ACADEMIC_PERIOD_OPEN_CONFLICT,
     ACADEMIC_PERIOD_CLOSE_CONFLICT,
     ACADEMIC_PERIOD_NOT_FOUND,

@@ -42,6 +42,9 @@ springdoc:
   api-docs:
     path: /v3/api-docs
 
+frontend:
+  url: ${FRONTEND_URL:http://localhost:5173}
+
 eureka:
   client:
     registry-fetch-interval-seconds: 5

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rusobr.user.domain.enums.UserRole;
+import com.rusobr.common.enums.UserRole;
 import com.rusobr.user.web.dto.user.UserProfileDetails;
 import com.rusobr.user.web.dto.parent.ParentDetails;
 import com.rusobr.user.web.dto.student.StudentDetails;

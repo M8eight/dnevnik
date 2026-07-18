@@ -1,5 +1,8 @@
 package com.rusobr.user.infrastructure.client.feign;
 
+import com.rusobr.common.exception.ForbiddenException;
+import com.rusobr.common.exception.NotFoundException;
+import com.rusobr.common.exception.UnauthorizedException;
 import com.rusobr.user.web.dto.feign.SchoolClassResponse;
 import com.rusobr.user.web.dto.feign.TeacherAcademicFeignDto;
 import com.rusobr.user.web.exception.*;
@@ -22,7 +25,7 @@ public class AcademicClientFallbackFactory implements FallbackFactory<AcademicCl
                         cause,
                         "getSchoolClassByStudentId",
                         "School class with %s not found".formatted(studentId),
-                        ExceptionCode.SCHOOL_CLASS_BY_STUDENT_NOT_FOUND
+                        UserExceptionCode.SCHOOL_CLASS_BY_STUDENT_NOT_FOUND
                 );
                 throw fallbackFailure("getSchoolClassByStudentId", studentId, cause);
             }
@@ -33,26 +36,26 @@ public class AcademicClientFallbackFactory implements FallbackFactory<AcademicCl
                         cause,
                         "getTeacherAcademicInfo",
                         "Teacher info with id: %s not found".formatted(teacherId),
-                        ExceptionCode.ACADEMIC_SERVICE_TEACHER_INFO_NOT_FOUND
+                        UserExceptionCode.ACADEMIC_SERVICE_TEACHER_INFO_NOT_FOUND
                 );
                 throw fallbackFailure("getTeacherAcademicInfo", teacherId, cause);
             }
         };
     }
 
-    private void handleCommonErrors(Throwable cause, String context, String notFoundMessage, ExceptionCode notFoundCode) {
+    private void handleCommonErrors(Throwable cause, String context, String notFoundMessage, UserExceptionCode notFoundCode) {
         if (notFoundCode != null && cause instanceof FeignException.NotFound) {
             throw new NotFoundException(notFoundMessage, notFoundCode);
         }
 
         if (cause instanceof FeignException.Unauthorized) {
             log.error("Fallback [{}]: academic-service Unauthorized", context, cause);
-            throw new UnauthorizedException("Не авторизован для запроса к academic-service", ExceptionCode.ACADEMIC_SERVICE_UNAUTHORIZED);
+            throw new UnauthorizedException("Не авторизован для запроса к academic-service", UserExceptionCode.ACADEMIC_SERVICE_UNAUTHORIZED);
         }
 
         if (cause instanceof FeignException.Forbidden) {
             log.error("Fallback [{}]: academic-service Forbidden", context, cause);
-            throw new ForbiddenException("Недостаточно прав для запроса к academic-service", ExceptionCode.ACADEMIC_SERVICE_FORBIDDEN);
+            throw new ForbiddenException("Недостаточно прав для запроса к academic-service", UserExceptionCode.ACADEMIC_SERVICE_FORBIDDEN);
         }
     }
 
@@ -61,7 +64,7 @@ public class AcademicClientFallbackFactory implements FallbackFactory<AcademicCl
         return new AcademicServiceUnavailableException(
                 "Не удалось выполнить запрос к academic-service: (%s) %s".formatted(method, arg),
                 cause,
-                ExceptionCode.ACADEMIC_SERVICE_UNAVAILABLE
+                UserExceptionCode.ACADEMIC_SERVICE_UNAVAILABLE
         );
     }
 }

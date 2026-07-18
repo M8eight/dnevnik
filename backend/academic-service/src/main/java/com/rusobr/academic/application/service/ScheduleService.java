@@ -1,20 +1,20 @@
 package com.rusobr.academic.application.service;
 
+import com.rusobr.academic.application.mapper.LessonInstanceMapper;
+import com.rusobr.academic.application.mapper.ScheduleLessonMapper;
 import com.rusobr.academic.domain.model.LessonInstance;
 import com.rusobr.academic.domain.model.ScheduleLesson;
 import com.rusobr.academic.domain.model.TeachingAssignment;
-import com.rusobr.academic.web.exception.ConflictException;
-import com.rusobr.academic.web.exception.ExceptionCode;
-import com.rusobr.academic.web.exception.NotFoundException;
 import com.rusobr.academic.infrastructure.client.UserClient;
-import com.rusobr.academic.application.mapper.LessonInstanceMapper;
-import com.rusobr.academic.application.mapper.ScheduleLessonMapper;
 import com.rusobr.academic.infrastructure.persistence.repository.LessonInstanceRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.ScheduleLessonRepository;
 import com.rusobr.academic.web.dto.feign.UserFeignResponse;
 import com.rusobr.academic.web.dto.lessonInstance.DiaryLessonInstanceDto;
 import com.rusobr.academic.web.dto.scheduleLesson.*;
 import com.rusobr.academic.web.dto.teachingAssignment.TeachingAssignmentRequest;
+import com.rusobr.common.exception.ConflictException;
+import com.rusobr.academic.web.exception.AcademicExceptionCode;
+import com.rusobr.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -157,7 +157,7 @@ public class ScheduleService {
                 scheduleLessonRequest.lessonNumber(),
                 scheduleLessonRequest.validFrom()
         )) {
-            throw new ConflictException("Slot is already taken for this class", ExceptionCode.SCHEDULE_SLOT_ALREADY_TAKEN);
+            throw new ConflictException("Slot is already taken for this class", AcademicExceptionCode.SCHEDULE_SLOT_ALREADY_TAKEN);
         }
 
         // Проверяем что учитель не ведёт другой урок в этот же слот
@@ -167,7 +167,7 @@ public class ScheduleService {
             scheduleLessonRequest.lessonNumber(),
             scheduleLessonRequest.validFrom()
         )) {
-            throw new ConflictException("Schedule lesson already exists", ExceptionCode.SCHEDULE_ALREADY_EXIST);
+            throw new ConflictException("Schedule lesson already exists", AcademicExceptionCode.SCHEDULE_ALREADY_EXIST);
         }
 
         ScheduleLesson scheduleLesson = scheduleLessonMapper.toEntity(scheduleLessonRequest, teachingAssignment);
@@ -181,11 +181,11 @@ public class ScheduleService {
     public void close(Long scheduleId, LocalDate closeDate) {
         ScheduleLesson scheduleLesson = scheduleLessonRepository.findWithTeachingAssignmentById(scheduleId)
                 .orElseThrow(() -> new NotFoundException("Schedule with id: %d not found".formatted(scheduleId),
-                        ExceptionCode.SCHEDULE_NOT_FOUND));
+                        AcademicExceptionCode.SCHEDULE_NOT_FOUND));
 
         if (scheduleLesson.getValidTo() != null && !scheduleLesson.getValidTo().isAfter(LocalDate.now())) {
             throw new ConflictException("Schedule with id: %d is already closed".formatted(scheduleId),
-                    ExceptionCode.SCHEDULE_ALREADY_CLOSED);
+                    AcademicExceptionCode.SCHEDULE_ALREADY_CLOSED);
         }
 
         scheduleLesson.setValidTo(closeDate);

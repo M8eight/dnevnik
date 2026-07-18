@@ -1,6 +1,7 @@
 package com.rusobr.user.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rusobr.common.exception.NotFoundException;
 import com.rusobr.user.application.service.teacher.TeacherService;
 import com.rusobr.user.web.dto.feign.BatchUserResponse;
 import com.rusobr.user.web.controller.TeacherController;
@@ -8,8 +9,7 @@ import com.rusobr.user.web.dto.feign.UserFeignResponse;
 import com.rusobr.user.web.dto.teacher.TeacherDetails;
 import com.rusobr.user.web.dto.teacher.TeacherResponse;
 import com.rusobr.user.web.dto.user.UserResponse;
-import com.rusobr.user.web.exception.ExceptionCode;
-import com.rusobr.user.web.exception.NotFoundException;
+import com.rusobr.user.web.exception.UserExceptionCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,7 +68,7 @@ public class TeacherControllerTest {
     @DisplayName("GET /teachers/{id} — 404 если учитель не найден")
     void getWithUserById_ShouldReturn404_WhenNotFound() throws Exception {
         when(teacherService.getWithUserById(TEACHER_ID))
-                .thenThrow(new NotFoundException("Teacher with id " + TEACHER_ID + " not found", ExceptionCode.TEACHER_NOT_FOUND));
+                .thenThrow(new NotFoundException("Teacher with id " + TEACHER_ID + " not found", UserExceptionCode.TEACHER_NOT_FOUND));
 
         mockMvc.perform(get("/api/v1/teachers/{id}", TEACHER_ID))
                 .andExpect(status().isNotFound())
@@ -95,7 +95,7 @@ public class TeacherControllerTest {
     @DisplayName("GET /teachers/{id}/details — 404 если учитель не найден")
     void getDetailsById_ShouldReturn404_WhenNotFound() throws Exception {
         when(teacherService.getDetailsById(TEACHER_ID))
-                .thenThrow(new NotFoundException("Teacher not found: " + TEACHER_ID, ExceptionCode.TEACHER_NOT_FOUND));
+                .thenThrow(new NotFoundException("Teacher not found: " + TEACHER_ID, UserExceptionCode.TEACHER_NOT_FOUND));
 
         mockMvc.perform(get("/api/v1/teachers/{id}/details", TEACHER_ID))
                 .andExpect(status().isNotFound())
@@ -161,7 +161,7 @@ public class TeacherControllerTest {
     @DisplayName("GET /teachers/{id}/simple — 404 если учитель не найден")
     void getTeacherSimpleById_ShouldReturn404_WhenNotFound() throws Exception {
         when(teacherService.getSimpleById(TEACHER_ID))
-                .thenThrow(new NotFoundException("Teacher not found: " + TEACHER_ID, ExceptionCode.TEACHER_NOT_FOUND));
+                .thenThrow(new NotFoundException("Teacher not found: " + TEACHER_ID, UserExceptionCode.TEACHER_NOT_FOUND));
 
         mockMvc.perform(get("/api/v1/teachers/{id}/simple", TEACHER_ID))
                 .andExpect(status().isNotFound())

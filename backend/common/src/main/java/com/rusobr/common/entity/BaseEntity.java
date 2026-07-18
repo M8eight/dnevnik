@@ -1,4 +1,4 @@
-package com.rusobr.academic.domain.model;
+package com.rusobr.common.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;

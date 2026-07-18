@@ -1,6 +1,6 @@
 package com.rusobr.user.application.event;
 
-import com.rusobr.user.domain.enums.UserRole;
+import com.rusobr.common.enums.UserRole;
 
 import java.util.Set;
 

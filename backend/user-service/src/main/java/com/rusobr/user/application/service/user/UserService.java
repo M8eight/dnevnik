@@ -1,8 +1,9 @@
 package com.rusobr.user.application.service.user;
 
+import com.rusobr.common.enums.UserRole;
+import com.rusobr.common.exception.NotFoundException;
 import com.rusobr.user.application.event.UserDeletedEvent;
 import com.rusobr.user.application.mapper.UserMapper;
-import com.rusobr.user.domain.enums.UserRole;
 import com.rusobr.user.domain.model.User;
 import com.rusobr.user.infrastructure.client.webClient.KeycloakRestClient;
 import com.rusobr.user.infrastructure.persistence.repository.UserRepository;
@@ -10,7 +11,6 @@ import com.rusobr.user.infrastructure.specification.UserSpecification;
 import com.rusobr.user.web.dto.keycloak.role.KeycloakRole;
 import com.rusobr.user.web.dto.user.UserDataDto;
 import com.rusobr.user.web.dto.user.UserResponse;
-import com.rusobr.user.web.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collections;
 import java.util.List;
 
-import static com.rusobr.user.web.exception.ExceptionCode.USER_NOT_FOUND;
+import static com.rusobr.user.web.exception.UserExceptionCode.USER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor

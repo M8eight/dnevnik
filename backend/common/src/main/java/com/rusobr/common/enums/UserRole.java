@@ -1,4 +1,4 @@
-package com.rusobr.academic.domain.enums;
+package com.rusobr.common.enums;
 
 public enum UserRole {
     ADMIN,

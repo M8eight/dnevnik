@@ -1,19 +1,19 @@
 package com.rusobr.user.application.service.user.strategy;
 
+import com.rusobr.common.enums.UserRole;
+import com.rusobr.common.exception.ConflictException;
 import com.rusobr.user.application.service.student.StudentService;
-import com.rusobr.user.domain.enums.UserRole;
 import com.rusobr.user.domain.model.Student;
 import com.rusobr.user.web.dto.student.StudentDetails;
 import com.rusobr.user.web.dto.user.UserProfileDetails;
 import com.rusobr.user.web.dto.user.UserRoleStrategy;
-import com.rusobr.user.web.exception.ConflictException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
-import static com.rusobr.user.web.exception.ExceptionCode.STUDENT_PROFILE_DETAILS_CONFLICT;
+import static com.rusobr.user.web.exception.UserExceptionCode.STUDENT_PROFILE_DETAILS_CONFLICT;
 
 @Slf4j
 @RequiredArgsConstructor

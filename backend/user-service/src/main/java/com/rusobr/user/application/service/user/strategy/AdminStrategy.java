@@ -1,6 +1,6 @@
 package com.rusobr.user.application.service.user.strategy;
 
-import com.rusobr.user.domain.enums.UserRole;
+import com.rusobr.common.enums.UserRole;
 import com.rusobr.user.web.dto.user.UserProfileDetails;
 import com.rusobr.user.web.dto.user.UserRoleStrategy;
 import lombok.RequiredArgsConstructor;

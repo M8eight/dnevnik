@@ -7,6 +7,7 @@ import org.hibernate.annotations.SQLRestriction;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import com.rusobr.common.entity.BaseEntity;
 
 @Entity
 @NoArgsConstructor

@@ -2,8 +2,14 @@ spring:
   cloud:
     circuitbreaker:
       resilience4j:
+        disable-time-limiter: true
         enable-semaphore-default-bulkhead: true
     openfeign:
+      client:
+        config:
+          default:
+            connect-timeout: 3000
+            read-timeout: 10000
       circuitbreaker:
         enabled: true
   jackson:

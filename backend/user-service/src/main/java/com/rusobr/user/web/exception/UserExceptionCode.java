@@ -1,6 +1,8 @@
 package com.rusobr.user.web.exception;
 
-public enum ExceptionCode {
+import com.rusobr.common.enums.IExceptionCode;
+
+public enum UserExceptionCode implements IExceptionCode {
     PARENT_NOT_FOUND,
     PARENT_PROFILE_DETAILS_CONFLICT,
 

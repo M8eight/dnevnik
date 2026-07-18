@@ -1,9 +1,9 @@
 package com.rusobr.academic.infrastructure.client;
 
-import com.rusobr.academic.config.FeignConfig;
 import com.rusobr.academic.web.dto.feign.BatchUserResponse;
 import com.rusobr.academic.web.dto.feign.TeacherResponse;
 import com.rusobr.academic.web.dto.feign.UserFeignResponse;
+import com.rusobr.common.config.FeignConfig;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

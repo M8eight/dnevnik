@@ -1,9 +1,9 @@
 package com.rusobr.user.service;
 
+import com.rusobr.common.exception.NotFoundException;
 import com.rusobr.user.application.event.UserDeletedEvent;
 import com.rusobr.user.application.mapper.ParentMapper;
 import com.rusobr.user.application.service.parent.ParentService;
-import com.rusobr.user.domain.enums.UserRole;
 import com.rusobr.user.domain.model.Parent;
 import com.rusobr.user.domain.model.User;
 import com.rusobr.user.infrastructure.persistence.repository.ParentRepository;
@@ -11,7 +11,6 @@ import com.rusobr.user.infrastructure.persistence.repository.UserRepository;
 import com.rusobr.user.web.dto.parent.ParentDetails;
 import com.rusobr.user.web.dto.parent.ParentResponse;
 import com.rusobr.user.web.dto.user.UserResponse;
-import com.rusobr.user.web.exception.NotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -19,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import com.rusobr.common.enums.UserRole;
 
 import java.util.Collections;
 import java.util.Optional;

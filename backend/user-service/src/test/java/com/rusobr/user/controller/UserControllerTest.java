@@ -1,9 +1,11 @@
 package com.rusobr.user.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rusobr.common.enums.UserRole;
+import com.rusobr.common.exception.ConflictException;
+import com.rusobr.common.exception.NotFoundException;
 import com.rusobr.user.application.service.user.UserOrchestrator;
 import com.rusobr.user.application.service.user.UserService;
-import com.rusobr.user.domain.enums.UserRole;
 import com.rusobr.user.web.controller.UserController;
 import com.rusobr.user.web.dto.parent.ParentDetails;
 import com.rusobr.user.web.dto.student.StudentDetails;
@@ -13,9 +15,7 @@ import com.rusobr.user.web.dto.user.UserDataDto;
 import com.rusobr.user.web.dto.user.UserResponse;
 import com.rusobr.user.web.dto.user.update.UserUpdateData;
 import com.rusobr.user.web.dto.user.update.UserUpdateRequest;
-import com.rusobr.user.web.exception.ConflictException;
-import com.rusobr.user.web.exception.ExceptionCode;
-import com.rusobr.user.web.exception.NotFoundException;
+import com.rusobr.user.web.exception.UserExceptionCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -136,7 +136,7 @@ public class UserControllerTest {
         UserCreateRequest<StudentDetails> request = new UserCreateRequest<>(
                 validUserDataDto(), UserRole.STUDENT, new StudentDetails("math")
         );
-        doThrow(new ConflictException("Could not create user", ExceptionCode.USER_CREATE_CONFLICT)).when(userOrchestrator).create(any());
+        doThrow(new ConflictException("Could not create user", UserExceptionCode.USER_CREATE_CONFLICT)).when(userOrchestrator).create(any());
 
         mockMvc.perform(post("/api/v1/users/students")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -202,7 +202,7 @@ public class UserControllerTest {
         UserCreateRequest<ParentDetails> request = new UserCreateRequest<>(
                 validUserDataDto(), UserRole.PARENT, new ParentDetails()
         );
-        doThrow(new ConflictException("Could not create user", ExceptionCode.USER_CREATE_CONFLICT)).when(userOrchestrator).create(any());
+        doThrow(new ConflictException("Could not create user", UserExceptionCode.USER_CREATE_CONFLICT)).when(userOrchestrator).create(any());
 
         mockMvc.perform(post("/api/v1/users/parents")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -245,7 +245,7 @@ public class UserControllerTest {
                 Map.of(UserRole.STUDENT, new StudentDetails("math"))
         );
         when(userOrchestrator.update(eq(USER_ID), any()))
-                .thenThrow(new ConflictException("Username already exists", ExceptionCode.USERNAME_ALREADY_EXISTS));
+                .thenThrow(new ConflictException("Username already exists", UserExceptionCode.USERNAME_ALREADY_EXISTS));
 
         mockMvc.perform(put("/api/v1/users/{id}", USER_ID)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -264,7 +264,7 @@ public class UserControllerTest {
                 Map.of(UserRole.STUDENT, new StudentDetails("math"))
         );
         when(userOrchestrator.update(eq(USER_ID), any()))
-                .thenThrow(new NotFoundException("User not found with id: " + USER_ID, ExceptionCode.USER_NOT_FOUND));
+                .thenThrow(new NotFoundException("User not found with id: " + USER_ID, UserExceptionCode.USER_NOT_FOUND));
 
         mockMvc.perform(put("/api/v1/users/{id}", USER_ID)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -291,7 +291,7 @@ public class UserControllerTest {
     @Test
     @DisplayName("DELETE /users/{id} — 404 если пользователь не найден")
     void delete_ShouldReturn404_WhenUserNotFound() throws Exception {
-        doThrow(new NotFoundException("User not found with id: " + USER_ID, ExceptionCode.USER_NOT_FOUND))
+        doThrow(new NotFoundException("User not found with id: " + USER_ID, UserExceptionCode.USER_NOT_FOUND))
                 .when(userService).deleteUserCascade(USER_ID);
 
         mockMvc.perform(delete("/api/v1/users/{id}", USER_ID))

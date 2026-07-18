@@ -8,8 +8,8 @@ allprojects {
 	apply plugin: 'java'
 
 	group = 'com.rusobr'
-	version = '0.0.1-SNAPSHOT'
-	description = 'Demo project for Spring Boot'
+	version = '0.1'
+	description = 'Backend microservices school system'
 	sourceCompatibility = JavaVersion.VERSION_17
 
 	repositories {
