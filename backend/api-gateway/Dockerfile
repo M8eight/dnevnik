@@ -8,10 +8,14 @@ COPY gradlew .
 COPY settings.gradle .
 COPY gradle gradle
 
+COPY common common
+
 COPY api-gateway api-gateway
 
 # Build jar
-RUN ./gradlew :api-gateway:bootJar --no-daemon
+RUN --mount=type=cache,id=eureka-gradle-cache,target=/home/gradle/.gradle/caches \
+    --mount=type=cache,id=eureka-gradle-wrapper,target=/home/gradle/.gradle/wrapper \
+    ./gradlew :api-gateway:bootJar --no-daemon
 
 # Jre image
 FROM eclipse-temurin:17-jre-jammy
@@ -22,7 +26,6 @@ RUN useradd -ms /bin/bash springuser
 RUN mkdir -p /app/logs && chown -R springuser:springuser /app
 
 COPY --from=build /app/api-gateway/build/libs/*.jar app.jar
-
 USER springuser
 
 # Run with container support and limit max RAM usage to 75%

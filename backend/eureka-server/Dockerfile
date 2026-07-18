@@ -11,7 +11,9 @@ COPY gradle gradle
 COPY eureka-server eureka-server
 
 # Build jar
-RUN ./gradlew :eureka-server:bootJar --no-daemon
+RUN --mount=type=cache,id=eureka-gradle-cache,target=/home/gradle/.gradle/caches \
+    --mount=type=cache,id=eureka-gradle-wrapper,target=/home/gradle/.gradle/wrapper \
+    ./gradlew :eureka-server:bootJar --no-daemon
 
 # Jre image
 FROM eclipse-temurin:17-jre-jammy

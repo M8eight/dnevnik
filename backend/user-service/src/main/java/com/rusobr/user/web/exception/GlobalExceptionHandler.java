@@ -1,6 +1,9 @@
-package com.rusobr.user.web.exception.exceptionAdvice;
+package com.rusobr.user.web.exception;
 
-import com.rusobr.user.web.exception.*;
+import com.rusobr.common.exception.ConflictException;
+import com.rusobr.common.exception.ForbiddenException;
+import com.rusobr.common.exception.NotFoundException;
+import com.rusobr.common.exception.UnauthorizedException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -105,7 +108,7 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now(),
                 HttpStatus.CONFLICT.value(),
                 ex.getMessage(),
-                ExceptionCode.DB_VALIDATION_ERROR,
+                UserExceptionCode.DB_VALIDATION_ERROR,
                 req.getRequestURI()
         );
 
@@ -123,7 +126,7 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now(),
                 HttpStatus.BAD_REQUEST.value(),
                 message,
-                ExceptionCode.VALIDATION_ERROR,
+                UserExceptionCode.VALIDATION_ERROR,
                 req.getRequestURI()
         );
 

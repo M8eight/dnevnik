@@ -8,10 +8,14 @@ COPY gradlew .
 COPY settings.gradle .
 COPY gradle gradle
 
+COPY common common
+
 COPY user-service user-service
 
 # Build jar
-RUN ./gradlew :user-service:bootJar --no-daemon
+RUN --mount=type=cache,id=eureka-gradle-cache,target=/home/gradle/.gradle/caches \
+    --mount=type=cache,id=eureka-gradle-wrapper,target=/home/gradle/.gradle/wrapper \
+    ./gradlew :user-service:bootJar --no-daemon
 
 # Jre image
 FROM eclipse-temurin:17-jre-jammy
@@ -27,7 +31,6 @@ COPY --from=build /app/user-service/build/libs/*.jar app.jar
 
 # Set permissions springuser for app directory
 RUN chown -R springuser:springuser /app
-
 USER springuser
 
 # Run with container support and limit max RAM usage to 75%

@@ -1,4 +1,4 @@
-package com.rusobr.academic.config;
+package com.rusobr.common.config;
 
 import feign.RequestInterceptor;
 import lombok.extern.slf4j.Slf4j;

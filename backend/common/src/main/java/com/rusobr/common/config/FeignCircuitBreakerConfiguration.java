@@ -1,4 +1,4 @@
-package com.rusobr.user.config;
+package com.rusobr.common.config;
 
 import org.springframework.cloud.circuitbreaker.resilience4j.Resilience4JCircuitBreakerFactory;
 import org.springframework.cloud.client.circuitbreaker.Customizer;

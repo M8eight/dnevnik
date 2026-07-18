@@ -2,8 +2,14 @@ spring:
   cloud:
     circuitbreaker:
       resilience4j:
+        disable-time-limiter: true
         enable-semaphore-default-bulkhead: true
     openfeign:
+      client:
+        config:
+          default:
+            connect-timeout: 3000
+            read-timeout: 10000
       circuitbreaker:
         enabled: true
   jackson:
@@ -90,6 +96,9 @@ keycloak:
   realm: ${KC_REALM:dnevnik-realm}
   client-id: dnevnik-backend
   client-secret: ${KC_CLIENT_SECRET:lFpKKXUky4yFUuAHQm1sbkAG2BcoY2kv}
+
+frontend:
+  url: ${FRONTEND_URL:http://localhost:5173}
 
 server:
   port: 9001

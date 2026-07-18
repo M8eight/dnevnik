@@ -1,6 +1,6 @@
 package com.rusobr.user.infrastructure.client.feign;
 
-import com.rusobr.user.config.FeignConfig;
+import com.rusobr.common.config.FeignConfig;
 import com.rusobr.user.web.dto.feign.SchoolClassResponse;
 import com.rusobr.user.web.dto.feign.TeacherAcademicFeignDto;
 import org.springframework.cloud.openfeign.FeignClient;
