@@ -6,8 +6,8 @@ import com.rusobr.academic.domain.enums.GradeType;
 import com.rusobr.academic.web.controller.JournalController;
 import com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodResponse;
 import com.rusobr.academic.web.dto.academicYear.AcademicYearResponse;
-import com.rusobr.academic.web.dto.feign.BatchUserResponse;
-import com.rusobr.academic.web.dto.feign.UserFeignResponse;
+import com.rusobr.common.dto.BatchUserResponse;
+import com.rusobr.common.dto.UserFeignResponse;
 import com.rusobr.academic.web.dto.lessonInstance.DatesGradesDto;
 import com.rusobr.academic.web.dto.lessonInstance.GradeLessonDto;
 import com.rusobr.academic.web.dto.lessonInstance.GradesLessonsResponse;
@@ -97,7 +97,7 @@ public class JournalControllerTest {
                 5.0,
                 List.of()
         );
-        return new TeacherJournalResponse(buildAcademicPeriodResponse(), new BatchUserResponse(List.of(student), List.of()), List.of(lessonInstance), List.of(studentJournal));
+        return new TeacherJournalResponse(buildAcademicPeriodResponse(), new BatchUserResponse(List.of(student), List.of(), false), List.of(lessonInstance), List.of(studentJournal));
     }
 
     @Test

@@ -5,10 +5,10 @@ import com.rusobr.academic.application.service.ClassStudentService;
 import com.rusobr.academic.application.service.SchoolClassService;
 import com.rusobr.academic.web.controller.SchoolClassController;
 import com.rusobr.academic.web.dto.academicYear.AcademicYearResponse;
-import com.rusobr.academic.web.dto.feign.BatchUserResponse;
+import com.rusobr.common.dto.BatchUserResponse;
 import com.rusobr.academic.web.dto.feign.TeacherDetails;
 import com.rusobr.academic.web.dto.feign.TeacherResponse;
-import com.rusobr.academic.web.dto.feign.UserFeignResponse;
+import com.rusobr.common.dto.UserFeignResponse;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassFullResponse;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassRequest;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassResponse;
@@ -90,7 +90,7 @@ public class SchoolClassControllerTest {
                 NAME,
                 buildTeacherResponse(),
                 TEACHER_ID,
-                new BatchUserResponse(List.of(buildStudentResponse()), List.of())
+                new BatchUserResponse(List.of(buildStudentResponse()), List.of(), false)
         );
     }
 

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rusobr.academic.application.service.FinalGradeService;
 import com.rusobr.academic.web.controller.FinalGradeController;
 import com.rusobr.academic.web.dto.academicYear.AcademicYearResponse;
-import com.rusobr.academic.web.dto.feign.UserFeignResponse;
+import com.rusobr.common.dto.UserFeignResponse;
 import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeCreateResponse;
 import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeRequest;
 import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeResponse;

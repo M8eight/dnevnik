@@ -6,7 +6,7 @@ import com.rusobr.academic.domain.model.SchoolClass;
 import com.rusobr.academic.infrastructure.client.UserClient;
 import com.rusobr.academic.infrastructure.persistence.repository.ClassStudentRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.SchoolClassRepository;
-import com.rusobr.academic.web.dto.feign.UserFeignResponse;
+import com.rusobr.common.dto.UserFeignResponse;
 import com.rusobr.common.exception.ConflictException;
 import com.rusobr.common.exception.NotFoundException;
 import org.junit.jupiter.api.DisplayName;

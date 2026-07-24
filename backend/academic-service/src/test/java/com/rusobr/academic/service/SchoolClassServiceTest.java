@@ -11,11 +11,12 @@ import com.rusobr.academic.infrastructure.persistence.repository.SchoolClassRepo
 import com.rusobr.academic.web.dto.academicYear.AcademicYearResponse;
 import com.rusobr.academic.web.dto.feign.TeacherDetails;
 import com.rusobr.academic.web.dto.feign.TeacherResponse;
-import com.rusobr.academic.web.dto.feign.UserFeignResponse;
+import com.rusobr.common.dto.UserFeignResponse;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassFullResponse;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassRequest;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassResponse;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassUpdateRequest;
+import com.rusobr.common.dto.BatchUserResponse;
 import com.rusobr.common.exception.ConflictException;
 import com.rusobr.academic.web.exception.AcademicExceptionCode;
 import com.rusobr.common.exception.NotFoundException;
@@ -150,16 +151,16 @@ class SchoolClassServiceTest {
             SchoolClassFullResponse expectedResponse = mock(SchoolClassFullResponse.class);
 
             when(schoolClassRepository.findWithClassStudentById(CLASS_ID)).thenReturn(Optional.of(schoolClass));
-            when(userClient.getBatchUsers(List.of(STUDENT_ID))).thenReturn(new com.rusobr.academic.web.dto.feign.BatchUserResponse(List.of(userResponse), List.of()));
+            when(userClient.getBatchStudents(List.of(STUDENT_ID))).thenReturn(BatchUserResponse.ok(List.of(userResponse), List.of()));
             when(userClient.getTeacherById(TEACHER_ID)).thenReturn(teacherResponse);
-            when(schoolClassMapper.toSchoolClassFullResponse(schoolClass, new com.rusobr.academic.web.dto.feign.BatchUserResponse(List.of(userResponse), List.of()), teacherResponse, TEACHER_ID))
+            when(schoolClassMapper.toSchoolClassFullResponse(schoolClass, BatchUserResponse.ok(List.of(userResponse), List.of()), teacherResponse, TEACHER_ID))
                     .thenReturn(expectedResponse);
 
             SchoolClassFullResponse result = service.findWithStudentsById(CLASS_ID);
 
             assertThat(result).isEqualTo(expectedResponse);
             verify(schoolClassRepository).findWithClassStudentById(CLASS_ID);
-            verify(userClient).getBatchUsers(List.of(STUDENT_ID));
+            verify(userClient).getBatchStudents(List.of(STUDENT_ID));
             verify(userClient).getTeacherById(TEACHER_ID);
         }
 
@@ -181,13 +182,13 @@ class SchoolClassServiceTest {
 
             when(schoolClassRepository.findWithClassStudentById(CLASS_ID)).thenReturn(Optional.of(schoolClass));
             when(userClient.getTeacherById(TEACHER_ID)).thenReturn(teacherResponse);
-            when(schoolClassMapper.toSchoolClassFullResponse(schoolClass, new com.rusobr.academic.web.dto.feign.BatchUserResponse(List.of(), List.of()), teacherResponse, TEACHER_ID))
+            when(schoolClassMapper.toSchoolClassFullResponse(schoolClass, BatchUserResponse.ok(List.of(), List.of()), teacherResponse, TEACHER_ID))
                     .thenReturn(expectedResponse);
 
             SchoolClassFullResponse result = service.findWithStudentsById(CLASS_ID);
 
             assertThat(result).isEqualTo(expectedResponse);
-            verify(userClient, never()).getBatchUsers(any());
+            verify(userClient, never()).getBatchStudents(any());
         }
 
         @Test
@@ -205,8 +206,8 @@ class SchoolClassServiceTest {
             SchoolClassFullResponse expectedResponse = mock(SchoolClassFullResponse.class);
 
             when(schoolClassRepository.findWithClassStudentById(CLASS_ID)).thenReturn(Optional.of(schoolClass));
-            when(userClient.getBatchUsers(List.of(STUDENT_ID))).thenReturn(new com.rusobr.academic.web.dto.feign.BatchUserResponse(List.of(userResponse), List.of()));
-            when(schoolClassMapper.toSchoolClassFullResponse(schoolClass, new com.rusobr.academic.web.dto.feign.BatchUserResponse(List.of(userResponse), List.of()), null, null))
+            when(userClient.getBatchStudents(List.of(STUDENT_ID))).thenReturn(BatchUserResponse.ok(List.of(userResponse), List.of()));
+            when(schoolClassMapper.toSchoolClassFullResponse(schoolClass, BatchUserResponse.ok(List.of(userResponse), List.of()), null, null))
                     .thenReturn(expectedResponse);
 
             SchoolClassFullResponse result = service.findWithStudentsById(CLASS_ID);
