@@ -3,9 +3,9 @@ package com.rusobr.user.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rusobr.common.exception.NotFoundException;
 import com.rusobr.user.application.service.teacher.TeacherService;
-import com.rusobr.user.web.dto.feign.BatchUserResponse;
+import com.rusobr.common.dto.BatchUserResponse;
 import com.rusobr.user.web.controller.TeacherController;
-import com.rusobr.user.web.dto.feign.UserFeignResponse;
+import com.rusobr.common.dto.UserFeignResponse;
 import com.rusobr.user.web.dto.teacher.TeacherDetails;
 import com.rusobr.user.web.dto.teacher.TeacherResponse;
 import com.rusobr.user.web.dto.user.UserResponse;
@@ -110,7 +110,7 @@ public class TeacherControllerTest {
     @DisplayName("POST /teachers/batch — 200 и список UserFeignResponse")
     void findBatchTeachers_ShouldReturn200() throws Exception {
         List<Long> ids = List.of(1L, 2L);
-        BatchUserResponse responses = new BatchUserResponse(List.of(
+        BatchUserResponse responses = BatchUserResponse.ok(List.of(
                 new UserFeignResponse(1L, "Ivan", "Ivanov", "ivan", "kc-1"),
                 new UserFeignResponse(2L, "Petr", "Petrov", "petr", "kc-2")
         ), List.of());
@@ -130,7 +130,7 @@ public class TeacherControllerTest {
     @Test
     @DisplayName("POST /teachers/batch — 200 пустой список если ids пустой")
     void findBatchTeachers_ShouldReturnEmptyList_WhenIdsEmpty() throws Exception {
-        when(teacherService.getBatch(List.of())).thenReturn(new BatchUserResponse(List.of(), List.of()));
+        when(teacherService.getBatch(List.of())).thenReturn(BatchUserResponse.ok(List.of(), List.of()));
 
                 mockMvc.perform(post("/api/v1/teachers/batch")
                         .contentType(MediaType.APPLICATION_JSON)

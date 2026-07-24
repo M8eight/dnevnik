@@ -6,9 +6,9 @@ import com.rusobr.common.exception.NotFoundException;
 import com.rusobr.user.application.service.student.StudentService;
 import com.rusobr.user.web.controller.StudentController;
 import com.rusobr.user.web.dto.feign.AcademicYearResponse;
-import com.rusobr.user.web.dto.feign.BatchUserResponse;
+import com.rusobr.common.dto.BatchUserResponse;
 import com.rusobr.user.web.dto.feign.SchoolClassResponse;
-import com.rusobr.user.web.dto.feign.UserFeignResponse;
+import com.rusobr.common.dto.UserFeignResponse;
 import com.rusobr.user.web.dto.student.StudentDetails;
 import com.rusobr.user.web.dto.student.StudentWithClassResponse;
 import com.rusobr.user.web.dto.teacher.TeacherDetails;
@@ -119,7 +119,7 @@ public class StudentControllerTest {
     @DisplayName("POST /students/batch — 200 и список UserFeignResponse")
     void getBatch_ShouldReturn200() throws Exception {
         List<Long> ids = List.of(1L, 2L);
-        BatchUserResponse responses = new BatchUserResponse(List.of(
+        BatchUserResponse responses = BatchUserResponse.ok(List.of(
                 new UserFeignResponse(1L, "Ivan", "Ivanov", "ivan", "kc-1"),
                 new UserFeignResponse(2L, "Petr", "Petrov", "petr", "kc-2")
         ), List.of());
@@ -140,7 +140,7 @@ public class StudentControllerTest {
     @Test
     @DisplayName("POST /students/batch — 200 пустой список если ids пустой")
     void getBatch_ShouldReturnEmptyList_WhenIdsEmpty() throws Exception {
-        when(studentService.getBatch(List.of())).thenReturn(new BatchUserResponse(List.of(), List.of()));
+        when(studentService.getBatch(List.of())).thenReturn(BatchUserResponse.ok(List.of(), List.of()));
 
                 mockMvc.perform(post("/api/v1/students/batch")
                         .contentType(MediaType.APPLICATION_JSON)

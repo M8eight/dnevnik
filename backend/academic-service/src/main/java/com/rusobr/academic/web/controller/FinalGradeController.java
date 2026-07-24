@@ -6,6 +6,7 @@ import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeRequest;
 import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeResponse;
 import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeTeacherResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +27,7 @@ public class FinalGradeController {
         return finalGradeService.getByStudentId(userId, academicYearId);
     }
 
+    @PreAuthorize("@gradeSecurity.canViewAssignment(#teachingAssignmentId, authentication)")
     @GetMapping("/by-assignment")
     public List<FinalGradeTeacherResponse> getByAssignmentId(@RequestParam Long teachingAssignmentId,
                                                              @RequestParam Long academicYearId) {

@@ -5,13 +5,11 @@ import com.rusobr.academic.domain.model.SchoolClass;
 import com.rusobr.academic.infrastructure.client.UserClient;
 import com.rusobr.academic.infrastructure.persistence.repository.ClassStudentRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.SchoolClassRepository;
-import com.rusobr.academic.web.dto.feign.UserFeignResponse;
-import com.rusobr.common.exception.ConflictException;
 import com.rusobr.academic.web.exception.AcademicExceptionCode;
+import com.rusobr.common.dto.UserFeignResponse;
+import com.rusobr.common.exception.ConflictException;
 import com.rusobr.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -27,10 +25,6 @@ public class ClassStudentService {
     private final ClassStudentRepository classStudentRepository;
     private final UserClient userClient;
     private final TransactionTemplate writeTransactionTemplate;
-
-    @Lazy
-    @Autowired
-    private ClassStudentService self;
 
     public List<UserFeignResponse> getUnassignedStudents() {
         Set<Long> ids = classStudentRepository.findAllStudentIds();

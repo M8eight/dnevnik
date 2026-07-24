@@ -8,7 +8,7 @@ import com.rusobr.user.application.mapper.UserMapper;
 import com.rusobr.user.domain.model.Parent;
 import com.rusobr.user.domain.model.Student;
 import com.rusobr.user.domain.model.User;
-import com.rusobr.user.web.dto.feign.BatchUserResponse;
+import com.rusobr.common.dto.BatchUserResponse;
 import com.rusobr.user.web.dto.student.StudentInfoResponse;
 import com.rusobr.user.web.exception.UserExceptionCode;
 import com.rusobr.user.infrastructure.client.feign.AcademicClient;
@@ -18,7 +18,7 @@ import com.rusobr.user.infrastructure.persistence.repository.StudentRepository;
 import com.rusobr.user.infrastructure.persistence.repository.UserRepository;
 import com.rusobr.user.application.service.teacher.TeacherService;
 import com.rusobr.user.web.dto.feign.SchoolClassResponse;
-import com.rusobr.user.web.dto.feign.UserFeignResponse;
+import com.rusobr.common.dto.UserFeignResponse;
 import com.rusobr.user.web.dto.student.StudentDetails;
 import com.rusobr.user.web.dto.student.StudentWithClassResponse;
 import com.rusobr.user.web.dto.teacher.TeacherResponse;
@@ -54,7 +54,7 @@ public class StudentService {
     @Transactional(readOnly = true)
     public BatchUserResponse getBatch(List<Long> ids) {
         if (ids == null || ids.isEmpty()) {
-            return new BatchUserResponse(List.of(), List.of());
+            return BatchUserResponse.ok(List.of(), List.of());
         }
 
         List<UserFeignResponse> students = studentRepository.findAllStudentsByIds(ids).stream()
@@ -63,7 +63,7 @@ public class StudentService {
         List<Long> foundIds = students.stream().map(UserFeignResponse::id).toList();
         List<Long> notFound = ids.stream().filter(id -> !foundIds.contains(id)).toList();
 
-        return new BatchUserResponse(students, notFound);
+        return BatchUserResponse.ok(students, notFound);
     }
 
     @Transactional(readOnly = true)

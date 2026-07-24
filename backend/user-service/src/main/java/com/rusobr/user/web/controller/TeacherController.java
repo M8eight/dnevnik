@@ -1,8 +1,8 @@
 package com.rusobr.user.web.controller;
 
 import com.rusobr.user.application.service.teacher.TeacherService;
-import com.rusobr.user.web.dto.feign.BatchUserResponse;
-import com.rusobr.user.web.dto.feign.UserFeignResponse;
+import com.rusobr.common.dto.BatchUserResponse;
+import com.rusobr.common.dto.UserFeignResponse;
 import com.rusobr.user.web.dto.teacher.TeacherDetails;
 import com.rusobr.user.web.dto.teacher.TeacherInfoResponse;
 import com.rusobr.user.web.dto.teacher.TeacherResponse;

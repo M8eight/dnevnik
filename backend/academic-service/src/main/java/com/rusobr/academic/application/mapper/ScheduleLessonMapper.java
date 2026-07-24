@@ -4,7 +4,7 @@ import com.rusobr.academic.domain.model.ScheduleLesson;
 import com.rusobr.academic.domain.model.TeachingAssignment;
 import com.rusobr.academic.infrastructure.persistence.projection.ScheduleLessonProjection;
 import com.rusobr.academic.infrastructure.persistence.projection.SchoolLessonProjection;
-import com.rusobr.academic.web.dto.feign.UserFeignResponse;
+import com.rusobr.common.dto.UserFeignResponse;
 import com.rusobr.academic.web.dto.lessonInstance.DiaryLessonInstanceDto;
 import com.rusobr.academic.web.dto.scheduleLesson.*;
 import org.mapstruct.Mapper;

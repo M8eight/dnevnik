@@ -48,7 +48,7 @@ export default function PeriodGradesView({
       : null;
 
     return { gradedCount: graded, classAverage: avg };
-  }, [entries, academicPeriodId]); // ← Зависимости: пересчитаем если они изменились
+  }, [entries, academicPeriodId]);
 
   const stats = [
     { icon: Users, label: "Учеников", value: entries.length, sub: "в классе" },
@@ -119,22 +119,22 @@ export default function PeriodGradesView({
                   </td>
                 </tr>
               ) : (
-                entries.map((entry) => {
-                  const avg = entry.currentAverage;
+                entries.map((student) => {
+                  const avg = student.currentAverage;
 
                   return (
                     <tr
-                      key={entry.user.id}
+                      key={student.user.id}
                       className="group hover:bg-slate-50/80 transition-colors border-b border-black/3"
                     >
                       <td className="px-6 py-4 border-r border-black/5">
                         <p className="text-[13px] font-bold text-(--navy) leading-tight">
-                          {entry.user.lastName} {entry.user.firstName}
+                          {student.user.firstName ? student.user.firstName + " " + student.user.lastName : student.user.id}
                         </p>
                       </td>
 
                       {academicPeriods.map((period) => {
-                        const targetGrade = entry.periodGrades.find(
+                        const targetGrade = student.periodGrades.find(
                           (pg) => pg.academicPeriodId === period.id
                         ) || null;
 
@@ -145,7 +145,7 @@ export default function PeriodGradesView({
                           >
                             <PeriodGradePopover
                               periodGrade={targetGrade}
-                              studentId={entry.user.id}
+                              studentId={student.user.id}
                               teachingAssignmentId={teachingAssignmentId}
                               academicPeriodId={period.id}
                             />

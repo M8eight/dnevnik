@@ -1,24 +1,25 @@
 package com.rusobr.academic.application.service;
 
+import com.rusobr.academic.application.mapper.FinalGradeMapper;
 import com.rusobr.academic.domain.model.AcademicPeriod;
 import com.rusobr.academic.domain.model.AcademicYear;
 import com.rusobr.academic.domain.model.FinalGrade;
 import com.rusobr.academic.domain.model.TeachingAssignment;
-import com.rusobr.academic.infrastructure.persistence.repository.AcademicYearRepository;
-import com.rusobr.common.exception.ConflictException;
-import com.rusobr.academic.web.exception.AcademicExceptionCode;
-import com.rusobr.common.exception.NotFoundException;
 import com.rusobr.academic.infrastructure.client.UserClient;
-import com.rusobr.academic.application.mapper.FinalGradeMapper;
 import com.rusobr.academic.infrastructure.persistence.repository.AcademicPeriodRepository;
+import com.rusobr.academic.infrastructure.persistence.repository.AcademicYearRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.FinalGradeRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.TeachingAssignmentRepository;
-import com.rusobr.academic.web.dto.feign.UserFeignResponse;
 import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeCreateResponse;
 import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeRequest;
 import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeResponse;
 import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeTeacherResponse;
+import com.rusobr.academic.web.exception.AcademicExceptionCode;
+import com.rusobr.common.dto.BatchUserResponse;
+import com.rusobr.common.exception.ConflictException;
+import com.rusobr.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FinalGradeService {
@@ -46,7 +48,6 @@ public class FinalGradeService {
     @Lazy
     @Autowired
     private FinalGradeService self;
-
 
     @Transactional(readOnly = true)
     public Map<String, FinalGradeResponse> getByStudentId(Long studentId, Long academicYearId) {
@@ -68,9 +69,9 @@ public class FinalGradeService {
                 Collectors.toList()
         ));
 
-        List<UserFeignResponse> students = userClient.getBatchUsers(data.studentIds()).found();
+        BatchUserResponse students = userClient.getBatchStudents(data.studentIds());
 
-        return students.stream().map(user ->
+        return students.found().stream().map(user ->
                 new FinalGradeTeacherResponse(user, finalGradesMap.get(user.id()))).toList();
     }
 

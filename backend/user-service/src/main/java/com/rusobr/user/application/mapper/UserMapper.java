@@ -3,7 +3,7 @@ package com.rusobr.user.application.mapper;
 import com.rusobr.common.enums.UserRole;
 import com.rusobr.user.domain.model.User;
 import com.rusobr.user.infrastructure.persistence.repository.projection.UserProjection;
-import com.rusobr.user.web.dto.feign.UserFeignResponse;
+import com.rusobr.common.dto.UserFeignResponse;
 import com.rusobr.user.web.dto.user.UserDataDto;
 import com.rusobr.user.web.dto.user.UserResponse;
 import org.mapstruct.Mapper;

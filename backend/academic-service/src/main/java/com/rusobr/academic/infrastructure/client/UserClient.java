@@ -1,8 +1,8 @@
 package com.rusobr.academic.infrastructure.client;
 
-import com.rusobr.academic.web.dto.feign.BatchUserResponse;
+import com.rusobr.common.dto.BatchUserResponse;
 import com.rusobr.academic.web.dto.feign.TeacherResponse;
-import com.rusobr.academic.web.dto.feign.UserFeignResponse;
+import com.rusobr.common.dto.UserFeignResponse;
 import com.rusobr.common.config.FeignConfig;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,6 +32,6 @@ public interface UserClient {
     List<UserFeignResponse> getBatchStudentsExcludeAssigned(@RequestBody Set<Long> ids);
 
     @PostMapping("/api/v1/students/batch")
-    BatchUserResponse getBatchUsers(@RequestBody List<Long> ids);
+    BatchUserResponse getBatchStudents(@RequestBody List<Long> ids);
 
 }

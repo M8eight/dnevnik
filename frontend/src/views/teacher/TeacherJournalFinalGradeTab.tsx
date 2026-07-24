@@ -169,7 +169,7 @@ export default function FinalGradesView({
                     >
                       <td className="px-6 py-4 border-r border-black/5">
                         <p className="text-[13px] font-bold text-(--navy) leading-tight">
-                          {student.lastName} {student.firstName}
+                          {student.firstName ? student.firstName + " " + student.lastName : student.id}
                         </p>
                       </td>
 

@@ -7,7 +7,7 @@ import com.rusobr.academic.domain.model.SchoolClass;
 import com.rusobr.academic.infrastructure.client.UserClient;
 import com.rusobr.academic.infrastructure.persistence.repository.AcademicYearRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.SchoolClassRepository;
-import com.rusobr.academic.web.dto.feign.BatchUserResponse;
+import com.rusobr.common.dto.BatchUserResponse;
 import com.rusobr.academic.web.dto.feign.TeacherResponse;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassFullResponse;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassRequest;
@@ -48,9 +48,10 @@ public class SchoolClassService {
 
     public SchoolClassFullResponse findWithStudentsById(Long id) {
         SchoolClass schoolClass = self.findWithClassStudentByIdTransactional(id);
-        BatchUserResponse users = new BatchUserResponse(List.of(), List.of());
+        BatchUserResponse users = BatchUserResponse.ok(List.of(), List.of());
         if (!schoolClass.getStudents().isEmpty()) {
-            users = userClient.getBatchUsers(
+            users = userClient.
+                    getBatchStudents(
                     schoolClass.getStudents().stream().map(ClassStudent::getStudentId).toList()
             );
         }

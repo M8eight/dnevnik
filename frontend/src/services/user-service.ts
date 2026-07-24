@@ -77,6 +77,7 @@ export interface TeacherDetailsResponse {
 export interface BatchUserResponse {
     found: UserSimpleResponse[];
     notFound: number[];
+    degraded: boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -91,9 +92,9 @@ export interface UserUpdateData {
 }
 
 export type UserProfileDetails =
-    | { studyProfile: string } // For students
-    | { email: string; phoneNumber: string } // For teachers
-    | Record<string, never> // For parents
+    | { studyProfile: string } 
+    | { email: string; phoneNumber: string }
+    | Record<string, never> 
 
 export interface UserUpdateRequest {
     userId: number;

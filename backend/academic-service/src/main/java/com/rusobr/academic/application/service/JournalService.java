@@ -8,7 +8,7 @@ import com.rusobr.academic.domain.model.ScheduleLesson;
 import com.rusobr.academic.infrastructure.client.UserClient;
 import com.rusobr.academic.infrastructure.persistence.repository.LessonInstanceRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.SchoolClassRepository;
-import com.rusobr.academic.web.dto.feign.BatchUserResponse;
+import com.rusobr.common.dto.BatchUserResponse;
 import com.rusobr.academic.web.dto.lessonInstance.*;
 import com.rusobr.academic.web.dto.lessonInstance.teacher.AttendanceStudentDto;
 import com.rusobr.academic.web.dto.lessonInstance.teacher.GradeStudentDto;
@@ -89,7 +89,7 @@ public class JournalService {
         JournalDbData data = Objects.requireNonNull(readOnlyTransactionTemplate.execute(status ->
                 fetchJournalData(teachingAssignmentId, academicPeriodId)));
 
-        BatchUserResponse students = userClient.getBatchUsers(data.studentsIds());
+        BatchUserResponse students = userClient.getBatchStudents(data.studentsIds());
 
         List<StudentJournalDto> studentJournal = buildStudentJournal(data.grades(), data.attendances());
 
