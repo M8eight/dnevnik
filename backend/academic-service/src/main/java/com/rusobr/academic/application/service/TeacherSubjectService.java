@@ -7,7 +7,7 @@ import com.rusobr.academic.domain.model.TeacherSubjectId;
 import com.rusobr.academic.infrastructure.client.UserClient;
 import com.rusobr.academic.infrastructure.persistence.repository.SubjectRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.TeacherSubjectRepository;
-import com.rusobr.academic.web.dto.feign.UserFeignResponse;
+import com.rusobr.common.dto.UserFeignResponse;
 import com.rusobr.academic.web.dto.teacherSubject.TeacherSubjectRequest;
 import com.rusobr.academic.web.dto.teacherSubject.TeacherSubjectResponse;
 import com.rusobr.common.exception.ConflictException;

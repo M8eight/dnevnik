@@ -1,8 +1,8 @@
 package com.rusobr.academic.infrastructure.client;
 
-import com.rusobr.academic.web.dto.feign.BatchUserResponse;
+import com.rusobr.common.dto.BatchUserResponse;
 import com.rusobr.academic.web.dto.feign.TeacherResponse;
-import com.rusobr.academic.web.dto.feign.UserFeignResponse;
+import com.rusobr.common.dto.UserFeignResponse;
 import com.rusobr.academic.web.exception.BadRequestException;
 import com.rusobr.academic.web.exception.AcademicExceptionCode;
 import com.rusobr.common.exception.ForbiddenException;
@@ -63,10 +63,10 @@ public class UserClientFallbackFactory implements FallbackFactory<UserClient> {
             }
 
             @Override
-            public BatchUserResponse getBatchUsers(List<Long> ids) {
+            public BatchUserResponse getBatchStudents(List<Long> ids) {
                 handleCommonErrors(cause, "getBatchUsers ids=" + ids, "Not found batch users with ids: %s".formatted(ids),
                         AcademicExceptionCode.USER_SERVICE_BATCH_USERS_NOT_FOUND);
-                throw fallbackFailure("getBatchUsers", ids, cause);
+                return BatchUserResponse.degraded(ids);
             }
         };
     }

@@ -2,7 +2,7 @@ package com.rusobr.academic.web.controller;
 
 import com.rusobr.academic.application.service.ClassStudentService;
 import com.rusobr.academic.application.service.SchoolClassService;
-import com.rusobr.academic.web.dto.feign.UserFeignResponse;
+import com.rusobr.common.dto.UserFeignResponse;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassFullResponse;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassRequest;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassResponse;

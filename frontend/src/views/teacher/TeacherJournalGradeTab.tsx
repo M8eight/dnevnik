@@ -91,7 +91,7 @@ export default function JournalTable({
                   >
                     <td className="sticky left-0 z-10 bg-white/95 group-hover:bg-slate-50/95 transition-colors px-4 py-3 border-r border-black/5">
                       <p className="text-[13px] font-bold text-(--navy) leading-tight truncate">
-                        {student.lastName} {student.firstName}
+                        {student.firstName ? student.firstName + " " + student.lastName : student.id}
                       </p>
                     </td>
                     {sortedLessons.map((lesson) => {

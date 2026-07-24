@@ -2,7 +2,7 @@ package com.rusobr.academic.application.mapper;
 
 import com.rusobr.academic.domain.model.AcademicYear;
 import com.rusobr.academic.domain.model.SchoolClass;
-import com.rusobr.academic.web.dto.feign.BatchUserResponse;
+import com.rusobr.common.dto.BatchUserResponse;
 import com.rusobr.academic.web.dto.feign.TeacherResponse;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassFullResponse;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassRequest;

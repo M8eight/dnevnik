@@ -1,7 +1,7 @@
 package com.rusobr.academic.web.dto.grade;
 
 import com.rusobr.academic.domain.enums.GradeType;
-import com.rusobr.academic.web.dto.feign.UserFeignResponse;
+import com.rusobr.common.dto.UserFeignResponse;
 
 import java.time.Instant;
 

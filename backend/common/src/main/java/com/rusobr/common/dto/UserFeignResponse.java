@@ -1,5 +1,8 @@
-package com.rusobr.user.web.dto.feign;
+package com.rusobr.common.dto;
 
+import lombok.Builder;
+
+@Builder
 public record UserFeignResponse(
         Long id,
         String firstName,

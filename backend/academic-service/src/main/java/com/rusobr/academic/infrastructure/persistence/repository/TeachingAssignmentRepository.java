@@ -41,7 +41,7 @@ public interface TeachingAssignmentRepository  extends JpaRepository<TeachingAss
         join sc.students s
         where ta.id = :teachingAssignmentId
     """)
-    List<Long> findStudentIdsByTeachingAssignmentId(Long teachingAssignmentId);
+    List<Long> findStudentIdsByTeachingAssignmentId(@Param("teachingAssignmentId") Long teachingAssignmentId);
 
     @Query("""
         select ta
@@ -53,4 +53,10 @@ public interface TeachingAssignmentRepository  extends JpaRepository<TeachingAss
     """)
     List<TeachingAssignment> findByTeacherId(@Param("teacherId") Long teacherId);
 
+    @Query("""
+        select ta.id
+        from TeachingAssignment ta
+        where ta.teacherId = :teacherId
+    """)
+    List<Long> getTeachingAssignmentIdsByTeacherId(@Param("teacherId") Long teacherId);
 }

@@ -9,7 +9,7 @@ import com.rusobr.academic.web.dto.grade.*;
 import com.rusobr.academic.web.dto.grade.createGrade.CreateGradeRequest;
 import com.rusobr.academic.web.dto.grade.createGrade.CreateGradeResponse;
 import com.rusobr.academic.web.dto.lessonInstance.LessonInstanceDto;
-import com.rusobr.academic.web.dto.feign.UserFeignResponse;
+import com.rusobr.common.dto.UserFeignResponse;
 import org.mapstruct.*;
 
 import java.util.List;

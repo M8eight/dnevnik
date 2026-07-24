@@ -1,7 +1,7 @@
 package com.rusobr.academic.application.mapper;
 
 import com.rusobr.academic.domain.model.TeacherSubject;
-import com.rusobr.academic.web.dto.feign.UserFeignResponse;
+import com.rusobr.common.dto.UserFeignResponse;
 import com.rusobr.academic.web.dto.feign.teacherInfo.TeacherSubjectRawResponse;
 import com.rusobr.academic.web.dto.teacherSubject.TeacherSubjectResponse;
 import org.mapstruct.Mapper;
