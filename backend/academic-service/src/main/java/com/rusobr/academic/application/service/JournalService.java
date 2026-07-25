@@ -15,6 +15,7 @@ import com.rusobr.academic.web.dto.lessonInstance.teacher.GradeStudentDto;
 import com.rusobr.academic.web.dto.lessonInstance.teacher.StudentJournalDto;
 import com.rusobr.academic.web.dto.lessonInstance.teacher.TeacherJournalResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -47,6 +48,7 @@ public class JournalService {
             List<AttendanceStudentDto> attendances
     ) {}
 
+    @Cacheable(value = "journalByStudentId", key = "#studentId + '#' + #academicPeriodId")
     @Transactional(readOnly = true)
     public GradesLessonsResponse getGradesByStudentId(Long studentId, Long academicPeriodId) {
         //Получаем Academic period
@@ -85,6 +87,7 @@ public class JournalService {
         return new GradesLessonsResponse(academicPeriodMapper.toResponse(academicPeriod), dates, subjects);
     }
 
+    @Cacheable(value = "journalByAssignment", key = "#teachingAssignmentId + '#' + #academicPeriodId", unless = "#result.degradedStudents")
     public TeacherJournalResponse getJournalByAssignment(Long teachingAssignmentId, Long academicPeriodId) {
         JournalDbData data = Objects.requireNonNull(readOnlyTransactionTemplate.execute(status ->
                 fetchJournalData(teachingAssignmentId, academicPeriodId)));
@@ -157,6 +160,7 @@ public class JournalService {
                 : 0.0;
     }
 
+    @Cacheable(value = "lessonInstancesByAssignment", key = "#teachingAssignmentId + '#' + #academicPeriodId")
     public List<LessonInstanceDto> getInstancesByAssignment(Long teachingAssignmentId, Long academicPeriodId) {
         AcademicPeriod academicPeriod = academicPeriodService.getById(academicPeriodId);
 

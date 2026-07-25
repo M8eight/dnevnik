@@ -15,6 +15,8 @@ import com.rusobr.academic.web.exception.AcademicExceptionCode;
 import com.rusobr.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +39,7 @@ public class TeacherSubjectService {
     @Autowired
     private TeacherSubjectService self;
 
+    @Cacheable("teacherSubjects")
     public List<TeacherSubjectResponse> findAll() {
         //Получаем учителей из базы academic потом идем в user-service и упаковываем в map, где ключ это id пользователя
         List<TeacherSubject> teacherSubjects = teacherSubjectRepository.findAll();
@@ -56,6 +59,7 @@ public class TeacherSubjectService {
         ).toList();
     }
 
+    @CacheEvict(value = "teacherSubjects", allEntries = true)
     public TeacherSubjectResponse create(TeacherSubjectRequest request) {
         TeacherSubjectId id = TeacherSubjectId.builder()
                 .teacherId(request.teacherId()).subjectId(request.subjectId()).build();
@@ -89,6 +93,7 @@ public class TeacherSubjectService {
         return teacherSubjectMapper.toResponse(teacherSubjectRepository.save(teacherSubject), teacher);
     }
 
+    @CacheEvict(value = "teacherSubjects", allEntries = true)
     @Transactional
     public void delete(TeacherSubjectRequest request) {
         TeacherSubjectId id = TeacherSubjectId.builder()

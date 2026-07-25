@@ -9,17 +9,16 @@ import com.rusobr.academic.infrastructure.client.UserClient;
 import com.rusobr.academic.infrastructure.persistence.repository.GradeRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.PeriodGradeRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.TeachingAssignmentRepository;
-import com.rusobr.common.dto.UserFeignResponse;
 import com.rusobr.academic.web.dto.grade.StudentAverageDto;
-import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeRequest;
-import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeResponse;
-import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeStudentResponse;
-import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeTeacherResponse;
-import com.rusobr.common.exception.ConflictException;
+import com.rusobr.academic.web.dto.grade.periodGrade.*;
 import com.rusobr.academic.web.exception.AcademicExceptionCode;
+import com.rusobr.common.dto.BatchUserResponse;
+import com.rusobr.common.exception.ConflictException;
 import com.rusobr.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,6 +52,7 @@ public class PeriodGradeService {
     @Autowired
     private PeriodGradeService self;
 
+    @Cacheable(value = "periodGradesByStudentId", key = "#studentId + '#' + #academicYearId")
     @Transactional(readOnly = true)
     public Map<String, List<PeriodGradeStudentResponse>> getByStudentId(Long studentId, Long academicYearId) {
         List<PeriodGradeStudentResponse> periodGrades = periodGradeRepository
@@ -69,7 +69,9 @@ public class PeriodGradeService {
         );
     }
 
-    public List<PeriodGradeTeacherResponse> getByAssignmentWithAverage(Long teachingAssignmentId, Long currentAcademicPeriodId, Long academicYearId) {
+
+    @Cacheable(value = "periodGradesByAssignment", key = "#teachingAssignmentId + '#' + #currentAcademicPeriodId + '#' + #academicYearId")
+    public PeriodGradeTeacherResponse getByAssignmentWithAverage(Long teachingAssignmentId, Long currentAcademicPeriodId, Long academicYearId) {
         PeriodGradeDbData data = self.getByAssignmentWithAverageTransactional(teachingAssignmentId, currentAcademicPeriodId, academicYearId);
 
         BatchUserResponse students = userClient.getBatchStudents(data.studentIds());
@@ -103,6 +105,7 @@ public class PeriodGradeService {
         return new PeriodGradeDbData(studentIds, periodGradesMap, averageGradesMap);
     }
 
+    @CacheEvict(value = {"periodGradesByAssignment", "periodGradesByStudentId"}, allEntries = true)
     @Transactional
     public PeriodGradeResponse create(PeriodGradeRequest dto) {
         AcademicPeriod academicPeriod = academicPeriodService.getById(dto.academicPeriodId());
@@ -127,6 +130,7 @@ public class PeriodGradeService {
 
     }
 
+    @CacheEvict(value = {"periodGradesByAssignment", "periodGradesByStudentId"}, allEntries = true)
     @Transactional
     public void delete(Long periodGradeId) {
         PeriodGrade periodGrade = periodGradeRepository.findWithAcademicPeriodById(periodGradeId)

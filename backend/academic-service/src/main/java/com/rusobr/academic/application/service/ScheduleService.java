@@ -17,6 +17,8 @@ import com.rusobr.academic.web.exception.AcademicExceptionCode;
 import com.rusobr.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,6 +49,7 @@ public class ScheduleService {
                 .stream().map(scheduleLessonMapper::toScheduleLessonResponse).toList();
     }
 
+    @Cacheable(value = "schedulesByStudentId", key = "#studentId + '#' + #startDate + '#' + #endDate")
     @Transactional(readOnly = true)
     public List<DiaryScheduleDto> getByStudentId(Long studentId, LocalDate startDate, LocalDate endDate) {
         //Получаем шаблон расписания по периоду и собираем их id в отдельный List
@@ -137,6 +140,7 @@ public class ScheduleService {
                 );
     }
 
+    @CacheEvict(value = "schedulesByStudentId", allEntries = true)
     public void create(ScheduleLessonRequest scheduleLessonRequest) {
         userClient.getTeacherById(scheduleLessonRequest.teacherId());
         self.createTransactional(scheduleLessonRequest);
@@ -177,6 +181,7 @@ public class ScheduleService {
         lessonInstanceService.generateInstanceForLesson(scheduleLesson);
     }
 
+    @CacheEvict(value = "schedulesByStudentId", allEntries = true)
     @Transactional
     public void close(Long scheduleId, LocalDate closeDate) {
         ScheduleLesson scheduleLesson = scheduleLessonRepository.findWithTeachingAssignmentById(scheduleId)

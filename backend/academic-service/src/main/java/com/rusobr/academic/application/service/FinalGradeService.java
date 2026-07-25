@@ -10,10 +10,7 @@ import com.rusobr.academic.infrastructure.persistence.repository.AcademicPeriodR
 import com.rusobr.academic.infrastructure.persistence.repository.AcademicYearRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.FinalGradeRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.TeachingAssignmentRepository;
-import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeCreateResponse;
-import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeRequest;
-import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeResponse;
-import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeTeacherResponse;
+import com.rusobr.academic.web.dto.grade.finalGrade.*;
 import com.rusobr.academic.web.exception.AcademicExceptionCode;
 import com.rusobr.common.dto.BatchUserResponse;
 import com.rusobr.common.exception.ConflictException;
@@ -21,6 +18,8 @@ import com.rusobr.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,6 +48,7 @@ public class FinalGradeService {
     @Autowired
     private FinalGradeService self;
 
+    @Cacheable(value = "finalGradesByStudent", key = "#studentId + '#' + #academicYearId")
     @Transactional(readOnly = true)
     public Map<String, FinalGradeResponse> getByStudentId(Long studentId, Long academicYearId) {
         List<FinalGrade> finalGrades = finalGradeRepository.findFinalGradesByStudentId(studentId, academicYearId);
@@ -60,8 +60,7 @@ public class FinalGradeService {
                 ));
     }
 
-    public List<FinalGradeTeacherResponse> getByAssignmentId(Long teachingAssignmentId, Long academicYearId) {
-        DbData data = self.getByAssignmentTransactional(teachingAssignmentId, academicYearId);
+    @Cacheable(value = "finalGradesByAssignment", key = "#teachingAssignmentId + '#' + #academicYearId", unless = "#result.degradedUsers")
     public FinalGradeTeacherResponse getByAssignmentId(Long teachingAssignmentId, Long academicYearId) {
         DbData data = self.getByAssignmentIdTransactional(teachingAssignmentId, academicYearId);
         List<FinalGradeResponse> mappedFinalGrades = data.finalGrades().stream().map(finalGradeMapper::toFinalGradeResponse).toList();
@@ -86,6 +85,7 @@ public class FinalGradeService {
         return new DbData(finalGrades, studentIds);
     }
 
+    @CacheEvict(value = {"finalGradesByStudent", "finalGradesByAssignment"}, allEntries = true)
     @Transactional
     public FinalGradeCreateResponse create(FinalGradeRequest finalGradeRequest) {
 
@@ -112,6 +112,7 @@ public class FinalGradeService {
         return finalGradeMapper.toFinalGradeCreateResponse(finalGradeRepository.save(finalGrade));
     }
 
+    @CacheEvict(value = {"finalGradesByStudent", "finalGradesByAssignment"}, allEntries = true)
     @Transactional
     public void delete(Long id) {
         FinalGrade finalGrade = finalGradeRepository.findWithAcademicYearById(id)

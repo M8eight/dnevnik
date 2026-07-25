@@ -13,6 +13,8 @@ import com.rusobr.academic.web.exception.AcademicExceptionCode;
 import com.rusobr.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +37,7 @@ public class AcademicPeriodService {
                         AcademicExceptionCode.ACADEMIC_PERIOD_NOT_FOUND));
     }
 
+    @Cacheable(value = "academicPeriods", key = "#date")
     public AcademicPeriod getByDate(LocalDate date) {
         return academicPeriodRepository.findByDate(date)
                 .orElseThrow(() -> new NotFoundException("Academic period by date %s not found".formatted(date),
@@ -53,6 +56,7 @@ public class AcademicPeriodService {
         return academicPeriodMapper.toResponse(getWithAcademicYearOrThrow(id));
     }
 
+    @Cacheable(value = "academicPeriods", key = "#academicYearId")
     @Transactional(readOnly = true)
     public List<AcademicPeriodResponse> getAllByAcademicYear(Long academicYearId) {
         return academicPeriodRepository.findAllByAcademicYearIdOrderByStartDateAsc(academicYearId).stream()
@@ -60,6 +64,7 @@ public class AcademicPeriodService {
                 .toList();
     }
 
+    @CacheEvict(value = "academicPeriods", allEntries = true)
     @Transactional
     public void openPeriod(Long id) {
         AcademicPeriod academicPeriod = getWithAcademicYearOrThrow(id);
@@ -69,6 +74,7 @@ public class AcademicPeriodService {
         academicPeriod.open();
     }
 
+    @CacheEvict(value = "academicPeriods", allEntries = true)
     @Transactional
     public void closePeriod(Long id) {
         AcademicPeriod academicPeriod = getWithAcademicYearOrThrow(id);
@@ -78,6 +84,7 @@ public class AcademicPeriodService {
         academicPeriod.close();
     }
 
+    @CacheEvict(value = "academicPeriods", allEntries = true)
     @Transactional
     public AcademicPeriodResponse create(AcademicPeriodRequest request) {
         validateDates(request.startDate(), request.endDate());
@@ -91,6 +98,7 @@ public class AcademicPeriodService {
         return academicPeriodMapper.toResponse(academicPeriodRepository.save(period));
     }
 
+    @CacheEvict(value = "academicPeriods", allEntries = true)
     @Transactional
     public void update(Long id, AcademicPeriodUpdateRequest request) {
         AcademicPeriod academicPeriod = getWithAcademicYearOrThrow(id);
@@ -109,6 +117,7 @@ public class AcademicPeriodService {
         if (request.name() != null) academicPeriod.setName(request.name());
     }
 
+    @CacheEvict(value = "academicPeriods", allEntries = true)
     @Transactional
     public void delete(Long id) {
         AcademicPeriod academicPeriod = getWithAcademicYearOrThrow(id);
