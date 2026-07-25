@@ -14,6 +14,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     annotationProcessor "org.hibernate.orm:hibernate-jpamodelgen:"
 
+    implementation 'com.github.ben-manes.caffeine:caffeine'
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'

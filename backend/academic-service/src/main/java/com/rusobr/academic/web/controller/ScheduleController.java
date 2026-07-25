@@ -17,7 +17,7 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/api/v1/")
+@RequestMapping("/api/v1")
 public class ScheduleController {
 
     private final ScheduleService scheduleService;

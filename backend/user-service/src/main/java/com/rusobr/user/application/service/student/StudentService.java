@@ -25,6 +25,7 @@ import com.rusobr.user.web.dto.teacher.TeacherResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
@@ -82,6 +83,7 @@ public class StudentService {
         return studentMapper.toStudentDetails(student);
     }
 
+    @Cacheable(value = "studentHomeInfo", key = "#id")
     public StudentWithClassResponse getWithClassById(Long id) {
         Student student = self.getStudentTransactional(id);
         SchoolClassResponse schoolClass = academicClient.getSchoolClassByStudentId(student.getId());

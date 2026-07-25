@@ -7,9 +7,10 @@ import com.rusobr.academic.domain.model.LessonInstance;
 import com.rusobr.academic.infrastructure.persistence.repository.AttendanceRepository;
 import com.rusobr.academic.web.dto.attendances.AttendanceRequest;
 import com.rusobr.academic.web.dto.attendances.AttendanceResponse;
-import com.rusobr.common.exception.ConflictException;
 import com.rusobr.academic.web.exception.AcademicExceptionCode;
+import com.rusobr.common.exception.ConflictException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +23,7 @@ public class AttendanceService {
     private final LessonInstanceService lessonInstanceService;
     private final AcademicPeriodService academicPeriodService;
 
+    @CacheEvict(value = {"journalByAssignment", "journalByStudentId"}, allEntries = true)
     @Transactional
     public AttendanceResponse create(AttendanceRequest attendanceRequest) {
         LessonInstance lessonInstance = lessonInstanceService.getById(attendanceRequest.lessonInstanceId());
@@ -44,6 +46,7 @@ public class AttendanceService {
         return attendanceMapper.toAttendanceResponse(attendanceRepository.save(attendance));
     }
 
+    @CacheEvict(value = {"journalByAssignment", "journalByStudentId"}, allEntries = true)
     @Transactional
     public void delete(Long id) {
         attendanceRepository.deleteById(id);

@@ -18,7 +18,7 @@ export const usePeriodGradesByStudent = (academicYearId: number) => {
 };
 
 export const usePeriodGradesByAssignment = (teachingAssignmentId: number, currentAcademicPeriodId: number, academicYearId: number) => {
-  return useQuery<PeriodGradeTeacherResponse[]>({
+  return useQuery<PeriodGradeTeacherResponse>({
     queryKey: ["periodGrades", teachingAssignmentId, currentAcademicPeriodId, academicYearId],
     queryFn: () => getPeriodGradesByAssignment(teachingAssignmentId, currentAcademicPeriodId, academicYearId),
     enabled: !!teachingAssignmentId && !!currentAcademicPeriodId && !!academicYearId,

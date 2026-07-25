@@ -97,7 +97,7 @@ class JournalServiceTest {
                     .thenReturn(dates);
             when(academicPeriodMapper.toResponse(period)).thenReturn(periodResponse);
 
-            GradesLessonsResponse result = service.getGradesLessonsByStudentId(STUDENT_ID, PERIOD_ID);
+            GradesLessonsResponse result = service.getGradesByStudentId(STUDENT_ID, PERIOD_ID);
 
             assertThat(result).isNotNull();
             assertThat(result.dates()).isEqualTo(dates);
@@ -111,7 +111,7 @@ class JournalServiceTest {
             when(academicPeriodService.getById(PERIOD_ID))
                     .thenThrow(new NotFoundException("Academic period with id " + PERIOD_ID + " not found", null));
 
-            assertThatThrownBy(() -> service.getGradesLessonsByStudentId(STUDENT_ID, PERIOD_ID))
+            assertThatThrownBy(() -> service.getGradesByStudentId(STUDENT_ID, PERIOD_ID))
                     .isInstanceOf(NotFoundException.class);
         }
     }

@@ -97,14 +97,14 @@ public class JournalControllerTest {
                 5.0,
                 List.of()
         );
-        return new TeacherJournalResponse(buildAcademicPeriodResponse(), new BatchUserResponse(List.of(student), List.of(), false), List.of(lessonInstance), List.of(studentJournal));
+        return new TeacherJournalResponse(buildAcademicPeriodResponse(), new BatchUserResponse(List.of(student), List.of(), false), List.of(lessonInstance), List.of(studentJournal), false);
     }
 
     @Test
     @DisplayName("GET /grades/by-student — 200 and grades lessons response")
     void getGradesByStudentId_ShouldReturn200() throws Exception {
         GradesLessonsResponse response = buildGradesLessonsResponse();
-        when(lessonInstanceService.getGradesLessonsByStudentId(STUDENT_ID, PERIOD_ID)).thenReturn(response);
+        when(lessonInstanceService.getGradesByStudentId(STUDENT_ID, PERIOD_ID)).thenReturn(response);
 
         mockMvc.perform(get("/api/v1/grades/by-student")
                         .param("academicPeriodId", String.valueOf(PERIOD_ID)))
@@ -119,7 +119,7 @@ public class JournalControllerTest {
     @Test
     @DisplayName("GET /grades/by-student — 404 when period not found")
     void getGradesByStudentId_ShouldReturn404_WhenPeriodNotFound() throws Exception {
-        when(lessonInstanceService.getGradesLessonsByStudentId(STUDENT_ID, PERIOD_ID))
+        when(lessonInstanceService.getGradesByStudentId(STUDENT_ID, PERIOD_ID))
                 .thenThrow(new NotFoundException("Academic period with id " + PERIOD_ID + " not found", AcademicExceptionCode.ACADEMIC_PERIOD_NOT_FOUND));
 
         mockMvc.perform(get("/api/v1/grades/by-student")

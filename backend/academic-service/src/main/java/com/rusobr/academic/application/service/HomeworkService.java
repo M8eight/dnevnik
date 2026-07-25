@@ -12,6 +12,8 @@ import com.rusobr.common.exception.ConflictException;
 import com.rusobr.academic.web.exception.AcademicExceptionCode;
 import com.rusobr.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -29,17 +31,20 @@ public class HomeworkService {
     private final AcademicPeriodService academicPeriodService;
     private final LessonInstanceService lessonInstanceService;
 
+    @Cacheable(value = "homeworksByDate", key = "#studentId + '#' + #date")
     @Transactional(readOnly = true)
     public List<HomeworkWithSubjectResponse> getByDate(LocalDate date, Long studentId) {
         return homeworkRepository.findHomeworksByDate(date, studentId).stream().map(homeworkMapper::toWithSubjectResponse).toList();
     }
 
+    @Cacheable(value = "homeworksByAssignment", key = "#teachingAssignmentId")
     @Transactional(readOnly = true)
     public Page<HomeworkResponse> getByAssignment(Long teachingAssignmentId, Pageable pageable) {
         Page<Homework> homeworkPage = homeworkRepository.findHomeworksByTeachingAssignmentId(teachingAssignmentId, pageable);
         return homeworkPage.map(homeworkMapper::toHomeworkResponse);
     }
 
+    @CacheEvict(value = {"homeworksByDate", "homeworksByAssignment"}, allEntries = true)
     @Transactional
     public HomeworkResponse create(HomeworkRequest homeworkRequest) {
         LessonInstance lessonInstance = lessonInstanceService.getById(homeworkRequest.lessonInstanceId());
@@ -58,6 +63,7 @@ public class HomeworkService {
         return homeworkMapper.toHomeworkResponse(homeworkRepository.save(homework));
     }
 
+    @CacheEvict(value = {"homeworksByDate", "homeworksByAssignment"}, allEntries = true)
     @Transactional
     public void delete(Long id) {
         Homework homework = homeworkRepository.findWithLessonInstanceById(id)

@@ -11,7 +11,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -29,8 +28,8 @@ public class FinalGradeController {
 
     @PreAuthorize("@gradeSecurity.canViewAssignment(#teachingAssignmentId, authentication)")
     @GetMapping("/by-assignment")
-    public List<FinalGradeTeacherResponse> getByAssignmentId(@RequestParam Long teachingAssignmentId,
-                                                             @RequestParam Long academicYearId) {
+    public FinalGradeTeacherResponse getByAssignmentId(@RequestParam Long teachingAssignmentId,
+                                                       @RequestParam Long academicYearId) {
         return finalGradeService.getByAssignmentId(teachingAssignmentId, academicYearId);
     }
 

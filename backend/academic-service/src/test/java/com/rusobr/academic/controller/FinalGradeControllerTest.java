@@ -9,6 +9,7 @@ import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeCreateResponse;
 import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeRequest;
 import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeResponse;
 import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeTeacherResponse;
+import com.rusobr.academic.web.dto.grade.finalGrade.StudentFinalGradesResponse;
 import com.rusobr.common.exception.ConflictException;
 import com.rusobr.academic.web.exception.AcademicExceptionCode;
 import com.rusobr.common.exception.NotFoundException;
@@ -105,7 +106,7 @@ public class FinalGradeControllerTest {
         );
     }
 
-    private FinalGradeTeacherResponse buildTeacherResponse() {
+    private StudentFinalGradesResponse buildTeacherResponse() {
         UserFeignResponse user = new UserFeignResponse(
                 100L,
                 "Ivan",
@@ -113,7 +114,7 @@ public class FinalGradeControllerTest {
                 "ipetrov",
                 "keycloak-123"
         );
-        return new FinalGradeTeacherResponse(user, List.of(buildGradeResponse()));
+        return new StudentFinalGradesResponse(user, List.of(buildGradeResponse()));
     }
 
     @Test
@@ -136,16 +137,16 @@ public class FinalGradeControllerTest {
     @DisplayName("GET /final-grades/by-assignment — 200 and list response")
     void getByAssignmentId_ShouldReturn200() throws Exception {
         when(finalGradeService.getByAssignmentId(TEACHING_ASSIGNMENT_ID, 1L))
-                .thenReturn(List.of(buildTeacherResponse()));
+                .thenReturn(new FinalGradeTeacherResponse(List.of(buildTeacherResponse()), false));
 
         mockMvc.perform(get("/api/v1/final-grades/by-assignment")
                         .param("teachingAssignmentId", String.valueOf(TEACHING_ASSIGNMENT_ID))
                         .param("academicYearId", String.valueOf(1L)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].user.id").value(100L))
-                .andExpect(jsonPath("$[0].user.firstName").value("Ivan"))
-                .andExpect(jsonPath("$[0].finalGrades[0].id").value(FINAL_GRADE_ID))
-                .andExpect(jsonPath("$[0].finalGrades[0].subjectName").value("Mathematics"));
+                .andExpect(jsonPath("$.studentFinalGradesResponse[0].user.id").value(100L))
+                .andExpect(jsonPath("$.studentFinalGradesResponse[0].user.firstName").value("Ivan"))
+                .andExpect(jsonPath("$.studentFinalGradesResponse[0].finalGrades[0].id").value(FINAL_GRADE_ID))
+                .andExpect(jsonPath("$.studentFinalGradesResponse[0].finalGrades[0].subjectName").value("Mathematics"));
     }
 
     @Test

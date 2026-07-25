@@ -20,6 +20,8 @@ import com.rusobr.common.exception.ConflictException;
 import com.rusobr.academic.web.exception.AcademicExceptionCode;
 import com.rusobr.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -50,6 +52,7 @@ public class GradeService {
         return gradeMapper.toGradeResponseDto(grade);
     }
 
+    @Cacheable(value = "gradesByPeriod", key = "#studentId + '#' + #date")
     @Transactional(readOnly = true)
     public Double getAverageByPeriod(Long studentId, LocalDate date) {
         AcademicPeriod academicPeriod = academicPeriodRepository.findByDate(date)
@@ -63,6 +66,7 @@ public class GradeService {
                 .doubleValue();
     }
 
+    @Cacheable(value = "gradesByDate", key = "#studentId + '#' + #date")
     @Transactional(readOnly = true)
     public List<GradeWithSubjectNameResponse> findAllByDate(Long studentId, LocalDate date) {
         return gradeRepository.findAllByDateAndStudentId(studentId, date).stream().map(gradeMapper::toWithSubjectNameResponse).toList();
@@ -77,6 +81,7 @@ public class GradeService {
         return gradeMapper.toGradeDetailResponse(gradeProjection, teacher);
     }
 
+    @CacheEvict(value = {"gradesByDate", "gradesByPeriod", "journalByAssignment", "journalByStudentId", "schedulesByStudentId"}, allEntries = true)
     @Transactional
     public CreateGradeResponse create(CreateGradeRequest gradeDto) {
         LessonInstance lessonInstance = lessonInstanceRepository.findById(gradeDto.lessonInstanceId())
@@ -95,6 +100,7 @@ public class GradeService {
                 gradeRepository.save(grade), lessonInstanceMapper.toLessonInstanceDto(lessonInstance));
     }
 
+    @CacheEvict(value = {"gradesByDate", "gradesByPeriod", "journalByAssignment", "journalByStudentId"}, allEntries = true)
     @Transactional
     public void delete(Long id) {
         Grade grade = gradeRepository.findWithLessonInstanceById(id)

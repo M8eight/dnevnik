@@ -10,6 +10,11 @@ export interface PeriodGradeStudentResponse {
 }
 
 export interface PeriodGradeTeacherResponse {
+    studentPeriodGrades: StudentPeriodGradeWithAverage[];
+    isDegradedUsers: boolean;
+}
+
+export interface StudentPeriodGradeWithAverage {
     user: UserSimpleResponse;
     periodGrades: PeriodGradeResponse[];
     currentAverage: number | null;
@@ -44,8 +49,8 @@ export const getPeriodGradesByStudent = async (academicYearId: number): Promise<
     return data;
 };
 
-export const getPeriodGradesByAssignment = async (teachingAssignmentId: number, currentAcademicPeriodId: number, academicYearId: number): Promise<PeriodGradeTeacherResponse[]> => {
-    const { data } = await api.get<PeriodGradeTeacherResponse[]>(
+export const getPeriodGradesByAssignment = async (teachingAssignmentId: number, currentAcademicPeriodId: number, academicYearId: number): Promise<PeriodGradeTeacherResponse> => {
+    const { data } = await api.get<PeriodGradeTeacherResponse>(
         `/academic-service/api/v1/period-grades/by-assignment`, {
         params: {
             teachingAssignmentId,

@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { BookOpen, Users, BookCheck, Scale, CalendarDays, Lock, CalendarClock } from "lucide-react";
+import { BookOpen, Users, BookCheck, Scale, CalendarDays, Lock, CalendarClock, AlertTriangle } from "lucide-react";
 import { useTeacherJournal } from "@/hooks/use-teacher-journal";
 import { useTeachingAssignmentDetail } from "@/hooks/use-teaching-assignment";
 import { useGetAcademicPeriodsByAcademicYear } from "@/hooks/use-academic-period";
@@ -257,6 +257,15 @@ export default function TeacherJournal() {
               periodName={currentSelectedPeriod?.name}
               yearName={currentAcademicYear?.name}
             />
+          )}
+
+          {data?.isDegradedStudents && (
+            <div className="flex items-center gap-3 rounded-2xl px-5 py-3.5 mb-6 bg-(--red-light)/60 ring-1 ring-(--red)/10">
+              <AlertTriangle className="w-5 h-5 text-(--red) shrink-0" />
+              <p className="text-[13px] font-bold text-(--navy)">
+                Список учеников может быть неполным: сервис данных временно работает в ограниченном режиме.
+              </p>
+            </div>
           )}
 
 

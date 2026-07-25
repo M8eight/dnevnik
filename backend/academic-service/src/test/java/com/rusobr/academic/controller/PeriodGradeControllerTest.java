@@ -8,6 +8,7 @@ import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeRequest;
 import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeResponse;
 import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeStudentResponse;
 import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeTeacherResponse;
+import com.rusobr.academic.web.dto.grade.periodGrade.StudentPeriodGradeWithAverage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -78,8 +79,8 @@ public class PeriodGradeControllerTest {
         return new UserFeignResponse(STUDENT_ID, "Ivan", "Petrov", "ipetrov", "keycloak-1");
     }
 
-    private PeriodGradeTeacherResponse buildTeacherResponse() {
-        return new PeriodGradeTeacherResponse(
+    private StudentPeriodGradeWithAverage buildTeacherResponse() {
+        return new StudentPeriodGradeWithAverage(
                 buildUserFeignResponse(),
                 List.of(buildPeriodGradeResponse()),
                 4.75
@@ -103,16 +104,16 @@ public class PeriodGradeControllerTest {
     @DisplayName("GET /period-grades/by-assignment — 200 and teacher period grades list")
     void getGradesByAssignment_ShouldReturn200() throws Exception {
         when(periodGradeService.getByAssignmentWithAverage(TEACHING_ASSIGNMENT_ID, ACADEMIC_PERIOD_ID, 1L))
-                .thenReturn(List.of(buildTeacherResponse()));
+                .thenReturn(new PeriodGradeTeacherResponse(List.of(buildTeacherResponse()), false));
 
         mockMvc.perform(get("/api/v1/period-grades/by-assignment")
                         .param("teachingAssignmentId", String.valueOf(TEACHING_ASSIGNMENT_ID))
                         .param("currentAcademicPeriodId", String.valueOf(ACADEMIC_PERIOD_ID))
                         .param("academicYearId", String.valueOf(1L)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].user.id").value(STUDENT_ID))
-                .andExpect(jsonPath("$[0].periodGrades[0].id").value(PERIOD_GRADE_ID))
-                .andExpect(jsonPath("$[0].currentAverage").value(4.75));
+                .andExpect(jsonPath("$.studentPeriodGrades[0].user.id").value(STUDENT_ID))
+                .andExpect(jsonPath("$.studentPeriodGrades[0].periodGrades[0].id").value(PERIOD_GRADE_ID))
+                .andExpect(jsonPath("$.studentPeriodGrades[0].currentAverage").value(4.75));
     }
 
     @Test

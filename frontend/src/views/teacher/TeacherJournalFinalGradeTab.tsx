@@ -28,33 +28,40 @@ export default function FinalGradesView({
   students: Student[];
   currentAcademicPeriodId: number;
 }) {
-  const { data: finalGradesData = [], isLoading: isFinalLoading } =
+  const { data: finalGradesResponse, isLoading: isFinalLoading } =
     useFinalGradesByAssignment(teachingAssignmentId, academicYearId);
 
-  const { data: periodEntries = [], isLoading: isPeriodLoading } =
-    usePeriodGradesByAssignment(teachingAssignmentId, currentAcademicPeriodId, academicYearId);
-
+  const { data: response, isLoading: isEntriesLoading } = usePeriodGradesByAssignment(
+    teachingAssignmentId,
+    currentAcademicPeriodId,
+    academicYearId
+  );
+  const entries = useMemo(() => response?.studentPeriodGrades ?? [], [response?.studentPeriodGrades]);
+    
   const { data: academicPeriods = [] } = useGetAcademicPeriods();
 
-  const isLoading = isFinalLoading || isPeriodLoading;
+  const isLoading = isFinalLoading || isEntriesLoading;
   const totalCols = 1 + academicPeriods.length + 1 + 1;
 
   const finalGradeByStudentId = useMemo(() => {
     const map = new Map<number, FinalGradeResponse>();
-    if (finalGradesData && Array.isArray(finalGradesData)) {
-      finalGradesData.forEach((item) => {
+    const studentFinalGradesResponse = finalGradesResponse?.studentFinalGradesResponse ?? [];
+
+    if (studentFinalGradesResponse && Array.isArray(studentFinalGradesResponse)) {
+      studentFinalGradesResponse.forEach((item) => {
         if (item.finalGrades && item.finalGrades.length > 0) {
           map.set(item.user.id, item.finalGrades[0]);
         }
       });
     }
+
     return map;
-  }, [finalGradesData]);
+  }, [finalGradesResponse]);
 
   const periodGradeMap = useMemo(() => {
     const map = new Map<number, Map<number, PeriodGradeResponse>>();
-    if (periodEntries && Array.isArray(periodEntries)) {
-      periodEntries.forEach((entry) => {
+    if (entries && Array.isArray(entries)) {
+      entries.forEach((entry) => {
         const byPeriod = new Map<number, PeriodGradeResponse>();
         if (entry.periodGrades && Array.isArray(entry.periodGrades)) {
           entry.periodGrades.forEach((pg) => {
@@ -67,7 +74,7 @@ export default function FinalGradesView({
       });
     }
     return map;
-  }, [periodEntries]);
+  }, [entries]);
 
   const getPeriodAverage = (studentId: number): number | null => {
     const byPeriod = periodGradeMap.get(studentId);

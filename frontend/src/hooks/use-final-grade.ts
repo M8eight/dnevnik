@@ -11,7 +11,7 @@ export const useFinalGradesByStudent = ( academicYearId: number ) => {
 };
 
 export const useFinalGradesByAssignment = ( teachingAssignmentId: number, academicYearId: number ) => {
-  return useQuery<FinalGradeTeacherResponse[]>({
+  return useQuery<FinalGradeTeacherResponse>({
     queryKey: ["finalGrades", teachingAssignmentId, academicYearId],
     queryFn: () => getFinalGradesByAssignment(teachingAssignmentId, academicYearId),
     enabled: !!teachingAssignmentId && !!academicYearId,

@@ -4,6 +4,7 @@ import com.rusobr.academic.application.service.PeriodGradeService;
 import com.rusobr.academic.web.dto.grade.periodGrade.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -24,10 +25,11 @@ public class PeriodGradeController {
         return periodGradeService.getByStudentId(userId, academicYearId);
     }
 
+    @PreAuthorize("@gradeSecurity.canViewAssignment(#teachingAssignmentId, authentication)")
     @GetMapping("/by-assignment")
-    public List<PeriodGradeTeacherResponse> getGradesByAssignment(@RequestParam Long teachingAssignmentId,
-                                                                  @RequestParam Long currentAcademicPeriodId,
-                                                                  @RequestParam Long academicYearId) {
+    public PeriodGradeTeacherResponse getGradesByAssignment(@RequestParam Long teachingAssignmentId,
+                                                                     @RequestParam Long currentAcademicPeriodId,
+                                                                     @RequestParam Long academicYearId) {
         return periodGradeService.getByAssignmentWithAverage(teachingAssignmentId, currentAcademicPeriodId, academicYearId);
     }
 

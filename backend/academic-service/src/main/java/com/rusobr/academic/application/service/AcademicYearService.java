@@ -9,6 +9,8 @@ import com.rusobr.academic.infrastructure.persistence.repository.AcademicYearRep
 import com.rusobr.academic.web.dto.academicYear.AcademicYearRequest;
 import com.rusobr.academic.web.dto.academicYear.AcademicYearResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +24,7 @@ public class AcademicYearService {
     private final AcademicYearRepository academicYearRepository;
     private final AcademicYearMapper academicYearMapper;
 
+    @Cacheable(value = "academicYears")
     @Transactional(readOnly = true)
     public List<AcademicYearResponse> getAll() {
         return academicYearRepository.findAllByOrderByStartDateDesc().stream()
@@ -34,6 +37,7 @@ public class AcademicYearService {
         return academicYearMapper.toResponse(findOrThrow(id));
     }
 
+    @CacheEvict(value = "academicYears", allEntries = true)
     @Transactional
     public AcademicYearResponse create(AcademicYearRequest request) {
         validateDates(request.startDate(), request.endDate());
@@ -41,6 +45,7 @@ public class AcademicYearService {
         return academicYearMapper.toResponse(academicYearRepository.save(academicYear));
     }
 
+    @CacheEvict(value = "academicYears", allEntries = true)
     @Transactional
     public void open(Long id) {
         AcademicYear academicYear = findOrThrow(id);
@@ -50,6 +55,7 @@ public class AcademicYearService {
         academicYear.open();
     }
 
+    @CacheEvict(value = "academicYears", allEntries = true)
     @Transactional
     public void close(Long id) {
         AcademicYear academicYear = findOrThrow(id);
@@ -59,6 +65,7 @@ public class AcademicYearService {
         academicYear.close();
     }
 
+    @CacheEvict(value = "academicYears", allEntries = true)
     @Transactional
     public AcademicYearResponse update(Long id, AcademicYearRequest request) {
         AcademicYear academicYear = findOrThrow(id);
@@ -80,6 +87,7 @@ public class AcademicYearService {
         return academicYearMapper.toResponse(academicYear);
     }
 
+    @CacheEvict(value = "academicYears", allEntries = true)
     @Transactional
     public void delete(Long id) {
         AcademicYear academicYear = findOrThrow(id);
