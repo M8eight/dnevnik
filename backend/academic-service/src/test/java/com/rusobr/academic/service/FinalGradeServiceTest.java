@@ -19,6 +19,7 @@ import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeCreateResponse;
 import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeRequest;
 import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeResponse;
 import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeTeacherResponse;
+import com.rusobr.academic.web.dto.grade.finalGrade.StudentFinalGradesResponse;
 import com.rusobr.common.exception.ConflictException;
 import com.rusobr.common.exception.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -116,11 +117,12 @@ class FinalGradeServiceTest {
             when(teachingAssignmentService.getStudentIdsByTeachingAssignmentId(ASSIGNMENT_ID)).thenReturn(List.of(STUDENT_ID));
             when(userClient.getBatchStudents(List.of(STUDENT_ID))).thenReturn(new BatchUserResponse(List.of(student), List.of(), false));
 
-            List<FinalGradeTeacherResponse> result = service.getByAssignmentId(ASSIGNMENT_ID, ACADEMIC_YEAR_ID);
+            FinalGradeTeacherResponse result = service.getByAssignmentId(ASSIGNMENT_ID, ACADEMIC_YEAR_ID);
 
-            assertThat(result).isNotNull().hasSize(1);
-            assertThat(result.get(0).user()).isEqualTo(student);
-            assertThat(result.get(0).finalGrades()).containsExactly(response);
+            assertThat(result).isNotNull();
+            assertThat(result.studentFinalGradesResponse()).hasSize(1);
+            assertThat(result.studentFinalGradesResponse().get(0).user()).isEqualTo(student);
+            assertThat(result.studentFinalGradesResponse().get(0).finalGrades()).containsExactly(response);
         }
     }
 

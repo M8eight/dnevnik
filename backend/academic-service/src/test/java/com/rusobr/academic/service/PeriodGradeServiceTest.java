@@ -21,6 +21,7 @@ import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeRequest;
 import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeResponse;
 import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeStudentResponse;
 import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeTeacherResponse;
+import com.rusobr.academic.web.dto.grade.periodGrade.StudentPeriodGradeWithAverage;
 import com.rusobr.common.exception.ConflictException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -141,11 +142,11 @@ class PeriodGradeServiceTest {
             when(gradeMapper.toStudentAverageDto(avgProjection)).thenReturn(avgDto);
 
             // When
-            List<PeriodGradeTeacherResponse> result = service.getByAssignmentWithAverage(ASSIGNMENT_ID, PERIOD_ID, ACADEMIC_YEAR_ID);
+            PeriodGradeTeacherResponse result = service.getByAssignmentWithAverage(ASSIGNMENT_ID, PERIOD_ID, ACADEMIC_YEAR_ID);
 
             // Then
-            assertThat(result).hasSize(1);
-            PeriodGradeTeacherResponse teacherResponse = result.get(0);
+            assertThat(result.studentPeriodGrades()).hasSize(1);
+            StudentPeriodGradeWithAverage teacherResponse = result.studentPeriodGrades().get(0);
             assertThat(teacherResponse.user()).isEqualTo(user);
             assertThat(teacherResponse.periodGrades()).containsExactly(pgResponse);
             assertThat(teacherResponse.currentAverage()).isEqualTo(4.75);
