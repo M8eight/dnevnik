@@ -49,6 +49,7 @@ export interface TeacherJournalResponse {
     students: BatchUserResponse;
     lessonInstances: LessonInstanceDto[];
     studentsJournal: StudentJournalEntry[];
+    isDegradedStudents: boolean;
 }
 
 export const getTeacherJournal = async (

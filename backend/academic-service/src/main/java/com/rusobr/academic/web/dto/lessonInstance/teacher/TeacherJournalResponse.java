@@ -10,5 +10,6 @@ public record TeacherJournalResponse(
         AcademicPeriodResponse academicPeriod,
         BatchUserResponse students,
         List<LessonInstanceDto> lessonInstances,
-        List<StudentJournalDto> studentsJournal
+        List<StudentJournalDto> studentsJournal,
+        boolean isDegradedStudents
 ) {}

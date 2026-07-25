@@ -10,9 +10,14 @@ export interface FinalGradeResponse {
     subjectName: string;
 }
 
-export interface FinalGradeTeacherResponse {
+export interface StudentFinalGradesResponse {
     user: UserSimpleResponse;
     finalGrades: FinalGradeResponse[];
+}
+
+export interface FinalGradeTeacherResponse {
+    studentFinalGradesResponse: StudentFinalGradesResponse[];
+    isDegradedUsers: boolean;
 }
 
 export interface FinalGradeCreateResponse {
@@ -44,8 +49,8 @@ export const getFinalGradesByStudent = async (academicYearId: number): Promise<F
     return data;
 };
 
-export const getFinalGradesByAssignment = async (teachingAssignmentId: number, academicYearId: number): Promise<FinalGradeTeacherResponse[]> => {
-    const { data } = await api.get<FinalGradeTeacherResponse[]>(
+export const getFinalGradesByAssignment = async (teachingAssignmentId: number, academicYearId: number): Promise<FinalGradeTeacherResponse> => {
+    const { data } = await api.get<FinalGradeTeacherResponse>(
         `/academic-service/api/v1/final-grades/by-assignment`, {
             params: {
                 teachingAssignmentId,

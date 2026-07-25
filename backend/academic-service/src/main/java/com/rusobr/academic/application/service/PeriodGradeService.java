@@ -72,14 +72,15 @@ public class PeriodGradeService {
     public List<PeriodGradeTeacherResponse> getByAssignmentWithAverage(Long teachingAssignmentId, Long currentAcademicPeriodId, Long academicYearId) {
         PeriodGradeDbData data = self.getByAssignmentWithAverageTransactional(teachingAssignmentId, currentAcademicPeriodId, academicYearId);
 
-        List<UserFeignResponse> students = userClient.getBatchStudents(data.studentIds()).found();
+        BatchUserResponse students = userClient.getBatchStudents(data.studentIds());
 
-        return students.stream()
-                .map(user -> new PeriodGradeTeacherResponse(
+        List<StudentPeriodGradeWithAverage> studentPeriodGrades = students.found().stream()
+                .map(user -> new StudentPeriodGradeWithAverage(
                         user,
                         data.periodGradesMap().get(user.id()),
                         data.averageGradesMap().get(user.id())
                 )).toList();
+        return new PeriodGradeTeacherResponse(studentPeriodGrades, students.degraded());
     }
 
     @Transactional(readOnly = true)

@@ -26,11 +26,12 @@ export default function PeriodGradesView({
   academicPeriodId,
   academicYearId,
 }: PeriodGradesViewProps) {
-  const { data: entries = [], isLoading: isEntriesLoading } = usePeriodGradesByAssignment(
+  const { data: response, isLoading: isEntriesLoading } = usePeriodGradesByAssignment(
     teachingAssignmentId,
     academicPeriodId,
     academicYearId
   );
+  const entries = useMemo(() => response?.studentPeriodGrades ?? [], [response?.studentPeriodGrades]);
 
   const { data: academicPeriods = [], isLoading: isPeriodsLoading } = useGetAcademicPeriods();
 

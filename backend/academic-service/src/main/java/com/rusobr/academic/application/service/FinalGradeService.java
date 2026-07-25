@@ -62,6 +62,8 @@ public class FinalGradeService {
 
     public List<FinalGradeTeacherResponse> getByAssignmentId(Long teachingAssignmentId, Long academicYearId) {
         DbData data = self.getByAssignmentTransactional(teachingAssignmentId, academicYearId);
+    public FinalGradeTeacherResponse getByAssignmentId(Long teachingAssignmentId, Long academicYearId) {
+        DbData data = self.getByAssignmentIdTransactional(teachingAssignmentId, academicYearId);
         List<FinalGradeResponse> mappedFinalGrades = data.finalGrades().stream().map(finalGradeMapper::toFinalGradeResponse).toList();
         Map<Long, List<FinalGradeResponse>> finalGradesMap = mappedFinalGrades.stream().collect(Collectors.groupingBy(
                 FinalGradeResponse::studentId,
@@ -71,12 +73,14 @@ public class FinalGradeService {
 
         BatchUserResponse students = userClient.getBatchStudents(data.studentIds());
 
-        return students.found().stream().map(user ->
-                new FinalGradeTeacherResponse(user, finalGradesMap.get(user.id()))).toList();
+        List<StudentFinalGradesResponse> result = students.found().stream().map(user ->
+                new StudentFinalGradesResponse(user, finalGradesMap.getOrDefault(user.id(), List.of()))).toList();
+
+        return new FinalGradeTeacherResponse(result, students.degraded());
     }
 
     @Transactional
-    DbData getByAssignmentTransactional(Long teachingAssignmentId, Long academicYearId) {
+    DbData getByAssignmentIdTransactional(Long teachingAssignmentId, Long academicYearId) {
         List<FinalGrade> finalGrades = finalGradeRepository.findFinalGradesByTeachingAssignmentId(teachingAssignmentId, academicYearId);
         List<Long> studentIds = teachingAssignmentService.getStudentIdsByTeachingAssignmentId(teachingAssignmentId);
         return new DbData(finalGrades, studentIds);

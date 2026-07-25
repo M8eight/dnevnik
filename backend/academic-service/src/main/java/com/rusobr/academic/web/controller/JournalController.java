@@ -25,7 +25,7 @@ public class JournalController {
     public GradesLessonsResponse getGradesByStudentId(@AuthenticationPrincipal Jwt jwt,
                                                       @RequestParam("academicPeriodId") Long academicPeriodId) {
         Long userId = jwt.getClaim("user_id");
-        return lessonInstanceService.getGradesLessonsByStudentId(userId, academicPeriodId);
+        return lessonInstanceService.getGradesByStudentId(userId, academicPeriodId);
     }
 
     @GetMapping("/journal/by-assignment")

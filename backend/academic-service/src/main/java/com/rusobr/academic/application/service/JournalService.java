@@ -48,7 +48,7 @@ public class JournalService {
     ) {}
 
     @Transactional(readOnly = true)
-    public GradesLessonsResponse getGradesLessonsByStudentId(Long studentId, Long academicPeriodId) {
+    public GradesLessonsResponse getGradesByStudentId(Long studentId, Long academicPeriodId) {
         //Получаем Academic period
         AcademicPeriod academicPeriod = academicPeriodService.getById(academicPeriodId);
 
@@ -97,7 +97,8 @@ public class JournalService {
                 academicPeriodMapper.toResponse(data.academicPeriod()),
                 students,
                 data.lessonInstances(),
-                studentJournal
+                studentJournal,
+                students.degraded()
         );
     }
 
