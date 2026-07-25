@@ -5,6 +5,7 @@ import com.rusobr.academic.web.dto.lessonInstance.GradesLessonsResponse;
 import com.rusobr.academic.web.dto.lessonInstance.LessonInstanceDto;
 import com.rusobr.academic.web.dto.lessonInstance.teacher.TeacherJournalResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,6 +29,7 @@ public class JournalController {
         return lessonInstanceService.getGradesByStudentId(userId, academicPeriodId);
     }
 
+    @PreAuthorize("@gradeSecurity.canViewAssignment(#teachingAssignmentId, authentication)")
     @GetMapping("/journal/by-assignment")
     public TeacherJournalResponse getByAssignment(
             @RequestParam("teachingAssignmentId") Long teachingAssignmentId,
@@ -35,6 +37,7 @@ public class JournalController {
         return lessonInstanceService.getJournalByAssignment(teachingAssignmentId, academicPeriodId);
     }
 
+    @PreAuthorize("@gradeSecurity.canViewAssignment(#teachingAssignmentId, authentication)")
     @GetMapping("/lesson-instances/by-assignment")
     public List<LessonInstanceDto> getInstanceByAssignment(@RequestParam("teachingAssignmentId") Long teachingAssignmentId,
                                                            @RequestParam("academicPeriodId") Long academicPeriodId) {
