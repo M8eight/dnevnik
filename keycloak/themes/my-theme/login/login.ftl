@@ -24,6 +24,9 @@
                 <div class="myapp-alert__body">
                     <div class="myapp-alert__title">${msg("loginErrorTitle")}</div>
                     <div class="myapp-alert__desc">${kcSanitize(messagesPerField.getFirstError('username','password'))?no_esc}</div>
+                    <br/>
+                    <div class="myapp-alert__desc">Внимание! Если вы забыли пароль, обратитесь к администратору</div>
+
                 </div>
             </div>
         </#if>
@@ -57,9 +60,6 @@
             <div class="myapp-field">
                 <div class="myapp-label-row">
                     <label for="password" class="myapp-label">${msg("password")}</label>
-                    <#if realm.resetPasswordAllowed>
-                        <a tabindex="5" href="${url.loginResetCredentialsUrl}" class="myapp-link-small">${msg("doForgotPassword")}</a>
-                    </#if>
                 </div>
                 <div class="myapp-input-wrap">
                     <svg class="myapp-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

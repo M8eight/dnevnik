@@ -86,7 +86,7 @@ public class KeycloakRestClient {
                 dto.lastName(),
                 true,
                 true,
-                List.of(new KeycloakCredential("password", dto.password(), false)),
+                List.of(new KeycloakCredential("password", dto.password(), true)),
                 userAttributes
         );
 
