@@ -174,7 +174,6 @@ body::after {
   text-align: center;
 }
 
-/* ===== карточка ===== */
 .myapp-card {
   background: rgba(255,255,255,0.55);
   backdrop-filter: blur(12px);
@@ -184,7 +183,6 @@ body::after {
   box-shadow: 0 10px 30px rgba(0,0,0,0.08);
 }
 
-/* ===== алерт ошибки ===== */
 .myapp-alert {
   display: flex;
   gap: 12px;
@@ -217,7 +215,6 @@ body::after {
   line-height: 1.4;
 }
 
-/* ===== форма ===== */
 form { display: flex; flex-direction: column; gap: 16px; }
 
 .myapp-field { display: flex; flex-direction: column; gap: 6px; }
@@ -335,3 +332,35 @@ form { display: flex; flex-direction: column; gap: 16px; }
   text-decoration: none;
 }
 .myapp-footnote a:hover { opacity: 0.8; }
+
+.myapp-actions-row {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 4px;
+}
+
+.myapp-field-error {
+  font-size: 11px;
+  font-weight: 600;
+  color: #b91c1c;
+  padding: 0 4px;
+}
+
+.myapp-button-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+.myapp-button-row .myapp-submit {
+  margin-top: 0;
+  flex: 1;
+}
+
+.myapp-submit--secondary {
+  background: rgba(0,0,0,0.06);
+  color: var(--navy);
+  box-shadow: none;
+}
+.myapp-submit--secondary:hover {
+  background: rgba(0,0,0,0.1);
+}
