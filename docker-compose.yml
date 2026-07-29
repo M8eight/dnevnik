@@ -40,7 +40,7 @@ services:
       KC_DB_PASSWORD: school_pass
     volumes:
       - keycloak_data:/opt/keycloak/data
-      - ./configs/dnevnik-realm-realm.json:/opt/keycloak/data/import/realm.json:ro
+      - ./keycloak/dnevnik-realm.json:/opt/keycloak/data/import/realm.json:ro
       - ./keycloak/themes/my-theme:/opt/keycloak/themes/my-theme
     networks:
       - micro-net
@@ -91,7 +91,9 @@ services:
   eureka-server:
     build:
       context: ./backend
-      dockerfile: ./eureka-server/Dockerfile
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: eureka-server
     container_name: eureka-server
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
@@ -106,7 +108,9 @@ services:
   api-gateway:
     build:
       context: ./backend
-      dockerfile: ./api-gateway/Dockerfile
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: api-gateway
     container_name: api-gateway
     ports:
       - "8080:8080"
@@ -122,7 +126,7 @@ services:
       - KC_URL=http://keycloak:8080
       - KC_PUBLIC_URL=http://localhost:9090
       - KC_REALM=dnevnik-realm
-      - EUREKA_URL=http://eureka-server:8761
+      - EUREKA_URL=http://user:password@eureka-server:8761
       - FRONTEND_URL=http://localhost:5173
       - APP_NAME=api-gateway
     volumes:
@@ -133,7 +137,9 @@ services:
   user-service:
     build:
       context: ./backend
-      dockerfile: ./user-service/Dockerfile
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: user-service
     container_name: user-service
     depends_on:
       eureka-server:
@@ -152,7 +158,7 @@ services:
       - PSQL_USER_USERNAME=school_user
       - PSQL_USER_PASSWORD=school_pass
       - LOKI_URL=http://loki:3100
-      - EUREKA_URL=http://eureka-server:8761
+      - EUREKA_URL=http://user:password@eureka-server:8761
       - APP_NAME=user-service
     volumes:
       - ./logs/user-service:/app/logs
@@ -162,7 +168,9 @@ services:
   academic-service:
     build:
       context: ./backend
-      dockerfile: ./academic-service/Dockerfile
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: academic-service
     container_name: academic-service
     depends_on:
       eureka-server:
@@ -181,7 +189,7 @@ services:
       - PSQL_ACADEMIC_USERNAME=school_user
       - PSQL_ACADEMIC_PASSWORD=school_pass
       - LOKI_URL=http://loki:3100
-      - EUREKA_URL=http://eureka-server:8761
+      - EUREKA_URL=http://user:password@eureka-server:8761
       - APP_NAME=academic-service
     volumes:
       - ./logs/academic-service:/app/logs
