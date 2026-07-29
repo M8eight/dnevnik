@@ -33,7 +33,7 @@
 
         <form id="kc-form-login" onsubmit="myappSubmit(this); return true;" action="${url.loginAction}" method="post">
 
-            <#-- Логин / email -->
+            <#-- Логин -->
             <#if !usernameHidden??>
                 <div class="myapp-field">
                     <label for="username" class="myapp-label">
@@ -43,10 +43,8 @@
                         </#if>
                     </label>
                     <div class="myapp-input-wrap">
-                        <svg class="myapp-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="2" y="4" width="20" height="16" rx="2"/>
-                            <path d="m22 6-10 7L2 6"/>
-                        </svg>
+                        <svg class="myapp-input-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-icon lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+
                         <input tabindex="1" id="username" name="username" type="text"
                                class="myapp-input"
                                value="${(login.username!'')}"
