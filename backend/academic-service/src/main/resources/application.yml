@@ -46,11 +46,11 @@ eureka:
     prefer-ip-address: false
   client:
     service-url:
-      defaultZone: ${EUREKA_URL:http://localhost:8761}/eureka/
+      defaultZone: ${EUREKA_URL:http://user:password@localhost:8761/eureka/}
 
 logging:
   loki:
-    url: ${LOKI_URL:http://localhost:3100}/loki/api/v1/push
+    url: ${LOKI_URL:http://localhost:3100}/loki/api/v1/push}
   level:
     root: INFO
     com.netflix.discovery: WARN
