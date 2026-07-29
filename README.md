@@ -25,10 +25,11 @@
 Backend:
 
 - Spring Boot, Spring Cloud Gateway, Eureka Discovery, OpenFeign
-- Spring Data JPA, PostgreSQL
-- Flyway
+- Resilience4J (circuitbreaker, retry, semaphore bulkhead)
+- Spring Data JPA, PostgreSQL, Flyway
+- Caffeine Cache
 - Spring Security OAuth2 Resource Server, Keycloak
-- MapStruct
+- MapStruct, Lombok
 - Logback, Loki, Grafana Alloy, Grafana
 - JUnit, Mockito, MockMvc
 
@@ -114,8 +115,9 @@ flowchart LR
 │   │   ├── store/                  # Redux Toolkit
 │   │   └── views/                  # route pages
 │   └── package.json
-├── configs/                        # Keycloak realm, Loki, Alloy, Grafana конфиги
+├── configs/                        # Loki, Alloy, Grafana конфиги
 ├── docs/                           # readme files
+├── keycloak/                       # Keycloak realm настройки и темы
 ├── init-db/                        # PostgreSQL init db`s
 └── docker-compose.yml
 ```
@@ -221,7 +223,7 @@ Swagger UI:
 ## Запуск через Docker Compose
 
 ```bash
-docker compose up --build
+docker compose up
 ```
 
 После запуска:
@@ -232,6 +234,11 @@ docker compose up --build
 - Eureka: `http://localhost:8761`
 - Keycloak: `http://localhost:9090`
 - Grafana: `http://localhost:3000`
+
+Eureka admin:
+
+- login: `user`
+- password: `password`
 
 Keycloak admin:
 
@@ -297,3 +304,8 @@ npm run dev
 ![admin users details](./docs/admin/5.png)
 ![admin schedule](./docs/admin/6.png)
 ![admin classes](./docs/admin/7.png)
+
+### Авторизация
+
+![auth login](./docs/auth/1.png)
+![auth update password](./docs/auth/2.png)
