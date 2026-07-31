@@ -1,0 +1,26 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: 'api-gateway'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['api-gateway:8080']
+
+  - job_name: 'user-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['user-service:9001']
+
+  - job_name: 'academic-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['academic-service:9002']
+
+  - job_name: 'eureka-server'
+    metrics_path: '/actuator/prometheus'
+    basic_auth:
+      username: 'user'
+      password: 'password'
+    static_configs:
+      - targets: ['eureka-server:8761']

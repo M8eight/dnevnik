@@ -16,3 +16,19 @@ eureka:
   client:
     register-with-eureka: false
     fetch-registry: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, metrics, prometheus
+  endpoint:
+    health:
+      show-details: never
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        http.client.requests: true
+  tag:
+    application: ${spring.application.name}

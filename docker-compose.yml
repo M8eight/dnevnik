@@ -68,6 +68,8 @@ services:
     volumes:
       - grafana-data:/var/lib/grafana
       - ./configs/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
+      - ./configs/grafana-dashboards.yaml:/etc/grafana/provisioning/dashboards/dashboards.yaml
+      - ./configs/dashboards:/etc/grafana/provisioning/dashboards/json
     depends_on:
       - loki
     networks:
@@ -81,12 +83,27 @@ services:
       - "4318:4318"  # OTLP HTTP
     volumes:
       - ./configs/alloy-config.alloy:/etc/alloy/config.alloy
-      - ./logs:/logs
+      - ./logs:/app/logs
+      - alloy-data:/var/lib/alloy/data
     command: run --server.http.listen-addr=0.0.0.0:12345 --storage.path=/var/lib/alloy/data /etc/alloy/config.alloy
     networks:
       - micro-net
     depends_on:
       - loki
+  
+  prometheus:
+    image: prom/prometheus:v2.53.0
+    container_name: prometheus
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./configs/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=15d'
+    networks:
+      - micro-net
 
   eureka-server:
     build:
@@ -96,7 +113,7 @@ services:
         SERVICE_NAME: eureka-server
     container_name: eureka-server
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://user:password@localhost:8761/actuator/health"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -126,9 +143,10 @@ services:
       - KC_URL=http://keycloak:8080
       - KC_PUBLIC_URL=http://localhost:9090
       - KC_REALM=dnevnik-realm
-      - EUREKA_URL=http://user:password@eureka-server:8761
+      - EUREKA_URL=http://user:password@eureka-server:8761/eureka/
       - FRONTEND_URL=http://localhost:5173
       - APP_NAME=api-gateway
+      - LOGS_PATH=/app/logs
     volumes:
       - ./logs/api-gateway:/app/logs
     networks:
@@ -158,8 +176,9 @@ services:
       - PSQL_USER_USERNAME=school_user
       - PSQL_USER_PASSWORD=school_pass
       - LOKI_URL=http://loki:3100
-      - EUREKA_URL=http://user:password@eureka-server:8761
+      - EUREKA_URL=http://user:password@eureka-server:8761/eureka/
       - APP_NAME=user-service
+      - LOGS_PATH=/app/logs
     volumes:
       - ./logs/user-service:/app/logs
     networks:
@@ -189,8 +208,9 @@ services:
       - PSQL_ACADEMIC_USERNAME=school_user
       - PSQL_ACADEMIC_PASSWORD=school_pass
       - LOKI_URL=http://loki:3100
-      - EUREKA_URL=http://user:password@eureka-server:8761
+      - EUREKA_URL=http://user:password@eureka-server:8761/eureka/
       - APP_NAME=academic-service
+      - LOGS_PATH=/app/logs
     volumes:
       - ./logs/academic-service:/app/logs
     networks:
@@ -212,6 +232,8 @@ volumes:
   keycloak_data:
   loki-data:
   grafana-data:
+  alloy-data:
+  prometheus-data:
 
 networks:
   micro-net:

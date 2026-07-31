@@ -1,33 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-    <!-- считываем spring.application.name -->
-    <springProperty name="SERVICE_NAME" source="spring.application.name" />
-
-    <!-- если переменная не задана - используется logs -->
-    <property name="LOG_PATH" value="${LOG_PATH:-logs}" />
+    <springProperty scope="context" name="appName" source="spring.application.name" defaultValue="api-gateway"/>
+    <springProperty scope="context" name="logPath" source="logging.file.path" defaultValue="/app/logs"/>
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} [traceId=%X{traceId} spanId=%X{spanId}] - %msg%n</pattern>
         </encoder>
     </appender>
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_PATH}/${SERVICE_NAME}.log</file>
-
+        <file>${logPath}/${appName}.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_PATH}/${SERVICE_NAME}.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>${logPath}/${appName}-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>100MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
             <maxHistory>7</maxHistory>
+            <totalSizeCap>2GB</totalSizeCap>
         </rollingPolicy>
-
-        <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %logger{36} traceId=%X{traceId} - %msg%n</pattern>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>{"app":"${appName}"}</customFields>
+            <includeContext>false</includeContext>
+            <includeMdcKeyName>traceId</includeMdcKeyName>
+            <includeMdcKeyName>spanId</includeMdcKeyName>
         </encoder>
+    </appender>
+
+    <appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="FILE"/>
+        <queueSize>1000</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <includeCallerData>false</includeCallerData>
     </appender>
 
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE"/>
+        <appender-ref ref="ASYNC_FILE"/>
     </root>
+
+    <logger name="org.springframework" level="INFO"/>
+    <logger name="com.netflix.discovery" level="WARN"/>
+    <logger name="com.netflix.eureka" level="WARN"/>
+    <logger name="reactor.netty.http.client" level="INFO"/>
+
+<!--    <springProfile name="debug-gateway">-->
+<!--        <logger name="org.springframework.cloud.gateway" level="DEBUG"/>-->
+<!--    </springProfile>-->
 
 </configuration>

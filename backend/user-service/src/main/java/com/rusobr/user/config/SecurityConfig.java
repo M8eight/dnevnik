@@ -29,7 +29,7 @@ public class SecurityConfig {
                 .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(req -> {
                     req
-                            .requestMatchers("/public/**", "/actuator/health").permitAll()
+                            .requestMatchers("/public/**", "/actuator/**").permitAll()
                             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                             .requestMatchers(POST, "/api/v1/students/batch").hasAnyRole(TEACHER.name(), ADMIN.name())
