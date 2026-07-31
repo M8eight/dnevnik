@@ -2,6 +2,8 @@ server:
   port: 8080
 
 spring:
+  reactor:
+    context-propagation: auto
   application:
     name: api-gateway
 
@@ -52,6 +54,25 @@ eureka:
       defaultZone: ${EUREKA_URL:http://user:password@localhost:8761/eureka/}
 
 logging:
-  level:
-    io.netty.resolver.dns: DEBUG
-    reactor.netty.http.client: DEBUG
+  file:
+    path: ${LOGS_PATH:./logs}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, metrics, prometheus
+  endpoint:
+    health:
+      show-details: never
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        http.client.requests: true
+  tag:
+    application: ${spring.application.name}
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0

@@ -1,35 +1,54 @@
-local.file_match "spring_logs" {
-  path_targets = [{
-    __path__ = "/logs/*.log",
-  }]
+livedebugging {
+  enabled = true
 }
 
-loki.source.file "spring_apps" {
-  targets    = local.file_match.spring_logs.targets
-  forward_to = [loki.process.spring_parser.receiver]
+local.file_match "log_files" {
+  path_targets = [
+    {"__path__" = "/app/logs/*/*.log"},
+  ]
 }
 
-loki.process "spring_parser" {
-  forward_to = [loki.write.local_loki.receiver]
+loki.source.file "app_logs" {
+  targets    = local.file_match.log_files.targets
+  forward_to = [loki.process.parse.receiver]
+}
 
-  stage.json {
+loki.process "parse" {
+stage.json {
     expressions = {
-      level   = "level",
-      logger  = "logger",
-      message = "message",
-      trace   = "trace_id",
+      level     = "level",
+      app       = "app",
+      traceId   = "traceId",
+      spanId    = "spanId",
+      userId    = "userId",
+      timestamp = "\"@timestamp\"",
     }
-  }
+}
 
   stage.labels {
     values = {
-      level  = "",
-      logger = "",
+      level = "",
+      app   = "",
     }
   }
+
+  stage.structured_metadata {
+    values = {
+      traceId = "",
+      spanId  = "",
+      userId  = "",
+    }
+  }
+
+  stage.timestamp {
+    source = "timestamp"
+    format = "RFC3339"
+  }
+
+  forward_to = [loki.write.default.receiver]
 }
 
-loki.write "local_loki" {
+loki.write "default" {
   endpoint {
     url = "http://loki:3100/loki/api/v1/push"
   }

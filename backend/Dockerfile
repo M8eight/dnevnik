@@ -20,8 +20,8 @@ COPY common common
 COPY ${SERVICE_NAME} ${SERVICE_NAME}
 
 # Собираем JAR конкретного модуля
-RUN --mount=type=cache,id=gradle-cache,target=/home/gradle/.gradle/caches \
-    --mount=type=cache,id=gradle-wrapper,target=/home/gradle/.gradle/wrapper \
+RUN --mount=type=cache,id=gradle-cache,target=/home/gradle/.gradle/caches,sharing=locked \
+    --mount=type=cache,id=gradle-wrapper,target=/home/gradle/.gradle/wrapper,sharing=locked \
     ./gradlew :${SERVICE_NAME}:bootJar --no-daemon
 
 # --- Финальная стадия (Runtime Stage) ---

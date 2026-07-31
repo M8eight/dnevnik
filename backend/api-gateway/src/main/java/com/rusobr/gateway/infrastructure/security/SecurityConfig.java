@@ -28,7 +28,7 @@ public class SecurityConfig {
                 .authorizeExchange(exchange -> exchange
                         .pathMatchers("/user-service/v3/api-docs/**", "/swagger-ui/**").permitAll()
                         .pathMatchers("/academic-service/v3/api-docs/**", "/swagger-ui/**").permitAll()
-                        .pathMatchers("/actuator/health").permitAll()
+                        .pathMatchers("/actuator/**").permitAll()
                         .anyExchange().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> {}))
                 .build();
