@@ -53,6 +53,12 @@ public class SchoolClassController {
         return classStudentService.getUnassignedStudents();
     }
 
+    @GetMapping("/by-teacher")
+    public List<SchoolClassResponse> getByTeacherId(@AuthenticationPrincipal Jwt jwt) {
+        Long userId = jwt.getClaim("user_id");
+        return schoolClassService.getByTeacherId(userId);
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public SchoolClassResponse create(@RequestBody @Valid SchoolClassRequest schoolClassReq) {

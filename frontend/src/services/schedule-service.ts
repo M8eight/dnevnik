@@ -1,4 +1,6 @@
 import api from "../axios/axios";
+import type { lessonInstance } from "./lesson-instance-service";
+import type { SchoolClassResponse } from "./school-class-service";
 import type { SubjectResponse } from "./subject-service";
 import type { UserSimpleResponse } from "./user-service";
 
@@ -92,10 +94,19 @@ export interface DiaryLessonInstanceDto {
     };
 }
 
+export interface TeacherScheduleItem {
+    lessonInstance: lessonInstance;
+    subject: SubjectResponse;
+    scheduleLesson: ScheduleItem;
+    schoolClass: SchoolClassResponse;
+    dayOfWeek: string;
+}
+
 
 export type DiaryResponse = Record<string, DiaryLesson[]>;
 export type ScheduleResponse = Record<string, ScheduleItem[]>;
 export type ScheduleClassResponse = Record<string, ScheduleLessonDto[]>;
+export type TeacherScheduleItemPeriod = Record<string, TeacherScheduleItem[]>;
 
 
 export const getDiaryScheduleByStudentId = async (startDate: string, endDate: string): Promise<DiaryScheduleDto[]> => {
@@ -131,6 +142,20 @@ export const getDiaryLessonsByStudentIdAndDateRange = async (studentId: number, 
 export const getScheduleByClassId = async (classId: number, date: string): Promise<ScheduleClassResponse> => {
     const { data } = await api.get<ScheduleClassResponse>(`/academic-service/api/v1/schedules/by-class`, {
         params: { classId, date }
+    });
+    return data;
+}
+
+export const getTeacherScheduleDate = async (date: string): Promise<TeacherScheduleItem[]> => {
+    const { data} = await api.get<TeacherScheduleItem[]>(`/academic-service/api/v1/schedules/by-teacher/date`, {
+        params: { date }
+    });
+    return data;
+}
+
+export const getTeacherSchedulePeriod = async (startDate: string, endDate: string): Promise<TeacherScheduleItemPeriod> => {
+    const { data } = await api.get<TeacherScheduleItemPeriod>(`/academic-service/api/v1/schedules/by-teacher/period`, {
+        params: { startDate, endDate }
     });
     return data;
 }

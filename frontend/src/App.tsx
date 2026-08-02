@@ -16,6 +16,7 @@ import UserInfo from './views/user/UserInfo'
 import LoginPage from './views/user/Login'
 import ForbiddenPage from './views/statusPage/ForbiddenPage'
 import { ProtectedRoute } from './routes/ProtectedRoute'
+import TeacherSchedule from './views/teacher/TeacherSchedule'
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
         </Route>
 
         <Route element={<ProtectedRoute roles={["TEACHER"]} />}>
+          <Route path="/teacher/home" element={<TeacherSchedule />} />
           <Route path="/teacher/journal" element={<TeacherJournal />} />
           <Route path="/teacher/homework" element={<HomeworkJournal />} />
         </Route>

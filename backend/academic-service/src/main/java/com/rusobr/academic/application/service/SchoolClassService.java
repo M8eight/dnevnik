@@ -96,6 +96,13 @@ public class SchoolClassService {
                 .map(schoolClassMapper::toSchoolClassResponse).toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<SchoolClassResponse> getByTeacherId(Long teacherId) {
+        log.info("{}", teacherId);
+        List<SchoolClass> schoolClasses = schoolClassRepository.findSchoolClassesTeacherId(teacherId);
+        log.info("{}", schoolClasses);
+        return schoolClasses.stream().map(schoolClassMapper::toSchoolClassResponse).toList();
+    }
     @Transactional
     public SchoolClassResponse create(SchoolClassRequest schoolClassReq) {
         AcademicYear academicYear = getAcademicYearOrThrow(schoolClassReq.academicYearId());

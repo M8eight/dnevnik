@@ -2,6 +2,7 @@ import { Layers } from "lucide-react";
 import NavbarComponent from "./NavbarComponent";
 
 const NAV_LINKS = [
+    { to: "/teacher/home", label: "Главная" },
     { to: "/teacher/journal", label: "Табель" },
     { to: "/teacher/homework", label: "Добавить ДЗ" },
 ];

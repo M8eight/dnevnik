@@ -4,7 +4,7 @@ import { useTeacherInfo } from "@/hooks/use-teacher";
 import { useUserById } from "@/hooks/use-user";
 import type { SchoolClassResponse } from "@/services/school-class-service";
 import { User, GraduationCap, BookOpen, Users, Phone, Mail, ChevronLeft } from "lucide-react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 
 function getInitials(firstName: string, lastName: string) {
@@ -363,6 +363,7 @@ function StudentClassBlock({ userId }: { userId: number }) {
 }
 
 export default function ProfilePage() {
+    const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
 
     const pathId = Number(id);
@@ -373,6 +374,7 @@ export default function ProfilePage() {
         return <div>Неверный id</div>;
     }
     const role = user?.roles?.[0];
+
 
     return (
         <div className="relative z-10 min-h-screen px-4 md:px-10 pt-5 pb-14">
@@ -387,7 +389,10 @@ export default function ProfilePage() {
                             <p className="text-xs text-black/40 mt-0.5">Личная информация</p>
                         </div>
                     </div>
-                    <button className="glass-pill flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-bold text-(--navy) border-none shadow-sm">
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="glass-pill flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-bold text-(--navy) border-none shadow-sm"
+                    >
                         <ChevronLeft className="w-4 h-4 text-(--red)" />
                         Назад
                     </button>

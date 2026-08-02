@@ -9,7 +9,7 @@ import { format } from "date-fns/format";
 import { ru } from "date-fns/locale";
 import { nextWeek, prevWeek } from "@/store/slices/scheduleSlice";
 import Chip from "@/components/student/chip";
-import { RUSSIAN_DAYS } from "@/constants/component-constants";
+import { LESSON_TIMES, RUSSIAN_DAYS } from "@/constants/component-constants";
 import { AttendanceBadge } from "@/components/student/diary/badges";
 import { GradePopover } from "@/components/student/diary/grade-detail-popover";
 import StudentNavbar from "@/components/layout/navbars/StudentNavbar";
@@ -17,16 +17,7 @@ import type { DiaryScheduleDto } from "@/services/schedule-service";
 
 const DAY_ORDER = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
 
-const LESSON_TIMES: Record<number, string> = {
-  1: "8:00–8:45",
-  2: "9:00–9:45",
-  3: "10:00–10:45",
-  4: "11:00–11:45",
-  5: "12:00–12:45",
-  6: "13:00–13:45",
-  7: "14:00–14:45",
-  8: "15:00–15:45",
-};
+
 
 const formatDateLabel = (dateStr: string) =>
   new Date(dateStr).toLocaleDateString("ru-RU", { day: "numeric", month: "long" });

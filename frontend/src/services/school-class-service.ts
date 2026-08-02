@@ -53,6 +53,11 @@ export const getAllUnassignedStudents = async (): Promise<UserSimpleResponse[]> 
     return data;
 };
 
+export const getByTeacherId = async (): Promise<SchoolClassResponse[]> => {
+    const { data } = await api.get<SchoolClassResponse[]>(`/academic-service/api/v1/school-classes/by-teacher`);
+    return data;
+};
+
 export const assignTeacherToClass = async (classId: number, teacherId: number): Promise<void> => {
     await api.put(`/academic-service/api/v1/school-classes/${classId}/teacher/${teacherId}`);
 };
