@@ -99,8 +99,8 @@ management:
       percentiles-histogram:
         http.server.requests: true
         http.client.requests: true
-  tag:
-    application: ${spring.application.name}
+    tags:
+      application: ${spring.application.name}
 
 keycloak:
   url: ${KC_URL:http://localhost:9090}

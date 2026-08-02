@@ -30,5 +30,5 @@ management:
       percentiles-histogram:
         http.server.requests: true
         http.client.requests: true
-  tag:
-    application: ${spring.application.name}
+    tags:
+      application: ${spring.application.name}
