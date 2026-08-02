@@ -21,9 +21,10 @@ import java.util.*;
 @Slf4j
 public class DebugDataInitializer implements CommandLineRunner {
 
-    private static final LocalDate ANCHOR = LocalDate.now()
-            .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
-    private static final int PAST_WEEKS = 4;
+    private static final LocalDate VIRTUAL_TODAY = LocalDate.of(2026, 9, 25);
+
+    private static final LocalDate ANCHOR = VIRTUAL_TODAY.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+    private static final int PAST_WEEKS = 20;
 
     private final SubjectRepository subjectRepository;
     private final SchoolClassRepository schoolClassRepository;
@@ -70,7 +71,8 @@ public class DebugDataInitializer implements CommandLineRunner {
         }
 
         LocalDate from = ANCHOR.minusWeeks(PAST_WEEKS);
-        log.info("=== Инициализация: {} недель начиная с {} ===", PAST_WEEKS, from);
+        log.info("=== Инициализация: {} недель начиная с {} (виртуальная 'сегодня' = {}) ===",
+                PAST_WEEKS, from, VIRTUAL_TODAY);
 
         Map<String, Subject> S = new LinkedHashMap<>();
         List.of(
@@ -83,8 +85,8 @@ public class DebugDataInitializer implements CommandLineRunner {
         AcademicYear academicYear = academicYearRepository.save(AcademicYear.builder()
                 .name("2025-2026")
                 .description("Год")
-                .startDate(LocalDate.of(2025, 1, 1))
-                .endDate(LocalDate.of(2026, 6, 26))
+                .startDate(LocalDate.of(2025, 9, 1))
+                .endDate(LocalDate.of(2026, 8, 31))
                 .build());
 
         ClassBundle c8a = buildClass("8А", 24L, range(27L, 54L), S, academicYear);
@@ -95,19 +97,20 @@ public class DebugDataInitializer implements CommandLineRunner {
         Map<DayOfWeek, List<ScheduleLesson>> sched8b = buildSchedule8B(c8b.ta());
         Map<DayOfWeek, List<ScheduleLesson>> sched9a = buildSchedule9A(c9a.ta());
 
-        // Только прошлые недели включая текущую (anchor)
+        validateNoTeacherConflicts(sched8a, sched8b, sched9a);
+
+        List<AcademicPeriod> periods = savePeriods(academicYear);
+
         for (int week = 0; week <= PAST_WEEKS; week++) {
             LocalDate monday = from.plusWeeks(week);
-            generateWeek(monday, sched8a, c8a.schoolClass());
-            generateWeek(monday, sched8b, c8b.schoolClass());
-            generateWeek(monday, sched9a, c9a.schoolClass());
+            generateWeek(monday, sched8a, c8a.schoolClass(), periods);
+            generateWeek(monday, sched8b, c8b.schoolClass(), periods);
+            generateWeek(monday, sched9a, c9a.schoolClass(), periods);
         }
-
-        savePeriods();
 
         saveTeacherSubjects(S);
 
-        savePeriodGrades(c8a, c8b, c9a);
+        savePeriodGrades(periods, c8a, c8b, c9a);
 
         saveFinalGrades(c8a, c8b, c9a);
 
@@ -192,8 +195,8 @@ public class DebugDataInitializer implements CommandLineRunner {
                 new Slot(5, "202", ta.get("Лит")), new Slot(6, "Зал", ta.get("Спорт"))
         )));
         map.put(DayOfWeek.TUESDAY, scheduleDay(DayOfWeek.TUESDAY, List.of(
-                new Slot(1, "205", ta.get("Ист")), new Slot(2, "206", ta.get("Общ")),
-                new Slot(3, "104", ta.get("Анг")), new Slot(4, "ПК-2", ta.get("Инф")),
+                new Slot(1, "104", ta.get("Анг")), new Slot(2, "206", ta.get("Общ")),
+                new Slot(3, "205", ta.get("Ист")), new Slot(4, "ПК-2", ta.get("Инф")),
                 new Slot(5, "ПК-2", ta.get("Инф")), new Slot(6, "113", ta.get("ГеоГр"))
         )));
         map.put(DayOfWeek.WEDNESDAY, scheduleDay(DayOfWeek.WEDNESDAY, List.of(
@@ -218,41 +221,72 @@ public class DebugDataInitializer implements CommandLineRunner {
         Map<DayOfWeek, List<ScheduleLesson>> map = new LinkedHashMap<>();
         map.put(DayOfWeek.MONDAY, scheduleDay(DayOfWeek.MONDAY, List.of(
                 new Slot(1, "402", ta.get("Физ")), new Slot(2, "402", ta.get("Физ")),
-                new Slot(3, "305", ta.get("Алг")), new Slot(4, "203", ta.get("Рус")),
-                new Slot(5, "203", ta.get("Лит")), new Slot(6, "Зал", ta.get("Спорт"))
+                new Slot(3, "203", ta.get("Лит")), new Slot(4, "203", ta.get("Рус")),
+                new Slot(5, "305", ta.get("Алг")), new Slot(6, "Зал", ta.get("Спорт"))
         )));
         map.put(DayOfWeek.TUESDAY, scheduleDay(DayOfWeek.TUESDAY, List.of(
                 new Slot(1, "ПК-1", ta.get("Инф")), new Slot(2, "ПК-1", ta.get("Инф")),
                 new Slot(3, "402", ta.get("Хим")), new Slot(4, "301", ta.get("Био")),
-                new Slot(5, "205", ta.get("Ист")), new Slot(6, "206", ta.get("Общ"))
+                new Slot(5, "206", ta.get("Общ")), new Slot(6, "205", ta.get("Ист"))
         )));
         map.put(DayOfWeek.WEDNESDAY, scheduleDay(DayOfWeek.WEDNESDAY, List.of(
-                new Slot(1, "305", ta.get("Алг")), new Slot(2, "305", ta.get("Гео")),
-                new Slot(3, "104", ta.get("Анг")), new Slot(4, "104", ta.get("Нем")),
+                new Slot(1, "104", ta.get("Нем")), new Slot(2, "305", ta.get("Гео")),
+                new Slot(3, "104", ta.get("Анг")), new Slot(4, "305", ta.get("Алг")),
                 new Slot(5, "113", ta.get("ГеоГр")), new Slot(6, "Зал", ta.get("Спорт"))
         )));
         map.put(DayOfWeek.THURSDAY, scheduleDay(DayOfWeek.THURSDAY, List.of(
-                new Slot(1, "203", ta.get("Рус")), new Slot(2, "305", ta.get("Алг")),
+                new Slot(1, "Мас", ta.get("Тех")), new Slot(2, "305", ta.get("Алг")),
                 new Slot(3, "402", ta.get("Физ")), new Slot(4, "205", ta.get("Ист")),
-                new Slot(5, "305", ta.get("Гео")), new Slot(6, "Мас", ta.get("Тех"))
+                new Slot(5, "305", ta.get("Гео")), new Slot(6, "203", ta.get("Рус"))
         )));
         map.put(DayOfWeek.FRIDAY, scheduleDay(DayOfWeek.FRIDAY, List.of(
-                new Slot(1, "402", ta.get("Хим")), new Slot(2, "301", ta.get("Био")),
-                new Slot(3, "203", ta.get("Лит")), new Slot(4, "104", ta.get("Анг")),
-                new Slot(5, "203", ta.get("Рус")), new Slot(6, "Изо", ta.get("Изо"))
+                new Slot(1, "Изо", ta.get("Изо")), new Slot(2, "301", ta.get("Био")),
+                new Slot(3, "203", ta.get("Рус")), new Slot(4, "104", ta.get("Анг")),
+                new Slot(5, "203", ta.get("Лит")), new Slot(6, "402", ta.get("Хим"))
         )));
         return map;
     }
 
+    @SafeVarargs
+    private void validateNoTeacherConflicts(Map<DayOfWeek, List<ScheduleLesson>>... schedules) {
+        Map<String, String> seen = new HashMap<>();
+        for (Map<DayOfWeek, List<ScheduleLesson>> schedule : schedules) {
+            for (var entry : schedule.entrySet()) {
+                for (ScheduleLesson sl : entry.getValue()) {
+                    Long teacherId = sl.getTeachingAssignment().getTeacherId();
+                    String key = teacherId + "|" + sl.getDayOfWeek() + "|" + sl.getLessonNumber();
+                    String info = sl.getTeachingAssignment().getSchoolClass().getName()
+                            + " " + sl.getTeachingAssignment().getSubject().getName();
+                    String prev = seen.putIfAbsent(key, info);
+                    if (prev != null) {
+                        throw new IllegalStateException(
+                                "Teacher conflict: teacherId=%s %s урок %s -> [%s] vs [%s]"
+                                        .formatted(teacherId, sl.getDayOfWeek(), sl.getLessonNumber(), prev, info));
+                    }
+                }
+            }
+        }
+    }
+
     private void generateWeek(LocalDate monday,
                               Map<DayOfWeek, List<ScheduleLesson>> schedule,
-                              SchoolClass schoolClass) {
+                              SchoolClass schoolClass,
+                              List<AcademicPeriod> periods) {
         schedule.forEach((day, lessons) -> {
             LocalDate date = monday.with(TemporalAdjusters.nextOrSame(day));
-            if (!date.isAfter(LocalDate.now())) {
+            if (!date.isAfter(VIRTUAL_TODAY) && isSchoolDay(date, periods)) {
                 buildDay(date, lessons, schoolClass);
             }
         });
+    }
+
+    private boolean isSchoolDay(LocalDate date, List<AcademicPeriod> periods) {
+        for (AcademicPeriod p : periods) {
+            if (!date.isBefore(p.getStartDate()) && !date.isAfter(p.getEndDate())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Transactional
@@ -272,9 +306,9 @@ public class DebugDataInitializer implements CommandLineRunner {
 
                 if (rng.nextInt(100) < 25) {
                     GradeType type = switch (rng.nextInt(10)) {
-                        case 0, 1 -> GradeType.TEST;       // 20% — контрольная
-                        case 2 -> GradeType.CONTROL;    // 10% — проверочная
-                        default -> GradeType.HOMEWORK;   // 70% — за ДЗ
+                        case 0, 1 -> GradeType.TEST;
+                        case 2 -> GradeType.CONTROL;
+                        default -> GradeType.HOMEWORK;
                     };
                     int weight = type == GradeType.TEST ? 3
                             : type == GradeType.CONTROL ? 2
@@ -288,9 +322,9 @@ public class DebugDataInitializer implements CommandLineRunner {
 
                 if (rng.nextInt(100) < 8) {
                     AttendanceStatus status = switch (rng.nextInt(10)) {
-                        case 0, 1, 2 -> AttendanceStatus.EXCUSED; // 30% уважительная
-                        case 3 -> AttendanceStatus.LATE;    // 10% опоздал
-                        default -> AttendanceStatus.ABSENT;  // 60% просто прогул
+                        case 0, 1, 2 -> AttendanceStatus.EXCUSED;
+                        case 3 -> AttendanceStatus.LATE;
+                        default -> AttendanceStatus.ABSENT;
                     };
                     attendanceRepository.save(Attendance.builder()
                             .lessonInstance(li).studentId(sid).status(status).build());
@@ -299,23 +333,23 @@ public class DebugDataInitializer implements CommandLineRunner {
         }
     }
 
-    private void savePeriods() {
-        AcademicYear academicYear = academicYearRepository.getReferenceById(1L);
-
-        academicPeriodRepository.saveAll(List.of(
+    private List<AcademicPeriod> savePeriods(AcademicYear academicYear) {
+        List<AcademicPeriod> periods = List.of(
                 AcademicPeriod.builder().name("Первая четверть").academicYear(academicYear)
-                        .startDate(LocalDate.of(2025, 9, 1)).endDate(LocalDate.of(2025, 10, 26))
+                        .startDate(LocalDate.of(2025, 9, 1)).endDate(LocalDate.of(2025, 10, 31))
                         .closed(true).build(),
                 AcademicPeriod.builder().name("Вторая четверть").academicYear(academicYear)
-                        .startDate(LocalDate.of(2025, 11, 5)).endDate(LocalDate.of(2025, 12, 28))
+                        .startDate(LocalDate.of(2025, 11, 1)).endDate(LocalDate.of(2025, 12, 31))
                         .closed(true).build(),
                 AcademicPeriod.builder().name("Третья четверть").academicYear(academicYear)
-                        .startDate(LocalDate.of(2026, 1, 9)).endDate(LocalDate.of(2026, 3, 31))
+                        .startDate(LocalDate.of(2026, 1, 1)).endDate(LocalDate.of(2026, 3, 31))
                         .closed(true).build(),
                 AcademicPeriod.builder().name("Четвертая четверть").academicYear(academicYear)
-                        .startDate(LocalDate.of(2026, 4, 6)).endDate(LocalDate.of(2026, 6, 25))
+                        .startDate(LocalDate.of(2026, 4, 1)).endDate(LocalDate.of(2026, 8, 31))
                         .closed(false).build()
-        ));
+        );
+
+        return academicPeriodRepository.saveAll(periods);
     }
 
     private void saveTeacherSubjects(Map<String, Subject> S) {
@@ -411,9 +445,8 @@ public class DebugDataInitializer implements CommandLineRunner {
         return 2;
     }
 
-    private void savePeriodGrades(ClassBundle... bundles) {
-        List<AcademicPeriod> closedPeriods = academicPeriodRepository.findAll()
-                .stream()
+    private void savePeriodGrades(List<AcademicPeriod> periods, ClassBundle... bundles) {
+        List<AcademicPeriod> closedPeriods = periods.stream()
                 .filter(AcademicPeriod::isClosed)
                 .toList();
 
