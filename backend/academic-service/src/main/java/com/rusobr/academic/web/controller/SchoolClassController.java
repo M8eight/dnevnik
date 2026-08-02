@@ -11,6 +11,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,6 +33,12 @@ public class SchoolClassController {
     @GetMapping("/{id}/details")
     public SchoolClassFullResponse getWithDetailsById(@PathVariable Long id){
         return schoolClassService.findWithStudentsById(id);
+    }
+
+    @GetMapping("/by-student")
+    public SchoolClassFullResponse getDetailsByStudentId(@AuthenticationPrincipal Jwt jwt) {
+        Long userId = jwt.getClaim("user_id");
+        return schoolClassService.getDetailsByStudentId(userId);
     }
 
     @GetMapping("/search/by-student")

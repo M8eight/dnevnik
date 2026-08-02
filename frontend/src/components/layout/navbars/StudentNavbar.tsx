@@ -3,6 +3,7 @@ import NavbarComponent from "./NavbarComponent";
 
 const NAV_LINKS = [
     { to: "/student/home", label: "Главная" },
+    { to: "/student/school-class", label: "Класс" },
     { to: "/student/diary", label: "Дневник" },
     { to: "/student/grade", label: "Оценки" },
 ];
