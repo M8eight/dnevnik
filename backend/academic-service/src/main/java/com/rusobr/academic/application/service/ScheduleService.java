@@ -185,8 +185,8 @@ public class ScheduleService {
         }
 
         // Проверяем что учитель не ведёт другой урок в этот же слот
-        if (scheduleLessonRepository.existsActiveByTeachingAssignmentSlot(
-            teachingAssignment.getId(),
+        if (scheduleLessonRepository.existsByTeacherSlot(
+            scheduleLessonRequest.teacherId(),
             scheduleLessonRequest.dayOfWeek(),
             scheduleLessonRequest.lessonNumber(),
             scheduleLessonRequest.validFrom()

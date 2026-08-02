@@ -33,7 +33,7 @@ public class LoggingFilter implements GlobalFilter, Ordered {
                 .defaultIfEmpty("anonymous")
                 .flatMap(userId -> {
 
-                    log.info(
+                    log.debug(
                             "Incoming request",
                             StructuredArguments.keyValue("userId", userId),
                             StructuredArguments.keyValue("method", request.getMethod().name()),

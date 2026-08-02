@@ -58,11 +58,11 @@ public interface ScheduleLessonRepository extends JpaRepository<ScheduleLesson, 
     @Query("""
         select sl
         from ScheduleLesson sl
-        join fetch sl.teachingAssignment ta
-        join fetch ta.subject s
+            join fetch sl.teachingAssignment ta
+            join fetch ta.subject s
         where ta.schoolClass.id = :classId
-        and sl.validFrom <= :date
-        and (sl.validTo is null or sl.validTo >= :date)
+            and sl.validFrom <= :date
+            and (sl.validTo is null or sl.validTo >= :date)
         order by sl.lessonNumber
     """)
     List<ScheduleLesson> findClassSchedule(@Param("classId") Long classId, @Param("date") LocalDate date);
@@ -73,11 +73,11 @@ public interface ScheduleLessonRepository extends JpaRepository<ScheduleLesson, 
     @Query("""
         select count(*) > 0
         from ScheduleLesson sl
-        join sl.teachingAssignment ta
+            join sl.teachingAssignment ta
         where ta.schoolClass.id = :classId
-        and sl.dayOfWeek = :dayOfWeek
-        and sl.lessonNumber = :lessonNumber
-        and (sl.validTo is null or sl.validTo >= :validFrom)
+            and sl.dayOfWeek = :dayOfWeek
+            and sl.lessonNumber = :lessonNumber
+            and (sl.validTo is null or sl.validTo >= :validFrom)
 """)
     boolean existsActiveByClassSlot(@Param("classId") Long schoolClassId,
                                     @Param("dayOfWeek") DayOfWeek dayOfWeek,
@@ -87,11 +87,11 @@ public interface ScheduleLessonRepository extends JpaRepository<ScheduleLesson, 
     @Query("""
         select count(*) > 0
         from ScheduleLesson sl
-        join sl.teachingAssignment ta
+            join sl.teachingAssignment ta
         where ta.id = :teachingAssignmentId
-        and sl.dayOfWeek = :dayOfWeek
-        and sl.lessonNumber = :lessonNumber
-        and (sl.validTo is null or sl.validTo >= :validFrom)
+            and sl.dayOfWeek = :dayOfWeek
+            and sl.lessonNumber = :lessonNumber
+            and (sl.validTo is null or sl.validTo >= :validFrom)
 """)
     boolean existsActiveByTeachingAssignmentSlot(@Param("teachingAssignmentId") Long teachingAssignmentId,
                                                  @Param("dayOfWeek") DayOfWeek dayOfWeek,
@@ -101,7 +101,7 @@ public interface ScheduleLessonRepository extends JpaRepository<ScheduleLesson, 
     @Query("""
         select sl
         from ScheduleLesson sl
-        join sl.teachingAssignment ta
+            join sl.teachingAssignment ta
         where ta.schoolClass.id = :classId
             and sl.validFrom <= :toDate
             and (sl.validTo is null or sl.validTo >= :fromDate)
@@ -111,15 +111,30 @@ public interface ScheduleLessonRepository extends JpaRepository<ScheduleLesson, 
                                                    @Param("toDate") LocalDate toDate);
 
     @Query("""
+        select count(*) > 0
+        from ScheduleLesson sl
+            join sl.teachingAssignment ta
+        where ta.teacherId = :teacherId
+            and sl.dayOfWeek = :dayOfWeek
+            and sl.lessonNumber = :lessonNumber
+            and sl.validFrom <= :date
+            and (sl.validTo is null or sl.validTo >= :date)
+    """)
+    boolean existsByTeacherSlot(@Param("teacherId") Long teacherId,
+                                @Param("dayOfWeek") DayOfWeek dayOfWeek,
+                                @Param("lessonNumber") Integer lessonNumber,
+                                @Param("date") LocalDate date);
+
+    @Query("""
         select sl
         from ScheduleLesson sl
-        join fetch sl.teachingAssignment ta
-        join fetch ta.subject su
-        join ta.schoolClass sc
-        join sc.students st
+            join fetch sl.teachingAssignment ta
+            join fetch ta.subject su
+            join ta.schoolClass sc
+            join sc.students st
         where st.studentId = :studentId
-        and sl.validFrom <= :endDate
-        and (sl.validTo is null or sl.validTo >= :startDate)
+            and sl.validFrom <= :endDate
+            and (sl.validTo is null or sl.validTo >= :startDate)
         order by sl.lessonNumber
     """)
     List<ScheduleLesson> findDiaryScheduleByStudentId(@Param("studentId") Long studentId,
