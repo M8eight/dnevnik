@@ -1,5 +1,6 @@
 package com.rusobr.academic.infrastructure.persistence.repository;
 
+import com.rusobr.academic.domain.model.LessonInstance;
 import com.rusobr.academic.domain.model.ScheduleLesson;
 import com.rusobr.academic.infrastructure.persistence.projection.ScheduleLessonProjection;
 import com.rusobr.academic.infrastructure.persistence.projection.SchoolLessonProjection;
@@ -124,5 +125,35 @@ public interface ScheduleLessonRepository extends JpaRepository<ScheduleLesson, 
     List<ScheduleLesson> findDiaryScheduleByStudentId(@Param("studentId") Long studentId,
                                                         @Param("startDate") LocalDate startDate,
                                                         @Param("endDate") LocalDate endDate);
+
+    @Query("""
+        select li
+        from LessonInstance li
+            left join fetch li.scheduleLesson sl
+            left join fetch sl.teachingAssignment ta
+            left join fetch ta.schoolClass sc
+            left join fetch ta.subject su
+        where ta.teacherId = :teacherId
+            and li.lessonDate = :date
+        order by sl.lessonNumber
+    """)
+    List<LessonInstance> findTeacherScheduleByDate(@Param("teacherId") Long teacherId, @Param("date") LocalDate date);
+
+    @Query("""
+        select li
+        from LessonInstance li
+            left join fetch li.scheduleLesson sl
+            left join fetch sl.teachingAssignment ta
+            left join fetch ta.schoolClass sc
+            left join fetch ta.subject su
+        where ta.teacherId = :teacherId
+            and li.lessonDate between :startDate and :endDate
+        order by li.lessonDate, sl.lessonNumber
+    """)
+    List<LessonInstance> findTeacherScheduleByPeriod(@Param("teacherId") Long teacherId,
+                                                   @Param("startDate") LocalDate startDate,
+                                                   @Param("endDate") LocalDate endDate);
+
+
 
 }

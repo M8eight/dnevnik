@@ -36,6 +36,21 @@ public class ScheduleController {
         return scheduleService.getByClass(classId, date);
     }
 
+    @GetMapping("/schedules/by-teacher/date")
+    public List<TeacherScheduleItem> getTeacherScheduleDate(@AuthenticationPrincipal Jwt jwt,
+                                                                       @RequestParam LocalDate date) {
+        Long userId = jwt.getClaim("user_id");
+        return scheduleService.getByTeacherIdDate(userId, date);
+    }
+
+    @GetMapping("/schedules/by-teacher/period")
+    public Map<DayOfWeek, List<TeacherScheduleItem>> getTeacherSchedulePeriod(@AuthenticationPrincipal Jwt jwt,
+                                                                              @RequestParam LocalDate startDate,
+                                                                              @RequestParam LocalDate endDate) {
+        Long userId = jwt.getClaim("user_id");
+        return scheduleService.getByTeacherIdPeriod(userId, startDate, endDate);
+    }
+
     @PostMapping("/schedules")
     public void create(@RequestBody ScheduleLessonRequest scheduleLessonRequest) {
         scheduleService.create(scheduleLessonRequest);

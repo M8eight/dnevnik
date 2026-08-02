@@ -32,11 +32,16 @@ public class SecurityConfig {
                             .requestMatchers("/public/**", "/actuator/**").permitAll()
                             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                            .requestMatchers(POST, "/api/v1/students/batch").hasAnyRole(TEACHER.name(), ADMIN.name())
+                            .requestMatchers(POST, "/api/v1/students/batch").hasAnyRole(TEACHER.name(), ADMIN.name(), STUDENT.name())
                             .requestMatchers(GET, "/api/v1/teachers/*/simple").hasAnyRole(ADMIN.name(), STUDENT.name())
-
-                            //STUDENT SCOPE
-                            .requestMatchers(GET, "/api/v1/students/with-class").hasRole(STUDENT.name())
+                            .requestMatchers(GET, "/api/v1/teachers/*").hasAnyRole(ADMIN.name(), TEACHER.name(), STUDENT.name())
+                            .requestMatchers(GET, "/api/v1/users/*").hasRole(TEACHER.name())
+                            .requestMatchers(GET, "/api/v1/students/*/details").hasAnyRole(ADMIN.name(), TEACHER.name())
+                            .requestMatchers(GET, "/api/v1/parents/*/details").hasAnyRole(ADMIN.name(), TEACHER.name())
+                            .requestMatchers(GET, "/api/v1/teachers/*/details").hasAnyRole(ADMIN.name(), TEACHER.name())
+                            .requestMatchers(GET, "/api/v1/students/*/info").hasAnyRole(ADMIN.name(), TEACHER.name())
+                            .requestMatchers(GET, "/api/v1/students/*").hasAnyRole(ADMIN.name(), TEACHER.name(), STUDENT.name())
+                            .requestMatchers(POST, "/api/v1/teachers/batch").hasAnyRole(ADMIN.name(), STUDENT.name())
 
                             //ADMIN SCOPE
                             .requestMatchers(GET, "/api/v1/users").hasRole(ADMIN.name())
@@ -44,13 +49,7 @@ public class SecurityConfig {
                             .requestMatchers(POST, "/api/v1/users/parents").hasRole(ADMIN.name())
                             .requestMatchers(POST, "/api/v1/users/teachers").hasRole(ADMIN.name())
                             .requestMatchers(DELETE, "/api/v1/users/*").hasRole(ADMIN.name())
-                            .requestMatchers(PUT, "/api/v1/users/*").hasRole(ADMIN.name())
                             .requestMatchers(POST, "/api/v1/students/exclude-assigned").hasRole(ADMIN.name())
-                            .requestMatchers(GET, "/api/v1/students/*/details").hasRole(ADMIN.name())
-                            .requestMatchers(GET, "/api/v1/parents/*/details").hasRole(ADMIN.name())
-                            .requestMatchers(GET, "/api/v1/teachers/*/details").hasRole(ADMIN.name())
-                            .requestMatchers(GET, "/api/v1/teachers/*").hasRole(ADMIN.name())
-                            .requestMatchers(POST, "/api/v1/teachers/batch").hasRole(ADMIN.name())
 
                             .anyRequest().denyAll();
                 })

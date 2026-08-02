@@ -96,6 +96,26 @@ public class ScheduleService {
         );
     }
 
+    @Cacheable(value = "schedulesByTeacherIdDate", key = "#teacherId + '#' + #date")
+    public List<TeacherScheduleItem> getByTeacherIdDate(Long teacherId, LocalDate date) {
+        List<LessonInstance> todaySchedules = scheduleLessonRepository.findTeacherScheduleByDate(teacherId, date);
+        return todaySchedules.stream().map(scheduleLessonMapper::toTeacherScheduleItem).toList();
+    }
+
+    @Cacheable(value = "schedulesByTeacherIdPeriod", key = "#teacherId + '#' + #startDate + '#' + #endDate")
+    public Map<DayOfWeek, List<TeacherScheduleItem>> getByTeacherIdPeriod(Long teacherId, LocalDate startDate, LocalDate endDate) {
+        List<LessonInstance> todaySchedules = scheduleLessonRepository.findTeacherScheduleByPeriod(teacherId, startDate, endDate);
+        List<TeacherScheduleItem> mappedSchedule = todaySchedules.stream().map(scheduleLessonMapper::toTeacherScheduleItem).toList();
+
+        return mappedSchedule.stream().collect(
+                Collectors.groupingBy(
+                        TeacherScheduleItem::dayOfWeek,
+                        LinkedHashMap::new,
+                        Collectors.toList()
+                )
+        );
+    }
+
     public Map<DayOfWeek, List<SchoolLessonResponse>> getWeekSchedule(Long studentId) {
         List<SchoolLessonResponse> sortedRes = scheduleLessonRepository.findAllByStudentId(studentId).stream()
                 .map(scheduleLessonMapper::toSchoolLessonResponse)
