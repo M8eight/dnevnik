@@ -214,7 +214,7 @@ class ScheduleServiceTest {
 
             when(teachingAssignmentService.createOrGet(any(TeachingAssignmentRequest.class))).thenReturn(ta);
             when(scheduleLessonRepository.existsActiveByClassSlot(CLASS_ID, DayOfWeek.MONDAY, 1, DATE)).thenReturn(false);
-            when(scheduleLessonRepository.existsActiveByTeachingAssignmentSlot(88L, DayOfWeek.MONDAY, 1, DATE)).thenReturn(false);
+            when(scheduleLessonRepository.existsByTeacherSlot(TEACHER_ID, DayOfWeek.MONDAY, 1, DATE)).thenReturn(false);
             when(scheduleLessonMapper.toEntity(request, ta)).thenReturn(sl);
 
             service.createTransactional(request);

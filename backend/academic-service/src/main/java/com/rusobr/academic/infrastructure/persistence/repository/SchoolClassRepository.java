@@ -39,30 +39,39 @@ public interface SchoolClassRepository extends JpaRepository<SchoolClass, Long> 
 """)
     List<Long> findStudentsIdsByTeachingAssignment(@Param("teachingAssignmentId") Long teachingAssignmentId);
 
-    List<SchoolClass> findAllByAcademicYearIdOrderByNameAsc(Long academicYearId);
+    List<SchoolClass> findAllByAcademicYearIdOrderByNameAsc(@Param("academicYearId") Long academicYearId);
 
     @EntityGraph(attributePaths = {"academicYear"})
     List<SchoolClass> findAllByOrderByNameAsc();
 
-    boolean existsByNameAndAcademicYearId(String name, Long academicYearId);
+    boolean existsByNameAndAcademicYearId(@Param("name") String name, @Param("academicYearId") Long academicYearId);
 
     boolean existsByNameAndIdNot(String name, Long id);
 
     @EntityGraph(attributePaths = {"students"})
-    Optional<SchoolClass> findWithClassStudentById(Long id);
+    Optional<SchoolClass> findWithClassStudentById(@Param("id") Long id);
 
-    boolean existsByNameAndAcademicYearIdAndIdNot(String name, Long academicYearId, Long id);
+    boolean existsByNameAndAcademicYearIdAndIdNot(@Param("name") String name, @Param("academicYearId") Long academicYearId, @Param("id") Long id);
 
     @EntityGraph(attributePaths = {"academicYear"})
-    Optional<SchoolClass> findWithAcademicYearById(Long id);
+    Optional<SchoolClass> findWithAcademicYearById(@Param("id") Long id);
 
     @Query("""
         select sc
         from SchoolClass sc
-        left join fetch sc.academicYear ay
+            left join fetch sc.academicYear ay
         where sc.classTeacherId = :teacherId
         order by sc.name
     """)
-    List<SchoolClass> findSchoolClassesByTeacherId(Long teacherId);
+    List<SchoolClass> findSchoolClassesBySchoolClassTeacherId(@Param("teacherId") Long teacherId);
+
+    @Query("""
+        select distinct sc
+        from SchoolClass sc
+            join TeachingAssignment ta on ta.schoolClass = sc
+        where ta.teacherId = :teacherId
+        order by sc.name
+    """)
+    List<SchoolClass> findSchoolClassesTeacherId(@Param("teacherId") Long teacherId);
 
 }

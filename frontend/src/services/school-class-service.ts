@@ -18,7 +18,6 @@ export interface SchoolClassRequest {
 export interface SchoolClassFullResponse {
     id: number;
     name: string;
-    academicYear: AcademicYearResponse;
     classTeacherId: number;
     teacher: TeacherFullDetails | null;
     students: BatchUserResponse;
@@ -50,6 +49,16 @@ export const getSchoolClassDetails = async (classId: number): Promise<SchoolClas
 
 export const getAllUnassignedStudents = async (): Promise<UserSimpleResponse[]> => {
     const { data } = await api.get<UserSimpleResponse[]>(`/academic-service/api/v1/school-classes/unassigned-students`);
+    return data;
+};
+
+export const getByTeacherId = async (): Promise<SchoolClassResponse[]> => {
+    const { data } = await api.get<SchoolClassResponse[]>(`/academic-service/api/v1/school-classes/by-teacher`);
+    return data;
+};
+
+export const getDetailsByStudentId = async (): Promise<SchoolClassFullResponse> => {
+    const { data } = await api.get<SchoolClassFullResponse>(`/academic-service/api/v1/school-classes/by-student`);
     return data;
 };
 

@@ -14,6 +14,8 @@ import {
     getSchoolClassesByAcademicYear,
     type SchoolClassUpdateRequest,
     type SchoolClassFullResponse,
+    getByTeacherId,
+    getDetailsByStudentId,
 } from "@/services/school-class-service";
 import type { UserSimpleResponse } from "@/services/user-service";
 
@@ -51,6 +53,22 @@ export const useGetUnassignedStudents = () => {
         queryFn: () => getAllUnassignedStudents(),
         enabled: true,
         staleTime: 1000 * 60 * 10,
+    });
+};
+
+export const useByTeacherId = () => {
+    return useQuery<SchoolClassResponse[]>({
+        queryKey: [...CLASS_QUERY_KEY, "by-teacher"],
+        queryFn: () => getByTeacherId(),
+        staleTime: 1000 * 60 * 5,
+    });
+};
+
+export const useGetDetailsByStudentId = () => {
+    return useQuery<SchoolClassFullResponse>({
+        queryKey: [...CLASS_QUERY_KEY, "by-student", "details"],
+        queryFn: () => getDetailsByStudentId(),
+        staleTime: 1000 * 60 * 2,
     });
 };
 

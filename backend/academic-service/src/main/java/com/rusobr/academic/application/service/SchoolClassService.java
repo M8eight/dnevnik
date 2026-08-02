@@ -96,6 +96,21 @@ public class SchoolClassService {
                 .map(schoolClassMapper::toSchoolClassResponse).toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<SchoolClassResponse> getByTeacherId(Long teacherId) {
+        log.info("{}", teacherId);
+        List<SchoolClass> schoolClasses = schoolClassRepository.findSchoolClassesTeacherId(teacherId);
+        log.info("{}", schoolClasses);
+        return schoolClasses.stream().map(schoolClassMapper::toSchoolClassResponse).toList();
+    }
+
+    public SchoolClassFullResponse getDetailsByStudentId(Long studentId) {
+        SchoolClass schoolClass = schoolClassRepository.findSchoolClassByStudentId(studentId)
+                .orElseThrow(() -> new NotFoundException("School class with studentId " + studentId + " not found",
+                AcademicExceptionCode.SCHOOL_CLASS_NOT_FOUND));
+        return findWithStudentsById(schoolClass.getId());
+    }
+
     @Transactional
     public SchoolClassResponse create(SchoolClassRequest schoolClassReq) {
         AcademicYear academicYear = getAcademicYearOrThrow(schoolClassReq.academicYearId());

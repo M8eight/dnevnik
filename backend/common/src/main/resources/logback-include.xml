@@ -28,6 +28,7 @@
         <appender-ref ref="FILE"/>
         <queueSize>1000</queueSize>
         <discardingThreshold>0</discardingThreshold>
+        <neverBlock>true</neverBlock>
         <includeCallerData>false</includeCallerData>
     </appender>
 

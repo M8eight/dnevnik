@@ -1,5 +1,6 @@
 package com.rusobr.academic.application.mapper;
 
+import com.rusobr.academic.domain.model.LessonInstance;
 import com.rusobr.academic.domain.model.ScheduleLesson;
 import com.rusobr.academic.domain.model.TeachingAssignment;
 import com.rusobr.academic.infrastructure.persistence.projection.ScheduleLessonProjection;
@@ -32,5 +33,11 @@ public interface ScheduleLessonMapper {
     ScheduleLessonResponse toScheduleLessonResponse(ScheduleLessonProjection projection);
 
     SchoolLessonResponse toSchoolLessonResponse(SchoolLessonProjection projection);
+
+    @Mapping(target = "dayOfWeek", source = "lessonInstance.scheduleLesson.dayOfWeek")
+    @Mapping(target = "subject", source = "lessonInstance.scheduleLesson.teachingAssignment.subject")
+    @Mapping(target = "lessonInstance", source = "lessonInstance")
+    @Mapping(target = "schoolClass", source = "lessonInstance.scheduleLesson.teachingAssignment.schoolClass")
+    TeacherScheduleItem toTeacherScheduleItem(LessonInstance lessonInstance);
 
 }

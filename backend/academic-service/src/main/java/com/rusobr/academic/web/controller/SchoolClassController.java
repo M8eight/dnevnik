@@ -11,6 +11,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,6 +35,12 @@ public class SchoolClassController {
         return schoolClassService.findWithStudentsById(id);
     }
 
+    @GetMapping("/by-student")
+    public SchoolClassFullResponse getDetailsByStudentId(@AuthenticationPrincipal Jwt jwt) {
+        Long userId = jwt.getClaim("user_id");
+        return schoolClassService.getDetailsByStudentId(userId);
+    }
+
     @GetMapping("/search/by-student")
     public SchoolClassResponse getByStudentId(@RequestParam("studentId") @NotNull Long studentId) {
         return schoolClassService.findByStudent(studentId);
@@ -51,6 +59,12 @@ public class SchoolClassController {
     @GetMapping("/unassigned-students")
     public List<UserFeignResponse> getAllUnassignedStudents() {
         return classStudentService.getUnassignedStudents();
+    }
+
+    @GetMapping("/by-teacher")
+    public List<SchoolClassResponse> getByTeacherId(@AuthenticationPrincipal Jwt jwt) {
+        Long userId = jwt.getClaim("user_id");
+        return schoolClassService.getByTeacherId(userId);
     }
 
     @PostMapping

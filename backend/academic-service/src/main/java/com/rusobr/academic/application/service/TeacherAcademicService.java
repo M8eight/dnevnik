@@ -35,7 +35,7 @@ public class TeacherAcademicService {
         List<TeacherSubjectRawResponse> teacherSubjectResponse = teacherSubject.stream()
                 .map(teacherSubjectMapper::toRawResponse).toList();
 
-        List<SchoolClass> teacherSchoolClasses = schoolClassRepository.findSchoolClassesByTeacherId(teacherId);
+        List<SchoolClass> teacherSchoolClasses = schoolClassRepository.findSchoolClassesBySchoolClassTeacherId(teacherId);
         List<SchoolClassResponse> schoolClassResponse = teacherSchoolClasses.stream()
                 .map(schoolClassMapper::toSchoolClassResponse).toList();
 
