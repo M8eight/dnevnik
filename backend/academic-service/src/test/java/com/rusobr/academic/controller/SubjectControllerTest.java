@@ -53,7 +53,7 @@ public class SubjectControllerTest {
     }
 
     @Test
-    @DisplayName("GET /subjects — 200 and page")
+    @DisplayName("GET /gradesBySubjects — 200 and page")
     void getAll_ShouldReturn200() throws Exception {
         Page<SubjectResponseDto> page = new PageImpl<>(List.of(buildSubjectResponse()), PageRequest.of(0, 20), 1);
         when(subjectService.getAll(org.mockito.ArgumentMatchers.any())).thenReturn(page);
@@ -65,7 +65,7 @@ public class SubjectControllerTest {
     }
 
     @Test
-    @DisplayName("POST /subjects — 200 and create")
+    @DisplayName("POST /gradesBySubjects — 200 and create")
     void create_ShouldReturn200() throws Exception {
         SubjectRequest request = new SubjectRequest(SUBJECT_NAME);
         when(subjectService.create(request)).thenReturn(buildSubjectResponse());
@@ -79,7 +79,7 @@ public class SubjectControllerTest {
     }
 
     @Test
-    @DisplayName("DELETE /subjects/{id} — 200 on delete")
+    @DisplayName("DELETE /gradesBySubjects/{id} — 200 on delete")
     void delete_ShouldReturn200() throws Exception {
         doNothing().when(subjectService).delete(SUBJECT_ID);
 

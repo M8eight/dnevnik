@@ -60,7 +60,7 @@ public class TeacherSubjectControllerTest {
     }
 
     @Test
-    @DisplayName("GET /teacher-subjects — 200 and list")
+    @DisplayName("GET /teacher-gradesBySubjects — 200 and list")
     void findAll_ShouldReturn200() throws Exception {
         when(teacherSubjectService.findAll()).thenReturn(List.of(buildResponse()));
 
@@ -71,7 +71,7 @@ public class TeacherSubjectControllerTest {
     }
 
     @Test
-    @DisplayName("POST /teacher-subjects — 200 and create")
+    @DisplayName("POST /teacher-gradesBySubjects — 200 and create")
     void create_ShouldReturn200() throws Exception {
         TeacherSubjectRequest request = new TeacherSubjectRequest(TEACHER_ID, SUBJECT_ID);
         when(teacherSubjectService.create(request)).thenReturn(buildResponse());
@@ -84,7 +84,7 @@ public class TeacherSubjectControllerTest {
     }
 
     @Test
-    @DisplayName("DELETE /teacher-subjects — 200 on delete")
+    @DisplayName("DELETE /teacher-gradesBySubjects — 200 on delete")
     void delete_ShouldReturn200() throws Exception {
         TeacherSubjectRequest request = new TeacherSubjectRequest(TEACHER_ID, SUBJECT_ID);
         doNothing().when(teacherSubjectService).delete(request);
