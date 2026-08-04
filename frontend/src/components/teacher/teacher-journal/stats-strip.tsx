@@ -1,4 +1,4 @@
-import type { TeacherJournalResponse } from "@/services/teacher-journal-service";
+import type { TeacherJournalResponse } from "@/services/journal-service";
 import { Users, BookOpen, TrendingUp } from "lucide-react";
 
 interface StatsStripProps {
@@ -6,25 +6,50 @@ interface StatsStripProps {
 }
 
 export default function StatsStrip({ data }: StatsStripProps) {
-  const totalGrades = data.studentsJournal.reduce(
-    (s, e) => s + e.grades.length,
-    0
+  const totalGrades = data.studentsJournal.reduce((sum, student) => {
+    const studentGradesCount = Object.values(student.gradesByLesson ?? {}).reduce(
+      (acc, gradesArray) => acc + gradesArray.length,
+      0
+    );
+    return sum + studentGradesCount;
+  }, 0);
+
+  const totalAbsent = data.studentsJournal.reduce((sum, student) => {
+    const absentCount = Object.values(student.attendancesByLesson ?? {}).filter(
+      (attendance) => attendance?.status === "ABSENT"
+    ).length;
+    return sum + absentCount;
+  }, 0);
+
+  const allGrades = data.studentsJournal.flatMap((student) =>
+    Object.values(student.gradesByLesson ?? {}).flatMap((gradesArray) =>
+      gradesArray.map((g) => g.value)
+    )
   );
-  const totalAbsent = data.studentsJournal.reduce(
-    (s, e) => s + e.attendances.filter((a) => a.status === "ABSENT").length,
-    0
-  );
-  const allGrades = data.studentsJournal.flatMap((e) => e.grades.map((g) => g.value));
+
   const periodAvg = allGrades.length
-    ? parseFloat(
-        (allGrades.reduce((a, b) => a + b, 0) / allGrades.length).toFixed(2)
-      ).toString()
+    ? (allGrades.reduce((a, b) => a + b, 0) / allGrades.length).toFixed(2)
     : "—";
 
   const stats = [
-    { icon: Users, label: "Учеников", val: data.students.found.length, sub: data.academicPeriod?.name ?? "..." },
-    { icon: BookOpen, label: "Уроков", val: data.lessonInstances.length, sub: `Оценок: ${totalGrades}` },
-    { icon: TrendingUp, label: "Ср. балл", val: periodAvg, sub: `Пропусков: ${totalAbsent}` },
+    {
+      icon: Users,
+      label: "Учеников",
+      val: data.studentsJournal?.length ?? 0,
+      sub: data.academicPeriod?.name ?? "...",
+    },
+    {
+      icon: BookOpen,
+      label: "Уроков",
+      val: data.lessonInstances?.length ?? 0,
+      sub: `Оценок: ${totalGrades}`,
+    },
+    {
+      icon: TrendingUp,
+      label: "Ср. балл",
+      val: periodAvg,
+      sub: `Пропусков: ${totalAbsent}`,
+    },
   ];
 
   return (
@@ -35,8 +60,12 @@ export default function StatsStrip({ data }: StatsStripProps) {
             <Icon className="w-5 h-5 text-(--navy)" />
           </div>
           <div>
-            <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-black/30 mb-1">{label}</p>
-            <p className="font-serif text-[1.8rem] font-black text-(--navy) leading-none mb-1">{val}</p>
+            <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-black/30 mb-1">
+              {label}
+            </p>
+            <p className="font-serif text-[1.8rem] font-black text-(--navy) leading-none mb-1">
+              {val}
+            </p>
             <p className="text-[11px] font-medium text-black/40">{sub}</p>
           </div>
         </div>

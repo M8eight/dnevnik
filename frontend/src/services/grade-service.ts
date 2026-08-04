@@ -22,12 +22,13 @@ export interface GradeLessonDto {
 export interface DatesGradesDto {
     subject: string;
     grades: GradeLessonDto[];
+    average: number;
 }
 
 export interface GradesLessonsResponse {
     academicPeriod: AcademicPeriodResponse;
     dates: string[]; 
-    subjects: DatesGradesDto[];
+    gradesBySubjects: DatesGradesDto[];
 }
 
 export interface LessonInstanceDto {

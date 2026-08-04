@@ -1,16 +1,14 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import { useRef } from "react";
+import { useRef, useMemo } from "react";
 import type { ViewMode } from "@/constants/component-constants";
 import { formatColDay, formatColDate, avgStyle, useHorizontalScrollDrag } from "@/helpers/teacher-helpers";
-import type { LessonInstanceDto, StudentJournalEntry, StudentMetadata } from "@/services/teacher-journal-service";
+import type { TeacherJournalResponse } from "@/services/journal-service";
 import { useJournalAccess } from "@/hooks/use-journal-access";
 import Chip from "@/components/student/chip";
 import GradePopover from "@/components/teacher/teacher-journal/grade-popover";
 
 interface JournalTableProps {
-  sortedStudents: StudentMetadata[];
-  sortedLessons: LessonInstanceDto[];
-  journalMap: Record<number, StudentJournalEntry>;
+  journalData: TeacherJournalResponse | undefined;
   isLoading: boolean;
   gradeType: string;
   gradeWeight: number;
@@ -19,9 +17,7 @@ interface JournalTableProps {
 }
 
 export default function JournalTable({
-  sortedStudents,
-  sortedLessons,
-  journalMap,
+  journalData,
   isLoading,
   gradeType,
   gradeWeight,
@@ -31,6 +27,13 @@ export default function JournalTable({
   const { isReadOnly } = useJournalAccess();
   const tableContainerRef = useRef<HTMLDivElement>(null);
   useHorizontalScrollDrag(tableContainerRef);
+
+  const lessons = useMemo(() => {
+    if (!journalData?.lessonInstances) return [];
+    return journalData.lessonInstances
+  }, [journalData]);
+
+  const totalColumns = lessons.length + 2; 
 
   return (
     <div className="glass-card rounded-[22px] overflow-hidden anim-in border-none shadow-xl">
@@ -45,17 +48,18 @@ export default function JournalTable({
               <th className="sticky left-0 z-40 bg-slate-50/95 text-left px-4 py-6 border-b border-r border-black/5 w-45 min-w-45 shadow-sm backdrop-blur-md">
                 <Chip className="border-(--navy)/20 text-(--navy)">Ученик</Chip>
               </th>
-              {sortedLessons.map((l) => (
+              {/* Исправлено: рендерим колонки по урокам, а не по ученикам */}
+              {lessons.map((lesson) => (
                 <th
-                  key={l.id}
+                  key={lesson.id}
                   className="z-30 bg-slate-50/95 min-w-16 text-center align-middle py-4 border-b border-r border-black/5 shadow-sm backdrop-blur-md"
                 >
                   <div className="flex flex-col items-center gap-0.5">
                     <span className="text-[12px] font-extrabold text-black/30 uppercase">
-                      {formatColDay(l.lessonDate)}
+                      {formatColDay(lesson.lessonDate)}
                     </span>
                     <span className="text-[12px] font-bold text-(--navy)">
-                      {formatColDate(l.lessonDate)}
+                      {formatColDate(lesson.lessonDate)}
                     </span>
                   </div>
                 </th>
@@ -68,22 +72,23 @@ export default function JournalTable({
           <tbody>
             {isLoading ? (
               <tr>
-                <td colSpan={sortedLessons.length + 2} className="p-10">
+                <td colSpan={totalColumns} className="p-10">
                   <Skeleton className="h-20 w-full" />
                 </td>
               </tr>
-            ) : sortedStudents.length === 0 ? (
+            ) : !journalData || journalData.studentsJournal.length === 0 ? (
               <tr>
                 <td
-                  colSpan={sortedLessons.length + 2}
+                  colSpan={totalColumns}
                   className="p-10 text-center text-black/30 font-bold text-sm"
                 >
                   Ученики не найдены
                 </td>
               </tr>
             ) : (
-              sortedStudents.map((student) => {
-                const entry = journalMap[student.id];
+              journalData.studentsJournal.map((entry) => {
+                const student = entry.student;
+
                 return (
                   <tr
                     key={student.id}
@@ -91,12 +96,15 @@ export default function JournalTable({
                   >
                     <td className="sticky left-0 z-10 bg-white/95 group-hover:bg-slate-50/95 transition-colors px-4 py-3 border-r border-black/5">
                       <p className="text-[13px] font-bold text-(--navy) leading-tight truncate">
-                        {student.firstName ? student.firstName + " " + student.lastName : student.id}
+                        {student.firstName
+                          ? `${student.firstName} ${student.lastName}`
+                          : student.id}
                       </p>
                     </td>
-                    {sortedLessons.map((lesson) => {
-                      const grades = entry?.grades.filter((g) => g.lessonInstanceId === lesson.id) ?? [];
-                      const attendances = entry?.attendances.filter((a) => a.lessonInstanceId === lesson.id) ?? [];
+                    {lessons.map((lesson) => {
+                      const grades = entry?.gradesByLesson?.[lesson.id] ?? [];
+                      const attendanceRecord = entry?.attendancesByLesson?.[lesson.id];
+                      const attendances = attendanceRecord ? [attendanceRecord] : [];
 
                       return (
                         <td key={lesson.id} className="h-17.5 p-0 text-center border-r border-black/5">
@@ -130,7 +138,9 @@ export default function JournalTable({
                     })}
                     <td className="sticky right-0 z-10 bg-white/95 group-hover:bg-slate-50/95 transition-colors text-center border-l border-black/5">
                       <span className={`font-serif text-[16px] ${avgStyle(entry?.gradesAverage)}`}>
-                        {entry?.gradesAverage}
+                        {entry?.gradesAverage !== null && entry?.gradesAverage !== undefined
+                          ? entry.gradesAverage
+                          : ""}
                       </span>
                     </td>
                   </tr>

@@ -1,4 +1,4 @@
-import type { GradeJournalDto } from "@/services/teacher-journal-service";
+import type { GradeLessonTeacherDto } from "@/services/journal-service";
 import { format } from "date-fns/format";
 import { ru } from "date-fns/locale";
 import { useEffect, type RefObject } from "react";
@@ -9,7 +9,7 @@ export const formatColDate = (dateStr: string) =>
 export const formatColDay = (dateStr: string) =>
   format(new Date(dateStr), "EEEEEE", { locale: ru }).toUpperCase();
 
-export const calcAvg = (grades: GradeJournalDto[]): number | null => {
+export const calcAvg = (grades: GradeLessonTeacherDto[]): number | null => {
   if (!grades.length) return null;
   const avg = grades.reduce((s, g) => s + g.value, 0) / grades.length;
   return parseFloat(avg.toFixed(1));

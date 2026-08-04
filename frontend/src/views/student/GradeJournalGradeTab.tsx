@@ -181,7 +181,7 @@ function GradeTableScrollArea({
                 </TableHeader>
 
                 <TableBody>
-                    {response.subjects.map((sub) => {
+                    {response.gradesBySubjects.map((sub) => {
                         const weightedAvg = calculateWeightedAvg(sub.grades);
 
                         return (
@@ -274,10 +274,10 @@ export default function GradeJournalGradeTab({ academicPeriodId }: GradeJournalG
 
     const filteredDates = response?.dates.filter((date) => {
         if (date <= localTodayStr) return true;
-        return response.subjects.some((sub) => sub.grades.some((g) => g.date === date));
+        return response.gradesBySubjects.some((sub) => sub.grades.some((g) => g.date === date));
     }) ?? [];
 
-    const allCurrentGrades = response?.subjects.flatMap((s) => s.grades) ?? [];
+    const allCurrentGrades = response?.gradesBySubjects.flatMap((s) => s.grades) ?? [];
     const overallAvg = allCurrentGrades.length
         ? allCurrentGrades.reduce((a, g) => a + g.value, 0) / allCurrentGrades.length
         : 0;
@@ -321,7 +321,7 @@ export default function GradeJournalGradeTab({ academicPeriodId }: GradeJournalG
                 <StatCard
                     icon={BookOpen}
                     label="Предметов"
-                    value={response.subjects.length.toString()}
+                    value={response.gradesBySubjects.length.toString()}
                     sub="в этой четверти"
                     accent="var(--navy)"
                     delay="anim-delay-3"
