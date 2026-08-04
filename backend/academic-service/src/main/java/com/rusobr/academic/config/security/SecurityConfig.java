@@ -48,6 +48,9 @@ public class SecurityConfig {
                             .requestMatchers(GET, "/api/v1/period-grades/by-student").hasRole(STUDENT.name())
                             .requestMatchers(GET, "/api/v1/school-classes/by-student").hasRole(STUDENT.name())
 
+                            .requestMatchers(GET, "/api/v1/pdf/student/grade-report/report").hasRole(STUDENT.name())
+                            .requestMatchers(GET, "/api/v1/pdf/teacher/student-grade-report/report").hasRole(TEACHER.name())
+
                             //TEACHER SCOPE
                             .requestMatchers(GET, "/api/v1/teaching-assignments").hasRole(TEACHER.name())
                             .requestMatchers(GET, "/api/v1/journal/by-assignment").hasRole(TEACHER.name())

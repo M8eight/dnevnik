@@ -41,11 +41,14 @@ dependencies {
 
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'net.logstash.logback:logstash-logback-encoder:8.0'
-
     implementation 'io.micrometer:micrometer-tracing-bridge-brave'
     implementation 'io.github.openfeign:feign-micrometer'
     implementation 'io.micrometer:context-propagation'
     implementation 'io.micrometer:micrometer-registry-prometheus'
+
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'com.openhtmltopdf:openhtmltopdf-pdfbox:1.0.10'
+    implementation 'com.openhtmltopdf:openhtmltopdf-svg-support:1.0.10'
 
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 }
