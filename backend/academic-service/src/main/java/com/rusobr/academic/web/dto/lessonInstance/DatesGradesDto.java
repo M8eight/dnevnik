@@ -4,6 +4,7 @@ import java.util.List;
 
 public record DatesGradesDto(
         String subject,
-        List<GradeLessonDto> grades
+        List<GradeLessonDto> grades,
+        Double average
 ) {
 }
