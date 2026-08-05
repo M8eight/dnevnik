@@ -1,6 +1,7 @@
 package com.rusobr.academic.web.controller;
 
 import com.rusobr.academic.application.service.JournalService;
+import com.rusobr.academic.web.dto.grade.PeriodFinalGradeResponse;
 import com.rusobr.academic.web.dto.lessonInstance.GradesLessonsResponse;
 import com.rusobr.academic.web.dto.lessonInstance.LessonInstanceDto;
 import com.rusobr.academic.web.dto.lessonInstance.teacher.TeacherJournalResponse;
@@ -20,13 +21,20 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JournalController {
 
-    private final JournalService lessonInstanceService;
+    private final JournalService journalService;
 
     @GetMapping("/grades/by-student")
     public GradesLessonsResponse getGradesByStudentId(@AuthenticationPrincipal Jwt jwt,
                                                       @RequestParam("academicPeriodId") Long academicPeriodId) {
         Long userId = jwt.getClaim("user_id");
-        return lessonInstanceService.getGradesByStudentId(userId, academicPeriodId);
+        return journalService.getGradesByStudentId(userId, academicPeriodId);
+    }
+
+    @GetMapping("/period-final-grades/by-student")
+    public List<PeriodFinalGradeResponse> getPeriodFinalGradesByStudentId(@AuthenticationPrincipal Jwt jwt,
+                                                                          @RequestParam("academicYearId") Long academicYearId) {
+        Long userId = jwt.getClaim("user_id");
+        return journalService.getPeriodFinalGrades(userId, academicYearId);
     }
 
     @PreAuthorize("@gradeSecurity.canViewAssignment(#teachingAssignmentId, authentication)")
@@ -34,14 +42,14 @@ public class JournalController {
     public TeacherJournalResponse getByAssignment(
             @RequestParam("teachingAssignmentId") Long teachingAssignmentId,
             @RequestParam("academicPeriodId") Long academicPeriodId) {
-        return lessonInstanceService.getJournalByAssignment(teachingAssignmentId, academicPeriodId);
+        return journalService.getJournalByAssignment(teachingAssignmentId, academicPeriodId);
     }
 
     @PreAuthorize("@gradeSecurity.canViewAssignment(#teachingAssignmentId, authentication)")
     @GetMapping("/lesson-instances/by-assignment")
     public List<LessonInstanceDto> getInstanceByAssignment(@RequestParam("teachingAssignmentId") Long teachingAssignmentId,
                                                            @RequestParam("academicPeriodId") Long academicPeriodId) {
-        return lessonInstanceService.getInstancesByAssignment(teachingAssignmentId, academicPeriodId);
+        return journalService.getInstancesByAssignment(teachingAssignmentId, academicPeriodId);
     }
 
 }

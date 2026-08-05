@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -16,6 +17,7 @@ public class HomeworkController {
 
     private final HomeworkService homeworkService;
 
+    @PreAuthorize("@gradeSecurity.canViewAssignment(#teachingAssignmentId, authentication)")
     @GetMapping("/by-assignment")
     public Page<HomeworkResponse> getByAssignment(@RequestParam Long teachingAssignmentId, Pageable pageable) {
         return homeworkService.getByAssignment(teachingAssignmentId, pageable);

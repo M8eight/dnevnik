@@ -18,12 +18,12 @@ import java.util.Map;
 public class PeriodGradeController {
     private final PeriodGradeService periodGradeService;
 
-    @GetMapping("/by-student")
-    public Map<String, List<PeriodGradeStudentResponse>> getByStudentId(@AuthenticationPrincipal Jwt jwt,
-                                                                        @RequestParam Long academicYearId) {
-        Long userId = jwt.getClaim("user_id");
-        return periodGradeService.getByStudentId(userId, academicYearId);
-    }
+//    @GetMapping("/by-student")
+//    public Map<String, List<PeriodGradeStudentResponse>> getByStudentId(@AuthenticationPrincipal Jwt jwt,
+//                                                                        @RequestParam Long academicYearId) {
+//        Long userId = jwt.getClaim("user_id");
+//        return periodGradeService.getByStudentId(userId, academicYearId);
+//    }
 
     @PreAuthorize("@gradeSecurity.canViewAssignment(#teachingAssignmentId, authentication)")
     @GetMapping("/by-assignment")

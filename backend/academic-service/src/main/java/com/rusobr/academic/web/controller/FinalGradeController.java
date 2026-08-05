@@ -3,15 +3,10 @@ package com.rusobr.academic.web.controller;
 import com.rusobr.academic.application.service.FinalGradeService;
 import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeCreateResponse;
 import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeRequest;
-import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeResponse;
 import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeTeacherResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,11 +15,11 @@ public class FinalGradeController {
 
     private final FinalGradeService finalGradeService;
 
-    @GetMapping("/by-student")
-    public Map<String, FinalGradeResponse> getByStudentId(@AuthenticationPrincipal Jwt jwt, @RequestParam Long academicYearId) {
-        Long userId = jwt.getClaim("user_id");
-        return finalGradeService.getByStudentId(userId, academicYearId);
-    }
+//    @GetMapping("/by-student")
+//    public Map<String, FinalGradeResponse> getByStudentId(@AuthenticationPrincipal Jwt jwt, @RequestParam Long academicYearId) {
+//        Long userId = jwt.getClaim("user_id");
+//        return finalGradeService.getByStudentId(userId, academicYearId);
+//    }
 
     @PreAuthorize("@gradeSecurity.canViewAssignment(#teachingAssignmentId, authentication)")
     @GetMapping("/by-assignment")

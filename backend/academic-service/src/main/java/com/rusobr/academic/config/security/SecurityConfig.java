@@ -44,8 +44,7 @@ public class SecurityConfig {
                             .requestMatchers(GET, "/api/v1/schedules/diary").hasRole(STUDENT.name())
                             .requestMatchers(GET, "/api/v1/grades/by-student").hasRole(STUDENT.name())
                             .requestMatchers(GET, "/api/v1/grades/*/detail").hasRole(STUDENT.name())
-                            .requestMatchers(GET, "/api/v1/final-grades/by-student").hasRole(STUDENT.name())
-                            .requestMatchers(GET, "/api/v1/period-grades/by-student").hasRole(STUDENT.name())
+                            .requestMatchers(GET, "/api/v1/period-final-grades/by-student").hasRole(STUDENT.name())
                             .requestMatchers(GET, "/api/v1/school-classes/by-student").hasRole(STUDENT.name())
 
                             .requestMatchers(GET, "/api/v1/pdf/student/grade-report/report").hasRole(STUDENT.name())
