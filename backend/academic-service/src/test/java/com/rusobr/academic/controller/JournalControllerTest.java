@@ -31,6 +31,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -84,7 +85,7 @@ public class JournalControllerTest {
 
     private GradesLessonsResponse buildGradesLessonsResponse() {
         GradeLessonDto gradeLesson = new GradeLessonDto(1L, 5, 1, GradeType.CONTROL, START_DATE);
-        DatesGradesDto datesGrades = new DatesGradesDto("Mathematics", List.of(gradeLesson));
+        DatesGradesDto datesGrades = new DatesGradesDto("Mathematics", List.of(gradeLesson), 5.0);
         return new GradesLessonsResponse(buildAcademicPeriodResponse(), List.of(START_DATE), List.of(datesGrades));
     }
 
@@ -92,12 +93,12 @@ public class JournalControllerTest {
         UserFeignResponse student = new UserFeignResponse(STUDENT_ID, "Ivan", "Ivanov", "ivan", "keycloak-1");
         LessonInstanceDto lessonInstance = new LessonInstanceDto(LESSON_INSTANCE_ID, START_DATE);
         StudentJournalDto studentJournal = new StudentJournalDto(
-                STUDENT_ID,
-                List.of(new StudentJournalDto.GradeLessonTeacherDto(1L, 5, 1, GradeType.CONTROL, LESSON_INSTANCE_ID)),
-                5.0,
-                List.of()
+                student,
+                Map.of(LESSON_INSTANCE_ID, List.of(new StudentJournalDto.GradeLessonTeacherDto(1L, 5, 1, GradeType.CONTROL, STUDENT_ID, LESSON_INSTANCE_ID))),
+                Map.of(),
+                5.0
         );
-        return new TeacherJournalResponse(buildAcademicPeriodResponse(), new BatchUserResponse(List.of(student), List.of(), false), List.of(lessonInstance), List.of(studentJournal), false);
+        return new TeacherJournalResponse(buildAcademicPeriodResponse(), List.of(lessonInstance), List.of(studentJournal), false);
     }
 
     @Test
@@ -111,9 +112,9 @@ public class JournalControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.academicPeriod.id").value(PERIOD_ID))
                 .andExpect(jsonPath("$.dates[0]").value(START_DATE.toString()))
-                .andExpect(jsonPath("$.subjects[0].subject").value("Mathematics"))
-                .andExpect(jsonPath("$.subjects[0].grades[0].gradeId").value(1))
-                .andExpect(jsonPath("$.subjects[0].grades[0].gradeType").value("CONTROL"));
+                .andExpect(jsonPath("$.gradesBySubjects[0].subject").value("Mathematics"))
+                .andExpect(jsonPath("$.gradesBySubjects[0].grades[0].gradeId").value(1))
+                .andExpect(jsonPath("$.gradesBySubjects[0].grades[0].gradeType").value("CONTROL"));
     }
 
     @Test
@@ -138,7 +139,7 @@ public class JournalControllerTest {
                         .param("academicPeriodId", String.valueOf(PERIOD_ID)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.academicPeriod.id").value(PERIOD_ID))
-                .andExpect(jsonPath("$.students.found[0].id").value(STUDENT_ID))
+                .andExpect(jsonPath("$.studentsJournal[0].student.id").value(STUDENT_ID))
                 .andExpect(jsonPath("$.lessonInstances[0].id").value(LESSON_INSTANCE_ID));
     }
 

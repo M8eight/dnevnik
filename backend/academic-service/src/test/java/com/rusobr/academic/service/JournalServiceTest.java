@@ -4,7 +4,6 @@ import com.rusobr.academic.application.mapper.AcademicPeriodMapper;
 import com.rusobr.academic.application.mapper.LessonInstanceMapper;
 import com.rusobr.academic.application.service.AcademicPeriodService;
 import com.rusobr.academic.application.service.JournalService;
-import com.rusobr.academic.domain.enums.AttendanceStatus;
 import com.rusobr.academic.domain.enums.GradeType;
 import com.rusobr.academic.domain.model.AcademicPeriod;
 import com.rusobr.academic.domain.model.LessonInstance;
@@ -21,8 +20,6 @@ import com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodResponse;
 import com.rusobr.common.dto.BatchUserResponse;
 import com.rusobr.common.dto.UserFeignResponse;
 import com.rusobr.academic.web.dto.lessonInstance.*;
-import com.rusobr.academic.web.dto.lessonInstance.teacher.AttendanceStudentDto;
-import com.rusobr.academic.web.dto.lessonInstance.teacher.GradeStudentDto;
 import com.rusobr.academic.web.dto.lessonInstance.teacher.StudentJournalDto;
 import com.rusobr.academic.web.dto.lessonInstance.teacher.TeacherJournalResponse;
 import com.rusobr.common.exception.NotFoundException;
@@ -101,8 +98,8 @@ class JournalServiceTest {
 
             assertThat(result).isNotNull();
             assertThat(result.dates()).isEqualTo(dates);
-            assertThat(result.subjects()).hasSize(1);
-            assertThat(result.subjects().get(0).subject()).isEqualTo("Математика");
+            assertThat(result.gradesBySubjects()).hasSize(1);
+            assertThat(result.gradesBySubjects().get(0).subject()).isEqualTo("Математика");
         }
 
         @Test
@@ -137,18 +134,14 @@ class JournalServiceTest {
             UserFeignResponse studentFeign = new UserFeignResponse(STUDENT_ID, "Иван", "Иванов", "ivan", "key");
 
             // Настраиваем внутреннее поведение DTO-шек, так как сервис будет вызывать их геттеры
-            GradeStudentDto mockGradeDto = mock(GradeStudentDto.class);
+            StudentJournalDto.GradeLessonTeacherDto mockGradeDto = mock(StudentJournalDto.GradeLessonTeacherDto.class);
             when(mockGradeDto.studentId()).thenReturn(STUDENT_ID);
-            when(mockGradeDto.gradeId()).thenReturn(20L);
             when(mockGradeDto.value()).thenReturn(5);
             when(mockGradeDto.weight()).thenReturn(2);
-            when(mockGradeDto.gradeType()).thenReturn(GradeType.CONTROL);
             when(mockGradeDto.lessonInstanceId()).thenReturn(LESSON_INSTANCE_ID);
 
-            AttendanceStudentDto mockAttendanceDto = mock(AttendanceStudentDto.class);
+            StudentJournalDto.AttendanceLessonTeacherDto mockAttendanceDto = mock(StudentJournalDto.AttendanceLessonTeacherDto.class);
             when(mockAttendanceDto.studentId()).thenReturn(STUDENT_ID);
-            when(mockAttendanceDto.attendanceId()).thenReturn(30L);
-            when(mockAttendanceDto.status()).thenReturn(AttendanceStatus.LATE);
             when(mockAttendanceDto.lessonInstanceId()).thenReturn(LESSON_INSTANCE_ID);
 
             // Обучаем репозитории возвращать списки проекций
@@ -176,7 +169,7 @@ class JournalServiceTest {
             assertThat(result.studentsJournal()).hasSize(1);
 
             StudentJournalDto journalRow = result.studentsJournal().get(0);
-            assertThat(journalRow.studentId()).isEqualTo(STUDENT_ID);
+            assertThat(journalRow.student()).isEqualTo(studentFeign);
             assertThat(journalRow.gradesAverage()).isEqualTo(5.0); // (5*2)/2 = 5.0
         }
     }

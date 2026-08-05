@@ -1,10 +1,9 @@
 import { useMemo, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BookOpen, Users, BookCheck, Scale, CalendarDays, Lock, CalendarClock, AlertTriangle } from "lucide-react";
-import { useTeacherJournal } from "@/hooks/use-teacher-journal";
+import { useTeacherJournal } from "@/hooks/use-journal";
 import { useTeachingAssignmentDetail } from "@/hooks/use-teaching-assignment";
 import { useGetAcademicPeriodsByAcademicYear } from "@/hooks/use-academic-period";
-import type { StudentJournalEntry } from "@/services/teacher-journal-service";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -15,7 +14,6 @@ import StatsStrip from "@/components/teacher/teacher-journal/stats-strip";
 import ToolbarPanel from "@/components/teacher/teacher-journal/toolbar-panel";
 import Legend from "@/components/teacher/teacher-journal/legend";
 import { useGetAcademicYears } from "@/hooks/use-academic-year";
-import FinalGradesView from "./TeacherJournalFinalGradeTab";
 import PeriodGradesView from "./TeacherJournalPeriodTab";
 import { JournalAccessProvider } from "@/hooks/use-journal-access";
 import ClosedPeriodAlert from "@/components/teacher/teacher-journal/closed-period-alert";
@@ -95,34 +93,6 @@ export default function TeacherJournal() {
   const assignmentId = selectedAssignmentId ? parseInt(selectedAssignmentId) : (assignments?.[0]?.teachingAssignmentId ?? 0);
 
   const { data, isLoading } = useTeacherJournal(assignmentId, academicPeriodId);
-
-  const sortedLessons = useMemo(() => {
-    if (!data?.lessonInstances) return [];
-    const seen = new Set<string>();
-    return [...data.lessonInstances]
-      .sort((a, b) => a.lessonDate.localeCompare(b.lessonDate))
-      .filter((l) => {
-        if (seen.has(l.lessonDate)) return false;
-        seen.add(l.lessonDate);
-        return true;
-      });
-  }, [data]);
-
-  const filteredStudents = useMemo(() => {
-    const students = data?.students?.found ?? [];
-    if (!searchQuery.trim()) return students;
-
-    const q = searchQuery.toLowerCase();
-    return students.filter((s) =>
-      `${s.lastName} ${s.firstName}`.toLowerCase().includes(q)
-    );
-  }, [data?.students, searchQuery]);
-
-  const journalMap = useMemo(() => {
-    const m: Record<number, StudentJournalEntry> = {};
-    data?.studentsJournal.forEach((e) => { m[e.studentId] = e; });
-    return m;
-  }, [data]);
 
   const currentAssignment = assignments?.find(
     (a) => a.teachingAssignmentId.toString() === selectedAssignmentId
@@ -286,9 +256,7 @@ export default function TeacherJournal() {
                 onExport={() => console.log("export")}
               />
               <JournalTable
-                sortedStudents={filteredStudents}
-                sortedLessons={sortedLessons}
-                journalMap={journalMap}
+                journalData={data}
                 isLoading={isLoading}
                 gradeType={selectedGradeType}
                 gradeWeight={selectedWeight}
@@ -307,14 +275,14 @@ export default function TeacherJournal() {
             />
           )}
 
-          {activeTab === "final" && (
+          {/* {activeTab === "final" && (
             <FinalGradesView
               teachingAssignmentId={assignmentId}
               academicYearId={parseInt(resolvedAcademicYearId, 10) || 0}
               students={filteredStudents}
               currentAcademicPeriodId={academicPeriodId}
             />
-          )}
+          )} */}
         </div>
       </div>
     </JournalAccessProvider>

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8" />
+
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 14mm;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "PT Sans", sans-serif;
+            font-size: 10pt;
+            line-height: 1.35;
+            color: #20242a;
+            background: #ffffff;
+        }
+
+        .report-header {
+            margin-bottom: 14px;
+        }
+
+        .report-title {
+            margin: 0 0 5px;
+            font-size: 18pt;
+            line-height: 1.2;
+            font-weight: 700;
+            color: #172033;
+        }
+
+        .report-meta {
+            font-size: 9.5pt;
+            color: #586174;
+        }
+
+        .report-meta div+div {
+            margin-top: 2px;
+        }
+
+        .table-wrapper {
+            width: 100%;
+        }
+
+        table {
+            width: 100%;
+            table-layout: fixed;
+            border-collapse: collapse;
+            border: 1px solid #b8c0cc;
+        }
+
+        .column-subject {
+            width: 16%;
+        }
+
+        .column-grades {
+            width: 74%;
+        }
+
+        .column-average {
+            width: 10%;
+        }
+
+        thead {
+            display: table-header-group;
+        }
+
+        tr {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        th,
+        td {
+            border: 1px solid #c9ced6;
+        }
+
+        th {
+            padding: 8px 10px;
+            font-size: 9.5pt;
+            font-weight: 700;
+            text-align: left;
+            vertical-align: middle;
+            color: #252b36;
+            background: #e9edf3;
+        }
+
+        th:last-child {
+            text-align: center;
+        }
+
+        td {
+            padding: 7px 10px;
+            vertical-align: middle;
+            background: #ffffff;
+        }
+
+        tbody tr:nth-child(even) td {
+            background: #f8f9fb;
+        }
+
+        .subject-name {
+            font-weight: 700;
+            color: #1e2633;
+            overflow-wrap: anywhere;
+        }
+
+        .grades-list {
+            line-height: 1.5;
+        }
+
+        .grade-chip {
+            display: inline-block;
+            margin-right: 9px;
+            white-space: nowrap;
+            font-size: 9pt;
+        }
+
+        .grade-value {
+            font-weight: 700;
+            color: #000000;
+        }
+
+        .grade-weight {
+            font-size: 7pt;
+            font-weight: 700;
+            vertical-align: super;
+            margin-left: 1px;
+            color: #000000;
+        }
+
+        .grade-date {
+            margin-left: 2px;
+            font-size: 8pt;
+            color: #555555;
+        }
+
+        .average {
+            padding-left: 5px;
+            padding-right: 5px;
+            font-size: 10pt;
+            font-weight: 700;
+            text-align: center;
+            white-space: nowrap;
+            color: #172033;
+        }
+
+        .report-summary {
+            margin-top: 14px;
+            padding: 9px 12px;
+            border: 1px solid #c9ced6;
+            border-radius: 4px;
+            font-size: 10.5pt;
+            font-weight: 700;
+            background: #f2f5f9;
+        }
+
+        .footer {
+            margin-top: 12px;
+            padding-top: 7px;
+            border-top: 1px solid #d7dbe2;
+            font-size: 8pt;
+            text-align: center;
+            color: #7a8493;
+        }
+
+        .grade-chip {
+            display: inline-block;
+            margin: 2px 3px 2px 0;
+            padding: 3px 7px;
+            border: 1px solid #999;
+            border-radius: 4px;
+            font-size: 8.5pt;
+            line-height: 1.15;
+            white-space: nowrap;
+            background: #ffffff;
+        }
+
+        .grade-value {
+            font-weight: 700;
+            color: #000;
+        }
+
+        .grade-weight {
+            font-size: 7pt;
+            font-weight: 700;
+            vertical-align: super;
+            margin-left: 1px;
+            color: #000;
+        }
+
+        .grade-date {
+            margin-left: 3px;
+            font-size: 7.5pt;
+            color: #555;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="report-header">
+        <h1 class="report-title" th:text="|Отчёт об успеваемости: ${student.lastName} ${student.firstName}|">
+            Отчёт об успеваемости
+        </h1>
+        <h2 class="report-title" th:text="|${title}|">
+            Заголовок
+        </h2>
+
+        <div class="report-meta">
+            <div th:text="|Класс: ${schoolClass.name}, учебный год: ${schoolClass.academicYear.name}|">
+                Класс и учебный год
+            </div>
+
+            <div th:text="|Период: ${periodName}|">
+                Период
+            </div>
+        </div>
+    </header>
+
+
+    <main class="table-wrapper">
+        <table>
+            <colgroup>
+                <col class="column-subject" />
+                <col class="column-grades" />
+                <col class="column-average" />
+            </colgroup>
+            <thead>
+                <tr>
+                    <th scope="col">Предмет</th>
+                    <th scope="col">Оценки</th>
+                    <th scope="col">Средний балл</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr th:each="row : ${rows}">
+                    <td class="subject-name" th:text="${row.subject}">
+                        Предмет
+                    </td>
+
+                    <td>
+                        <div class="grades-list">
+                            <span th:each="grade : ${row.grades}" class="grade-chip">
+                                <span class="grade-value" th:text="${grade.value}">
+                                    5
+                                </span>
+                                <sup th:if="${grade.weight != null and grade.weight > 1}" class="grade-weight"
+                                    th:text="|*${grade.weight}|">
+                                    *2
+                                </sup>
+                                <span class="grade-date" th:text="|(${#temporals.format(grade.date, 'dd.MM')})|">
+                                    (01.09)
+                                </span>
+                            </span>
+                        </div>
+
+                    </td>
+
+                    <td class="average" th:text="${#numbers.formatDecimal(row.average, 1, 2, 'COMMA')}">
+                        4,50
+                    </td>
+                </tr>
+            </tbody>
+
+        </table>
+    </main>
+
+    <div class="report-summary">
+        Итоговый средний балл:
+        <span th:text="${#numbers.formatDecimal(totalAverage, 1, 2, 'COMMA')}">
+            4,00
+        </span>
+    </div>
+
+    <footer class="footer">
+        Документ сформирован автоматически
+    </footer>
+
+
+</body>
+
+</html>

@@ -4,13 +4,13 @@ import { useCreateAttendance, useDeleteAttendance } from "@/hooks/use-attendance
 import { useCreateGrade, useDeleteGrade } from "@/hooks/use-grade";
 import { useJournalAccess } from "@/hooks/use-journal-access";
 import { cn } from "@/lib/utils";
-import type { GradeJournalDto, AttendanceJournalDto } from "@/services/teacher-journal-service";
+import type { GradeLessonTeacherDto, AttendanceLessonTeacherDto } from "@/services/journal-service";
 import { useState } from "react";
 import { X } from "lucide-react";
 
 interface GradePopoverProps {
-  grades: GradeJournalDto[];
-  attendances: AttendanceJournalDto[];
+  grades: GradeLessonTeacherDto[];
+  attendances: AttendanceLessonTeacherDto[];
   studentId: number;
   lessonInstanceId: number;
   academicPeriodId: number;

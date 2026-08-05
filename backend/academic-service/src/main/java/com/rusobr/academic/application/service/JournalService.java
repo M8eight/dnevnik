@@ -8,12 +8,13 @@ import com.rusobr.academic.domain.model.ScheduleLesson;
 import com.rusobr.academic.infrastructure.client.UserClient;
 import com.rusobr.academic.infrastructure.persistence.repository.LessonInstanceRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.SchoolClassRepository;
-import com.rusobr.common.dto.BatchUserResponse;
+import com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodResponse;
+import com.rusobr.academic.web.dto.grade.WeightedGrade;
 import com.rusobr.academic.web.dto.lessonInstance.*;
-import com.rusobr.academic.web.dto.lessonInstance.teacher.AttendanceStudentDto;
-import com.rusobr.academic.web.dto.lessonInstance.teacher.GradeStudentDto;
 import com.rusobr.academic.web.dto.lessonInstance.teacher.StudentJournalDto;
 import com.rusobr.academic.web.dto.lessonInstance.teacher.TeacherJournalResponse;
+import com.rusobr.common.dto.BatchUserResponse;
+import com.rusobr.common.dto.UserFeignResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,10 @@ import java.math.RoundingMode;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,18 +44,11 @@ public class JournalService {
     private final AcademicPeriodService academicPeriodService;
     private final TransactionTemplate readOnlyTransactionTemplate;
 
-    private record JournalDbData(
-            AcademicPeriod academicPeriod,
-            List<LessonInstanceDto> lessonInstances,
-            List<Long> studentsIds,
-            List<GradeStudentDto> grades,
-            List<AttendanceStudentDto> attendances
-    ) {}
+
 
     @Cacheable(value = "journalByStudentId", key = "#studentId + '#' + #academicPeriodId")
     @Transactional(readOnly = true)
     public GradesLessonsResponse getGradesByStudentId(Long studentId, Long academicPeriodId) {
-        //Получаем Academic period
         AcademicPeriod academicPeriod = academicPeriodService.getById(academicPeriodId);
 
         //Получаем плоский список оценок по предметам
@@ -81,7 +78,7 @@ public class JournalService {
 
         //Превращаем map в dto
         List<DatesGradesDto> subjects = mappedGradesBySubject.entrySet().stream()
-                .map(e -> new DatesGradesDto(e.getKey(), e.getValue()))
+                .map(e -> new DatesGradesDto(e.getKey(), e.getValue(), calculateWeightedAverage(e.getValue())))
                 .toList();
 
         return new GradesLessonsResponse(academicPeriodMapper.toResponse(academicPeriod), dates, subjects);
@@ -94,16 +91,57 @@ public class JournalService {
 
         BatchUserResponse students = userClient.getBatchStudents(data.studentsIds());
 
-        List<StudentJournalDto> studentJournal = buildStudentJournal(data.grades(), data.attendances());
+        var mappedStudents = students.found().stream().collect(Collectors.toMap(
+                UserFeignResponse::id,
+                user -> user
+        ));
+
+        var mappedGrades = data.grades.stream().collect(Collectors.groupingBy(
+                StudentJournalDto.GradeLessonTeacherDto::studentId,
+                LinkedHashMap::new,
+                Collectors.groupingBy(
+                        StudentJournalDto.GradeLessonTeacherDto::lessonInstanceId,
+                        Collectors.toList()
+                )
+        ));
+
+        var mappedAttendances = data.attendances.stream().collect(Collectors.groupingBy(
+                StudentJournalDto.AttendanceLessonTeacherDto::studentId,
+                LinkedHashMap::new,
+                Collectors.toMap(
+                        StudentJournalDto.AttendanceLessonTeacherDto::lessonInstanceId,
+                        a -> a
+                )
+        ));
+
+        var journal = data.studentsIds().stream().map(
+                studentId -> {
+                    var gradesOrDefault = mappedGrades.getOrDefault(studentId, Map.of());
+                    List<StudentJournalDto.GradeLessonTeacherDto> allGrades = gradesOrDefault.values().stream().flatMap(List::stream).toList();
+                    return new StudentJournalDto(
+                            mappedStudents.get(studentId),
+                            gradesOrDefault,
+                            mappedAttendances.getOrDefault(studentId, Map.of()),
+                            calculateWeightedAverage(allGrades)
+                            );
+                }
+        ).toList();
 
         return new TeacherJournalResponse(
-                academicPeriodMapper.toResponse(data.academicPeriod()),
-                students,
+                data.academicPeriod(),
                 data.lessonInstances(),
-                studentJournal,
+                journal,
                 students.degraded()
         );
     }
+
+    private record JournalDbData(
+            AcademicPeriodResponse academicPeriod,
+            List<LessonInstanceDto> lessonInstances,
+            List<Long> studentsIds,
+            List<StudentJournalDto.GradeLessonTeacherDto> grades,
+            List<StudentJournalDto.AttendanceLessonTeacherDto> attendances
+    ) {}
 
     private JournalDbData fetchJournalData(Long teachingAssignmentId, Long academicPeriodId) {
         AcademicPeriod academicPeriod = academicPeriodService.getById(academicPeriodId);
@@ -114,47 +152,20 @@ public class JournalService {
 
         List<Long> studentsIds = schoolClassRepository.findStudentsIdsByTeachingAssignment(teachingAssignmentId);
 
-        List<GradeStudentDto> grades = lessonInstanceRepository
+        List<StudentJournalDto.GradeLessonTeacherDto> grades = lessonInstanceRepository
                 .findGradesByTeachingAssignment(teachingAssignmentId, academicPeriod.getStartDate(), academicPeriod.getEndDate())
                 .stream().map(lessonInstanceMapper::toGradeStudentDto).toList();
 
-        List<AttendanceStudentDto> attendances = lessonInstanceRepository
+        List<StudentJournalDto.AttendanceLessonTeacherDto> attendances = lessonInstanceRepository
                 .findAttendancesByTeachingAssignment(teachingAssignmentId, academicPeriod.getStartDate(), academicPeriod.getEndDate())
                 .stream().map(lessonInstanceMapper::toAttendanceStudentDto).toList();
 
-        return new JournalDbData(academicPeriod, lessonInstances, studentsIds, grades, attendances);
+        return new JournalDbData(academicPeriodMapper.toResponse(academicPeriod), lessonInstances, studentsIds, grades, attendances);
     }
 
-    private List<StudentJournalDto> buildStudentJournal(List<GradeStudentDto> grades, List<AttendanceStudentDto> attendances) {
-        var gradeJournal = grades.stream()
-                .collect(Collectors.groupingBy(GradeStudentDto::studentId, LinkedHashMap::new, Collectors.mapping(
-                        p -> new StudentJournalDto.GradeLessonTeacherDto(p.gradeId(), p.value(), p.weight(), p.gradeType(), p.lessonInstanceId()),
-                        Collectors.toList())));
-
-        var attendanceJournal = attendances.stream()
-                .collect(Collectors.groupingBy(AttendanceStudentDto::studentId, LinkedHashMap::new, Collectors.mapping(
-                        p -> new StudentJournalDto.AttendanceLessonTeacherDto(p.attendanceId(), p.status(), p.lessonInstanceId()),
-                        Collectors.toList())));
-
-        Set<Long> allStudentIds = new LinkedHashSet<>();
-        allStudentIds.addAll(gradeJournal.keySet());
-        allStudentIds.addAll(attendanceJournal.keySet());
-
-        return allStudentIds.stream()
-                .map(studentId -> {
-                    var studentGrades = gradeJournal.getOrDefault(studentId, List.of());
-                    return new StudentJournalDto(
-                            studentId,
-                            studentGrades,
-                            calculateWeightedAverage(studentGrades),
-                            attendanceJournal.getOrDefault(studentId, List.of())
-                    );
-                }).toList();
-    }
-
-    private double calculateWeightedAverage(List<StudentJournalDto.GradeLessonTeacherDto> grades) {
+    public static double calculateWeightedAverage(List<? extends WeightedGrade> grades) {
         double top = grades.stream().mapToDouble(g -> g.value() * g.weight()).sum();
-        double bottom = grades.stream().mapToDouble(StudentJournalDto.GradeLessonTeacherDto::weight).sum();
+        double bottom = grades.stream().mapToDouble(WeightedGrade::weight).sum();
         return bottom > 0
                 ? BigDecimal.valueOf(top / bottom).setScale(2, RoundingMode.HALF_UP).doubleValue()
                 : 0.0;

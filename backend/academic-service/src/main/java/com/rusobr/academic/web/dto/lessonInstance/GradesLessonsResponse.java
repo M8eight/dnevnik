@@ -8,6 +8,6 @@ import java.util.List;
 public record GradesLessonsResponse(
         AcademicPeriodResponse academicPeriod,
         List<LocalDate> dates,
-        List<DatesGradesDto> subjects
+        List<DatesGradesDto> gradesBySubjects
 ) {
 }

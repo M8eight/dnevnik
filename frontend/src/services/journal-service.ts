@@ -1,14 +1,6 @@
 import api from "@/axios/axios";
-import type { AcademicYearResponse } from "./academic-year-service";
-import type { BatchUserResponse } from "./user-service";
-
-
-export interface StudentMetadata {
-    id: number;
-    firstName: string;
-    lastName: string;
-    keycloakId: string;
-}
+import type { UserSimpleResponse } from "./user-service";
+import type { AcademicPeriodResponse } from "./academic-period-service";
 
 
 export interface LessonInstanceDto {
@@ -16,7 +8,7 @@ export interface LessonInstanceDto {
     lessonDate: string;
 }
 
-export interface GradeJournalDto {
+export interface GradeLessonTeacherDto {
     gradeId: number;
     value: number;
     weight: number;
@@ -24,31 +16,23 @@ export interface GradeJournalDto {
     lessonInstanceId: number;
 }
 
-export interface AttendanceJournalDto {
+export interface AttendanceLessonTeacherDto {
     attendanceId: number;
     status: string;
     lessonInstanceId: number;
 }
 
-export interface StudentJournalEntry {
-    studentId: number;
-    grades: GradeJournalDto[];
+export interface StudentJournalDto {
+    student: UserSimpleResponse;
+    gradesByLesson: Record<number, GradeLessonTeacherDto[]>;
+    attendancesByLesson: Record<number, AttendanceLessonTeacherDto>;
     gradesAverage : number | null;
-    attendances: AttendanceJournalDto[];
 }
 
 export interface TeacherJournalResponse {
-    academicPeriod: {
-        id: number;
-        name: string;
-        academicYear: AcademicYearResponse;
-        isClosed: boolean;
-        startDate: string;
-        endDate: string;
-    };
-    students: BatchUserResponse;
+    academicPeriod: AcademicPeriodResponse;
     lessonInstances: LessonInstanceDto[];
-    studentsJournal: StudentJournalEntry[];
+    studentsJournal: StudentJournalDto[];
     isDegradedStudents: boolean;
 }
 

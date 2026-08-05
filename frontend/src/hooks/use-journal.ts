@@ -1,4 +1,4 @@
-import { getTeacherJournal, type TeacherJournalResponse } from "@/services/teacher-journal-service";
+import { getTeacherJournal, type TeacherJournalResponse } from "@/services/journal-service";
 import { useQuery } from "@tanstack/react-query";
 
 export const useTeacherJournal = (teachingAssignmentId: number, academicPeriodId: number) => {

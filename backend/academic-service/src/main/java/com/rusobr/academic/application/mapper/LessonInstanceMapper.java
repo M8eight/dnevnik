@@ -10,8 +10,7 @@ import com.rusobr.academic.web.dto.homework.HomeworkDiaryResponse;
 import com.rusobr.academic.web.dto.lessonInstance.DiaryLessonInstanceDto;
 import com.rusobr.academic.web.dto.lessonInstance.GradeJournalDto;
 import com.rusobr.academic.web.dto.lessonInstance.LessonInstanceDto;
-import com.rusobr.academic.web.dto.lessonInstance.teacher.AttendanceStudentDto;
-import com.rusobr.academic.web.dto.lessonInstance.teacher.GradeStudentDto;
+import com.rusobr.academic.web.dto.lessonInstance.teacher.StudentJournalDto;
 import org.mapstruct.*;
 
 import java.util.Set;
@@ -41,8 +40,8 @@ public interface LessonInstanceMapper {
 
     LessonInstanceDto toLessonInstanceDto(LessonInstanceProjection projection);
 
-    GradeStudentDto toGradeStudentDto(GradeStudentProjection projection);
+    StudentJournalDto.GradeLessonTeacherDto toGradeStudentDto(GradeStudentProjection projection);
 
-    AttendanceStudentDto toAttendanceStudentDto(AttendanceStudentProjection projection);
+    StudentJournalDto.AttendanceLessonTeacherDto toAttendanceStudentDto(AttendanceStudentProjection projection);
 
 }
