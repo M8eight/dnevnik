@@ -25,10 +25,8 @@ export default function AssignStudentsModal({
         return () => clearTimeout(t);
     }, [studentSearch]);
 
-    // Данные родителя с детьми
     const { data: parentData, isLoading: isParentLoading } = useParent(parent.id);
 
-    // Список всех учеников для поиска
     const { data: allStudents, isLoading: isStudentsLoading } = useFindUsersByFilter(
         0,
         20,
@@ -45,7 +43,6 @@ export default function AssignStudentsModal({
         if (e.target === overlayRef.current) onClose();
     };
 
-    // Блокируем скролл страницы пока открыта модалка
     useEffect(() => {
         document.body.style.overflow = "hidden";
         return () => { document.body.style.overflow = ""; };

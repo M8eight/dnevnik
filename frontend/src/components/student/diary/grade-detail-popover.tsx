@@ -20,7 +20,6 @@ const formatDateTimeLabel = (dateStr: string) => {
 const initials = (firstName: string, lastName: string) =>
   `${firstName?.[0] ?? ""}${lastName?.[0] ?? ""}`.toUpperCase();
 
-// Обновленные стили, синхронизированные с GradeBadge
 const gradeStyles: Record<number, { bg: string; text: string; ring: string }> = {
   5: { bg: "bg-emerald-50", text: "text-emerald-600", ring: "ring-emerald-600/15" },
   4: { bg: "bg-amber-50",   text: "text-amber-500",   ring: "ring-amber-500/15" },
@@ -28,11 +27,9 @@ const gradeStyles: Record<number, { bg: string; text: string; ring: string }> = 
   2: { bg: "bg-red-50",     text: "text-red-600",     ring: "ring-red-600/15" },
 };
 
-// Функция для получения стилей (с дефолтным значением на случай непредвиденной оценки)
 const getGradeStyle = (value: number) => 
   gradeStyles[value] || { bg: "bg-gray-50", text: "text-gray-500", ring: "ring-black/6" };
 
-// Добавлен проп size
 export function GradePopover({ gradeId, value, size = "md" }: { gradeId: number; value: number; size?: "sm" | "md" }) {
   const [open, setOpen] = useState(false);
   const { data, isLoading } = useGradeDetail(gradeId, open);

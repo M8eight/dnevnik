@@ -92,8 +92,8 @@ export default function YearCard({
                                 className={cn(
                                     "w-8 h-8 rounded-[10px] flex items-center justify-center transition-all",
                                     year.closed
-                                        ? "bg-black/5 hover:bg-emerald-50 text-black/35 hover:text-emerald-500"   // Серая, при наведении зеленеет (включаем)
-                                        : "bg-emerald-50 hover:bg-amber-50 text-emerald-600 hover:text-amber-500" // Зеленая, при наведении желтеет (типа отключаем)
+                                        ? "bg-black/5 hover:bg-emerald-50 text-black/35 hover:text-emerald-500"
+                                        : "bg-emerald-50 hover:bg-amber-50 text-emerald-600 hover:text-amber-500"
                                 )}
                             >
                                 {isSettingActive ? (

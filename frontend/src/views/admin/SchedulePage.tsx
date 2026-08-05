@@ -40,7 +40,6 @@ export default function SchedulePage() {
 
     const [date, setDate] = useState<string>(todayStr);
 
-    //academicYear
     const { data: academicYears } = useGetAcademicYears();
     const [selectedAcademicYearId, setSelectedAcademicYearId] = useState<string>("");
 

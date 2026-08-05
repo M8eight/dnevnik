@@ -44,13 +44,11 @@ export default function HomeworkCalendar({
         const end = endOfMonth(currentMonth);
         const monthDays = eachDayOfInterval({ start, end });
 
-        // Monday-based offset
         const startDow = getDay(start);
         const offset = startDow === 0 ? 6 : startDow - 1;
         const prefixDays: (Date | null)[] = Array(offset).fill(null);
 
         const allCells = [...prefixDays, ...monthDays];
-        // pad to full weeks
         while (allCells.length % 7 !== 0) allCells.push(null);
         return allCells;
     }, [currentMonth]);
