@@ -30,7 +30,7 @@ export default function ClassCard({
 
     const handleSave = (e: React.MouseEvent) => {
         e.stopPropagation();
-        if (!name.trim() || !onUpdate) return; // Защита от вызова undefined
+        if (!name.trim() || !onUpdate) return;
         onUpdate(schoolClass.id, { name: name.trim() });
         setEditing(false);
     };
@@ -48,7 +48,7 @@ export default function ClassCard({
 
     const handleDeleteClick = (e: React.MouseEvent) => {
         e.stopPropagation();
-        if (onDelete) onDelete(schoolClass.id); // Защита от вызова undefined
+        if (onDelete) onDelete(schoolClass.id);
     };
 
     return (

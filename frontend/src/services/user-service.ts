@@ -2,8 +2,6 @@ import type { PageResponse } from "@/helpers/helper-interfaces";
 import api from "../axios/axios";
 
 
-// ─── User create types ────────────────────────────────────────────────────────────────────
-
 export type UserRole = "STUDENT" | "PARENT" | "TEACHER";
 
 export interface UserBase {
@@ -82,8 +80,6 @@ export interface BatchUserResponse {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface ParentDetailsResponse { }
-
-// ─── User update types ────────────────────────────────────────────────────────────────────
 
 export interface UserUpdateData {
     username?: string;

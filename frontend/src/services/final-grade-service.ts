@@ -36,19 +36,6 @@ export interface FinalGradeRequest {
         teachingAssignmentId: number;
 }
 
-export type FinalGradesStudentResponse = Record<string, FinalGradeResponse>;
-
-export const getFinalGradesByStudent = async (academicYearId: number): Promise<FinalGradesStudentResponse> => {
-    const { data } = await api.get<FinalGradesStudentResponse>(
-        `/academic-service/api/v1/final-grades/by-student`, {
-            params: {
-                academicYearId
-            }
-        }
-    );
-    return data;
-};
-
 export const getFinalGradesByAssignment = async (teachingAssignmentId: number, academicYearId: number): Promise<FinalGradeTeacherResponse> => {
     const { data } = await api.get<FinalGradeTeacherResponse>(
         `/academic-service/api/v1/final-grades/by-assignment`, {

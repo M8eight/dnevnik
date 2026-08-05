@@ -18,7 +18,6 @@ import type { DiaryScheduleDto } from "@/services/schedule-service";
 const DAY_ORDER = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
 
 
-
 const formatDateLabel = (dateStr: string) =>
   new Date(dateStr).toLocaleDateString("ru-RU", { day: "numeric", month: "long" });
 
@@ -29,7 +28,6 @@ const mapAttendanceStatus = (status?: string) => {
   return "";
 };
 
-// вычисляем дату дня по началу недели и dayOfWeek
 function lessonDate(weekStart: Date, dayOfWeek: string): string {
   const idx = DAY_ORDER.indexOf(dayOfWeek);
   return format(addDays(weekStart, idx), "yyyy-MM-dd");

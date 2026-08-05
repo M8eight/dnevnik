@@ -1,13 +1,7 @@
 import api from "@/axios/axios";
 import type { UserSimpleResponse } from "./user-service";
 
-export interface PeriodGradeStudentResponse {
-    id: number;
-    value: number;
-    description: string | null;
-    subjectName: string;
-    academicPeriodId: number;
-}
+
 
 export interface PeriodGradeTeacherResponse {
     studentPeriodGrades: StudentPeriodGradeWithAverage[];
@@ -35,19 +29,6 @@ export interface PeriodGradeRequest {
     studentId: number;
     academicPeriodId: number;
 }
-
-export type PeriodGradesStudentResponse = Record<string, PeriodGradeStudentResponse[]>;
-
-export const getPeriodGradesByStudent = async (academicYearId: number): Promise<PeriodGradesStudentResponse> => {
-    const { data } = await api.get<PeriodGradesStudentResponse>(
-        `/academic-service/api/v1/period-grades/by-student`, {
-        params: {
-            academicYearId,
-        }
-    }
-    );
-    return data;
-};
 
 export const getPeriodGradesByAssignment = async (teachingAssignmentId: number, currentAcademicPeriodId: number, academicYearId: number): Promise<PeriodGradeTeacherResponse> => {
     const { data } = await api.get<PeriodGradeTeacherResponse>(

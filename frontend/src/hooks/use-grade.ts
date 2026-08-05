@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { getAvgGradeByStudentId, findAllGradesByDate, getGradesLessonsByStudentId, deleteGrade, getGradeDetail } from "@/services/grade-service"
+import { getAvgGradeByStudentId, findAllGradesByDate, deleteGrade, getGradeDetail } from "@/services/grade-service"
 import type { AvgGrade, GradeDetailResponse, GradeWithSubjectNameResponse } from "@/services/grade-service"
 
 import { useMutation, useQueryClient } from "@tanstack/react-query"
@@ -22,14 +22,6 @@ export const useGradesByDate = (studentId: number, date: string) => {
     });
 };
 
-export const useGradesLessonsByStudentId = (academicPeriodId: number) => {
-    return useQuery({
-        queryKey: ['gradesLessonsByStudentId', academicPeriodId],
-        queryFn: () => getGradesLessonsByStudentId(academicPeriodId),
-        enabled: !!academicPeriodId,
-    });
-};
-
 export const useGradeDetail = (gradeId: number, enabled: boolean = true) => {
     return useQuery<GradeDetailResponse>({
         queryKey: ['gradeDetail', gradeId],
@@ -47,7 +39,7 @@ export const useCreateGrade = () => {
             queryClient.invalidateQueries({ queryKey: ['gradesByDate'] });
             queryClient.invalidateQueries({ queryKey: ['avgGrade'] });
             queryClient.invalidateQueries({ queryKey: ['gradesLessonsByStudentId'] });
-            queryClient.invalidateQueries({ queryKey: ['teacherJournal'] }); // Добавлено для обновления журнала
+            queryClient.invalidateQueries({ queryKey: ['teacherJournal'] });
         }
     });
 };
@@ -61,7 +53,7 @@ export const useDeleteGrade = () => {
             queryClient.invalidateQueries({ queryKey: ['gradesByDate'] });
             queryClient.invalidateQueries({ queryKey: ['avgGrade'] });
             queryClient.invalidateQueries({ queryKey: ['gradesLessonsByStudentId'] });
-            queryClient.invalidateQueries({ queryKey: ['teacherJournal'] }); // Обновляем журнал после удаления
+            queryClient.invalidateQueries({ queryKey: ['teacherJournal'] });
         }
     });
 };

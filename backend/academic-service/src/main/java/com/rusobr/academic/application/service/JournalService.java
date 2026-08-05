@@ -9,7 +9,10 @@ import com.rusobr.academic.infrastructure.client.UserClient;
 import com.rusobr.academic.infrastructure.persistence.repository.LessonInstanceRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.SchoolClassRepository;
 import com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodResponse;
+import com.rusobr.academic.web.dto.grade.PeriodFinalGradeResponse;
 import com.rusobr.academic.web.dto.grade.WeightedGrade;
+import com.rusobr.academic.web.dto.grade.finalGrade.FinalGradeResponse;
+import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeStudentResponse;
 import com.rusobr.academic.web.dto.lessonInstance.*;
 import com.rusobr.academic.web.dto.lessonInstance.teacher.StudentJournalDto;
 import com.rusobr.academic.web.dto.lessonInstance.teacher.TeacherJournalResponse;
@@ -41,9 +44,10 @@ public class JournalService {
     private final SchoolClassRepository schoolClassRepository;
     private final UserClient userClient;
     private final LessonInstanceMapper lessonInstanceMapper;
-    private final AcademicPeriodService academicPeriodService;
     private final TransactionTemplate readOnlyTransactionTemplate;
-
+    private final PeriodGradeService periodGradeService;
+    private final FinalGradeService finalGradeService;
+    private final AcademicPeriodService academicPeriodService;
 
 
     @Cacheable(value = "journalByStudentId", key = "#studentId + '#' + #academicPeriodId")
@@ -82,6 +86,19 @@ public class JournalService {
                 .toList();
 
         return new GradesLessonsResponse(academicPeriodMapper.toResponse(academicPeriod), dates, subjects);
+    }
+
+    @Cacheable(value = "journalPeriodFinalGradeByStudentId", key = "#studentId + '#' + #academicYearId")
+    public List<PeriodFinalGradeResponse> getPeriodFinalGrades(Long studentId, Long academicYearId) {
+        Map<String, List<PeriodGradeStudentResponse>> periodGrades = periodGradeService.getByStudentId(studentId, academicYearId);
+        Map<String, FinalGradeResponse> finalGrades = finalGradeService.getByStudentId(studentId, academicYearId);
+        return periodGrades.keySet().stream().map(
+                subject ->
+                    new PeriodFinalGradeResponse(
+                            subject,
+                            periodGrades.get(subject),
+                            finalGrades.get(subject)
+                    )).toList();
     }
 
     @Cacheable(value = "journalByAssignment", key = "#teachingAssignmentId + '#' + #academicPeriodId", unless = "#result.degradedStudents")

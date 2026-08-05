@@ -34,7 +34,6 @@ export default function UserAdminPage() {
     const [debouncedSearch, setDebouncedSearch] = useState("");
     const [filterRole, setFilterRole] = useState<UserRole | "ALL">("ALL");
 
-    // Модалка привязки
     const [assignParent, setAssignParent] = useState<UserResponse | null>(null);
     const [editUser, setEditUser] = useState<UserResponse | null>(null);
 

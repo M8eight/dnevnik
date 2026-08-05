@@ -10,12 +10,7 @@ import { GRADE_STYLE } from "@/constants/component-constants";
 import { cn } from "@/lib/utils";
 import FinalGradePopover from "@/components/teacher/teacher-journal/final-grade-popover";
 import Chip from "@/components/student/chip";
-
-export interface Student {
-  id: number;
-  firstName: string;
-  lastName: string;
-}
+import type { UserSimpleResponse } from "@/services/user-service";
 
 export default function FinalGradesView({
   teachingAssignmentId,
@@ -25,7 +20,7 @@ export default function FinalGradesView({
 }: {
   teachingAssignmentId: number;
   academicYearId: number;
-  students: Student[];
+  students: UserSimpleResponse[];
   currentAcademicPeriodId: number;
 }) {
   const { data: finalGradesResponse, isLoading: isFinalLoading } =

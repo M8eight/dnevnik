@@ -17,7 +17,7 @@ export function addDays(date: Date, days: number): Date {
 export function getWeekStart(date: Date): Date {
     const d = new Date(date);
     d.setHours(0, 0, 0, 0);
-    const day = d.getDay(); // 0 = Sunday, 1 = Monday, ...
+    const day = d.getDay();
     const diffToMonday = day === 0 ? -6 : 1 - day;
     d.setDate(d.getDate() + diffToMonday);
     return d;
@@ -26,7 +26,7 @@ export function getWeekStart(date: Date): Date {
 export function getWeekRange(date: Date): { start: Date; end: Date } {
     const start = getWeekStart(date);
     const nextWeekStart = addDays(start, WEEK_DAYS_COUNT);
-    const end = addDays(nextWeekStart, -1); // <- the "endDate -1 day" fix
+    const end = addDays(nextWeekStart, -1);
     return { start, end };
 }
 

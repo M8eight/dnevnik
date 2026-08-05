@@ -1,14 +1,6 @@
-import { createFinalGrade, deleteFinalGrade, getFinalGradesByAssignment, getFinalGradesByStudent, type FinalGradeRequest, type FinalGradesStudentResponse, type FinalGradeTeacherResponse } from "@/services/final-grade-service";
+import { createFinalGrade, deleteFinalGrade, getFinalGradesByAssignment, type FinalGradeRequest, type FinalGradeTeacherResponse } from "@/services/final-grade-service";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-
-export const useFinalGradesByStudent = ( academicYearId: number ) => {
-  return useQuery<FinalGradesStudentResponse>({
-    queryKey: ["finalGrades", academicYearId],
-    queryFn: () => getFinalGradesByStudent(academicYearId),
-    enabled: !!academicYearId,
-  });
-};
 
 export const useFinalGradesByAssignment = ( teachingAssignmentId: number, academicYearId: number ) => {
   return useQuery<FinalGradeTeacherResponse>({

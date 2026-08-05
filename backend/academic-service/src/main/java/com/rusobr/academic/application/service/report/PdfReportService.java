@@ -76,6 +76,17 @@ public class PdfReportService {
         return generateReport(context, "grade-report");
     }
 
+    public byte[] generateStudentPeriodFinalGradeReport(StudentPeriodFinalGradeReportDto request) {
+        Context context = new Context();
+        context.setVariable("title", request.title());
+        context.setVariable("academicYearName", request.academicYearName());
+        context.setVariable("student", request.student());
+        context.setVariable("schoolClass", request.schoolClass());
+        context.setVariable("periodFinalGrades", request.periodFinalGrades());
+
+        return generateReport(context, "grade-period-report.html");
+    }
+
     public byte[] generateTeacherGradeReport(TeacherGradeReportDto request) {
         TeacherJournalResponse journal = request.journal();
         DateTimeFormatter dateFmt = DateTimeFormatter.ofPattern("dd.MM");

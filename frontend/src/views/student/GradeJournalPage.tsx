@@ -10,6 +10,7 @@ import StudentNavbar from "@/components/layout/navbars/StudentNavbar";
 import GradeJournalPeriodGradeTab from "./GradeJournalPeriodGradeTab";
 import GradeJournalGradeTab from "./GradeJournalGradeTab";
 import { useGetAcademicYears } from "@/hooks/use-academic-year";
+import { useCreateStudentPeriodFinalReport, useCreateStudentReport } from "@/hooks/use-pdf";
 
 type Tab = "current" | "period";
 
@@ -64,6 +65,9 @@ export default function GradeTablePage() {
     const resolvedPeriodId = selectedPeriodId || defaultPeriodId;
     const academicPeriodId = resolvedPeriodId ? parseInt(resolvedPeriodId, 10) : 0;
     const academicYearIdNumber = resolvedAcademicYearId ? parseInt(resolvedAcademicYearId, 10) : 0;
+
+    const { mutate: createGradeReport, isPending: isPendingGrades } = useCreateStudentReport();
+    const { mutate: createGradePeriodFinalReport, isPending: isPendingPeriodFinal } = useCreateStudentPeriodFinalReport();
 
     return (
         <div className="relative z-10 min-h-screen px-6 md:px-10 pt-2 pb-14 max-w-400 mx-auto">
@@ -126,12 +130,25 @@ export default function GradeTablePage() {
                         </Select>
                     )}
 
-                    <Button
-                        variant="outline"
-                        className="glass-pill h-11 border-0 text-[11px] font-extrabold uppercase tracking-widest rounded-2xl text-(--navy) px-5 hover:scale-[1.02] transition-transform"
-                    >
-                        <Download className="mr-2 h-4 w-4 text-(--red)" /> PDF
-                    </Button>
+                    {activeTab === "current" && (
+                        <Button
+                            variant="outline"
+                            onClick={() => createGradeReport(academicPeriodId)}
+                            className="glass-pill h-11 border-0 text-[11px] font-extrabold uppercase tracking-widest rounded-2xl text-(--navy) px-5 hover:scale-[1.02] transition-transform"
+                        >
+                            <Download className="mr-2 h-4 w-4 text-(--red)" /> {isPendingGrades ? "Генерация..." : "PDF"}
+                        </Button>
+                    )}
+                    {activeTab === "period" && (
+                        <Button
+                            variant="outline"
+                            onClick={() => createGradePeriodFinalReport(academicYearIdNumber)}
+                            className="glass-pill h-11 border-0 text-[11px] font-extrabold uppercase tracking-widest rounded-2xl text-(--navy) px-5 hover:scale-[1.02] transition-transform"
+                        >
+                            <Download className="mr-2 h-4 w-4 text-(--red)" /> {isPendingPeriodFinal ? "Генерация..." : "PDF"}
+                        </Button>
+                    )}
+
 
                 </div>
             </header>

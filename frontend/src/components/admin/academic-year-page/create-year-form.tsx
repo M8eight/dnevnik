@@ -44,7 +44,7 @@ export default function CreateYearForm() {
     const isValid = !!(formValues.name && formValues.startDate && formValues.endDate);
 
     const formatDateToString = (date: Date) => {
-        return date.toLocaleDateString("en-CA"); // Возвращает строго "YYYY-MM-DD"
+        return date.toLocaleDateString("en-CA");
     };
 
     const onSubmit = (values: FormValues) => {

@@ -30,7 +30,6 @@ export function GradeBadge({ grade, size = "md" }: { grade?: number | null; size
     2: "bg-red-50     text-red-600",
   };
 
-  // Определяем классы размеров
   const sizeClass = size === "md" ? "w-[36px] h-[36px] text-[17px]" : "w-[28px] h-[28px] text-[14px]";
 
   return (

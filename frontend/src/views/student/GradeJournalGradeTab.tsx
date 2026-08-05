@@ -5,9 +5,9 @@ import React, { useRef, useState, useEffect, useCallback, useLayoutEffect } from
 import GradeBadge from "@/components/student/grades-page/grade-badge";
 import StatCard from "@/components/student/grades-page/stat-card";
 import { Award, BookOpen, Star, TrendingUp } from "lucide-react";
-import { useGradesLessonsByStudentId } from "@/hooks/use-grade";
 import { useHorizontalScrollDrag } from "@/helpers/teacher-helpers";
 import { GradePopover } from "@/components/student/diary/grade-detail-popover";
+import { useGradesLessonsByStudentId } from "@/hooks/use-journal";
 
 export interface GradeJournalGradeTabProps {
     academicPeriodId: number;

@@ -19,7 +19,6 @@ import CreateSubjectForm from "@/components/admin/subject-page/create-subject-fo
 import SubjectCard from "@/components/admin/subject-page/subject-card";
 
 
-// ─── Main page ────────────────────────────────────────────────────────────────
 export default function SubjectsPage() {
     const [page, setPage] = useState(0);
     const [pageSize] = useState(20);
@@ -38,7 +37,6 @@ export default function SubjectsPage() {
         s.name.toLowerCase().includes(search.toLowerCase())
     );
 
-    // Функции навигации
     const handleNextPage = () => {
         if (!isLast) setPage((old) => old + 1);
     };

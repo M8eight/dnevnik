@@ -6,7 +6,6 @@ import com.rusobr.academic.web.controller.PeriodGradeController;
 import com.rusobr.common.dto.UserFeignResponse;
 import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeRequest;
 import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeResponse;
-import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeStudentResponse;
 import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeTeacherResponse;
 import com.rusobr.academic.web.dto.grade.periodGrade.StudentPeriodGradeWithAverage;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,7 +23,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
-import java.util.Map;
 
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
@@ -67,10 +65,6 @@ public class PeriodGradeControllerTest {
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
     }
 
-    private PeriodGradeStudentResponse buildStudentResponse() {
-        return new PeriodGradeStudentResponse(PERIOD_GRADE_ID, VALUE, "Excellent work", "Mathematics", ACADEMIC_PERIOD_ID);
-    }
-
     private PeriodGradeResponse buildPeriodGradeResponse() {
         return new PeriodGradeResponse(PERIOD_GRADE_ID, VALUE, "Excellent work", STUDENT_ID, ACADEMIC_PERIOD_ID);
     }
@@ -85,19 +79,6 @@ public class PeriodGradeControllerTest {
                 List.of(buildPeriodGradeResponse()),
                 4.75
         );
-    }
-
-    @Test
-    @DisplayName("GET /period-grades/by-student — 200 and student period grades map")
-    void getByStudentId_ShouldReturn200() throws Exception {
-        when(periodGradeService.getByStudentId(STUDENT_ID, 1L))
-                .thenReturn(Map.of("Mathematics", List.of(buildStudentResponse())));
-
-        mockMvc.perform(get("/api/v1/period-grades/by-student")
-                        .param("academicYearId", String.valueOf(1L)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.Mathematics[0].id").value(PERIOD_GRADE_ID))
-                .andExpect(jsonPath("$.Mathematics[0].subjectName").value("Mathematics"));
     }
 
     @Test
