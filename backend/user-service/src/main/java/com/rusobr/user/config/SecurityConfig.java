@@ -33,7 +33,7 @@ public class SecurityConfig {
                             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                             .requestMatchers(POST, "/api/v1/students/batch").hasAnyRole(TEACHER.name(), ADMIN.name(), STUDENT.name())
-                            .requestMatchers(GET, "/api/v1/teachers/*/simple").hasAnyRole(ADMIN.name(), STUDENT.name())
+                            .requestMatchers(GET, "/api/v1/teachers/*/simple").hasAnyRole(ADMIN.name(), STUDENT.name(), TEACHER.name())
                             .requestMatchers(GET, "/api/v1/teachers/*").hasAnyRole(ADMIN.name(), TEACHER.name(), STUDENT.name())
                             .requestMatchers(GET, "/api/v1/users/*").hasRole(TEACHER.name())
                             .requestMatchers(GET, "/api/v1/students/*/details").hasAnyRole(ADMIN.name(), TEACHER.name())

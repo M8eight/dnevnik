@@ -18,6 +18,8 @@ import PeriodGradesView from "./TeacherJournalPeriodTab";
 import { JournalAccessProvider } from "@/hooks/use-journal-access";
 import ClosedPeriodAlert from "@/components/teacher/teacher-journal/closed-period-alert";
 import JournalTable from "./TeacherJournalGradeTab";
+import FinalGradesView from "./TeacherJournalFinalGradeTab";
+import { useCreateTeacherReport } from "@/hooks/use-pdf";
 
 const DEFAULT_GRADE_TYPE = "TEST";
 const DEFAULT_GRADE_WEIGHT = 1;
@@ -97,6 +99,9 @@ export default function TeacherJournal() {
   const currentAssignment = assignments?.find(
     (a) => a.teachingAssignmentId.toString() === selectedAssignmentId
   );
+
+  const { mutate: createTeacherGradeReport } = useCreateTeacherReport();
+  
 
   return (
     <JournalAccessProvider currentPeriod={currentSelectedPeriod} currentYear={currentAcademicYear} periods={periods}>
@@ -253,7 +258,7 @@ export default function TeacherJournal() {
                 onSearchChange={setSearchQuery}
                 viewMode={viewMode}
                 onViewModeChange={setViewMode}
-                onExport={() => console.log("export")}
+                onExport={() => createTeacherGradeReport({teachingAssignmentId: assignmentId, periodId: academicPeriodId}) }
               />
               <JournalTable
                 journalData={data}
@@ -275,14 +280,14 @@ export default function TeacherJournal() {
             />
           )}
 
-          {/* {activeTab === "final" && (
+          {activeTab === "final" && (
             <FinalGradesView
               teachingAssignmentId={assignmentId}
               academicYearId={parseInt(resolvedAcademicYearId, 10) || 0}
-              students={filteredStudents}
+              students={data?.studentsJournal.map(el => el.student) || []}
               currentAcademicPeriodId={academicPeriodId}
             />
-          )} */}
+          )}
         </div>
       </div>
     </JournalAccessProvider>

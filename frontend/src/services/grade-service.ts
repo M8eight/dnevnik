@@ -1,5 +1,4 @@
 import api from "@/axios/axios";
-import type { AcademicPeriodResponse } from "./academic-period-service";
 import type { UserSimpleResponse } from "./user-service";
 
 export type AvgGrade = number;
@@ -17,18 +16,6 @@ export interface GradeLessonDto {
     weight: number;
     gradeType: string;
     date: string;
-}
-
-export interface DatesGradesDto {
-    subject: string;
-    grades: GradeLessonDto[];
-    average: number;
-}
-
-export interface GradesLessonsResponse {
-    academicPeriod: AcademicPeriodResponse;
-    dates: string[]; 
-    gradesBySubjects: DatesGradesDto[];
 }
 
 export interface LessonInstanceDto {
@@ -77,14 +64,6 @@ export const getAvgGradeByStudentId = async (studentId: number, academicPeriodId
 
 export const findAllGradesByDate = async (studentId: number, date: string): Promise<GradeWithSubjectNameResponse[]> => {
     const {data} = await api.get<GradeWithSubjectNameResponse[]>(`/academic-service/api/v1/grades/by-date?studentId=${studentId}&date=${date}`);
-    return data;
-};
-
-export const getGradesLessonsByStudentId = async (academicPeriodId: number): Promise<GradesLessonsResponse> => {
-    const { data } = await api.get<GradesLessonsResponse>(
-        `/academic-service/api/v1/grades/by-student`, 
-        { params: { academicPeriodId } }
-    );
     return data;
 };
 

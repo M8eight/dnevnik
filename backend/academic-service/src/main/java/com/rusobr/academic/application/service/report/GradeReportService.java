@@ -1,13 +1,20 @@
 package com.rusobr.academic.application.service.report;
 
+import com.rusobr.academic.application.service.AcademicYearService;
 import com.rusobr.academic.application.service.JournalService;
 import com.rusobr.academic.application.service.SchoolClassService;
 import com.rusobr.academic.domain.model.TeachingAssignment;
 import com.rusobr.academic.infrastructure.client.UserClient;
 import com.rusobr.academic.infrastructure.persistence.repository.TeachingAssignmentRepository;
+import com.rusobr.academic.web.dto.academicYear.AcademicYearResponse;
+import com.rusobr.academic.web.dto.grade.PeriodFinalGradeResponse;
 import com.rusobr.academic.web.dto.lessonInstance.GradeLessonDto;
 import com.rusobr.academic.web.dto.lessonInstance.teacher.TeacherJournalResponse;
-import com.rusobr.academic.web.dto.pdf.*;
+import com.rusobr.academic.web.dto.pdf.StudentGradeReportDto;
+import com.rusobr.academic.web.dto.pdf.StudentGradeReportRow;
+import com.rusobr.academic.web.dto.pdf.StudentPeriodFinalGradeReportDto;
+import com.rusobr.academic.web.dto.pdf.TeacherGradeReportDto;
+import com.rusobr.academic.web.dto.schoolClass.SchoolClassResponse;
 import com.rusobr.academic.web.exception.AcademicExceptionCode;
 import com.rusobr.common.dto.UserFeignResponse;
 import com.rusobr.common.exception.NotFoundException;
@@ -17,8 +24,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import static com.rusobr.academic.application.service.JournalService.calculateWeightedAverage;
 
@@ -31,6 +36,7 @@ public class GradeReportService {
     private final SchoolClassService schoolClassService;
     private final UserClient userClient;
     private final TeachingAssignmentRepository teachingAssignmentRepository;
+    private final AcademicYearService academicYearService;
 
     public StudentGradeReportDto getStudentGradeReport(Long studentId, Long periodId) {
         var student = userClient.getBatchStudents(List.of(studentId)).found().get(0);
@@ -60,6 +66,21 @@ public class GradeReportService {
                 .schoolClass(schoolClass)
                 .gradeRows(rows)
                 .totalAverage(totalAverage).build();
+    }
+
+    public StudentPeriodFinalGradeReportDto getStudentPeriodFinalGradeReport(Long studentId, Long academicYearId) {
+        AcademicYearResponse academicYear = academicYearService.findById(academicYearId);
+        UserFeignResponse student = userClient.getBatchStudents(List.of(studentId)).found().get(0);
+        SchoolClassResponse schoolClass = schoolClassService.findByStudent(studentId);
+        List<PeriodFinalGradeResponse> periodFinalGrades = journalService.getPeriodFinalGrades(studentId, academicYearId);
+
+        return StudentPeriodFinalGradeReportDto.builder()
+                .title("Успеваемость за год")
+                .academicYearName(academicYear.name())
+                .student(student)
+                .schoolClass(schoolClass)
+                .periodFinalGrades(periodFinalGrades)
+                .build();
     }
 
     public TeacherGradeReportDto getTeacherGradeReport(Long teachingAssignmentId, Long periodId) {

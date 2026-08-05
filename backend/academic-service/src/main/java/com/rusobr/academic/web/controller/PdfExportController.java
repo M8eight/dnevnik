@@ -3,11 +3,13 @@ package com.rusobr.academic.web.controller;
 import com.rusobr.academic.application.service.report.GradeReportService;
 import com.rusobr.academic.application.service.report.PdfReportService;
 import com.rusobr.academic.web.dto.pdf.StudentGradeReportDto;
+import com.rusobr.academic.web.dto.pdf.StudentPeriodFinalGradeReportDto;
 import com.rusobr.academic.web.dto.pdf.TeacherGradeReportDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,18 +31,32 @@ public class PdfExportController {
 
         StudentGradeReportDto data = gradeReportService.getStudentGradeReport(studentId, periodId);
         byte[] pdf = pdfReportService.generateStudentGradeReport(data);
-        String fileName = "grades-%s-%s.pdf".formatted("27", "4");
+        String fileName = "grades-%s-%s.pdf".formatted(studentId, periodId);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(pdf);
     }
 
+    @GetMapping(value = "/student/grade-period-report/report", produces = MediaType.APPLICATION_PDF_VALUE)
+    public ResponseEntity<byte[]> studentPeriodFinalGradeReport(@AuthenticationPrincipal Jwt jwt, @RequestParam Long academicYearId) {
+        Long studentId = jwt.getClaim("user_id");
+
+        StudentPeriodFinalGradeReportDto data = gradeReportService.getStudentPeriodFinalGradeReport(studentId, academicYearId);
+        byte[] pdf = pdfReportService.generateStudentPeriodFinalGradeReport(data);
+        String fileName = "period-grades-%s-%s.pdf".formatted(studentId, academicYearId);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdf);
+    }
+
+    @PreAuthorize("@gradeSecurity.canViewAssignment(#teachingAssignmentId, authentication)")
     @GetMapping(value = "/teacher/student-grade-report/report", produces = MediaType.APPLICATION_PDF_VALUE)
     public ResponseEntity<byte[]> teacherGradeReport(@RequestParam Long teachingAssignmentId, @RequestParam Long periodId) {
         TeacherGradeReportDto data = gradeReportService.getTeacherGradeReport(teachingAssignmentId, periodId);
         byte[] pdf = pdfReportService.generateTeacherGradeReport(data);
-        String fileName = "grades-%s-%s.pdf".formatted("1", "4");
+        String fileName = "grades-%s-%s.pdf".formatted(teachingAssignmentId, periodId);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
                 .contentType(MediaType.APPLICATION_PDF)

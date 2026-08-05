@@ -2,21 +2,11 @@ import {
   createPeriodGrade,
   deletePeriodGrade,
   getPeriodGradesByAssignment,
-  getPeriodGradesByStudent,
   type PeriodGradeRequest,
-  type PeriodGradesStudentResponse,
   type PeriodGradeTeacherResponse,
 } from "@/services/period-grade-service";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
  
-export const usePeriodGradesByStudent = (academicYearId: number) => {
-  return useQuery<PeriodGradesStudentResponse>({
-    queryKey: ["studentPeriodGrades", academicYearId],
-    queryFn: () => getPeriodGradesByStudent(academicYearId),
-    enabled: !!academicYearId,
-  });
-};
-
 export const usePeriodGradesByAssignment = (teachingAssignmentId: number, currentAcademicPeriodId: number, academicYearId: number) => {
   return useQuery<PeriodGradeTeacherResponse>({
     queryKey: ["periodGrades", teachingAssignmentId, currentAcademicPeriodId, academicYearId],

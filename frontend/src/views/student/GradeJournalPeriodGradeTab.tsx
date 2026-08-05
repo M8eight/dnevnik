@@ -5,10 +5,8 @@ import StatCard from "@/components/student/grades-page/stat-card";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { TableHead, TableHeader, TableRow, TableBody, TableCell, Table } from "@/components/ui/table";
 import {  useGetAcademicPeriodsByAcademicYear } from "@/hooks/use-academic-period";
-import { useFinalGradesByStudent } from "@/hooks/use-final-grade";
-import { usePeriodGradesByStudent } from "@/hooks/use-period-grade";
-import type { FinalGradesStudentResponse } from "@/services/final-grade-service";
-import { Loader2, TrendingUp, Star, BookOpen, BarChart2 } from "lucide-react";
+import { usePeriodFinalGradesByStudentId } from "@/hooks/use-journal";
+import { Loader2, Star, BookOpen, BarChart2 } from "lucide-react";
 import { useMemo } from "react";
 
 export interface GradeJournalGradeTabProps {
@@ -20,35 +18,21 @@ export default function GradeJournalPeriodGradeTab({ academicYearId }: GradeJour
 
     const schoolYear = periods[0]?.academicYear.name ?? "";
 
-    const { data: periodGradesMap = {}, isLoading: isPeriodLoading } =
-        usePeriodGradesByStudent(academicYearId);
+    const { data: periodFinalGrades = [], isLoading: isGradeLoading } =
+        usePeriodFinalGradesByStudentId(academicYearId);
 
-    const { data: finalGradesMap = {} as FinalGradesStudentResponse, isLoading: isFinalLoading } =
-        useFinalGradesByStudent(academicYearId);
+    const isLoading = isLoadingPeriods || isGradeLoading;
 
-    const isLoading = isLoadingPeriods || isPeriodLoading || isFinalLoading;
-
-    const subjects = useMemo(() => Object.keys(periodGradesMap), [periodGradesMap]);
-
-    // Периоды отсортированы по id
     const sortedPeriods = useMemo(
         () => [...periods].sort((a, b) => a.id - b.id),
         [periods]
     );
 
-    const allPeriodGrades = useMemo(
-        () => Object.values(periodGradesMap).flat(),
-        [periodGradesMap]
-    );
+    const periodFinalGradesData = useMemo(() => {
+        if (!periodFinalGrades?.length) return [];
+        return periodFinalGrades
+    }, [periodFinalGrades]);
 
-    const overallAvg = allPeriodGrades.length
-        ? allPeriodGrades.reduce((sum, g) => sum + g.value, 0) / allPeriodGrades.length
-        : 0;
-
-    const fivesCount = allPeriodGrades.filter((g) => g.value === 5).length;
-
-    const getFinalGrade = (subjectName: string) =>
-        finalGradesMap[subjectName];
 
     if (isLoading) {
         return (
@@ -63,7 +47,7 @@ export default function GradeJournalPeriodGradeTab({ academicYearId }: GradeJour
         );
     }
 
-    if (!Object.keys(periodGradesMap).length) {
+    if (!Object.keys(periodFinalGradesData).length) {
         return (
             <div className="flex h-60 items-center justify-center">
                 <div className="glass-card rounded-[28px] p-10 text-center">
@@ -77,26 +61,18 @@ export default function GradeJournalPeriodGradeTab({ academicYearId }: GradeJour
         <>
             {/* Статистика */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-                <StatCard
-                    icon={TrendingUp}
-                    label="Средний балл"
-                    value={overallAvg ? parseFloat(overallAvg.toFixed(2)).toString() : "—"}
-                    sub="за все четверти"
-                    accent="var(--red)"
-                    delay="anim-delay-1"
-                />
+
                 <StatCard
                     icon={Star}
                     label="Пятёрок"
-                    value={fivesCount.toString()}
-                    sub={`из ${allPeriodGrades.length} оценок`}
+                    value={periodFinalGradesData.reduce((acc, el) => acc + el.periodGrades.filter((g) => g.value === 5).length, 0).toString() }
                     accent="var(--gold)"
                     delay="anim-delay-2"
                 />
                 <StatCard
                     icon={BookOpen}
                     label="Предметов"
-                    value={subjects.length.toString()}
+                    value={periodFinalGradesData.length.toString()}
                     sub="в этом году"
                     accent="var(--navy)"
                     delay="anim-delay-3"
@@ -150,11 +126,9 @@ export default function GradeJournalPeriodGradeTab({ academicYearId }: GradeJour
                         </TableHeader>
 
                         <TableBody>
-                            {subjects.map((subjectName) => {
-                                // Оценки по предмету — список PeriodGradeStudentResponse
-                                const gradesForSubject = periodGradesMap[subjectName];
+                            {periodFinalGradesData.map((el) => {
+                                const gradesForSubject = el.periodGrades;
 
-                                // academicPeriodId → оценка
                                 const gradeByPeriodId = new Map(
                                     gradesForSubject.map((g) => [g.academicPeriodId, g])
                                 );
@@ -165,11 +139,11 @@ export default function GradeJournalPeriodGradeTab({ academicYearId }: GradeJour
 
                                 return (
                                     <TableRow
-                                        key={subjectName}
+                                        key={el.subjectName}
                                         className="border-black/4 transition-colors group h-14.5 hover:bg-black/1.5"
                                     >
                                         <TableCell className="pl-7 py-0 font-bold text-[13px] text-(--navy) sticky left-0 bg-white/60 backdrop-blur-sm z-20 border-r border-black/5 group-hover:bg-amber-50/50 transition-colors">
-                                            {subjectName}
+                                            {el.subjectName}
                                         </TableCell>
 
                                         {sortedPeriods.map((period) => {
@@ -198,7 +172,7 @@ export default function GradeJournalPeriodGradeTab({ academicYearId }: GradeJour
                                         {/* Годовая итоговая оценка */}
                                         <TableCell className="p-0 text-center bg-black/1 backdrop-blur-sm group-hover:bg-amber-50/60 transition-colors">
                                             <div className="flex items-center justify-center h-14.5 px-1">
-                                                <GradeBadge grade={getFinalGrade(subjectName)?.value} size="md" />
+                                                <GradeBadge grade={el.finalGrade.value} size="md" />
                                             </div>
                                         </TableCell>
                                     </TableRow>

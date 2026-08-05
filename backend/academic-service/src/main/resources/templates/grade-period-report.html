@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8" />
+
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 14mm;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "PT Sans", sans-serif;
+            font-size: 10pt;
+            line-height: 1.35;
+            color: #20242a;
+            background: #ffffff;
+        }
+
+        .report-header {
+            margin-bottom: 14px;
+        }
+
+        .report-title {
+            margin: 0 0 5px;
+            font-size: 18pt;
+            line-height: 1.2;
+            font-weight: 700;
+            color: #172033;
+        }
+
+        .report-meta {
+            font-size: 9.5pt;
+            color: #586174;
+        }
+
+        .report-meta div+div {
+            margin-top: 2px;
+        }
+
+        .table-wrapper {
+            width: 100%;
+        }
+
+        table {
+            width: 100%;
+            table-layout: fixed;
+            border-collapse: collapse;
+            border: 1px solid #b8c0cc;
+        }
+
+        .column-subject {
+            width: 25%;
+        }
+
+        .column-grades {
+            width: 60%;
+        }
+
+        .column-final-grade {
+            width: 15%;
+        }
+
+        thead {
+            display: table-header-group;
+        }
+
+        tr {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        th,
+        td {
+            border: 1px solid #c9ced6;
+        }
+
+        th {
+            padding: 8px 10px;
+            font-size: 9.5pt;
+            font-weight: 700;
+            text-align: left;
+            vertical-align: middle;
+            color: #252b36;
+            background: #e9edf3;
+        }
+
+        th:last-child {
+            text-align: center;
+        }
+
+        td {
+            padding: 7px 10px;
+            vertical-align: middle;
+            background: #ffffff;
+        }
+
+        tbody tr:nth-child(even) td {
+            background: #f8f9fb;
+        }
+
+        .subject-name {
+            font-weight: 700;
+            color: #1e2633;
+            overflow-wrap: anywhere;
+        }
+
+        .grades-list {
+            line-height: 1.5;
+        }
+
+        .grade-chip {
+            display: inline-block;
+            margin: 2px 3px 2px 0;
+            padding: 3px 9px;
+            border: 1px solid #999;
+            border-radius: 4px;
+            font-size: 9.5pt;
+            line-height: 1.15;
+            white-space: nowrap;
+            background: #ffffff;
+        }
+
+        .grade-value {
+            font-weight: 700;
+            color: #000;
+        }
+
+        .final-grade {
+            padding-left: 5px;
+            padding-right: 5px;
+            font-size: 11pt;
+            font-weight: 700;
+            text-align: center;
+            white-space: nowrap;
+            color: #172033;
+        }
+
+        .footer {
+            margin-top: 12px;
+            padding-top: 7px;
+            border-top: 1px solid #d7dbe2;
+            font-size: 8pt;
+            text-align: center;
+            color: #7a8493;
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="report-header">
+    <h1 class="report-title" th:text="|Отчёт об успеваемости: ${student.lastName} ${student.firstName}|">
+        Отчёт об успеваемости
+    </h1>
+    <h2 class="report-title" th:text="${title}">
+        Заголовок отчета
+    </h2>
+
+    <div class="report-meta">
+        <div th:text="|Класс: ${schoolClass.name}|">
+            Класс: 10А
+        </div>
+        <div th:text="|Учебный год: ${academicYearName}|">
+            Учебный год: 2023-2024
+        </div>
+    </div>
+</header>
+
+
+<main class="table-wrapper">
+    <table>
+        <colgroup>
+            <col class="column-subject" />
+            <col class="column-grades" />
+            <col class="column-final-grade" />
+        </colgroup>
+        <thead>
+        <tr>
+            <th scope="col">Предмет</th>
+            <th scope="col">Периодические оценки</th>
+            <th scope="col">Итоговая оценка</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <!-- Итерация по списку PeriodFinalGradeResponse -->
+        <tr th:each="row : ${periodFinalGrades}">
+            <td class="subject-name" th:text="${row.subjectName}">
+                Предмет
+            </td>
+
+            <td>
+                <div class="grades-list">
+                    <!-- Итерация по списку PeriodGradeStudentResponse -->
+                    <!-- Используем title для отображения description (например "За 1 четверть") при наведении -->
+                    <span th:each="grade : ${row.periodGrades}" class="grade-chip" th:title="${grade.description}">
+                                <span class="grade-value" th:text="${grade.value}">
+                                    5
+                                </span>
+                            </span>
+                </div>
+            </td>
+
+            <!-- Вывод итоговой оценки, если finalGrade != null, иначе прочерк -->
+            <td class="final-grade" th:text="${row.finalGrade != null ? row.finalGrade.value : '-'}">
+                5
+            </td>
+        </tr>
+        </tbody>
+
+    </table>
+</main>
+
+<footer class="footer">
+    Документ сформирован автоматически
+</footer>
+
+</body>
+
+</html>
