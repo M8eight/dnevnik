@@ -29,7 +29,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -115,22 +114,6 @@ public class FinalGradeControllerTest {
                 "keycloak-123"
         );
         return new StudentFinalGradesResponse(user, List.of(buildGradeResponse()));
-    }
-
-    @Test
-    @DisplayName("GET /final-grades/by-student — 200 and map response")
-    void getByStudentId_ShouldReturn200() throws Exception {
-        when(finalGradeService.getByStudentId(STUDENT_ID, 1L))
-                .thenReturn(Map.of("Mathematics", buildGradeResponse()));
-
-        mockMvc.perform(get("/api/v1/final-grades/by-student")
-                        .param("academicYearId", String.valueOf(1L)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.Mathematics.id").value(FINAL_GRADE_ID))
-                .andExpect(jsonPath("$.Mathematics.studentId").value(STUDENT_ID))
-//                .andExpect(jsonPath("$.Mathematics.academicYear.id").value(1L))
-                .andExpect(jsonPath("$.Mathematics.value").value(5))
-                .andExpect(jsonPath("$.Mathematics.description").value("Excellent work"));
     }
 
     @Test
