@@ -5,14 +5,7 @@ import { Loader2, LockOpen, Lock, Trash2, CalendarDays, Pencil, Check, X } from 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
-function formatDate(iso: string) {
-    return new Date(iso).toLocaleDateString("ru-RU", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-    });
-}
+import { formatRuDateShort } from "@/lib/date";
 
 export default function PeriodCard({
     period,
@@ -107,7 +100,7 @@ export default function PeriodCard({
                         </p>
                         <p className="text-xs text-black/40 mt-0.5 flex items-center gap-1">
                             <CalendarDays className="w-3 h-3" />
-                            {formatDate(period.startDate)} — {formatDate(period.endDate)}
+                            {formatRuDateShort(period.startDate)} — {formatRuDateShort(period.endDate)}
                         </p>
                     </div>
                 )}

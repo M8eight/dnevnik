@@ -3,14 +3,7 @@ import { cn } from "@/lib/utils";
 import type { AcademicYearResponse } from "@/services/academic-year-service";
 import { Loader2, Trash2, CalendarDays, CheckCircle2 } from "lucide-react";
 import { useState } from "react";
-
-function formatDate(iso: string) {
-    return new Date(iso).toLocaleDateString("ru-RU", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-    });
-}
+import { formatRuDateShort } from "@/lib/date";
 
 export default function YearCard({
     year,
@@ -74,7 +67,7 @@ export default function YearCard({
 
                     <div className="flex items-center gap-3 mt-1.5 flex-wrap">
                         <span className="text-[11px] font-semibold text-black/30">
-                            {formatDate(year.startDate)} — {formatDate(year.endDate)}
+                            {formatRuDateShort(year.startDate)} — {formatRuDateShort(year.endDate)}
                         </span>
                     </div>
                 </div>

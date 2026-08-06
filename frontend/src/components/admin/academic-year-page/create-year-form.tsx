@@ -10,7 +10,7 @@ import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { formatRuDateShort, toISODate } from "@/lib/date";
 
 const formSchema = z.object({
     name: z
@@ -43,16 +43,12 @@ export default function CreateYearForm() {
     const formValues = useWatch({ control });
     const isValid = !!(formValues.name && formValues.startDate && formValues.endDate);
 
-    const formatDateToString = (date: Date) => {
-        return date.toLocaleDateString("en-CA");
-    };
-
     const onSubmit = (values: FormValues) => {
         createMutation.mutate(
             {
                 name: values.name,
-                startDate: formatDateToString(values.startDate),
-                endDate: formatDateToString(values.endDate),
+                startDate: toISODate(values.startDate),
+                endDate: toISODate(values.endDate),
             },
             {
                 onSuccess: () => {
@@ -114,7 +110,7 @@ export default function CreateYearForm() {
                                     >
                                         <CalendarIcon className="mr-2 h-4 w-4 text-black/40" />
                                         {field.value ? (
-                                            format(field.value, "dd.MM.yyyy")
+                                            formatRuDateShort(field.value)
                                         ) : (
                                             <span>дд.мм.гггг</span>
                                         )}
@@ -156,7 +152,7 @@ export default function CreateYearForm() {
                                     >
                                         <CalendarIcon className="mr-2 h-4 w-4 text-black/40" />
                                         {field.value ? (
-                                            format(field.value, "dd.MM.yyyy")
+                                            formatRuDateShort(field.value)
                                         ) : (
                                             <span>ДД.ММ.ГГГГ</span>
                                         )}

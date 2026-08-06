@@ -9,7 +9,7 @@ import { z } from "zod";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { formatRuDateShort, toISODate } from "@/lib/date";
 import { Calendar } from "@/components/ui/calendar";
 
 const formSchema = z.object({
@@ -44,17 +44,13 @@ export default function CreatePeriodForm({ academicYearId }: CreatePeriodFormPro
     const formValues = useWatch({ control });
     const isValid = !!(formValues.name && formValues.startDate && formValues.endDate);
 
-    const formatDateToString = (date: Date) => {
-        return date.toLocaleDateString("en-CA");
-    };
-
     const onSubmit = (values: FormValues) => {
         createMutation.mutate(
             {
                 name: values.name,
                 academicYearId: academicYearId,
-                startDate: formatDateToString(values.startDate),
-                endDate: formatDateToString(values.endDate),
+                startDate: toISODate(values.startDate),
+                endDate: toISODate(values.endDate),
             },
             {
                 onSuccess: () => {
@@ -115,7 +111,7 @@ export default function CreatePeriodForm({ academicYearId }: CreatePeriodFormPro
                                     >
                                         <CalendarIcon className="mr-2 h-4 w-4 text-black/40" />
                                         {field.value ? (
-                                            format(field.value, "dd.MM.yyyy")
+                                            formatRuDateShort(field.value)
                                         ) : (
                                             <span>дд.мм.гггг</span>
                                         )}
@@ -157,7 +153,7 @@ export default function CreatePeriodForm({ academicYearId }: CreatePeriodFormPro
                                     >
                                         <CalendarIcon className="mr-2 h-4 w-4 text-black/40" />
                                         {field.value ? (
-                                            format(field.value, "dd.MM.yyyy")
+                                            formatRuDateShort(field.value)
                                         ) : (
                                             <span>ДД.ММ.ГГГГ</span>
                                         )}

@@ -30,12 +30,10 @@ import { useAcademicYearSelection } from "@/hooks/use-academic-year-selection";
 import PageHeader from "@/components/admin/page-header";
 import AcademicYearSelect from "@/components/admin/academic-year-select";
 import ClosedYearAlert from "@/components/admin/closed-year-alert";
+import { toISODate } from "@/lib/date";
 
 export default function SchedulePage() {
-    const todayStr = useMemo(() => {
-        const d = new Date();
-        return d.toISOString().split("T")[0];
-    }, []);
+    const todayStr = useMemo(() => toISODate(new Date()), []);
 
     const [date, setDate] = useState<string>(todayStr);
 

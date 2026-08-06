@@ -1,5 +1,6 @@
 import type { ScheduleLessonDto } from "@/services/schedule-service";
 import { MapPin, Trash2 } from "lucide-react";
+import { formatRuMonthDay } from "@/lib/date";
 
 interface LessonCellProps {
     dayKey: string;
@@ -16,7 +17,7 @@ export default function LessonCell({ dayKey, slotNum, schedule, onAddClick, onCl
 
     if (activeLesson) {
         const validTo = activeLesson.validTo
-            ? new Date(activeLesson.validTo).toLocaleDateString("ru-RU", { day: "numeric", month: "short" })
+            ? formatRuMonthDay(activeLesson.validTo)
             : null;
 
         return (
