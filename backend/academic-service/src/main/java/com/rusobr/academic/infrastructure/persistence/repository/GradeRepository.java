@@ -101,4 +101,16 @@ public interface GradeRepository extends JpaRepository<Grade, Long> {
     Optional<GradeDetailProjection> findDetailById(@Param("id") Long id);
 
     boolean existsByIdAndStudentId(Long id, Long studentId);
+
+    @Query("""
+        select count(*) > 0
+        from Grade g
+            join g.lessonInstance li
+            join li.scheduleLesson sl
+            join sl.teachingAssignment ta
+        where ta.teacherId = :teacherId
+        and g.id = :gradeId
+""")
+    boolean isGradeOwnedByTeacher(@Param("teacherId") Long teacherId, @Param("gradeId") Long gradeId);
+
 }

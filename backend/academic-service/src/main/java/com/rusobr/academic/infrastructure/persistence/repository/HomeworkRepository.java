@@ -47,4 +47,16 @@ public interface HomeworkRepository extends CrudRepository<Homework, Long> {
 
     @EntityGraph(attributePaths = {"lessonInstance"})
     Optional<Homework> findWithLessonInstanceById(Long id);
+
+    @Query("""
+        select count(*) > 0
+        from Homework h
+            join h.lessonInstance li
+            join li.scheduleLesson sl
+            join sl.teachingAssignment ta
+        where ta.teacherId = :teacherId
+        and h.id = :homeworkId
+    """)
+    boolean isHomeworkOwnedByTeacher(@Param("teacherId") Long teacherId, @Param("homeworkId") Long homeworkId);
+
 }

@@ -4,6 +4,7 @@ import com.rusobr.academic.domain.model.FinalGrade;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -35,4 +36,14 @@ public interface FinalGradeRepository extends JpaRepository<FinalGrade, Long> {
 
     @EntityGraph(attributePaths = {"academicYear"})
     Optional<FinalGrade> findWithAcademicYearById(Long id);
+
+    @Query("""
+        select count(*) > 0
+        from FinalGrade fg
+            join fg.teachingAssignment ta
+        where ta.teacherId = :teacherId
+        and fg.id = :finalGradeId
+""")
+    boolean isFinalGradeOwnedByTeacher(@Param("teacherId") Long teacherId, @Param("finalGradeId") Long finalGradeId);
+
 }

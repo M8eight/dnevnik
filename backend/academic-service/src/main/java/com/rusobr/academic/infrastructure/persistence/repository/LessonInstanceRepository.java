@@ -169,4 +169,30 @@ public interface LessonInstanceRepository extends JpaRepository<LessonInstance, 
                                                                  @Param("endDate") LocalDate endDate,
                                                                  @Param("studentId") Long studentId);
 
+    @Query("""
+        select count(*) > 0
+            from LessonInstance li
+            join li.scheduleLesson sl
+            join sl.teachingAssignment ta
+            join ta.schoolClass sc
+            join sc.students cs
+            where cs.studentId = :studentId
+            and li.id = :lessonInstanceId
+            and ta.teacherId = :teacherId
+    """)
+    boolean isOwnedByTeacherAndHasStudent(@Param("teacherId") Long teacherId,
+                                                       @Param("lessonInstanceId") Long lessonInstanceId,
+                                                       @Param("studentId") Long studentId);
+
+    @Query("""
+        select count(*) > 0
+            from LessonInstance li
+            join li.scheduleLesson sl
+            join sl.teachingAssignment ta
+            where li.id = :lessonInstanceId
+            and ta.teacherId = :teacherId
+    """)
+    boolean isOwnedByTeacher(@Param("teacherId") Long teacherId,
+                                          @Param("lessonInstanceId") Long lessonInstanceId);
+
 }
