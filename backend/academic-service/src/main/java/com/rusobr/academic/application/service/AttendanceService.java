@@ -10,12 +10,14 @@ import com.rusobr.academic.web.dto.attendances.AttendanceResponse;
 import com.rusobr.academic.web.exception.AcademicExceptionCode;
 import com.rusobr.common.exception.ConflictException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AttendanceService {
 
     private final AttendanceRepository attendanceRepository;
@@ -43,13 +45,16 @@ public class AttendanceService {
                 .orElseGet(() -> attendanceMapper.toAttendance(attendanceRequest, lessonInstance)
                 );
 
-        return attendanceMapper.toAttendanceResponse(attendanceRepository.save(attendance));
+        AttendanceResponse response = attendanceMapper.toAttendanceResponse(attendanceRepository.save(attendance));
+        log.info("Attendance created: request={}", attendanceRequest);
+        return response;
     }
 
     @CacheEvict(value = {"journalByAssignment", "journalByStudentId"}, allEntries = true)
     @Transactional
     public void delete(Long id) {
         attendanceRepository.deleteById(id);
+        log.info("Attendance deleted: id={}", id);
     }
 
 }

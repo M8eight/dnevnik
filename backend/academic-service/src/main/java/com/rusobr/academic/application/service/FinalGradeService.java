@@ -109,7 +109,10 @@ public class FinalGradeService {
         FinalGrade finalGrade = finalGradeMapper.toFinalGrade(finalGradeRequest);
         finalGrade.setTeachingAssignment(teachingAssignment);
         finalGrade.setAcademicYear(academicYear);
-        return finalGradeMapper.toFinalGradeCreateResponse(finalGradeRepository.save(finalGrade));
+        FinalGradeCreateResponse response = finalGradeMapper
+                .toFinalGradeCreateResponse(finalGradeRepository.save(finalGrade));
+        log.info("Create final grade: request={}", finalGradeRequest);
+        return response;
     }
 
     @CacheEvict(value = {"finalGradesByStudent", "finalGradesByAssignment"}, allEntries = true)
@@ -132,6 +135,7 @@ public class FinalGradeService {
         });
 
         finalGradeRepository.deleteById(id);
+        log.info("Delete final grade: gradeId={}", id);
     }
 
 }

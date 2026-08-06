@@ -20,6 +20,7 @@ import com.rusobr.common.exception.ConflictException;
 import com.rusobr.academic.web.exception.AcademicExceptionCode;
 import com.rusobr.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -34,6 +35,7 @@ import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class GradeService {
 
     private final GradeRepository gradeRepository;
@@ -83,9 +85,9 @@ public class GradeService {
 
     @CacheEvict(value = {"gradesByDate", "gradesByPeriod", "journalByAssignment", "journalByStudentId", "schedulesByStudentId"}, allEntries = true)
     @Transactional
-    public CreateGradeResponse create(CreateGradeRequest gradeDto) {
-        LessonInstance lessonInstance = lessonInstanceRepository.findById(gradeDto.lessonInstanceId())
-                .orElseThrow(() -> new NotFoundException("Lesson instance with id: %d".formatted(gradeDto.lessonInstanceId()),
+    public CreateGradeResponse create(CreateGradeRequest request) {
+        LessonInstance lessonInstance = lessonInstanceRepository.findById(request.lessonInstanceId())
+                .orElseThrow(() -> new NotFoundException("Lesson instance with id: %d".formatted(request.lessonInstanceId()),
                         AcademicExceptionCode.LESSON_INSTANCE_NOT_FOUND));
         AcademicPeriod academicPeriod = academicPeriodService.getByDate(lessonInstance.getLessonDate());
         if (academicPeriod.isClosed()) {
@@ -93,11 +95,13 @@ public class GradeService {
                     AcademicExceptionCode.ACADEMIC_PERIOD_CLOSED_CONFLICT);
         }
 
-        Grade grade = gradeMapper.toGrade(gradeDto);
+        Grade grade = gradeMapper.toGrade(request);
         grade.setLessonInstance(lessonInstance);
 
-        return gradeMapper.toCreateGradeResponseDto(
+        CreateGradeResponse response = gradeMapper.toCreateGradeResponseDto(
                 gradeRepository.save(grade), lessonInstanceMapper.toLessonInstanceDto(lessonInstance));
+        log.info("Create grade: request={}", request);
+        return response;
     }
 
     @CacheEvict(value = {"gradesByDate", "gradesByPeriod", "journalByAssignment", "journalByStudentId"}, allEntries = true)
@@ -112,6 +116,7 @@ public class GradeService {
         }
 
         gradeRepository.delete(grade);
+        log.info("Delete grade: id={}", id);
     }
 
 }

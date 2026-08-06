@@ -12,6 +12,7 @@ import com.rusobr.common.exception.ConflictException;
 import com.rusobr.academic.web.exception.AcademicExceptionCode;
 import com.rusobr.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -24,6 +25,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class HomeworkService {
 
     private final HomeworkRepository homeworkRepository;
@@ -60,7 +62,9 @@ public class HomeworkService {
                 .text(homeworkRequest.text())
                 .build();
 
-        return homeworkMapper.toHomeworkResponse(homeworkRepository.save(homework));
+        HomeworkResponse response = homeworkMapper.toHomeworkResponse(homeworkRepository.save(homework));
+        log.info("Create homework: request={}", homeworkRequest);
+        return response;
     }
 
     @CacheEvict(value = {"homeworksByDate", "homeworksByAssignment"}, allEntries = true)
@@ -76,6 +80,7 @@ public class HomeworkService {
         }
 
         homeworkRepository.delete(homework);
+        log.info("Delete homework: id={}", id);
     }
 
 }

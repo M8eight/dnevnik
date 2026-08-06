@@ -79,6 +79,7 @@ public class UserService {
         userRepository.delete(user);
 
         applicationEventPublisher.publishEvent(new UserDeletedEvent(user.getId(), user.getRoles()));
+        log.info("User deleted: userId={}", id);
     }
 
 }
