@@ -1,4 +1,4 @@
-import { closeAcademicYear, createAcademicYear, deleteAcademicYear, getAcademicYearById, getAcademicYears, openAcademicYear, updateAcademicYear, type AcademicYearRequest, type AcademicYearResponse } from "@/services/academic-year-service";
+import { closeAcademicYear, createAcademicYear, deleteAcademicYear, getAcademicYears, openAcademicYear, type AcademicYearRequest, type AcademicYearResponse } from "@/services/academic-year-service";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 
@@ -8,14 +8,6 @@ export const useGetAcademicYears = () => {
     return useQuery<AcademicYearResponse[]>({
         queryKey: QUERY_KEY,
         queryFn: getAcademicYears,
-    });
-};
-
-export const useGetAcademicYearById = (id: number) => {
-    return useQuery<AcademicYearResponse>({
-        queryKey: [...QUERY_KEY, id],
-        queryFn: () => getAcademicYearById(id),
-        enabled: !!id,
     });
 };
 
@@ -39,14 +31,6 @@ export const useCloseAcademicYear = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: (id: number) => closeAcademicYear(id),
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: QUERY_KEY }),
-    });
-};
-
-export const useUpdateAcademicYear = () => {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: (params: { id: number; request: Partial<AcademicYearRequest> }) => updateAcademicYear(params.id, params.request),
         onSuccess: () => queryClient.invalidateQueries({ queryKey: QUERY_KEY }),
     });
 };

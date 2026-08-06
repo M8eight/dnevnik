@@ -11,6 +11,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { formatRuDateShort, toISODate } from "@/lib/date";
+import { FIELD_CLASS } from "@/constants/form-styles";
 
 const formSchema = z.object({
     name: z
@@ -60,8 +61,7 @@ export default function CreateYearForm() {
         );
     };
 
-    const fieldClass =
-        "h-11 bg-white/40 border border-black/10 rounded-2xl focus-visible:ring-(--red) text-sm font-semibold placeholder:font-normal transition-all duration-200";
+    const fieldClass = FIELD_CLASS;
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

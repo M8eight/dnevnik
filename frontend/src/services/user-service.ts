@@ -41,11 +41,6 @@ export interface CreateTeacherRequest {
     details: TeacherDetails;
 }
 
-export type CreateUserRequest =
-    | CreateStudentRequest
-    | CreateParentRequest
-    | CreateTeacherRequest;
-
 export interface UserResponse {
     id: number;
     username: string;
