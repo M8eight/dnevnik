@@ -170,9 +170,53 @@ class AttendanceServiceTest {
         @Test
         @DisplayName("успешно вызывает удаление из репозитория по id")
         void success() {
+            LessonInstance lessonInstance = LessonInstance.builder().id(LESSON_INSTANCE_ID).lessonDate(LESSON_DATE).build();
+            Attendance attendance = Attendance.builder()
+                    .id(ATTENDANCE_ID)
+                    .studentId(STUDENT_ID)
+                    .lessonInstance(lessonInstance)
+                    .build();
+            AcademicPeriod openPeriod = AcademicPeriod.builder().closed(false).build();
+
+            when(attendanceRepository.findWithLessonInstanceById(ATTENDANCE_ID)).thenReturn(Optional.of(attendance));
+            when(academicPeriodService.getByDate(LESSON_DATE)).thenReturn(openPeriod);
+
             service.delete(ATTENDANCE_ID);
 
             verify(attendanceRepository).deleteById(ATTENDANCE_ID);
+        }
+
+        @Test
+        @DisplayName("запись не найдена — бросает NotFoundException")
+        void notFound_throwsException() {
+            when(attendanceRepository.findWithLessonInstanceById(ATTENDANCE_ID)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> service.delete(ATTENDANCE_ID))
+                    .isInstanceOf(NotFoundException.class)
+                    .hasMessageContaining("Attendance with id: " + ATTENDANCE_ID);
+
+            verify(attendanceRepository, never()).deleteById(any());
+        }
+
+        @Test
+        @DisplayName("академический период закрыт — бросает ConflictException")
+        void closedPeriod_throwsConflictException() {
+            LessonInstance lessonInstance = LessonInstance.builder().id(LESSON_INSTANCE_ID).lessonDate(LESSON_DATE).build();
+            Attendance attendance = Attendance.builder()
+                    .id(ATTENDANCE_ID)
+                    .studentId(STUDENT_ID)
+                    .lessonInstance(lessonInstance)
+                    .build();
+            AcademicPeriod closedPeriod = AcademicPeriod.builder().closed(true).build();
+
+            when(attendanceRepository.findWithLessonInstanceById(ATTENDANCE_ID)).thenReturn(Optional.of(attendance));
+            when(academicPeriodService.getByDate(LESSON_DATE)).thenReturn(closedPeriod);
+
+            assertThatThrownBy(() -> service.delete(ATTENDANCE_ID))
+                    .isInstanceOf(ConflictException.class)
+                    .hasMessageContaining("is closed");
+
+            verify(attendanceRepository, never()).deleteById(any());
         }
     }
 }

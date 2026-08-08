@@ -80,15 +80,15 @@ public class HomeworkControllerTest {
     }
 
     @Test
-    @DisplayName("POST /homeworks — 200 and created homework")
-    void create_ShouldReturn200() throws Exception {
+    @DisplayName("POST /homeworks — 201 and created homework")
+    void create_ShouldReturn201() throws Exception {
         HomeworkRequest request = buildHomeworkRequest();
         when(homeworkService.create(request)).thenReturn(buildHomeworkResponse());
 
         mockMvc.perform(post("/api/v1/homeworks")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(HOMEWORK_ID))
                 .andExpect(jsonPath("$.text").value("Read chapter 5"))
                 .andExpect(jsonPath("$.lessonInstance.id").value(LESSON_INSTANCE_ID))
@@ -96,12 +96,12 @@ public class HomeworkControllerTest {
     }
 
     @Test
-    @DisplayName("DELETE /homeworks/{id} — 200 on success")
-    void delete_ShouldReturn200() throws Exception {
+    @DisplayName("DELETE /homeworks/{id} — 204 on success")
+    void delete_ShouldReturn204() throws Exception {
         doNothing().when(homeworkService).delete(HOMEWORK_ID);
 
         mockMvc.perform(delete("/api/v1/homeworks/{id}", HOMEWORK_ID))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         verify(homeworkService).delete(HOMEWORK_ID);
     }
