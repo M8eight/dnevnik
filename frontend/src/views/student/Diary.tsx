@@ -6,32 +6,22 @@ import type { RootState } from "@/store";
 import { useDispatch, useSelector } from "react-redux";
 import { addDays } from "date-fns/addDays";
 import { format } from "date-fns/format";
-import { ru } from "date-fns/locale";
+import { enUS, ru } from "date-fns/locale";
 import { nextWeek, prevWeek } from "@/store/slices/scheduleSlice";
 import Chip from "@/components/student/chip";
 import { LESSON_TIMES, RUSSIAN_DAYS } from "@/constants/component-constants";
 import { AttendanceBadge } from "@/components/student/diary/badges";
 import { GradePopover } from "@/components/student/diary/grade-detail-popover";
 import StudentNavbar from "@/components/layout/navbars/StudentNavbar";
+import { capitalizeFirst, formatRuDate, toISODate } from "@/lib/date";
 import type { DiaryScheduleDto } from "@/services/schedule-service";
-
-const DAY_ORDER = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
-
-
-const formatDateLabel = (dateStr: string) =>
-  new Date(dateStr).toLocaleDateString("ru-RU", { day: "numeric", month: "long" });
 
 const mapAttendanceStatus = (status?: string) => {
   if (status === "ABSENT") return "Н";
-  if (status === "EXCUSED") return "ОП";
-  if (status === "LATE") return "О";
+  if (status === "LATE") return "ОП";
+  if (status === "EXCUSED") return "О";
   return "";
 };
-
-function lessonDate(weekStart: Date, dayOfWeek: string): string {
-  const idx = DAY_ORDER.indexOf(dayOfWeek);
-  return format(addDays(weekStart, idx), "yyyy-MM-dd");
-}
 
 function groupByDay(lessons: DiaryScheduleDto[]): Record<string, DiaryScheduleDto[]> {
   return lessons.reduce((acc, lesson) => {
@@ -51,7 +41,7 @@ function DayCard({
   date: string;
   lessons: DiaryScheduleDto[];
 }) {
-  const today = new Date().toISOString().split("T")[0];
+  const today = toISODate(new Date());
   const isToday = date === today;
 
   return (
@@ -65,7 +55,7 @@ function DayCard({
           {isToday ? `${RUSSIAN_DAYS[dayOfWeek] || "День"} · сегодня` : RUSSIAN_DAYS[dayOfWeek] || "День"}
         </Chip>
         <p className="text-[10px] font-bold text-black/25 uppercase tracking-[0.18em]">
-          {formatDateLabel(date)}
+          {formatRuDate(date)}
         </p>
       </div>
 
@@ -79,7 +69,6 @@ function DayCard({
             <div key={idx} className="py-3 first:pt-0 last:pb-0">
               <div className="flex items-start gap-3">
 
-                {/* Время урока */}
                 <div className="flex flex-col justify-center items-end min-w-14 pt-1 shrink-0">
                   <span className="text-[13px] font-extrabold text-black/30 leading-none tabular-nums">
                     {LESSON_TIMES[lesson.lessonNumber]?.split("–")[0] ?? "—"}
@@ -89,10 +78,8 @@ function DayCard({
                   </span>
                 </div>
 
-                {/* Разделитель */}
                 <div className="w-0.5 self-stretch rounded-full bg-black/6 shrink-0" />
 
-                {/* Контент урока */}
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-start gap-2">
                     <div className="min-w-0">
@@ -140,15 +127,23 @@ export default function Diary() {
   const startDay = format(currentWeekStart, "dd");
   const endDayWithMonth = format(weekEnd, "dd MMM", { locale: ru });
   const fullMonthYear = format(currentWeekStart, "LLLL yyyy", { locale: ru });
-  const capitalizedMonth = fullMonthYear.charAt(0).toUpperCase() + fullMonthYear.slice(1);
+  const capitalizedMonth = capitalizeFirst(fullMonthYear);
+
+  const weekDays = Array.from({ length: 7 }, (_, i) => {
+    const day = addDays(currentWeekStart, i);
+    return {
+      dayOfWeek: format(day, "EEEE", { locale: enUS }).toUpperCase(),
+      date: format(day, "yyyy-MM-dd"),
+    };
+  });
 
   const grouped = data ? groupByDay(data) : {};
-  const sortedDays = DAY_ORDER
-    .filter(day => grouped[day])
-    .map(day => ({
-      dayOfWeek: day,
-      date: lessonDate(currentWeekStart, day),
-      lessons: grouped[day].sort((a, b) => a.lessonNumber - b.lessonNumber),
+  const sortedDays = weekDays
+    .filter(({ dayOfWeek }) => grouped[dayOfWeek])
+    .map(({ dayOfWeek, date }) => ({
+      dayOfWeek,
+      date,
+      lessons: grouped[dayOfWeek].sort((a, b) => a.lessonNumber - b.lessonNumber),
     }));
 
   return (

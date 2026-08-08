@@ -288,6 +288,7 @@ export default function TeacherJournal() {
               currentAcademicPeriodId={academicPeriodId}
             />
           )}
+          
         </div>
       </div>
     </JournalAccessProvider>

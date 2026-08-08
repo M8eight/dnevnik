@@ -1,14 +1,6 @@
 import type { PageResponse } from "@/helpers/helper-interfaces"
-import { type HomeworkRequest, type HomeworkResponse, type HomeworkWithSubjectResponse, createHomeworks, deleteHomework, getHomeworkByDate, getHomeworksByTeachingAssignment } from "@/services/homework-service"
+import { type HomeworkRequest, type HomeworkResponse, createHomeworks, deleteHomework, getHomeworksByTeachingAssignment } from "@/services/homework-service"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-
-export const useHomeworkByDate = (date: string, studentId: number) => {
-    return useQuery<HomeworkWithSubjectResponse[]>({
-        queryKey: ['homework', date, studentId],
-        queryFn: () => getHomeworkByDate(date, studentId),
-        enabled: !!date && !!studentId,
-    })
-}
 
 export const useHomeworksByTeachingAssignment = (teachingAssginmentId: number, page: number, size: number) => {
     return useQuery<PageResponse<HomeworkResponse>>({
