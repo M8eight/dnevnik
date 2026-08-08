@@ -27,6 +27,7 @@ public enum AcademicExceptionCode implements IExceptionCode {
     FINAL_GRADE_NOT_FOUND,
 
     GRADE_NOT_FOUND,
+    ATTENDANCE_NOT_FOUND,
 
     TEACHING_ASSIGNMENT_NOT_FOUND,
 
@@ -55,8 +56,12 @@ public enum AcademicExceptionCode implements IExceptionCode {
     USER_SERVICE_FORBIDDEN,
     USER_SERVICE_UNAUTHORIZED,
 
+    ACCESS_DENIED,
+
     DB_VALIDATION_ERROR,
     VALIDATION_ERROR,
 
-    PDF_EXPORT_ERROR
+    PDF_EXPORT_ERROR,
+
+    UNHANDLED_SERVER_ERROR
 }

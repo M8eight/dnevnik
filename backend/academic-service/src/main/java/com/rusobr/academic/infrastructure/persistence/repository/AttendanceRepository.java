@@ -1,6 +1,8 @@
 package com.rusobr.academic.infrastructure.persistence.repository;
 
 import com.rusobr.academic.domain.model.Attendance;
+import com.rusobr.academic.domain.model.Grade;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -23,5 +25,8 @@ public interface AttendanceRepository extends JpaRepository<Attendance,Long> {
         and a.id = :gradeId
     """)
     boolean isAttendanceOwnedByTeacher(@Param("teacherId") Long teacherId, @Param("attendanceId") Long attendanceId);
+
+    @EntityGraph(attributePaths = {"lessonInstance"})
+    Optional<Attendance> findWithLessonInstanceById(Long id);
 
 }

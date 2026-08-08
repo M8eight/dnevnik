@@ -1,10 +1,12 @@
 package com.rusobr.academic.web.dto.grade.periodGrade;
 
+import jakarta.validation.constraints.NotNull;
+
 public record PeriodGradeRequest(
-        Integer value,
+        @NotNull Integer value,
         String description,
-        Long teachingAssignmentId,
-        Long studentId,
-        Long academicPeriodId
+        @NotNull Long teachingAssignmentId,
+        @NotNull Long studentId,
+        @NotNull Long academicPeriodId
 ) {
 }

@@ -4,6 +4,7 @@ import com.rusobr.academic.application.service.PeriodGradeService;
 import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeRequest;
 import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeResponse;
 import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeTeacherResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,12 +27,12 @@ public class PeriodGradeController {
     @PreAuthorize("@teacherSecurity.canCreatePeriodGrade(#periodGradeRequest.teachingAssignmentId(), #periodGradeRequest.studentId(), authentication)")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public PeriodGradeResponse createPeriodGrade(@RequestBody PeriodGradeRequest periodGradeRequest) {
+    public PeriodGradeResponse createPeriodGrade(@RequestBody @Valid PeriodGradeRequest periodGradeRequest) {
         return periodGradeService.create(periodGradeRequest);
     }
 
 
-    @PreAuthorize("@teacherSecurity.canDeletePeriodGrade(#periodGradeRequest.teachingAssignmentId(), #periodGradeRequest.studentId(), authentication)")
+    @PreAuthorize("@teacherSecurity.canDeletePeriodGrade(#id, authentication)")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deletePeriodGrade(@PathVariable Long id) {
