@@ -25,7 +25,7 @@ public class AttendanceService {
     private final LessonInstanceService lessonInstanceService;
     private final AcademicPeriodService academicPeriodService;
 
-    @CacheEvict(value = {"journalByAssignment", "journalByStudentId"}, allEntries = true)
+    @CacheEvict(value = {"journalByAssignment", "journalByStudentId", "schedulesByStudentId"}, allEntries = true)
     @Transactional
     public AttendanceResponse create(AttendanceRequest attendanceRequest) {
         LessonInstance lessonInstance = lessonInstanceService.getById(attendanceRequest.lessonInstanceId());
@@ -50,7 +50,7 @@ public class AttendanceService {
         return response;
     }
 
-    @CacheEvict(value = {"journalByAssignment", "journalByStudentId"}, allEntries = true)
+    @CacheEvict(value = {"journalByAssignment", "journalByStudentId", "schedulesByStudentId"}, allEntries = true)
     @Transactional
     public void delete(Long id) {
         attendanceRepository.deleteById(id);

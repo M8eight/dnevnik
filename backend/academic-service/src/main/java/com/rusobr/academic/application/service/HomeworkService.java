@@ -39,14 +39,13 @@ public class HomeworkService {
         return homeworkRepository.findHomeworksByDate(date, studentId).stream().map(homeworkMapper::toWithSubjectResponse).toList();
     }
 
-    @Cacheable(value = "homeworksByAssignment", key = "#teachingAssignmentId")
     @Transactional(readOnly = true)
     public Page<HomeworkResponse> getByAssignment(Long teachingAssignmentId, Pageable pageable) {
         Page<Homework> homeworkPage = homeworkRepository.findHomeworksByTeachingAssignmentId(teachingAssignmentId, pageable);
         return homeworkPage.map(homeworkMapper::toHomeworkResponse);
     }
 
-    @CacheEvict(value = {"homeworksByDate", "homeworksByAssignment"}, allEntries = true)
+    @CacheEvict(value = {"homeworksByDate", "homeworksByAssignment", "schedulesByStudentId"}, allEntries = true)
     @Transactional
     public HomeworkResponse create(HomeworkRequest homeworkRequest) {
         LessonInstance lessonInstance = lessonInstanceService.getById(homeworkRequest.lessonInstanceId());
@@ -67,7 +66,7 @@ public class HomeworkService {
         return response;
     }
 
-    @CacheEvict(value = {"homeworksByDate", "homeworksByAssignment"}, allEntries = true)
+    @CacheEvict(value = {"homeworksByDate", "homeworksByAssignment", "schedulesByStudentId"}, allEntries = true)
     @Transactional
     public void delete(Long id) {
         Homework homework = homeworkRepository.findWithLessonInstanceById(id)

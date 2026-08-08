@@ -106,7 +106,7 @@ public class PeriodGradeService {
         return new PeriodGradeDbData(studentIds, periodGradesMap, averageGradesMap);
     }
 
-    @CacheEvict(value = {"periodGradesByAssignment", "periodGradesByStudentId"}, allEntries = true)
+    @CacheEvict(value = {"periodGradesByAssignment", "periodGradesByStudentId", "journalPeriodFinalGradeByStudentId"}, allEntries = true)
     @Transactional
     public PeriodGradeResponse create(PeriodGradeRequest dto) {
         AcademicPeriod academicPeriod = academicPeriodService.getById(dto.academicPeriodId());
@@ -133,7 +133,7 @@ public class PeriodGradeService {
         return response;
     }
 
-    @CacheEvict(value = {"periodGradesByAssignment", "periodGradesByStudentId"}, allEntries = true)
+    @CacheEvict(value = {"periodGradesByAssignment", "periodGradesByStudentId", "journalPeriodFinalGradeByStudentId"}, allEntries = true)
     @Transactional
     public void delete(Long periodGradeId) {
         PeriodGrade periodGrade = periodGradeRepository.findWithAcademicPeriodById(periodGradeId)

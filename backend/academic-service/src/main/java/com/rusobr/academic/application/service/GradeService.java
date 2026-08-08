@@ -104,7 +104,7 @@ public class GradeService {
         return response;
     }
 
-    @CacheEvict(value = {"gradesByDate", "gradesByPeriod", "journalByAssignment", "journalByStudentId"}, allEntries = true)
+    @CacheEvict(value = {"gradesByDate", "gradesByPeriod", "journalByAssignment", "journalByStudentId", "schedulesByStudentId"}, allEntries = true)
     @Transactional
     public void delete(Long id) {
         Grade grade = gradeRepository.findWithLessonInstanceById(id)

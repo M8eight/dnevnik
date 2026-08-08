@@ -85,7 +85,7 @@ public class FinalGradeService {
         return new DbData(finalGrades, studentIds);
     }
 
-    @CacheEvict(value = {"finalGradesByStudent", "finalGradesByAssignment"}, allEntries = true)
+    @CacheEvict(value = {"finalGradesByStudent", "finalGradesByAssignment", "journalPeriodFinalGradeByStudentId"}, allEntries = true)
     @Transactional
     public FinalGradeCreateResponse create(FinalGradeRequest finalGradeRequest) {
 
@@ -115,7 +115,7 @@ public class FinalGradeService {
         return response;
     }
 
-    @CacheEvict(value = {"finalGradesByStudent", "finalGradesByAssignment"}, allEntries = true)
+    @CacheEvict(value = {"finalGradesByStudent", "finalGradesByAssignment", "journalPeriodFinalGradeByStudentId"}, allEntries = true)
     @Transactional
     public void delete(Long id) {
         FinalGrade finalGrade = finalGradeRepository.findWithAcademicYearById(id)
