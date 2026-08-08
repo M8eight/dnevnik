@@ -4,6 +4,7 @@ import com.rusobr.academic.domain.model.Attendance;
 import com.rusobr.academic.domain.model.LessonInstance;
 import com.rusobr.academic.web.dto.attendances.AttendanceRequest;
 import com.rusobr.academic.web.dto.attendances.AttendanceResponse;
+import com.rusobr.academic.web.dto.attendances.journal.AttendanceSimpleResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
@@ -13,6 +14,8 @@ import org.mapstruct.ReportingPolicy;
 public interface AttendanceMapper {
     @Mapping(target = "attendanceId", source = "id")
     AttendanceResponse toAttendanceResponse(Attendance attendance);
+
+    AttendanceSimpleResponse toAttendanceSimpleResponse(Attendance attendance);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "lessonInstance", source = "lessonInstanceEntity")

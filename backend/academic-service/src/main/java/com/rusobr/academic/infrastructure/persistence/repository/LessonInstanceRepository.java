@@ -154,19 +154,57 @@ public interface LessonInstanceRepository extends JpaRepository<LessonInstance, 
         select distinct li
         from LessonInstance li
             join fetch li.scheduleLesson sl
-            left join fetch li.attendances a
-            left join fetch li.grades g
-            left join fetch li.homeworks h
         where sl.id in :scheduleLessonIds
-            and (a.studentId = :studentId
-                or g.studentId = :studentId
-                or h.id is not null)
             and li.lessonDate between :startDate and :endDate
         order by li.lessonDate asc
     """)
-    List<LessonInstance> findDiaryAcademicPerformanceByStudentId(@Param("scheduleLessonIds") List<Long> scheduleLessonIds,
-                                                                 @Param("startDate") LocalDate startDate,
-                                                                 @Param("endDate") LocalDate endDate,
-                                                                 @Param("studentId") Long studentId);
+    List<LessonInstance> findLessonInstancesByScheduleId(@Param("scheduleLessonIds") List<Long> scheduleLessonIds,
+                                                         @Param("startDate") LocalDate startDate,
+                                                         @Param("endDate") LocalDate endDate);
+
+    @Query("""
+        select distinct li
+        from LessonInstance li
+            join fetch li.scheduleLesson sl
+            join fetch li.grades g
+        where sl.id in :scheduleLessonIds
+            and g.studentId = :studentId
+            and li.lessonDate between :startDate and :endDate
+        order by li.lessonDate asc
+    """)
+    List<LessonInstance> findLessonInstanceGradesByPeriodAndStudent(@Param("scheduleLessonIds") List<Long> scheduleLessonIds,
+                                                                    @Param("startDate") LocalDate startDate,
+                                                                    @Param("endDate") LocalDate endDate,
+                                                                    @Param("studentId") Long studentId);
+
+    @Query("""
+        select distinct li
+        from LessonInstance li
+            join fetch li.scheduleLesson sl
+            join fetch li.attendances a
+        where sl.id in :scheduleLessonIds
+            and a.studentId = :studentId
+            and li.lessonDate between :startDate and :endDate
+        order by li.lessonDate asc
+    """)
+    List<LessonInstance> findLessonInstanceAttendancesByPeriodAndStudent(@Param("scheduleLessonIds") List<Long> scheduleLessonIds,
+                                                                         @Param("startDate") LocalDate startDate,
+                                                                         @Param("endDate") LocalDate endDate,
+                                                                         @Param("studentId") Long studentId);
+
+    @Query("""
+        select distinct li
+        from LessonInstance li
+            join fetch li.scheduleLesson sl
+            left join fetch li.homeworks h
+        where sl.id in :scheduleLessonIds
+            and li.lessonDate between :startDate and :endDate
+        order by li.lessonDate asc
+    """)
+    List<LessonInstance> findLessonInstanceHomeworksByPeriodAndStudent(@Param("scheduleLessonIds") List<Long> scheduleLessonIds,
+                                                                       @Param("startDate") LocalDate startDate,
+                                                                       @Param("endDate") LocalDate endDate);
+
+
 
 }

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rusobr.academic.application.service.ScheduleService;
 import com.rusobr.academic.web.controller.ScheduleController;
 import com.rusobr.common.dto.UserFeignResponse;
-import com.rusobr.academic.web.dto.scheduleLesson.DiaryScheduleDto;
 import com.rusobr.academic.web.dto.scheduleLesson.ScheduleLessonDto;
 import com.rusobr.academic.web.dto.scheduleLesson.ScheduleLessonRequest;
 import com.rusobr.academic.web.dto.scheduleLesson.ScheduleLessonResponse;

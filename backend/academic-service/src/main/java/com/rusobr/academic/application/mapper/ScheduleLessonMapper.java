@@ -5,8 +5,8 @@ import com.rusobr.academic.domain.model.ScheduleLesson;
 import com.rusobr.academic.domain.model.TeachingAssignment;
 import com.rusobr.academic.infrastructure.persistence.projection.ScheduleLessonProjection;
 import com.rusobr.academic.infrastructure.persistence.projection.SchoolLessonProjection;
+import com.rusobr.academic.web.dto.scheduleLesson.studentDiary.ScheduleLessonDiaryDto;
 import com.rusobr.common.dto.UserFeignResponse;
-import com.rusobr.academic.web.dto.lessonInstance.DiaryLessonInstanceDto;
 import com.rusobr.academic.web.dto.scheduleLesson.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -25,11 +25,6 @@ public interface ScheduleLessonMapper {
     @Mapping(target = "teachingAssignment", source = "teachingAssignment")
     ScheduleLesson toEntity(ScheduleLessonRequest scheduleLessonRequest, TeachingAssignment teachingAssignment);
 
-    @Mapping(target = "id", source = "scheduleLesson.id")
-    @Mapping(target = "instance", source = "diaryLessonInstance")
-    @Mapping(target = "subject", source = "scheduleLesson.teachingAssignment.subject")
-    DiaryScheduleDto toDiaryScheduleDto(ScheduleLesson scheduleLesson, DiaryLessonInstanceDto diaryLessonInstance);
-
     ScheduleLessonResponse toScheduleLessonResponse(ScheduleLessonProjection projection);
 
     SchoolLessonResponse toSchoolLessonResponse(SchoolLessonProjection projection);
@@ -39,5 +34,8 @@ public interface ScheduleLessonMapper {
     @Mapping(target = "lessonInstance", source = "lessonInstance")
     @Mapping(target = "schoolClass", source = "lessonInstance.scheduleLesson.teachingAssignment.schoolClass")
     TeacherScheduleItem toTeacherScheduleItem(LessonInstance lessonInstance);
+
+    @Mapping(target = "subject", source = "scheduleLesson.teachingAssignment.subject")
+    ScheduleLessonDiaryDto toScheduleLessonDiaryDto(ScheduleLesson scheduleLesson);
 
 }

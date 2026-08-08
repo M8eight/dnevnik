@@ -1,6 +1,6 @@
 package com.rusobr.academic.web.dto.homework;
 
-public record HomeworkDiaryResponse(
+public record HomeworkSimpleResponse(
         Long id,
         String text
 ) {
