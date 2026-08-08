@@ -41,8 +41,13 @@ export default function UserAdminPage() {
         const timer = setTimeout(() => setDebouncedSearch(searchName), 500);
         return () => clearTimeout(timer);
     }, [searchName]);
+    
+    const [prevFilters, setPrevFilters] = useState({ search: debouncedSearch, role: filterRole });
 
-    useEffect(() => { setPage(0); }, [debouncedSearch, filterRole]);
+    if (prevFilters.search !== debouncedSearch || prevFilters.role !== filterRole) {
+        setPrevFilters({ search: debouncedSearch, role: filterRole });
+        setPage(0);
+    }
 
     const { data: usersData, isLoading: isUsersLoading } = useFindUsersByFilter(
         page,
@@ -83,7 +88,6 @@ export default function UserAdminPage() {
     return (
         <div className="relative z-10 min-h-screen px-4 md:px-10 pt-5 pb-14">
 
-            {/* Модалка привязки */}
             {assignParent && (
                 <AssignStudentsModal
                     parent={assignParent}
@@ -95,10 +99,8 @@ export default function UserAdminPage() {
                 <EditUserModal user={editUser} onClose={() => setEditUser(null)} />
             )}
 
-            {/* ── Header ── */}
             <AdminNavbar />
 
-            {/* ── Controls bar ── */}
             <div className="max-w-[1400px] mx-auto mb-6">
                 <div className="glass-card rounded-[24px] p-5 flex items-center gap-5 border-none shadow-lg backdrop-blur-md">
                     <div className="hidden sm:flex w-12 h-12 rounded-[18px] bg-[var(--red-light)]/60 items-center justify-center ring-1 ring-[var(--red)]/10">
@@ -111,10 +113,8 @@ export default function UserAdminPage() {
                 </div>
             </div>
 
-            {/* ── Main Content Grid ── */}
             <div className="max-w-[1400px] mx-auto grid grid-cols-1 xl:grid-cols-[400px_1fr] gap-6 xl:gap-8 mt-6">
 
-                {/* Левая колонка */}
                 <div className="flex flex-col gap-6">
                     <div className="glass-card rounded-[32px] p-6 backdrop-blur-md">
                         <h2 className="text-base font-black text-[var(--navy)] flex items-center gap-2 mb-5">
@@ -125,10 +125,8 @@ export default function UserAdminPage() {
                     </div>
                 </div>
 
-                {/* Правая колонка */}
                 <div className="flex flex-col gap-4">
 
-                    {/* Фильтры */}
                     <div className="glass-card rounded-[24px] p-4 flex flex-col sm:flex-row gap-4 items-center justify-between backdrop-blur-md">
                         <div className="relative w-full sm:max-w-md">
                             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-black/30" />
@@ -165,7 +163,6 @@ export default function UserAdminPage() {
                         </div>
                     </div>
 
-                    {/* Список */}
                     <div className="glass-card rounded-[32px] p-2 flex-1 flex flex-col backdrop-blur-md min-h-[500px]">
 
                         <div className="p-4 px-6 flex items-center justify-between border-b border-black/5 flex-wrap gap-4">
@@ -231,7 +228,6 @@ export default function UserAdminPage() {
                                                     </div>
 
                                                     <div className="flex items-center gap-1">
-                                                        {/* Кнопка привязки — только для родителей */}
                                                         {isParent && (
                                                             <button
                                                                 onClick={() => setAssignParent(user)}
