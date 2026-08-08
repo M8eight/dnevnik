@@ -57,4 +57,6 @@ public enum AcademicExceptionCode implements IExceptionCode {
 
     DB_VALIDATION_ERROR,
     VALIDATION_ERROR,
+
+    PDF_EXPORT_ERROR
 }
