@@ -14,6 +14,12 @@ export interface CreateAttendanceRequest {
     lessonInstanceId: number;
 }
 
+export interface AttendanceSimpleResponse {
+    id: number,
+    status: string,
+    studentId: number
+}
+
 export const createAttendance = async (request: CreateAttendanceRequest): Promise<CreateAttendanceResponse> => {
     const { data } = await api.post<CreateAttendanceResponse>(
         `/academic-service/api/v1/attendances`,

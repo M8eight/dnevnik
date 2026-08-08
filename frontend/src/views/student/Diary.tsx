@@ -13,34 +13,15 @@ import { LESSON_TIMES, RUSSIAN_DAYS } from "@/constants/component-constants";
 import { AttendanceBadge } from "@/components/student/diary/badges";
 import { GradePopover } from "@/components/student/diary/grade-detail-popover";
 import StudentNavbar from "@/components/layout/navbars/StudentNavbar";
-import type { DiaryScheduleDto } from "@/services/schedule-service";
-
-const DAY_ORDER = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
-
-
-const formatDateLabel = (dateStr: string) =>
-  new Date(dateStr).toLocaleDateString("ru-RU", { day: "numeric", month: "long" });
+import { capitalizeFirst, formatRuDate, toISODate } from "@/lib/date";
+import type { DiaryLessonDto } from "@/services/schedule-service";
 
 const mapAttendanceStatus = (status?: string) => {
   if (status === "ABSENT") return "Н";
-  if (status === "EXCUSED") return "ОП";
-  if (status === "LATE") return "О";
+  if (status === "LATE") return "ОП";
+  if (status === "EXCUSED") return "О";
   return "";
 };
-
-function lessonDate(weekStart: Date, dayOfWeek: string): string {
-  const idx = DAY_ORDER.indexOf(dayOfWeek);
-  return format(addDays(weekStart, idx), "yyyy-MM-dd");
-}
-
-function groupByDay(lessons: DiaryScheduleDto[]): Record<string, DiaryScheduleDto[]> {
-  return lessons.reduce((acc, lesson) => {
-    const key = lesson.dayOfWeek;
-    if (!acc[key]) acc[key] = [];
-    acc[key].push(lesson);
-    return acc;
-  }, {} as Record<string, DiaryScheduleDto[]>);
-}
 
 function DayCard({
   dayOfWeek,
@@ -49,9 +30,9 @@ function DayCard({
 }: {
   dayOfWeek: string;
   date: string;
-  lessons: DiaryScheduleDto[];
+  lessons: DiaryLessonDto[];
 }) {
-  const today = new Date().toISOString().split("T")[0];
+  const today = toISODate(new Date());
   const isToday = date === today;
 
   return (
@@ -65,21 +46,25 @@ function DayCard({
           {isToday ? `${RUSSIAN_DAYS[dayOfWeek] || "День"} · сегодня` : RUSSIAN_DAYS[dayOfWeek] || "День"}
         </Chip>
         <p className="text-[10px] font-bold text-black/25 uppercase tracking-[0.18em]">
-          {formatDateLabel(date)}
+          {formatRuDate(date)}
         </p>
       </div>
 
       <div className="divide-y divide-black/5">
-        {lessons.map((lesson, idx) => {
-          const attendance = lesson.instance?.attendances?.[0];
-          const grade = lesson.instance?.grades?.[0];
-          const homework = lesson.instance?.homework;
+      {lessons.length === 0 ? (
+        <div className="py-6 flex flex-col items-center justify-center text-center">
+          <p className="text-[13px] font-medium text-black/25">Уроков нет</p>
+        </div>
+      ) : (
+        lessons?.map((lesson) => {
+          const grades = lesson.grades;
+          const homeworks = lesson.homeworks;
+          const attendance = lesson.attendance;
 
           return (
-            <div key={idx} className="py-3 first:pt-0 last:pb-0">
+            <div key={lesson.lessonInstanceId} className="py-3 first:pt-0 last:pb-0">
               <div className="flex items-start gap-3">
 
-                {/* Время урока */}
                 <div className="flex flex-col justify-center items-end min-w-14 pt-1 shrink-0">
                   <span className="text-[13px] font-extrabold text-black/30 leading-none tabular-nums">
                     {LESSON_TIMES[lesson.lessonNumber]?.split("–")[0] ?? "—"}
@@ -89,10 +74,8 @@ function DayCard({
                   </span>
                 </div>
 
-                {/* Разделитель */}
                 <div className="w-0.5 self-stretch rounded-full bg-black/6 shrink-0" />
 
-                {/* Контент урока */}
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-start gap-2">
                     <div className="min-w-0">
@@ -100,19 +83,20 @@ function DayCard({
                         {lesson.subject?.name ?? "—"}
                       </p>
                       <p className="text-[11px] text-black/20 mt-0.5">
-                        {lesson.classRoom}
+                        {lesson.classRoom}  
                       </p>
-                      {homework && (
-                        <p className="text-[12px] text-black/35 mt-1 italic leading-snug line-clamp-2">
-                          {homework.text}
+                      {homeworks.map(({id, text}) => (
+                        <p className="text-[12px] text-black/35 mt-1 italic leading-snug line-clamp-2" key={id}>
+                          {text}
                         </p>
-                      )}
+                      ))
+                      }
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <AttendanceBadge status={mapAttendanceStatus(attendance?.status)} />
-                      {grade?.id != null && grade.value != null && (
-                        <GradePopover gradeId={grade.id} value={grade.value} />
-                      )}
+                      {grades.map(({id, value}) => (
+                        <GradePopover gradeId={id} value={value} key={id} />
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -120,7 +104,8 @@ function DayCard({
               </div>
             </div>
           );
-        })}
+        }) ?? []
+      )}
       </div>
     </div>
   );
@@ -134,22 +119,13 @@ export default function Diary() {
   const startDate = format(currentWeekStart, "yyyy-MM-dd");
   const endDate = format(addDays(currentWeekStart, 6), "yyyy-MM-dd");
 
-  const { data, isLoading } = useDiaryScheduleByStudentId(startDate, endDate);
+  const { data: weekSchedule, isLoading } = useDiaryScheduleByStudentId(startDate, endDate);
 
   const weekEnd = addDays(currentWeekStart, 6);
   const startDay = format(currentWeekStart, "dd");
   const endDayWithMonth = format(weekEnd, "dd MMM", { locale: ru });
   const fullMonthYear = format(currentWeekStart, "LLLL yyyy", { locale: ru });
-  const capitalizedMonth = fullMonthYear.charAt(0).toUpperCase() + fullMonthYear.slice(1);
-
-  const grouped = data ? groupByDay(data) : {};
-  const sortedDays = DAY_ORDER
-    .filter(day => grouped[day])
-    .map(day => ({
-      dayOfWeek: day,
-      date: lessonDate(currentWeekStart, day),
-      lessons: grouped[day].sort((a, b) => a.lessonNumber - b.lessonNumber),
-    }));
+  const capitalizedMonth = capitalizeFirst(fullMonthYear);
 
   return (
     <div className="relative z-10 min-h-screen px-6 md:px-10 pt-2 pb-14">
@@ -202,7 +178,7 @@ export default function Diary() {
               </div>
             </div>
           ))
-          : sortedDays.map(({ dayOfWeek, date, lessons }) => (
+          : weekSchedule?.days.map(({ dayOfWeek, date, lessons }) => (
             <DayCard key={dayOfWeek} dayOfWeek={dayOfWeek} date={date} lessons={lessons} />
           ))
         }

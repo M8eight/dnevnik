@@ -10,6 +10,14 @@ export interface Grade {
     subjectName: string;
 }
 
+export interface GradeResponse {
+    id: number;
+    studentId: number;
+    value: number;
+    weight: number;
+    type: string;
+}
+
 export interface GradeLessonDto {
     gradeId: number;
     value: number;
