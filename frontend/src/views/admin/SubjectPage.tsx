@@ -47,10 +47,9 @@ export default function SubjectsPage() {
 
     return (
         <div className="relative z-10 min-h-screen px-4 md:px-10 pt-5 pb-14">
-            {/* ── Header ── */}
+
             <AdminNavbar />
 
-            {/* ── Controls bar ── */}
             <div className="max-w-[1400px] mx-auto mb-6">
                 <div className="glass-card rounded-[24px] p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-5 border-none shadow-lg backdrop-blur-md">
 
@@ -70,7 +69,6 @@ export default function SubjectsPage() {
                         </div>
                     </div>
 
-                    {/* Search */}
                     <div className="relative w-full lg:w-[280px]">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/30" />
                         <Input
@@ -84,12 +82,9 @@ export default function SubjectsPage() {
                 </div>
             </div>
 
-            {/* ── Main grid ── */}
             <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2">
                     <div className="glass-card rounded-[32px] p-6 backdrop-blur-md min-h-[600px] flex flex-col">
-
-                        {/* Заголовок списка */}
                         <div className="flex items-center justify-between mb-5">
                             <h2 className="font-serif font-black text-lg text-[var(--navy)] tracking-tight flex items-center gap-2">
                                 <Layers className="w-5 h-5 text-[var(--red)]" />
@@ -103,7 +98,6 @@ export default function SubjectsPage() {
                             </div>
                         </div>
 
-                        {/* Список предметов */}
                         <ScrollArea className="flex-1 pr-2">
                             {isLoading ? (
                                 <div className="flex flex-col items-center justify-center py-20 text-black/30">
@@ -132,7 +126,6 @@ export default function SubjectsPage() {
                             )}
                         </ScrollArea>
 
-                        {/* ─── Блок пагинации ─── */}
                         <div className="flex items-center justify-between mt-6 pt-4 border-t border-black/5">
                             <Button
                                 variant="ghost"

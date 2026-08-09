@@ -1,26 +1,10 @@
 import { useQuery } from "@tanstack/react-query"
-import { getAvgGradeByStudentId, findAllGradesByDate, deleteGrade, getGradeDetail } from "@/services/grade-service"
-import type { AvgGrade, GradeDetailResponse, GradeWithSubjectNameResponse } from "@/services/grade-service"
+import { deleteGrade, getGradeDetail } from "@/services/grade-service"
+import type { GradeDetailResponse } from "@/services/grade-service"
 
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { createGrade } from "@/services/grade-service"
 import type { CreateGradeRequest, CreateGradeResponse } from "@/services/grade-service"
-
-export const useAvgGrade = (studentId: number, academicPeriodId: number) => {
-    return useQuery<AvgGrade>({
-        queryKey: ['avgGrade', studentId, academicPeriodId],
-        queryFn: () => getAvgGradeByStudentId(studentId, academicPeriodId),
-        enabled: !!studentId && !!academicPeriodId,
-    });
-};
-
-export const useGradesByDate = (studentId: number, date: string) => {
-    return useQuery<GradeWithSubjectNameResponse[]>({
-        queryKey: ['gradesByDate', studentId, date],
-        queryFn: () => findAllGradesByDate(studentId, date),
-        enabled: !!studentId && !!date,
-    });
-};
 
 export const useGradeDetail = (gradeId: number, enabled: boolean = true) => {
     return useQuery<GradeDetailResponse>({

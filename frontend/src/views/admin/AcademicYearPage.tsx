@@ -9,10 +9,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import AdminNavbar from "@/components/layout/navbars/AdminNavbar";
-
 import YearCard from "@/components/admin/academic-year-page/year-card";
 import CreateYearForm from "@/components/admin/academic-year-page/create-year-form";
-
 import { 
     useGetAcademicYears, 
     useDeleteAcademicYear, 
@@ -20,6 +18,7 @@ import {
     useCloseAcademicYear
 } from "@/hooks/use-academic-year";
 import type { AcademicYearResponse } from "@/services/academic-year-service";
+import PageHeader from "@/components/admin/page-header";
 
 export default function AcademicYearPage() {
     const [search, setSearch] = useState("");
@@ -54,44 +53,29 @@ export default function AcademicYearPage() {
 
     return (
         <div className="relative z-10 min-h-screen px-4 md:px-10 pt-5 pb-14">
-            {/* ── Header ── */}
+
             <AdminNavbar />
 
-            {/* ── Controls bar ── */}
-            <div className="max-w-350 mx-auto mb-6">
-                <div className="glass-card rounded-[24px] p-5 flex flex-col lg:flex-row justify-between lg:items-center gap-5 border-none shadow-lg backdrop-blur-md">
-
-                    <div className="flex items-center gap-4">
-                        <div className="hidden sm:flex w-12 h-12 rounded-[18px] bg-(--red-light)/60 items-center justify-center ring-1 ring-(--red)/10">
-                            <CalendarDays className="w-6 h-6 text-(--red)" />
-                        </div>
-                        <div>
-                            <h1 className="font-serif font-black text-2xl lg:text-3xl text-(--navy) tracking-tight">
-                                Учебные годы
-                            </h1>
-                            <p className="text-sm text-black/40 mt-0.5">
-                                {isLoading
-                                    ? "Загрузка..."
-                                    : `${academicYears.length} ${getYearWord(academicYears.length)} · ${activeCount} активен`}
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 w-full lg:w-auto">
-                        <div className="relative w-full lg:w-70 float-end">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/30" />
-                            <Input
-                                placeholder="Поиск года..."
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                className="pl-10 h-11 bg-white/40 border-black/10 rounded-2xl text-sm font-semibold placeholder:font-normal focus-visible:ring-(--red)"
-                            />
-                        </div>
-                    </div>
+            <PageHeader
+                icon={CalendarDays}
+                title="Учебные годы"
+                subtitle={
+                    isLoading
+                        ? "Загрузка..."
+                        : `${academicYears.length} ${getYearWord(academicYears.length)} · ${activeCount} активен`
+                }
+            >
+                <div className="relative w-full lg:w-70 float-end">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/30" />
+                    <Input
+                        placeholder="Поиск года..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="pl-10 h-11 bg-white/40 border-black/10 rounded-2xl text-sm font-semibold placeholder:font-normal focus-visible:ring-(--red)"
+                    />
                 </div>
-            </div>
+            </PageHeader>
 
-            {/* ── Main grid ── */}
             <div className="max-w-350 mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                 <div className="lg:col-span-2">
@@ -102,7 +86,6 @@ export default function AcademicYearPage() {
                             Все учебные годы
                         </h2>
 
-                        {/* Список годов */}
                         <ScrollArea className="flex-1 pr-2">
                             {isLoading ? (
                                 <div className="flex flex-col items-center justify-center py-20 text-black/30">

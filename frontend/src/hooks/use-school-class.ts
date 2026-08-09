@@ -3,7 +3,6 @@ import {
     addStudentToClass,
     createClass,
     deleteClass,
-    getSchoolClasses,
     getSchoolClassDetails,
     removeStudentFromClass,
     updateClass,
@@ -20,14 +19,6 @@ import {
 import type { UserSimpleResponse } from "@/services/user-service";
 
 const CLASS_QUERY_KEY = ["classes"];
-
-export const useGetAllClasses = () => {
-    return useQuery<SchoolClassResponse[]>({
-        queryKey: [...CLASS_QUERY_KEY],
-        queryFn: () => getSchoolClasses(),
-        staleTime: 1000 * 60 * 5,
-    });
-};
 
 export const useGetAllClassesByAcademicYear = (academicYearId: number) => {
     return useQuery<SchoolClassResponse[]>({

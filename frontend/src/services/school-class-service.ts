@@ -32,11 +32,6 @@ export interface SchoolClassUpdateRequest {
     name: string;
 }
 
-export const getSchoolClasses = async (): Promise<SchoolClassResponse[]> => {
-    const { data } = await api.get<SchoolClassResponse[]>(`/academic-service/api/v1/school-classes`);
-    return data;
-};
-
 export const getSchoolClassesByAcademicYear = async (academicYearId: number): Promise<SchoolClassResponse[]> => {
     const { data } = await api.get<SchoolClassResponse[]>(`/academic-service/api/v1/school-classes/by-academic-year/${academicYearId}`);
     return data;

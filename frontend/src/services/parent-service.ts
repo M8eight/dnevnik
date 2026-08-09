@@ -1,5 +1,5 @@
 import api from "@/axios/axios";
-import type { ParentDetailsResponse, UserResponse } from "./user-service";
+import type { UserResponse } from "./user-service";
 
 export interface ParentResponse {
     user: UserResponse;
@@ -19,8 +19,3 @@ export const getParentInfo = async (parentId: number): Promise<ParentInfoRespons
     const { data } = await api.get<ParentInfoResponse>(`/user-service/api/v1/parents/${parentId}/info`);
     return data;
 }
-
-export const getParentDetails = async (id: number): Promise<ParentDetailsResponse> => {
-    const { data } = await api.get(`/user-service/api/v1/parents/${id}/details`);
-    return data;
-};

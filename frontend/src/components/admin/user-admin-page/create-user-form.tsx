@@ -11,6 +11,7 @@ import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
+import { FIELD_CLASS } from "@/constants/form-styles";
 
 const formSchema = z.object({
     role: z.enum(["STUDENT", "PARENT", "TEACHER"]),
@@ -35,11 +36,11 @@ const formSchema = z.object({
     }
 });
 
-const roleFormat = (role: string) => {
+const roleFormat = (role: UserRole) => {
     switch (role) {
-        case "ученик": return "ученика";
-        case "родитель": return "родителя";
-        case "учитель": return "учителя";
+        case "STUDENT": return "ученика";
+        case "PARENT": return "родителя";
+        case "TEACHER": return "учителя";
     }
 }
 
@@ -119,10 +120,7 @@ export default function CreateUserForm() {
         }
     };
 
-    const fieldClass =
-        "h-11 bg-white/40 border border-black/10 rounded-2xl focus-visible:ring-(--red) text-sm font-semibold placeholder:font-normal transition-all duration-200";
-
-    const activeRole = ROLES.find((r) => r.value === currentRole)!;
+    const fieldClass = FIELD_CLASS;
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
@@ -247,7 +245,7 @@ export default function CreateUserForm() {
                 ) : success ? (
                     <><CheckCircle2 className="w-4 h-4" />Создан!</>
                 ) : (
-                    <>Создать {roleFormat(activeRole.label.toLowerCase())}
+                    <>Создать {roleFormat(currentRole)}
                         <Send className="w-4 h-4" /></>
                 )}
             </Button>

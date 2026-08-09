@@ -1,9 +1,6 @@
 import type { SchoolClassFullResponse } from "@/services/school-class-service";
 import { AlertTriangle, GraduationCap, Mail, Phone, Users } from "lucide-react";
-
-function getInitials(firstName: string, lastName: string) {
-    return `${firstName[0]}${lastName[0]}`.toUpperCase();
-}
+import { Avatar } from "../layout";
 
 export function Skeleton({ className }: { className?: string }) {
     return <div className={`animate-pulse rounded-xl bg-black/8 ${className}`} />;
@@ -16,34 +13,6 @@ export function InfoRow({ icon: Icon, value }: { icon: React.ElementType; value:
                 <Icon className="w-3.5 h-3.5 text-(--red)" />
             </div>
             <span className="text-xs font-semibold">{value}</span>
-        </div>
-    );
-}
-
-export function Avatar({
-    firstName,
-    lastName,
-    size = "md",
-    color = "red",
-}: {
-    firstName: string;
-    lastName: string;
-    size?: "sm" | "md" | "lg";
-    color?: "red" | "navy" | "green";
-}) {
-    const sizeMap = {
-        sm: "w-11 h-11 rounded-[12px] text-sm",
-        md: "w-14 h-14 rounded-[16px] text-base",
-        lg: "w-28 h-28 rounded-[36px] text-3xl",
-    };
-    const colorMap = {
-        red: "bg-(--red-light)/50 text-(--red)",
-        navy: "bg-(--navy)/8 text-(--navy)",
-        green: "bg-emerald-100/70 text-emerald-700",
-    };
-    return (
-        <div className={`${sizeMap[size]} ${colorMap[color]} flex items-center justify-center shrink-0`}>
-            <span className="font-serif font-black">{getInitials(firstName, lastName)}</span>
         </div>
     );
 }

@@ -9,9 +9,6 @@ import {
     Send,
     Loader2,
     RefreshCw,
-    AlertTriangle,
-    CalendarClock,
-
 } from "lucide-react";
 import {
     Select,
@@ -29,33 +26,23 @@ import { DAYS_MAP, LESSON_SLOTS } from "@/constants/component-constants";
 import LessonCell from "@/components/admin/schedule-page/lesson-cell";
 import ConfirmCloseModal from "@/components/admin/schedule-page/confirm-close-modal";
 import GenerateModal from "@/components/admin/schedule-page/generate-modal";
-import { useGetAcademicYears } from "@/hooks/use-academic-year";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useAcademicYearSelection } from "@/hooks/use-academic-year-selection";
+import PageHeader from "@/components/admin/page-header";
+import AcademicYearSelect from "@/components/admin/academic-year-select";
+import ClosedYearAlert from "@/components/admin/closed-year-alert";
+import { toISODate } from "@/lib/date";
 
 export default function SchedulePage() {
-    const todayStr = useMemo(() => {
-        const d = new Date();
-        return d.toISOString().split("T")[0];
-    }, []);
+    const todayStr = useMemo(() => toISODate(new Date()), []);
 
     const [date, setDate] = useState<string>(todayStr);
 
-    const { data: academicYears } = useGetAcademicYears();
-    const [selectedAcademicYearId, setSelectedAcademicYearId] = useState<string>("");
-
-    const defaultAcademicYearId = useMemo(() => {
-        if (!academicYears?.length) return "";
-        return academicYears[0].id.toString();
-    }, [academicYears]);
-
-    const resolvedAcademicYearId = selectedAcademicYearId || defaultAcademicYearId;
-
-    const currentAcademicYear = useMemo(() => {
-        return academicYears?.find(year => year.id.toString() === resolvedAcademicYearId);
-    }, [academicYears, resolvedAcademicYearId]);
-
-    const isYearClosed = currentAcademicYear ? currentAcademicYear.closed : false;
-
+    const {
+        resolvedAcademicYearId,
+        setSelectedAcademicYearId,
+        currentAcademicYear,
+        isYearClosed,
+    } = useAcademicYearSelection();
 
     const [viewClassId, setViewClassId] = useState<string>("");
 
@@ -180,102 +167,65 @@ export default function SchedulePage() {
 
     return (
         <div className="relative z-10 min-h-screen px-4 md:px-10 pt-5 pb-14">
+            
             <AdminNavbar />
 
-            {/* Header */}
-            <div className="max-w-350 mx-auto mb-6">
-                <div className="glass-card rounded-[24px] p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-5 border-none shadow-lg backdrop-blur-md">
-                    <div className="flex items-center gap-4">
-                        <div className="hidden sm:flex w-12 h-12 rounded-[18px] bg-(--red-light)/60 items-center justify-center ring-1 ring-(--red)/10">
-                            <CalendarDays className="w-6 h-6 text-(--red)" />
-                        </div>
-                        <div>
-                            <h1 className="font-serif font-black text-2xl lg:text-3xl text-(--navy) tracking-tight">
-                                Расписание
-                            </h1>
-                            <p className="text-sm text-black/40 mt-0.5">
-                                {isLoading
-                                    ? "Загрузка данных..."
-                                    : `${currentClass?.name ?? "—"} · ${lessonsCount} уро${lessonsCount === 1 ? "к" : lessonsCount < 5 && lessonsCount > 0 ? "ка" : "ков"} на неделе`}
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-3">
-                        <div className="flex items-center gap-2 bg-white/40 border border-white/60 rounded-2xl px-4 py-2 text-xs font-semibold text-black/50">
-                            <Calendar className="w-3.5 h-3.5 text-(--red)" />
-                            <span>Дата:</span>
-                            <input
-                                type="date"
-                                value={date}
-                                onChange={(e) => setDate(e.target.value)}
-                                className="bg-transparent text-(--navy) font-bold focus:outline-none cursor-pointer"
-                            />
-                        </div>
-
-                        <button
-                            onClick={() => setIsGenerateModalOpen(true)}
-                            disabled={!activeClassId}
-                            className="flex items-center gap-2 h-10 px-4 rounded-2xl bg-white/40 border border-white/60 text-xs font-bold text-(--navy) hover:bg-white/60 transition-all disabled:opacity-40"
-                        >
-                            <RefreshCw className="w-3.5 h-3.5 text-(--red)" />
-                            Загрузить уроки
-                        </button>
-
-                        <Select
-                            value={resolvedAcademicYearId}
-                            onValueChange={setSelectedAcademicYearId}
-                        >
-                            <SelectTrigger className="glass-pill h-10 px-5 text-[12px] font-bold rounded-2xl text-(--navy) border-0 shadow-sm gap-2 min-w-45">
-                                <CalendarClock className="w-4 h-4 text-(--red)" />
-                                <SelectValue placeholder="Выберите год" />
-                            </SelectTrigger>
-                            <SelectContent className="rounded-2xl border-none shadow-2xl bg-white/95 backdrop-blur-xl max-h-87.5">
-                                {academicYears?.map((academicYear) => (
-                                    <SelectItem key={academicYear.id} value={academicYear.id.toString()} className="font-bold text-[13px] py-3 rounded-xl cursor-pointer">
-                                        {academicYear.name} {academicYear.closed && "(Архив)"}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-
-                        <Select value={activeClassId} onValueChange={setViewClassId}>
-                            <SelectTrigger className="w-35 h-10 text-xs font-bold rounded-2xl bg-white/40 border-white/60 text-(--navy)">
-                                <div className="flex items-center gap-2">
-                                    <Users className="w-3.5 h-3.5 text-(--red)" />
-                                    <SelectValue placeholder="Класс" />
-                                </div>
-                            </SelectTrigger>
-                            <SelectContent className="rounded-2xl">
-                                {classes.map((c) => (
-                                    <SelectItem key={c.id} value={c.id.toString()} className="text-xs font-bold">
-                                        {c.name}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
+            <PageHeader
+                icon={CalendarDays}
+                title="Расписание"
+                subtitle={
+                    isLoading
+                        ? "Загрузка данных..."
+                        : `${currentClass?.name ?? "—"} · ${lessonsCount} уро${lessonsCount === 1 ? "к" : lessonsCount < 5 && lessonsCount > 0 ? "ка" : "ков"} на неделе`
+                }
+            >
+                <div className="flex items-center gap-2 bg-white/40 border border-white/60 rounded-2xl px-4 py-2 text-xs font-semibold text-black/50">
+                    <Calendar className="w-3.5 h-3.5 text-(--red)" />
+                    <span>Дата:</span>
+                    <input
+                        type="date"
+                        value={date}
+                        onChange={(e) => setDate(e.target.value)}
+                        className="bg-transparent text-(--navy) font-bold focus:outline-none cursor-pointer"
+                    />
                 </div>
-            </div>
+
+                <button
+                    onClick={() => setIsGenerateModalOpen(true)}
+                    disabled={!activeClassId}
+                    className="flex items-center gap-2 h-10 px-4 rounded-2xl bg-white/40 border border-white/60 text-xs font-bold text-(--navy) hover:bg-white/60 transition-all disabled:opacity-40"
+                >
+                    <RefreshCw className="w-3.5 h-3.5 text-(--red)" />
+                    Загрузить уроки
+                </button>
+
+                <AcademicYearSelect
+                    value={resolvedAcademicYearId}
+                    onChange={setSelectedAcademicYearId}
+                />
+
+                <Select value={activeClassId} onValueChange={setViewClassId}>
+                    <SelectTrigger className="w-35 h-10 text-xs font-bold rounded-2xl bg-white/40 border-white/60 text-(--navy)">
+                        <div className="flex items-center gap-2">
+                            <Users className="w-3.5 h-3.5 text-(--red)" />
+                            <SelectValue placeholder="Класс" />
+                        </div>
+                    </SelectTrigger>
+                    <SelectContent className="rounded-2xl">
+                        {classes.map((c) => (
+                            <SelectItem key={c.id} value={c.id.toString()} className="text-xs font-bold">
+                                {c.name}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </PageHeader>
 
             {isYearClosed && (
-                <div className="max-w-350 mx-auto mb-6 animate-in fade-in slide-in-from-top-2 duration-300">
-                    <Alert variant="destructive" className="rounded-[24px] bg-linear-to-r from-red-50 to-red-50/50 border-red-200/80 shadow-lg backdrop-blur-sm">
-                        <div className="flex items-start gap-4">
-                            <div className="shrink-0 mt-0.5 w-10 h-10 rounded-[14px] bg-red-100/60 flex items-center justify-center">
-                                <AlertTriangle className="h-5 w-5 text-yellow-600" />
-                            </div>
-                            <div className="flex-1">
-                                <AlertTitle className="font-serif font-black tracking-tight text-base text-yellow-900 mb-1">
-                                    Учебный год <span className="font-bold text-yellow-900">({currentAcademicYear?.name})</span> закрыт
-                                </AlertTitle>
-                                <AlertDescription className="text-sm text-yellow-800/85 font-medium leading-relaxed">
-                                    Операции удаления и редактирования классов запрещены
-                                </AlertDescription>
-                            </div>
-                        </div>
-                    </Alert>
-                </div>
+                <ClosedYearAlert
+                    yearName={currentAcademicYear?.name}
+                    description="Операции удаления и редактирования классов запрещены"
+                />
             )}
 
             {/* Grid */}

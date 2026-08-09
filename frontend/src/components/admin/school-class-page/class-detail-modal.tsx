@@ -15,16 +15,7 @@ import {
 } from "@/hooks/use-school-class";
 import { useFindUsersByFilter } from "@/hooks/use-user";
 import type { UserResponse, UserSimpleResponse } from "@/services/user-service";
-
-
-function Avatar({ name }: { name: string }) {
-    const initials = name.split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase();
-    return (
-        <div className="w-9 h-9 rounded-[12px] bg-linear-to-br from-(--red-light) to-(--red)/20 flex items-center justify-center ring-1 ring-(--red)/15 shrink-0">
-            <span className="text-xs font-black text-(--red)">{initials || "?"}</span>
-        </div>
-    );
-}
+import { Avatar } from "@/components/layout/layout";
 
 function DataWarningAlert({ children }: { children: React.ReactNode }) {
     return (
@@ -105,7 +96,6 @@ function TeacherPicker({
                             <p className="text-xs text-black/30 text-center py-4 font-semibold">Не найдено</p>
                         ) : (
                             teachers.map((u) => {
-                                const name = `${u.firstName} ${u.lastName}`;
                                 const isActive = value?.id === u.id;
                                 return (
                                     <button
@@ -114,8 +104,8 @@ function TeacherPicker({
                                         onClick={() => handleSelect(u)}
                                         className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm hover:bg-black/4 transition text-left ${isActive ? "bg-(--red-light)/40" : ""}`}
                                     >
-                                        <Avatar name={name} />
-                                        <span className="font-semibold text-(--navy) flex-1 truncate">{name}</span>
+                                        <Avatar firstName={u.firstName} lastName={u.lastName} />
+                                        <span className="font-semibold text-(--navy) flex-1 truncate">{`${u.firstName} ${u.lastName}`}</span>
                                         {isActive && <Check className="w-3.5 h-3.5 text-(--red) shrink-0" />}
                                     </button>
                                 );
@@ -200,7 +190,7 @@ function StudentPicker({
                             <p className="text-xs text-black/30 text-center py-4 font-semibold">Нет свободных учеников</p>
                         ) : (
                             filteredStudents.map((u) => {
-                                const name = `${u.firstName} ${u.lastName}`;
+                                // const name = `${u.firstName} ${u.lastName}`;
                                 const isActive = value?.id === u.id;
                                 return (
                                     <button
@@ -209,8 +199,8 @@ function StudentPicker({
                                         onClick={() => handleSelect(u)}
                                         className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm hover:bg-black/4 transition text-left ${isActive ? "bg-(--red-light)/40" : ""}`}
                                     >
-                                        <Avatar name={name} />
-                                        <span className="font-semibold text-(--navy) flex-1 truncate">{name}</span>
+                                        <Avatar firstName={u.firstName} lastName={u.lastName} />
+                                        <span className="font-semibold text-(--navy) flex-1 truncate">{`${u.firstName} ${u.lastName}`}</span>
                                         {isActive && <Check className="w-3.5 h-3.5 text-(--red) shrink-0" />}
                                     </button>
                                 );
@@ -446,7 +436,8 @@ export default function ClassDetailModal({ classId, className, onClose }: ClassD
                                                     className="group flex items-center gap-3 rounded-[16px] bg-white/60 border border-black/5 px-4 py-3 shadow-sm hover:shadow-md hover:bg-white/80 transition-all duration-150"
                                                     style={{ animationDelay: `${idx * 20}ms` }}
                                                 >
-                                                    <Avatar name={fullName || "?"} />
+                                                    <Avatar firstName={student.firstName} lastName={student.lastName} />
+
                                                     <div className="min-w-0 flex-1">
                                                         <p className="font-bold text-sm text-(--navy) truncate leading-tight">
                                                             {fullName || `Ученик #${student.id}`}

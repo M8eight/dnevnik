@@ -1,5 +1,6 @@
 import { RefreshCw, Calendar, Loader2 } from "lucide-react";
 import { useState, useMemo } from "react";
+import { toISODate } from "@/lib/date";
 
 interface GenerateModalProps {
     isGenerating: boolean;
@@ -13,8 +14,8 @@ export default function GenerateModal({ isGenerating, onConfirm, onCancel }: Gen
         const nextMonth = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
         
         return {
-            todayStr: today.toISOString().split("T")[0],
-            nextMonthStr: nextMonth.toISOString().split("T")[0]
+            todayStr: toISODate(today),
+            nextMonthStr: toISODate(nextMonth)
         };
     }, []);
 
