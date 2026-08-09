@@ -119,7 +119,7 @@ class GradeServiceTest {
         @Test
         @DisplayName("успешно создает оценку, если период открыт")
         void success() {
-            CreateGradeRequest request = new CreateGradeRequest(STUDENT_ID, LESSON_ID, 1L, 5, 2, GradeType.TEST);
+            CreateGradeRequest request = new CreateGradeRequest(STUDENT_ID, LESSON_ID, 5, 2, GradeType.TEST);
             LessonInstance lesson = LessonInstance.builder().id(LESSON_ID).lessonDate(DATE).build();
             AcademicPeriod period = AcademicPeriod.builder().closed(false).build();
             Grade grade = new Grade();
@@ -142,7 +142,7 @@ class GradeServiceTest {
         @Test
         @DisplayName("период закрыт — бросает ConflictException")
         void periodClosed_throwsException() {
-            CreateGradeRequest request = new CreateGradeRequest(STUDENT_ID, LESSON_ID, 1L, 5, 2, GradeType.TEST);
+            CreateGradeRequest request = new CreateGradeRequest(STUDENT_ID, LESSON_ID, 5, 2, GradeType.TEST);
             LessonInstance lesson = LessonInstance.builder().lessonDate(DATE).build();
             AcademicPeriod period = AcademicPeriod.builder().closed(true).build();
 

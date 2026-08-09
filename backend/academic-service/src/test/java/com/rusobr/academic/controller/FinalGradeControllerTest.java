@@ -133,15 +133,15 @@ public class FinalGradeControllerTest {
     }
 
     @Test
-    @DisplayName("POST /final-grades — 200 and created grade")
-    void create_ShouldReturn200() throws Exception {
+    @DisplayName("POST /final-grades — 201 and created grade")
+    void create_ShouldReturn201() throws Exception {
         FinalGradeRequest request = buildRequest();
         when(finalGradeService.create(request)).thenReturn(buildCreateResponse());
 
         mockMvc.perform(post("/api/v1/final-grades")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(FINAL_GRADE_ID))
                 .andExpect(jsonPath("$.studentId").value(STUDENT_ID))
                 .andExpect(jsonPath("$.value").value(5))
@@ -163,12 +163,12 @@ public class FinalGradeControllerTest {
     }
 
     @Test
-    @DisplayName("DELETE /final-grades/{id} — 200 on success")
-    void delete_ShouldReturn200() throws Exception {
+    @DisplayName("DELETE /final-grades/{id} — 204 on success")
+    void delete_ShouldReturn204() throws Exception {
         doNothing().when(finalGradeService).delete(FINAL_GRADE_ID);
 
         mockMvc.perform(delete("/api/v1/final-grades/{id}", FINAL_GRADE_ID))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         verify(finalGradeService).delete(FINAL_GRADE_ID);
     }

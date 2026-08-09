@@ -37,19 +37,15 @@ public class PdfReportService {
             builder.useFastMode();
             builder.withHtmlContent(html, null);
 
-            InputStream regularFont =
-                    getClass().getResourceAsStream("/fonts/PTSans-Regular.ttf");
-            InputStream boldFont =
-                    getClass().getResourceAsStream("/fonts/PTSans-Bold.ttf");
             builder.useFont(
-                    () -> regularFont,
+                    () -> getClass().getResourceAsStream("/fonts/PTSans-Regular.ttf"),
                     "PT Sans",
                     400,
                     PdfRendererBuilder.FontStyle.NORMAL,
                     true
             );
             builder.useFont(
-                    () -> boldFont,
+                    () -> getClass().getResourceAsStream("/fonts/PTSans-Bold.ttf"),
                     "PT Sans",
                     700,
                     PdfRendererBuilder.FontStyle.NORMAL,
@@ -60,7 +56,7 @@ public class PdfReportService {
             builder.run();
             return os.toByteArray();
         } catch (IOException e) {
-            throw new ReportGenerationException("Не удалось сформировать PDF-отчёт");
+            throw new ReportGenerationException("Не удалось сформировать PDF-отчёт", e);
         }
     }
 

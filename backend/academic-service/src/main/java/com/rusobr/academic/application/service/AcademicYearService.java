@@ -9,6 +9,7 @@ import com.rusobr.academic.infrastructure.persistence.repository.AcademicYearRep
 import com.rusobr.academic.web.dto.academicYear.AcademicYearRequest;
 import com.rusobr.academic.web.dto.academicYear.AcademicYearResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AcademicYearService {
 
     private final AcademicYearRepository academicYearRepository;
@@ -42,7 +44,9 @@ public class AcademicYearService {
     public AcademicYearResponse create(AcademicYearRequest request) {
         validateDates(request.startDate(), request.endDate());
         AcademicYear academicYear = academicYearMapper.toEntity(request);
-        return academicYearMapper.toResponse(academicYearRepository.save(academicYear));
+        AcademicYearResponse response = academicYearMapper.toResponse(academicYearRepository.save(academicYear));
+        log.info("Academic year created: request={}", request);
+        return response;
     }
 
     @CacheEvict(value = "academicYears", allEntries = true)
@@ -53,6 +57,7 @@ public class AcademicYearService {
         validateDates(academicYear.getStartDate(), academicYear.getEndDate());
 
         academicYear.open();
+        log.info("Academic year opened: id={}", id);
     }
 
     @CacheEvict(value = "academicYears", allEntries = true)
@@ -63,6 +68,7 @@ public class AcademicYearService {
         validateDates(academicYear.getStartDate(), academicYear.getEndDate());
 
         academicYear.close();
+        log.info("Academic year closed: id={}", id);
     }
 
     @CacheEvict(value = "academicYears", allEntries = true)
@@ -84,7 +90,9 @@ public class AcademicYearService {
             academicYear.setEndDate(request.endDate());
         }
 
-        return academicYearMapper.toResponse(academicYear);
+        AcademicYearResponse response = academicYearMapper.toResponse(academicYear);
+        log.info("Academic year updated: id={}, request={}", id, request);
+        return response;
     }
 
     @CacheEvict(value = "academicYears", allEntries = true)
@@ -92,6 +100,7 @@ public class AcademicYearService {
     public void delete(Long id) {
         AcademicYear academicYear = findOrThrow(id);
         academicYearRepository.delete(academicYear);
+        log.info("Academic year deleted: id={}", id);
     }
 
     // helpers

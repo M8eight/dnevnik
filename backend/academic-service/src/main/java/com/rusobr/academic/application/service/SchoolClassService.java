@@ -123,12 +123,15 @@ public class SchoolClassService {
 
         SchoolClass schoolClass = schoolClassMapper.toSchoolClass(schoolClassReq, academicYear);
 
-        return schoolClassMapper.toSchoolClassResponse(schoolClassRepository.save(schoolClass));
+        SchoolClassResponse response = schoolClassMapper.toSchoolClassResponse(schoolClassRepository.save(schoolClass));
+        log.info("School class created: request={}", schoolClassReq);
+        return response;
     }
 
     public void assignTeacher(Long classId, Long teacherId) {
         userClient.getTeacherById(teacherId);
         self.assignTeacherDb(classId, teacherId);
+        log.info("School class assign teacher: classId={}, teacherId={}", classId, teacherId);
     }
 
     @Transactional
@@ -147,6 +150,7 @@ public class SchoolClassService {
         validateAcademicYearIsActive(schoolClass.getAcademicYear());
 
         schoolClass.setName(request.name());
+        log.info("School class updated: request={}", request);
     }
 
     @Transactional
@@ -156,6 +160,7 @@ public class SchoolClassService {
         validateAcademicYearIsActive(schoolClass.getAcademicYear());
 
         schoolClassRepository.delete(schoolClass);
+        log.info("School class deleted: id={}", id);
     }
 
     // helpers

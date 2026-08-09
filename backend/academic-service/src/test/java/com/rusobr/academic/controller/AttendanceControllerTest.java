@@ -64,15 +64,15 @@ public class AttendanceControllerTest {
     }
 
     @Test
-    @DisplayName("POST /attendances — 200 и созданное посещение")
-    void createAttendance_ShouldReturn200() throws Exception {
+    @DisplayName("POST /attendances — 201 и созданное посещение")
+    void createAttendance_ShouldReturn201() throws Exception {
         AttendanceRequest request = buildRequest();
         when(attendanceService.create(request)).thenReturn(buildResponse());
 
         mockMvc.perform(post("/api/v1/attendances")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.attendanceId").value(ATTENDANCE_ID))
                 .andExpect(jsonPath("$.studentId").value(STUDENT_ID))
                 .andExpect(jsonPath("$.status").value("LATE"))
@@ -109,12 +109,12 @@ public class AttendanceControllerTest {
     }
 
     @Test
-    @DisplayName("DELETE /attendances/{id} — 200 при успешном удалении")
-    void deleteAttendance_ShouldReturn200() throws Exception {
+    @DisplayName("DELETE /attendances/{id} — 204 при успешном удалении")
+    void deleteAttendance_ShouldReturn204() throws Exception {
         doNothing().when(attendanceService).delete(ATTENDANCE_ID);
 
         mockMvc.perform(delete("/api/v1/attendances/{id}", ATTENDANCE_ID))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         verify(attendanceService).delete(ATTENDANCE_ID);
     }

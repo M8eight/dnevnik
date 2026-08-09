@@ -16,6 +16,7 @@ import com.rusobr.academic.web.dto.pdf.StudentPeriodFinalGradeReportDto;
 import com.rusobr.academic.web.dto.pdf.TeacherGradeReportDto;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassResponse;
 import com.rusobr.academic.web.exception.AcademicExceptionCode;
+import com.rusobr.academic.web.exception.BadRequestException;
 import com.rusobr.common.dto.UserFeignResponse;
 import com.rusobr.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +40,7 @@ public class GradeReportService {
     private final AcademicYearService academicYearService;
 
     public StudentGradeReportDto getStudentGradeReport(Long studentId, Long periodId) {
-        var student = userClient.getBatchStudents(List.of(studentId)).found().get(0);
+        UserFeignResponse student = fetchStudentOrThrow(studentId);
         var journal = journalService.getGradesByStudentId(studentId, periodId);
         var schoolClass = schoolClassService.findByStudent(studentId);
 
@@ -70,7 +71,7 @@ public class GradeReportService {
 
     public StudentPeriodFinalGradeReportDto getStudentPeriodFinalGradeReport(Long studentId, Long academicYearId) {
         AcademicYearResponse academicYear = academicYearService.findById(academicYearId);
-        UserFeignResponse student = userClient.getBatchStudents(List.of(studentId)).found().get(0);
+        UserFeignResponse student = fetchStudentOrThrow(studentId);
         SchoolClassResponse schoolClass = schoolClassService.findByStudent(studentId);
         List<PeriodFinalGradeResponse> periodFinalGrades = journalService.getPeriodFinalGrades(studentId, academicYearId);
 
@@ -94,6 +95,14 @@ public class GradeReportService {
                 .title("Табель успеваемости учеников")
                 .teacher(teacher)
                 .journal(journal).build();
+    }
+
+    private UserFeignResponse fetchStudentOrThrow(Long studentId) {
+        List<UserFeignResponse> found = userClient.getBatchStudents(List.of(studentId)).found();
+        if (found.isEmpty()) {
+            throw new BadRequestException("Student not found with id: %s".formatted(studentId), AcademicExceptionCode.PDF_EXPORT_ERROR);
+        }
+        return found.get(0);
     }
 
 }

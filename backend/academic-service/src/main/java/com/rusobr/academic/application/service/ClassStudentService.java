@@ -10,6 +10,7 @@ import com.rusobr.common.dto.UserFeignResponse;
 import com.rusobr.common.exception.ConflictException;
 import com.rusobr.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -19,6 +20,7 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ClassStudentService {
 
     private final SchoolClassRepository schoolClassRepository;
@@ -49,6 +51,7 @@ public class ClassStudentService {
                     .build());
             return null;
         });
+        log.info("Add student to class: classId={}, studentId={}", classId, studentId);
     }
 
     @Transactional
@@ -58,6 +61,7 @@ public class ClassStudentService {
                         .formatted(classId, studentId), AcademicExceptionCode.CLASS_STUDENT_NOT_FOUND));
 
         classStudentRepository.delete(classStudent);
+        log.info("Remove student from class: classId={}, studentId={}", classId, studentId);
     }
 
 }

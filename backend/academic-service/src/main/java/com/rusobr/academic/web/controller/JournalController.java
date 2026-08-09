@@ -37,7 +37,7 @@ public class JournalController {
         return journalService.getPeriodFinalGrades(userId, academicYearId);
     }
 
-    @PreAuthorize("@gradeSecurity.canViewAssignment(#teachingAssignmentId, authentication)")
+    @PreAuthorize("@teacherSecurity.canViewAssignment(#teachingAssignmentId, authentication)")
     @GetMapping("/journal/by-assignment")
     public TeacherJournalResponse getByAssignment(
             @RequestParam("teachingAssignmentId") Long teachingAssignmentId,
@@ -45,7 +45,7 @@ public class JournalController {
         return journalService.getJournalByAssignment(teachingAssignmentId, academicPeriodId);
     }
 
-    @PreAuthorize("@gradeSecurity.canViewAssignment(#teachingAssignmentId, authentication)")
+    @PreAuthorize("@teacherSecurity.canViewAssignment(#teachingAssignmentId, authentication)")
     @GetMapping("/lesson-instances/by-assignment")
     public List<LessonInstanceDto> getInstanceByAssignment(@RequestParam("teachingAssignmentId") Long teachingAssignmentId,
                                                            @RequestParam("academicPeriodId") Long academicPeriodId) {

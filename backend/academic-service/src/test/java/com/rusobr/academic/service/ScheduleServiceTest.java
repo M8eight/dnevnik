@@ -15,12 +15,11 @@ import com.rusobr.academic.infrastructure.persistence.projection.ScheduleLessonP
 import com.rusobr.academic.infrastructure.persistence.projection.SchoolLessonProjection;
 import com.rusobr.academic.infrastructure.persistence.repository.LessonInstanceRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.ScheduleLessonRepository;
+import com.rusobr.academic.web.dto.homework.HomeworkSimpleResponse;
 import com.rusobr.common.dto.BatchUserResponse;
 import com.rusobr.academic.web.dto.attendances.journal.AttendanceSimpleResponse;
 import com.rusobr.common.dto.UserFeignResponse;
 import com.rusobr.academic.web.dto.grade.GradeResponse;
-import com.rusobr.academic.web.dto.homework.HomeworkDiaryResponse;
-import com.rusobr.academic.web.dto.lessonInstance.DiaryLessonInstanceDto;
 import com.rusobr.academic.web.dto.scheduleLesson.*;
 import com.rusobr.academic.web.dto.teachingAssignment.TeachingAssignmentRequest;
 import com.rusobr.common.exception.ConflictException;
@@ -105,7 +104,7 @@ class ScheduleServiceTest {
             AttendanceSimpleResponse att = new AttendanceSimpleResponse(1L, AttendanceStatus.LATE, STUDENT_ID);
             AttendanceSimpleResponse alienAtt = new AttendanceSimpleResponse(2L, AttendanceStatus.ABSENT, 999L);
             GradeResponse grade = new GradeResponse(1L, STUDENT_ID, 5, 1, GradeType.CONTROL);
-            HomeworkDiaryResponse homework = new HomeworkDiaryResponse(1L, "Параграф 5");
+            HomeworkSimpleResponse homework = new HomeworkSimpleResponse(1L, "Параграф 5");
 
             DiaryLessonInstanceDto initialDto = new DiaryLessonInstanceDto(
                     50L, SCHEDULE_ID, DATE,
@@ -119,7 +118,7 @@ class ScheduleServiceTest {
 
             when(scheduleLessonRepository.findDiaryScheduleByStudentId(STUDENT_ID, start, end))
                     .thenReturn(List.of(sl1));
-            when(lessonInstanceRepository.findDiaryAcademicPerformanceByStudentId(List.of(SCHEDULE_ID), start, end, STUDENT_ID))
+            when(lessonInstanceRepository.findLessonInstancesByScheduleId(List.of(SCHEDULE_ID), start, end, STUDENT_ID))
                     .thenReturn(List.of(li1));
             when(lessonInstanceMapper.toDiaryLessonInstance(li1)).thenReturn(initialDto);
 

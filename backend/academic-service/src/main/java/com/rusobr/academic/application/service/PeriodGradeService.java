@@ -16,6 +16,7 @@ import com.rusobr.common.dto.BatchUserResponse;
 import com.rusobr.common.exception.ConflictException;
 import com.rusobr.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PeriodGradeService {
 
     private final PeriodGradeRepository periodGradeRepository;
@@ -69,7 +71,6 @@ public class PeriodGradeService {
         );
     }
 
-
     @Cacheable(value = "periodGradesByAssignment", key = "#teachingAssignmentId + '#' + #currentAcademicPeriodId + '#' + #academicYearId")
     public PeriodGradeTeacherResponse getByAssignmentWithAverage(Long teachingAssignmentId, Long currentAcademicPeriodId, Long academicYearId) {
         PeriodGradeDbData data = self.getByAssignmentWithAverageTransactional(teachingAssignmentId, currentAcademicPeriodId, academicYearId);
@@ -105,7 +106,7 @@ public class PeriodGradeService {
         return new PeriodGradeDbData(studentIds, periodGradesMap, averageGradesMap);
     }
 
-    @CacheEvict(value = {"periodGradesByAssignment", "periodGradesByStudentId"}, allEntries = true)
+    @CacheEvict(value = {"periodGradesByAssignment", "periodGradesByStudentId", "journalPeriodFinalGradeByStudentId"}, allEntries = true)
     @Transactional
     public PeriodGradeResponse create(PeriodGradeRequest dto) {
         AcademicPeriod academicPeriod = academicPeriodService.getById(dto.academicPeriodId());
@@ -115,7 +116,8 @@ public class PeriodGradeService {
         }
 
         TeachingAssignment teachingAssignment = teachingAssignmentRepository.findById(dto.teachingAssignmentId())
-                .orElseThrow(() -> new NotFoundException("Teaching assignment with id: %d not found".formatted(dto.teachingAssignmentId()),
+                .orElseThrow(() -> new NotFoundException("Teaching assignment with id: %d not found"
+                        .formatted(dto.teachingAssignmentId()),
                         AcademicExceptionCode.TEACHING_ASSIGNMENT_NOT_FOUND));
 
         PeriodGrade periodGrade = PeriodGrade.builder()
@@ -126,11 +128,12 @@ public class PeriodGradeService {
                 .teachingAssignment(teachingAssignment)
                 .build();
 
-        return periodGradeMapper.toPeriodGradeResponse(periodGradeRepository.save(periodGrade));
-
+        PeriodGradeResponse response = periodGradeMapper.toPeriodGradeResponse(periodGradeRepository.save(periodGrade));
+        log.info("Create period grade: request={}", dto);
+        return response;
     }
 
-    @CacheEvict(value = {"periodGradesByAssignment", "periodGradesByStudentId"}, allEntries = true)
+    @CacheEvict(value = {"periodGradesByAssignment", "periodGradesByStudentId", "journalPeriodFinalGradeByStudentId"}, allEntries = true)
     @Transactional
     public void delete(Long periodGradeId) {
         PeriodGrade periodGrade = periodGradeRepository.findWithAcademicPeriodById(periodGradeId)
@@ -143,6 +146,7 @@ public class PeriodGradeService {
         }
 
         periodGradeRepository.delete(periodGrade);
+        log.info("Delete period grade: id={}", periodGradeId);
     }
 
 }

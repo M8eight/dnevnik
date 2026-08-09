@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotNull;
 public record CreateGradeRequest(
         @NotNull Long studentId,
         @NotNull Long lessonInstanceId,
-        @NotNull Long academicPeriodId,
         @NotNull Integer value,
         @NotNull Integer weight,
         @NotNull GradeType gradeType

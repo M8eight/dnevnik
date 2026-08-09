@@ -72,6 +72,7 @@ public class AcademicPeriodService {
         validateAcademicYear(academicPeriod.getAcademicYear());
 
         academicPeriod.open();
+        log.info("Academic period opened: id={}, academicYearId={}", id, academicPeriod.getAcademicYear().getId());
     }
 
     @CacheEvict(value = "academicPeriods", allEntries = true)
@@ -82,6 +83,7 @@ public class AcademicPeriodService {
         validateAcademicYear(academicPeriod.getAcademicYear());
 
         academicPeriod.close();
+        log.info("Academic period closed: id={}, academicYearId={}", id, academicPeriod.getAcademicYear().getId());
     }
 
     @CacheEvict(value = "academicPeriods", allEntries = true)
@@ -95,7 +97,9 @@ public class AcademicPeriodService {
         AcademicPeriod period = academicPeriodMapper.toEntity(request);
         period.setAcademicYear(academicYear);
 
-        return academicPeriodMapper.toResponse(academicPeriodRepository.save(period));
+        AcademicPeriodResponse response = academicPeriodMapper.toResponse(academicPeriodRepository.save(period));
+        log.info("Academic period created: request={}", request);
+        return response;
     }
 
     @CacheEvict(value = "academicPeriods", allEntries = true)
@@ -115,6 +119,7 @@ public class AcademicPeriodService {
         }
 
         if (request.name() != null) academicPeriod.setName(request.name());
+        log.info("Academic period updated: id={} request={}", id, request);
     }
 
     @CacheEvict(value = "academicPeriods", allEntries = true)
@@ -125,6 +130,7 @@ public class AcademicPeriodService {
         validateAcademicYear(academicPeriod.getAcademicYear());
 
         academicPeriodRepository.delete(academicPeriod);
+        log.info("Academic period deleted: id={}", id);
     }
 
     // helpers

@@ -7,7 +7,7 @@ export const getStudentReport = async (periodId: number) => {
 }
 
 export const getStudentPeriodFinalReport = async (academicYearId: number) => {
-    return api.get<Blob>(`/academic-service/api/v1/pdf/student/grade-period-report/report?studentId=27&academicYearId=${academicYearId}`,
+    return api.get<Blob>(`/academic-service/api/v1/pdf/student/grade-period-report/report?academicYearId=${academicYearId}`,
         { responseType: 'blob' }
     );
 }

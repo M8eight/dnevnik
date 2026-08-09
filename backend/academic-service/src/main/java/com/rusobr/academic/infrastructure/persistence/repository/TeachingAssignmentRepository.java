@@ -2,7 +2,6 @@ package com.rusobr.academic.infrastructure.persistence.repository;
 
 import com.rusobr.academic.domain.model.TeachingAssignment;
 import com.rusobr.academic.infrastructure.persistence.projection.TeachingAssignmentDetailsProjection;
-import com.rusobr.academic.web.dto.teachingAssignment.TeachingAssignmentDetailsDto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -54,9 +53,22 @@ public interface TeachingAssignmentRepository  extends JpaRepository<TeachingAss
     List<TeachingAssignment> findByTeacherId(@Param("teacherId") Long teacherId);
 
     @Query("""
-        select ta.id
+        select count(*) > 0
         from TeachingAssignment ta
         where ta.teacherId = :teacherId
+            and ta.id = :teachingAssignmentId
     """)
-    List<Long> getTeachingAssignmentIdsByTeacherId(@Param("teacherId") Long teacherId);
+    boolean isTeacherOwnedAssignment(@Param("teacherId") Long teacherId, @Param("teachingAssignmentId") Long teachingAssignmentId);
+
+    @Query("""
+        select count(*) > 0
+        from TeachingAssignment ta
+            join ta.schoolClass sc
+            join sc.students cs
+        where ta.teacherId = :teacherId
+        and ta.id = :teachingAssignmentId
+        and cs.studentId = :studentId
+    """)
+    boolean isOwnedByTeacherWithStudent(@Param("teacherId") Long teacherId, @Param("teachingAssignmentId") Long teachingAssignmentId, @Param("studentId") Long studentId);
+
 }
