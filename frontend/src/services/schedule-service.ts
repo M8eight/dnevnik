@@ -1,4 +1,7 @@
 import api from "../axios/axios";
+import type { AttendanceSimpleResponse } from "./attendance-service";
+import type { GradeResponse } from "./grade-service";
+import type { HomeworkSimpleResponse } from "./homework-service";
 import type { lessonInstance } from "./lesson-instance-service";
 import type { SchoolClassResponse } from "./school-class-service";
 import type { SubjectResponse } from "./subject-service";
@@ -32,15 +35,26 @@ export interface ScheduleRequest {
     validFrom: string;
 }
 
-export interface DiaryScheduleDto {
-    id: number;
-    dayOfWeek : string;
-    lessonNumber : number;
-    classRoom : string;
-    validFrom : string;
-    validTo : string;
-    subject : SubjectResponse;
-    instance : DiaryLessonInstanceDto;
+export interface DiaryWeekResponse {
+    weekStart: string;
+    weekEnd: string;
+    days: DiaryDayDto[];
+}
+
+export interface DiaryDayDto {
+    dayOfWeek: string;
+    date: string;
+    lessons: DiaryLessonDto[]
+};
+export interface DiaryLessonDto {
+    lessonNumber: number;
+    subject: SubjectResponse;
+    scheduleId: number;
+    lessonInstanceId: number;
+    classRoom: string;
+    grades: GradeResponse[];
+    attendance: AttendanceSimpleResponse;
+    homeworks: HomeworkSimpleResponse[];
 }
 
 export interface DiaryLessonInstanceDto {
@@ -79,8 +93,8 @@ export type ScheduleClassResponse = Record<string, ScheduleLessonDto[]>;
 export type TeacherScheduleItemPeriod = Record<string, TeacherScheduleItem[]>;
 
 
-export const getDiaryScheduleByStudentId = async (startDate: string, endDate: string): Promise<DiaryScheduleDto[]> => {
-    const { data } = await api.get<DiaryScheduleDto[]>(`/academic-service/api/v1/schedules/diary`, {
+export const getDiaryScheduleByStudentId = async (startDate: string, endDate: string): Promise<DiaryWeekResponse> => {
+    const { data } = await api.get<DiaryWeekResponse>(`/academic-service/api/v1/schedules/diary`, {
         params: { startDate, endDate }
     });
     return data;

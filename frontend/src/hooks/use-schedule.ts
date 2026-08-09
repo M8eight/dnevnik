@@ -1,8 +1,8 @@
-import { closeSchedule, createSchedule, getDiaryScheduleByStudentId, getScheduleByClassId, getTeacherScheduleDate, getTeacherSchedulePeriod, loadLessonInsance, type DiaryScheduleDto, type ScheduleClassResponse, type ScheduleRequest, type TeacherScheduleItem, type TeacherScheduleItemPeriod } from "@/services/schedule-service"
+import { closeSchedule, createSchedule, getDiaryScheduleByStudentId, getScheduleByClassId, getTeacherScheduleDate, getTeacherSchedulePeriod, loadLessonInsance, type DiaryWeekResponse, type ScheduleClassResponse, type ScheduleRequest, type TeacherScheduleItem, type TeacherScheduleItemPeriod } from "@/services/schedule-service"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 export const useDiaryScheduleByStudentId = (startDate: string, endDate: string) => {
-    return useQuery<DiaryScheduleDto[]>({
+    return useQuery<DiaryWeekResponse>({
         queryKey: ['schedule', startDate, endDate],
         queryFn: () => getDiaryScheduleByStudentId(startDate, endDate),
         enabled: !!startDate && !!endDate,

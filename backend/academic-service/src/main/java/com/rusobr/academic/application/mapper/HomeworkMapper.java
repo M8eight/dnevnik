@@ -2,7 +2,7 @@ package com.rusobr.academic.application.mapper;
 
 import com.rusobr.academic.domain.model.Homework;
 import com.rusobr.academic.infrastructure.persistence.projection.HomeworkWithSubjectProjection;
-import com.rusobr.academic.web.dto.homework.HomeworkDiaryResponse;
+import com.rusobr.academic.web.dto.homework.HomeworkSimpleResponse;
 import com.rusobr.academic.web.dto.homework.HomeworkResponse;
 import com.rusobr.academic.web.dto.homework.HomeworkWithSubjectResponse;
 import org.mapstruct.Mapper;
@@ -14,7 +14,7 @@ public interface HomeworkMapper {
 
     HomeworkResponse toHomeworkResponse(Homework homework);
 
-    HomeworkDiaryResponse toDiaryHomeworkResponse(Homework homework);
+    HomeworkSimpleResponse toHomeworkSimpleResponse(Homework homework);
 
     HomeworkWithSubjectResponse toWithSubjectResponse(HomeworkWithSubjectProjection projection);
 

@@ -2,6 +2,7 @@ package com.rusobr.academic.web.controller;
 
 import com.rusobr.academic.application.service.ScheduleService;
 import com.rusobr.academic.web.dto.scheduleLesson.*;
+import com.rusobr.academic.web.dto.scheduleLesson.studentDiary.DiaryWeekResponse;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,9 +24,9 @@ public class ScheduleController {
     private final ScheduleService scheduleService;
 
     @GetMapping("/schedules/diary")
-    public List<DiaryScheduleDto> getDiaryScheduleByStudentId(@AuthenticationPrincipal Jwt jwt,
-                                                              @RequestParam LocalDate startDate,
-                                                              @RequestParam LocalDate endDate) {
+    public DiaryWeekResponse getDiaryScheduleByStudentId(@AuthenticationPrincipal Jwt jwt,
+                                                         @RequestParam LocalDate startDate,
+                                                         @RequestParam LocalDate endDate) {
         Long userId = jwt.getClaim("user_id");
         return scheduleService.getByStudentId(userId, startDate, endDate);
     }

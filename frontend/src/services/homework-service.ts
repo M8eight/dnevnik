@@ -16,6 +16,11 @@ export interface HomeworkResponse {
     };
 }
 
+export interface HomeworkSimpleResponse {
+    id: number;
+    text: string;
+}
+
 export interface HomeworkRequest {
     text: string;
     lessonInstanceId: number;

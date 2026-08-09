@@ -14,7 +14,7 @@ import { AttendanceBadge } from "@/components/student/diary/badges";
 import { GradePopover } from "@/components/student/diary/grade-detail-popover";
 import StudentNavbar from "@/components/layout/navbars/StudentNavbar";
 import { capitalizeFirst, formatRuDate, toISODate } from "@/lib/date";
-import type { DiaryScheduleDto } from "@/services/schedule-service";
+import type { DiaryLessonDto } from "@/services/schedule-service";
 
 const mapAttendanceStatus = (status?: string) => {
   if (status === "ABSENT") return "Н";
@@ -23,15 +23,6 @@ const mapAttendanceStatus = (status?: string) => {
   return "";
 };
 
-function groupByDay(lessons: DiaryScheduleDto[]): Record<string, DiaryScheduleDto[]> {
-  return lessons.reduce((acc, lesson) => {
-    const key = lesson.dayOfWeek;
-    if (!acc[key]) acc[key] = [];
-    acc[key].push(lesson);
-    return acc;
-  }, {} as Record<string, DiaryScheduleDto[]>);
-}
-
 function DayCard({
   dayOfWeek,
   date,
@@ -39,7 +30,7 @@ function DayCard({
 }: {
   dayOfWeek: string;
   date: string;
-  lessons: DiaryScheduleDto[];
+  lessons: DiaryLessonDto[];
 }) {
   const today = toISODate(new Date());
   const isToday = date === today;
@@ -60,13 +51,18 @@ function DayCard({
       </div>
 
       <div className="divide-y divide-black/5">
-        {lessons.map((lesson, idx) => {
-          const attendance = lesson.instance?.attendances?.[0];
-          const grade = lesson.instance?.grades?.[0];
-          const homework = lesson.instance?.homework;
+      {lessons.length === 0 ? (
+        <div className="py-6 flex flex-col items-center justify-center text-center">
+          <p className="text-[13px] font-medium text-black/25">Уроков нет</p>
+        </div>
+      ) : (
+        lessons?.map((lesson) => {
+          const grades = lesson.grades;
+          const homeworks = lesson.homeworks;
+          const attendance = lesson.attendance;
 
           return (
-            <div key={idx} className="py-3 first:pt-0 last:pb-0">
+            <div key={lesson.lessonInstanceId} className="py-3 first:pt-0 last:pb-0">
               <div className="flex items-start gap-3">
 
                 <div className="flex flex-col justify-center items-end min-w-14 pt-1 shrink-0">
@@ -87,19 +83,20 @@ function DayCard({
                         {lesson.subject?.name ?? "—"}
                       </p>
                       <p className="text-[11px] text-black/20 mt-0.5">
-                        {lesson.classRoom}
+                        {lesson.classRoom}  
                       </p>
-                      {homework && (
-                        <p className="text-[12px] text-black/35 mt-1 italic leading-snug line-clamp-2">
-                          {homework.text}
+                      {homeworks.map(({id, text}) => (
+                        <p className="text-[12px] text-black/35 mt-1 italic leading-snug line-clamp-2" key={id}>
+                          {text}
                         </p>
-                      )}
+                      ))
+                      }
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <AttendanceBadge status={mapAttendanceStatus(attendance?.status)} />
-                      {grade?.id != null && grade.value != null && (
-                        <GradePopover gradeId={grade.id} value={grade.value} />
-                      )}
+                      {grades.map(({id, value}) => (
+                        <GradePopover gradeId={id} value={value} key={id} />
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -107,7 +104,8 @@ function DayCard({
               </div>
             </div>
           );
-        })}
+        }) ?? []
+      )}
       </div>
     </div>
   );
@@ -121,30 +119,13 @@ export default function Diary() {
   const startDate = format(currentWeekStart, "yyyy-MM-dd");
   const endDate = format(addDays(currentWeekStart, 6), "yyyy-MM-dd");
 
-  const { data, isLoading } = useDiaryScheduleByStudentId(startDate, endDate);
+  const { data: weekSchedule, isLoading } = useDiaryScheduleByStudentId(startDate, endDate);
 
   const weekEnd = addDays(currentWeekStart, 6);
   const startDay = format(currentWeekStart, "dd");
   const endDayWithMonth = format(weekEnd, "dd MMM", { locale: ru });
   const fullMonthYear = format(currentWeekStart, "LLLL yyyy", { locale: ru });
   const capitalizedMonth = capitalizeFirst(fullMonthYear);
-
-  const weekDays = Array.from({ length: 7 }, (_, i) => {
-    const day = addDays(currentWeekStart, i);
-    return {
-      dayOfWeek: format(day, "EEEE", { locale: enUS }).toUpperCase(),
-      date: format(day, "yyyy-MM-dd"),
-    };
-  });
-
-  const grouped = data ? groupByDay(data) : {};
-  const sortedDays = weekDays
-    .filter(({ dayOfWeek }) => grouped[dayOfWeek])
-    .map(({ dayOfWeek, date }) => ({
-      dayOfWeek,
-      date,
-      lessons: grouped[dayOfWeek].sort((a, b) => a.lessonNumber - b.lessonNumber),
-    }));
 
   return (
     <div className="relative z-10 min-h-screen px-6 md:px-10 pt-2 pb-14">
@@ -197,7 +178,7 @@ export default function Diary() {
               </div>
             </div>
           ))
-          : sortedDays.map(({ dayOfWeek, date, lessons }) => (
+          : weekSchedule?.days.map(({ dayOfWeek, date, lessons }) => (
             <DayCard key={dayOfWeek} dayOfWeek={dayOfWeek} date={date} lessons={lessons} />
           ))
         }

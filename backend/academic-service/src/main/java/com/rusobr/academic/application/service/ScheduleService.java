@@ -1,15 +1,20 @@
 package com.rusobr.academic.application.service;
 
-import com.rusobr.academic.application.mapper.LessonInstanceMapper;
-import com.rusobr.academic.application.mapper.ScheduleLessonMapper;
+import com.rusobr.academic.application.mapper.*;
 import com.rusobr.academic.domain.model.LessonInstance;
 import com.rusobr.academic.domain.model.ScheduleLesson;
 import com.rusobr.academic.domain.model.TeachingAssignment;
 import com.rusobr.academic.infrastructure.client.UserClient;
 import com.rusobr.academic.infrastructure.persistence.repository.LessonInstanceRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.ScheduleLessonRepository;
+import com.rusobr.academic.web.dto.attendances.journal.AttendanceSimpleResponse;
+import com.rusobr.academic.web.dto.grade.GradeResponse;
+import com.rusobr.academic.web.dto.homework.HomeworkSimpleResponse;
+import com.rusobr.academic.web.dto.scheduleLesson.studentDiary.DiaryDayDto;
+import com.rusobr.academic.web.dto.scheduleLesson.studentDiary.DiaryLessonDto;
+import com.rusobr.academic.web.dto.scheduleLesson.studentDiary.DiaryWeekResponse;
+import com.rusobr.academic.web.dto.scheduleLesson.studentDiary.ScheduleLessonDiaryDto;
 import com.rusobr.common.dto.UserFeignResponse;
-import com.rusobr.academic.web.dto.lessonInstance.DiaryLessonInstanceDto;
 import com.rusobr.academic.web.dto.scheduleLesson.*;
 import com.rusobr.academic.web.dto.teachingAssignment.TeachingAssignmentRequest;
 import com.rusobr.common.exception.ConflictException;
@@ -40,7 +45,9 @@ public class ScheduleService {
     private final TeachingAssignmentService teachingAssignmentService;
     private final LessonInstanceRepository lessonInstanceRepository;
     private final JournalService lessonInstanceService;
-    private final LessonInstanceMapper lessonInstanceMapper;
+    private final AttendanceMapper attendanceMapper;
+    private final HomeworkMapper homeworkMapper;
+    private final GradeMapper gradeMapper;
 
     @Lazy
     @Autowired
@@ -53,49 +60,77 @@ public class ScheduleService {
 
     @Cacheable(value = "schedulesByStudentId", key = "#studentId + '#' + #startDate + '#' + #endDate")
     @Transactional(readOnly = true)
-    public List<DiaryScheduleDto> getByStudentId(Long studentId, LocalDate startDate, LocalDate endDate) {
-        //Получаем шаблон расписания по периоду и собираем их id в отдельный List
+    public DiaryWeekResponse getByStudentId(Long studentId, LocalDate startDate, LocalDate endDate) {
         List<ScheduleLesson> scheduleLessons = scheduleLessonRepository
                 .findDiaryScheduleByStudentId(studentId, startDate, endDate);
         List<Long> ids = scheduleLessons.stream().map(ScheduleLesson::getId).toList();
 
-        //Собираем детализацию (посещаемость, оценки, дз), маппим в dto
         List<LessonInstance> lessonInstances = lessonInstanceRepository
-                .findDiaryAcademicPerformanceByStudentId(ids, startDate, endDate, studentId);
-        List<DiaryLessonInstanceDto> diaryLessonInstances = lessonInstances.stream()
-                .map(lessonInstanceMapper::toDiaryLessonInstance).toList();
-        //Упаковываем в map, где key это scheduleId, а тело фильтруем отсекая лишние записи
-        // в связи с join fetch собираются все записи класса, а не только ученика
-        Map<Long, DiaryLessonInstanceDto> mappedDiaryLessonInstances = diaryLessonInstances.stream().collect(
-            Collectors.toMap(
-                    DiaryLessonInstanceDto::scheduleId,
-                    li -> filterByStudent(li, studentId)
-            )
-        );
+                .findLessonInstancesByScheduleId(ids, startDate, endDate);
 
-        //Отсекаем чужие записи и мапим, а затем сортируем список по дню недели
-        return scheduleLessons.stream()
-                .map(sl -> {
-                    DiaryLessonInstanceDto instance = mappedDiaryLessonInstances.get(sl.getId());
-                    if (instance != null && instance.grades().isEmpty() && instance.attendances().isEmpty()
-                            && instance.homework() == null) {
-                        instance = null;
-                    }
-                    return scheduleLessonMapper.toDiaryScheduleDto(sl, instance);
-                })
-                .sorted(Comparator.comparingInt(dto -> dto.dayOfWeek().getValue()))
+        Map<Long, List<GradeResponse>> mappedGrades = lessonInstanceRepository
+                .findLessonInstanceGradesByPeriodAndStudent(ids, startDate, endDate, studentId)
+                .stream().collect(Collectors.groupingBy(
+                        LessonInstance::getId,
+                        LinkedHashMap::new,
+                        Collectors.flatMapping(
+                                li -> li.getGrades().stream().map(gradeMapper::toGradeResponseDto),
+                                Collectors.toList()
+                        )
+                ));
+
+        Map<Long, AttendanceSimpleResponse> mappedAttendances = lessonInstanceRepository
+                .findLessonInstanceAttendancesByPeriodAndStudent(ids, startDate, endDate, studentId)
+                .stream().collect(Collectors.toMap(
+                        LessonInstance::getId,
+                        li -> li.getAttendances().stream().findFirst()
+                                .map(attendanceMapper::toAttendanceSimpleResponse).orElseThrow()
+                ));
+
+        Map<Long, List<HomeworkSimpleResponse>> mappedHomeworks = lessonInstanceRepository
+                .findLessonInstanceHomeworksByPeriodAndStudent(ids, startDate, endDate)
+                .stream().collect(Collectors.groupingBy(
+                        LessonInstance::getId,
+                        LinkedHashMap::new,
+                        Collectors.flatMapping(
+                                li -> li.getHomeworks().stream().map(homeworkMapper::toHomeworkSimpleResponse),
+                                Collectors.toList()
+                        )
+                ));
+
+        Map<Long, ScheduleLessonDiaryDto> mappedSchedule = scheduleLessons.stream()
+                .map(scheduleLessonMapper::toScheduleLessonDiaryDto).collect(
+                        Collectors.toMap(
+                                ScheduleLessonDiaryDto::id,
+                                s -> s
+                        ));
+
+        Map<LocalDate, List<DiaryLessonDto>> byDate = lessonInstances.stream()
+                .collect(Collectors.groupingBy(
+                        LessonInstance::getLessonDate,
+                        LinkedHashMap::new,
+                        Collectors.mapping(li -> {
+                            ScheduleLessonDiaryDto currentSchedule = mappedSchedule.get(li.getScheduleLesson().getId());
+                            return new DiaryLessonDto(
+                                    currentSchedule.lessonNumber(), currentSchedule.subject(), currentSchedule.id(), li.getId(), currentSchedule.classRoom(),
+                                    mappedGrades.getOrDefault(li.getId(), List.of()),
+                                    mappedAttendances.getOrDefault(li.getId(), null),
+                                    mappedHomeworks.getOrDefault(li.getId(), List.of())
+                            );
+                        }, Collectors.toList())
+                ));
+
+        List<DiaryDayDto> days = byDate.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .map(e -> new DiaryDayDto(
+                        e.getKey().getDayOfWeek(),
+                        e.getKey(),
+                        e.getValue().stream().sorted(Comparator.comparing(DiaryLessonDto::lessonNumber))
+                                .toList()
+                ))
                 .toList();
-    }
 
-    private DiaryLessonInstanceDto filterByStudent(DiaryLessonInstanceDto dto, Long studentId) {
-        return new DiaryLessonInstanceDto(
-                dto.id(),
-                dto.scheduleId(),
-                dto.lessonDate(),
-                dto.attendances().stream().filter(a -> Objects.equals(a.studentId(), studentId)).toList(),
-                dto.grades().stream().filter(g -> Objects.equals(g.studentId(), studentId)).toList(),
-                dto.homework()
-        );
+        return new DiaryWeekResponse(startDate, endDate, days);
     }
 
     @Cacheable(value = "schedulesByTeacherIdDate", key = "#teacherId + '#' + #date")
@@ -189,10 +224,10 @@ public class ScheduleService {
 
         // Проверяем что учитель не ведёт другой урок в этот же слот
         if (scheduleLessonRepository.existsByTeacherSlot(
-            scheduleLessonRequest.teacherId(),
-            scheduleLessonRequest.dayOfWeek(),
-            scheduleLessonRequest.lessonNumber(),
-            scheduleLessonRequest.validFrom()
+                scheduleLessonRequest.teacherId(),
+                scheduleLessonRequest.dayOfWeek(),
+                scheduleLessonRequest.lessonNumber(),
+                scheduleLessonRequest.validFrom()
         )) {
             throw new ConflictException("Schedule lesson already exists", AcademicExceptionCode.SCHEDULE_ALREADY_EXIST);
         }
