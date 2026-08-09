@@ -6,7 +6,7 @@ import type { RootState } from "@/store";
 import { useDispatch, useSelector } from "react-redux";
 import { addDays } from "date-fns/addDays";
 import { format } from "date-fns/format";
-import { ru } from "date-fns/locale";
+import { enUS, ru } from "date-fns/locale";
 import { nextWeek, prevWeek } from "@/store/slices/scheduleSlice";
 import Chip from "@/components/student/chip";
 import { LESSON_TIMES, RUSSIAN_DAYS } from "@/constants/component-constants";

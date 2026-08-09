@@ -26,11 +26,6 @@ export interface HomeworkRequest {
     lessonInstanceId: number;
 }
 
-export const getHomeworkByDate = async (date: string, studentId: number): Promise<HomeworkWithSubjectResponse[]> => {
-    const { data } = await api.get<HomeworkWithSubjectResponse[]>(`/academic-service/api/v1/homeworks/by-date?date=${date}&studentId=${studentId}`);
-    return data;
-}
-
 export const getHomeworksByTeachingAssignment = async (teachingAssignmentId: number, page: number, size: number): Promise<PageResponse<HomeworkResponse>> => {
     const { data } = await api.get<PageResponse<HomeworkResponse>>(`/academic-service/api/v1/homeworks/by-assignment`, {
         params: {

@@ -8,6 +8,9 @@ import com.rusobr.academic.web.dto.scheduleLesson.ScheduleLessonDto;
 import com.rusobr.academic.web.dto.scheduleLesson.ScheduleLessonRequest;
 import com.rusobr.academic.web.dto.scheduleLesson.ScheduleLessonResponse;
 import com.rusobr.academic.web.dto.scheduleLesson.SchoolLessonResponse;
+import com.rusobr.academic.web.dto.scheduleLesson.studentDiary.DiaryDayDto;
+import com.rusobr.academic.web.dto.scheduleLesson.studentDiary.DiaryLessonDto;
+import com.rusobr.academic.web.dto.scheduleLesson.studentDiary.DiaryWeekResponse;
 import com.rusobr.academic.web.dto.subject.SubjectResponseDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -68,16 +71,24 @@ public class ScheduleControllerTest {
         return new ScheduleLessonResponse(SCHEDULE_ID, 2, "Mathematics", "101");
     }
 
-    private DiaryScheduleDto buildDiaryScheduleDto() {
-        return new DiaryScheduleDto(
-                SCHEDULE_ID,
-                DayOfWeek.MONDAY,
-                2,
-                "101",
+    private DiaryWeekResponse buildDiaryWeekResponse() {
+        return new DiaryWeekResponse(
                 DATE,
-                DATE.plusWeeks(1),
-                new SubjectResponseDto(SUBJECT_ID, "Mathematics"),
-                null
+                DATE.plusDays(1),
+                List.of(new DiaryDayDto(
+                        DayOfWeek.MONDAY,
+                        DATE,
+                        List.of(new DiaryLessonDto(
+                                2,
+                                new SubjectResponseDto(SUBJECT_ID, "Mathematics"),
+                                SCHEDULE_ID,
+                                500L,
+                                "101",
+                                List.of(),
+                                null,
+                                List.of()
+                        ))
+                ))
         );
     }
 
@@ -111,17 +122,18 @@ public class ScheduleControllerTest {
     }
 
     @Test
-    @DisplayName("GET /schedules/diary — 200 and diary schedule list")
+    @DisplayName("GET /schedules/diary — 200 and diary week response")
     void getDiaryScheduleByStudentId_ShouldReturn200() throws Exception {
         when(scheduleService.getByStudentId(STUDENT_ID, DATE, DATE.plusDays(1)))
-                .thenReturn(List.of(buildDiaryScheduleDto()));
+                .thenReturn(buildDiaryWeekResponse());
 
         mockMvc.perform(get("/api/v1/schedules/diary")
                         .param("startDate", DATE.toString())
                         .param("endDate", DATE.plusDays(1).toString()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(SCHEDULE_ID))
-                .andExpect(jsonPath("$[0].subject.name").value("Mathematics"));
+                .andExpect(jsonPath("$.days[0].lessons[0].id").doesNotExist())
+                .andExpect(jsonPath("$.days[0].lessons[0].scheduleId").value(SCHEDULE_ID))
+                .andExpect(jsonPath("$.days[0].lessons[0].subject.name").value("Mathematics"));
     }
 
     @Test

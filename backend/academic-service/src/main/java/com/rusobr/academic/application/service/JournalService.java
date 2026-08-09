@@ -19,6 +19,7 @@ import com.rusobr.academic.web.dto.lessonInstance.teacher.TeacherJournalResponse
 import com.rusobr.common.dto.BatchUserResponse;
 import com.rusobr.common.dto.UserFeignResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +38,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class JournalService {
 
     private final LessonInstanceRepository lessonInstanceRepository;
@@ -206,6 +208,7 @@ public class JournalService {
         }
 
         generateInstanceBetween(scheduleLesson, from, to);
+        log.info("Generate lesson instance for schedule: id={}, from={}, to={}", scheduleLesson.getId(), from, to);
     }
 
     public void generateInstanceBetween(ScheduleLesson scheduleLesson, LocalDate from, LocalDate to) {
@@ -227,6 +230,7 @@ public class JournalService {
             }
             current = current.plusWeeks(1);
         }
+        log.info("Generate lesson instance for schedule between: id={}, from={}, to={}", scheduleLesson.getId(), from, to);
     }
 
 }

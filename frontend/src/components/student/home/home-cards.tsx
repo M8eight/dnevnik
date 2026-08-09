@@ -13,7 +13,6 @@ import subjectColor from "./subject-color-helper";
 export function UserCard({ user }: { user: StudentFullDetailsResponse }) {
   return (
     <div className="col-span-12 md:col-span-6 glass-card rounded-[22px] p-7 relative overflow-hidden anim-in anim-delay-1">
-      {/* Decorative circle */}
       <div className="absolute top-5 right-6 w-20 h-20 rounded-full border-[3px] border-[var(--red)] opacity-[0.08]" />
       <div className="absolute top-8 right-9 w-10 h-10 rounded-full bg-[var(--red)] opacity-[0.05]" />
 

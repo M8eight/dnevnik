@@ -6,7 +6,6 @@ import {
 } from "lucide-react";
 
 
-{/* Admin */}
 export const ACCENT_PALETTE = [
     { light: "bg-[var(--red-light)]/60", dot: "bg-[var(--red)]", text: "text-[var(--red)]" },
     { light: "bg-blue-50/70", dot: "bg-blue-500", text: "text-blue-600" },
@@ -47,7 +46,6 @@ export const ROLES: {
     ];
 
 
-{/* Teacher */}
 export type ViewMode = "ALL" | "GRADES" | "ATTENDANCE";
 
 export const WEEKDAYS = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];

@@ -4,11 +4,12 @@ import { CurrentDate } from "@/helpers/student-helpers";
 import { UserCard, RatingCard, TeacherCard, TodayScheduleCard, TodayGradesCard, HomeworkCard, WeekScheduleCard } from "@/components/student/home/home-cards";
 import StudentNavbar from "@/components/layout/navbars/StudentNavbar";
 import { useHomeAggregation } from "@/hooks/bff/use-student-bff";
+import { toISODate } from "@/lib/date";
 
 
 function Home() {
   const today = new Date();
-  const todayDateStr = today.toISOString().split("T")[0];
+  const todayDateStr = toISODate(today);
   const currentDayOfWeek = new Intl.DateTimeFormat("en-US", { weekday: "long" })
     .format(today)
     .toUpperCase();

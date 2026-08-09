@@ -16,6 +16,7 @@ import { useState } from "react";
 import { useStudentDetails } from "@/hooks/use-student";
 import { useTeacherDetails } from "@/hooks/use-teacher";
 import TeacherSubjectsField from "./teacher-subject-selector";
+import { FIELD_CLASS } from "@/constants/form-styles";
 
 interface Props {
     user: UserResponse;
@@ -140,8 +141,7 @@ export default function EditUserModal({ user, onClose }: Props) {
         );
     };
 
-    const fieldClass =
-        "h-11 bg-white/40 border border-black/10 rounded-2xl focus-visible:ring-(--red) text-sm font-semibold placeholder:font-normal transition-all duration-200";
+    const fieldClass = FIELD_CLASS;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">

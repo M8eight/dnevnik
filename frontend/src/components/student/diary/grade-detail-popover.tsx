@@ -3,18 +3,12 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { GradeBadge } from "@/components/student/diary/badges";
 import { useGradeDetail } from "@/hooks/use-grade";
 import { Calendar } from "lucide-react";
+import { formatRuDateTime } from "@/lib/date";
 
 const GRADE_TYPE_LABELS: Record<string, string> = {
   HOMEWORK: "Домашняя работа",
   TEST: "Работа на уроке",
   CONTROL: "Контрольная работа",
-};
-
-const formatDateTimeLabel = (dateStr: string) => {
-  const d = new Date(dateStr);
-  const date = d.toLocaleDateString("ru-RU", { day: "numeric", month: "long" });
-  const time = d.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
-  return `${date} · ${time}`;
 };
 
 const initials = (firstName: string, lastName: string) =>
@@ -91,7 +85,7 @@ export function GradePopover({ gradeId, value, size = "md" }: { gradeId: number;
                 <span className="flex items-center justify-center w-7 h-7 rounded-full bg-black/4 shrink-0">
                   <Calendar className="w-3.5 h-3.5 text-black/40" />
                 </span>
-                <p className="text-[12px] text-black/50">{formatDateTimeLabel(data.date)}</p>
+                <p className="text-[12px] text-black/50">{formatRuDateTime(data.date)}</p>
               </div>
             </div>
           </>

@@ -8,6 +8,7 @@ import { Award, BookOpen, Star, TrendingUp } from "lucide-react";
 import { useHorizontalScrollDrag } from "@/helpers/teacher-helpers";
 import { GradePopover } from "@/components/student/diary/grade-detail-popover";
 import { useGradesLessonsByStudentId } from "@/hooks/use-journal";
+import { toISODate } from "@/lib/date";
 
 export interface GradeJournalGradeTabProps {
     academicPeriodId: number;
@@ -138,8 +139,7 @@ function GradeTableScrollArea({
         const el = scrollRef.current;
         if (!el || filteredDates.length === 0) return;
 
-        const today = new Date();
-        const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+        const todayStr = toISODate(new Date());
 
         const targetDate = [...filteredDates].filter((d) => d <= todayStr).pop() ?? filteredDates[0];
         const targetEl = dateHeaderRefs.current[targetDate];
@@ -270,7 +270,7 @@ export default function GradeJournalGradeTab({ academicPeriodId }: GradeJournalG
     const { data: response, isLoading, isError } = useGradesLessonsByStudentId(academicPeriodId);
 
     const today = new Date();
-    const localTodayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    const localTodayStr = toISODate(today);
 
     const filteredDates = response?.dates.filter((date) => {
         if (date <= localTodayStr) return true;

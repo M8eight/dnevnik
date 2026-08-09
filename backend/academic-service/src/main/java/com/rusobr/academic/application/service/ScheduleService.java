@@ -21,6 +21,7 @@ import com.rusobr.common.exception.ConflictException;
 import com.rusobr.academic.web.exception.AcademicExceptionCode;
 import com.rusobr.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -35,6 +36,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ScheduleService {
 
     private final ScheduleLessonRepository scheduleLessonRepository;
@@ -199,6 +201,7 @@ public class ScheduleService {
     public void create(ScheduleLessonRequest scheduleLessonRequest) {
         userClient.getTeacherById(scheduleLessonRequest.teacherId());
         self.createTransactional(scheduleLessonRequest);
+        log.info("Create schedule request={}", scheduleLessonRequest);
     }
 
     @Transactional
@@ -253,6 +256,7 @@ public class ScheduleService {
 
         // Удаляем lessonInstance к которым ничего не привязано
         lessonInstanceRepository.softDeleteFutureEmptyAfterDate(scheduleId, closeDate);
+        log.info("Schedule closed: scheduleId={}, closeDate={}", scheduleId, closeDate);
     }
 
     @Transactional
@@ -266,9 +270,7 @@ public class ScheduleService {
         for (ScheduleLesson sl : scheduleLessons) {
             lessonInstanceService.generateInstanceBetween(sl, fromDate, toDate);
         }
-
+        log.info("load schedule: classId={}, fromDate={}, toDate={}", classId, fromDate, toDate);
     }
-
-    //todo расписание для учителя какие уроки у нее
 
 }

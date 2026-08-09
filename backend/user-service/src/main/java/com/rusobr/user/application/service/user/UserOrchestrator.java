@@ -40,6 +40,7 @@ public class UserOrchestrator {
             keycloakRestClient.assignRoleToUser(new AssignRoleToUserRequest(kId, kRole.name(), kRole.id()));
 
             userService.setKeycloakId(kId, user.id());
+            log.info("User created: username={} role={}", userCreateRequest.user().username(), userCreateRequest.role());
 
         } catch (Exception e) {
             log.error("Rollback create user: {} keycloakId: {}", user, kId, e);
@@ -76,6 +77,7 @@ public class UserOrchestrator {
             Optional.ofNullable(userUpdateRequest.password())
                     .ifPresent(p -> keycloakRestClient.resetKeycloakPassword(user.getKeycloakId(), p));
 
+            log.info("User updated: userId={}", userId);
             return userResponse;
         } catch (Exception e) {
             log.error("Rollback update user {}", user.getUsername());

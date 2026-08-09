@@ -51,7 +51,7 @@ public class PdfExportController {
                 .body(pdf);
     }
 
-    @PreAuthorize("@gradeSecurity.canViewAssignment(#teachingAssignmentId, authentication)")
+    @PreAuthorize("@teacherSecurity.canViewAssignment(#teachingAssignmentId, authentication)")
     @GetMapping(value = "/teacher/student-grade-report/report", produces = MediaType.APPLICATION_PDF_VALUE)
     public ResponseEntity<byte[]> teacherGradeReport(@RequestParam Long teachingAssignmentId, @RequestParam Long periodId) {
         TeacherGradeReportDto data = gradeReportService.getTeacherGradeReport(teachingAssignmentId, periodId);

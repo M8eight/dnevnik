@@ -46,7 +46,6 @@ public class GradeControllerTest {
 
     private static final Long GRADE_ID = 1L;
     private static final Long STUDENT_ID = 10L;
-    private static final Long PERIOD_ID = 5L;
     private static final Long LESSON_ID = 100L;
     private static final LocalDate DATE = LocalDate.of(2026, 10, 20);
 
@@ -55,7 +54,7 @@ public class GradeControllerTest {
     }
 
     private CreateGradeRequest buildCreateRequest() {
-        return new CreateGradeRequest(STUDENT_ID, LESSON_ID, PERIOD_ID, 5, 2, GradeType.TEST);
+        return new CreateGradeRequest(STUDENT_ID, LESSON_ID, 5, 2, GradeType.TEST);
     }
 
     private CreateGradeResponse buildCreateResponse() {
@@ -87,15 +86,15 @@ public class GradeControllerTest {
     }
 
     @Test
-    @DisplayName("POST /grades — 200 and created grade")
-    void create_ShouldReturn200() throws Exception {
+    @DisplayName("POST /grades — 201 and created grade")
+    void create_ShouldReturn201() throws Exception {
         CreateGradeRequest request = buildCreateRequest();
         when(gradeService.create(request)).thenReturn(buildCreateResponse());
 
         mockMvc.perform(post("/api/v1/grades")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.gradeId").value(GRADE_ID))
                 .andExpect(jsonPath("$.studentId").value(STUDENT_ID))
                 .andExpect(jsonPath("$.lessonInstance.id").value(LESSON_ID))
@@ -120,12 +119,12 @@ public class GradeControllerTest {
     }
 
     @Test
-    @DisplayName("DELETE /grades/{id} — 200 on success")
-    void delete_ShouldReturn200() throws Exception {
+    @DisplayName("DELETE /grades/{id} — 204 on success")
+    void delete_ShouldReturn204() throws Exception {
         doNothing().when(gradeService).delete(GRADE_ID);
 
         mockMvc.perform(delete("/api/v1/grades/{id}", GRADE_ID))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         verify(gradeService).delete(GRADE_ID);
     }

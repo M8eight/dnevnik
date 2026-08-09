@@ -14,6 +14,7 @@ import com.rusobr.common.exception.ConflictException;
 import com.rusobr.academic.web.exception.AcademicExceptionCode;
 import com.rusobr.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TeacherSubjectService {
 
     private final TeacherSubjectRepository teacherSubjectRepository;
@@ -66,7 +68,9 @@ public class TeacherSubjectService {
 
         UserFeignResponse teacher = userClient.getTeacherSimpleById(request.teacherId());
 
-        return self.createTransactional(request, id, teacher);
+        TeacherSubjectResponse response = self.createTransactional(request, id, teacher);
+        log.info("TeacherSubject created: request={}", request);
+        return response;
     }
 
     @Transactional
@@ -105,6 +109,7 @@ public class TeacherSubjectService {
         }
 
         teacherSubjectRepository.softDelete(id.getSubjectId(), id.getTeacherId());
+        log.info("TeacherSubject deleted: request={}", request);
     }
 
 }

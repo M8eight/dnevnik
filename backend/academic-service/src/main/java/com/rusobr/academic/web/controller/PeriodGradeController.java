@@ -1,16 +1,14 @@
 package com.rusobr.academic.web.controller;
 
 import com.rusobr.academic.application.service.PeriodGradeService;
-import com.rusobr.academic.web.dto.grade.periodGrade.*;
+import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeRequest;
+import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeResponse;
+import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeTeacherResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,14 +16,7 @@ import java.util.Map;
 public class PeriodGradeController {
     private final PeriodGradeService periodGradeService;
 
-//    @GetMapping("/by-student")
-//    public Map<String, List<PeriodGradeStudentResponse>> getByStudentId(@AuthenticationPrincipal Jwt jwt,
-//                                                                        @RequestParam Long academicYearId) {
-//        Long userId = jwt.getClaim("user_id");
-//        return periodGradeService.getByStudentId(userId, academicYearId);
-//    }
-
-    @PreAuthorize("@gradeSecurity.canViewAssignment(#teachingAssignmentId, authentication)")
+    @PreAuthorize("@teacherSecurity.canViewAssignment(#teachingAssignmentId, authentication)")
     @GetMapping("/by-assignment")
     public PeriodGradeTeacherResponse getGradesByAssignment(@RequestParam Long teachingAssignmentId,
                                                                      @RequestParam Long currentAcademicPeriodId,
@@ -33,12 +24,15 @@ public class PeriodGradeController {
         return periodGradeService.getByAssignmentWithAverage(teachingAssignmentId, currentAcademicPeriodId, academicYearId);
     }
 
+    @PreAuthorize("@teacherSecurity.canCreatePeriodGrade(#periodGradeRequest.teachingAssignmentId(), #periodGradeRequest.studentId(), authentication)")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public PeriodGradeResponse createPeriodGrade(@RequestBody PeriodGradeRequest periodGradeRequest) {
+    public PeriodGradeResponse createPeriodGrade(@RequestBody @Valid PeriodGradeRequest periodGradeRequest) {
         return periodGradeService.create(periodGradeRequest);
     }
 
+
+    @PreAuthorize("@teacherSecurity.canDeletePeriodGrade(#id, authentication)")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deletePeriodGrade(@PathVariable Long id) {

@@ -1,3 +1,4 @@
+import { Avatar } from "@/components/layout/layout";
 import { useParentInfo } from "@/hooks/use-parent";
 import { useStudentInfo } from "@/hooks/use-student";
 import { useTeacherInfo } from "@/hooks/use-teacher";
@@ -6,10 +7,6 @@ import type { SchoolClassResponse } from "@/services/school-class-service";
 import { User, GraduationCap, BookOpen, Users, Phone, Mail, ChevronLeft } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 
-
-function getInitials(firstName: string, lastName: string) {
-    return `${firstName[0]}${lastName[0]}`.toUpperCase();
-}
 
 function Skeleton({ className }: { className?: string }) {
     return <div className={`animate-pulse rounded-xl bg-black/8 ${className}`} />;
@@ -22,34 +19,6 @@ function InfoRow({ icon: Icon, value }: { icon: React.ElementType; value: string
                 <Icon className="w-3.5 h-3.5 text-(--red)" />
             </div>
             <span className="text-xs font-semibold">{value}</span>
-        </div>
-    );
-}
-
-function Avatar({
-    firstName,
-    lastName,
-    size = "md",
-    color = "red",
-}: {
-    firstName: string;
-    lastName: string;
-    size?: "sm" | "md" | "lg";
-    color?: "red" | "navy" | "green";
-}) {
-    const sizeMap = {
-        sm: "w-11 h-11 rounded-[12px] text-sm",
-        md: "w-14 h-14 rounded-[16px] text-base",
-        lg: "w-28 h-28 rounded-[36px] text-3xl",
-    };
-    const colorMap = {
-        red: "bg-(--red-light)/50 text-(--red)",
-        navy: "bg-(--navy)/8 text-(--navy)",
-        green: "bg-emerald-100/70 text-emerald-700",
-    };
-    return (
-        <div className={`${sizeMap[size]} ${colorMap[color]} flex items-center justify-center shrink-0`}>
-            <span className="font-serif font-black">{getInitials(firstName, lastName)}</span>
         </div>
     );
 }

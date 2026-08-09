@@ -8,6 +8,7 @@ import com.rusobr.academic.infrastructure.persistence.repository.SubjectReposito
 import com.rusobr.academic.web.dto.subject.SubjectRequest;
 import com.rusobr.academic.web.dto.subject.SubjectResponseDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class SubjectService {
 
     private final SubjectRepository subjectRepository;
@@ -35,7 +37,9 @@ public class SubjectService {
     @Transactional
     public SubjectResponseDto create(SubjectRequest dto) {
         Subject subject = subjectMapper.toSubject(dto);
-        return subjectMapper.toSubjectResponseDto(subjectRepository.save(subject));
+        SubjectResponseDto response = subjectMapper.toSubjectResponseDto(subjectRepository.save(subject));
+        log.info("Subject created: request={}", dto);
+        return response;
     }
 
     @Transactional
@@ -45,6 +49,7 @@ public class SubjectService {
                     AcademicExceptionCode.SUBJECT_NOT_FOUND);
         }
         subjectRepository.deleteById(id);
+        log.info("Subject deleted: id={}", id);
     }
 
 }

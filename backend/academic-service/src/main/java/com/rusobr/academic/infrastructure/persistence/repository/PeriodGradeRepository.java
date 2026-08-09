@@ -1,7 +1,6 @@
 package com.rusobr.academic.infrastructure.persistence.repository;
 
 import com.rusobr.academic.domain.model.PeriodGrade;
-import com.rusobr.academic.infrastructure.persistence.projection.PeriodGradeProjection;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -43,5 +42,14 @@ public interface PeriodGradeRepository extends CrudRepository<PeriodGrade, Long>
 """)
     List<PeriodGrade> findPeriodGradesByTeachingAssignmentId(@Param("teachingAssignmentId") Long teachingAssignmentId,
                                                              @Param("academicYearId") Long academicYearId);
+
+    @Query("""
+        select count(*) > 0
+        from PeriodGrade pg
+            join pg.teachingAssignment ta
+        where ta.teacherId = :teacherId
+        and pg.id = :gradeId
+""")
+    boolean isPeriodGradeOwnedByTeacher(@Param("teacherId") Long teacherId, @Param("periodGradeId") Long periodGradeId);
 
 }
