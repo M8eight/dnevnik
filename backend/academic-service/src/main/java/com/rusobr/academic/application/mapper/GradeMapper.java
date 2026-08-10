@@ -34,6 +34,7 @@ public interface GradeMapper {
 
     GradeJournalResponse toGradeJournalResponse(List<UserFeignResponse> users, GetGradeDataDto grade);
 
+    @Mapping(target = "date", source = "lessonDate")
     GradeJournalItemDto toItemProjection(GradeJournalItemProjection itemProjection);
 
     GradeWithSubjectNameResponse toWithSubjectNameResponse(GradeWithSubjectNameProjection projection);
