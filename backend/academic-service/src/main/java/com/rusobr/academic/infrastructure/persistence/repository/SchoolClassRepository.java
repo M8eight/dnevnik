@@ -14,7 +14,7 @@ import java.util.Optional;
 public interface SchoolClassRepository extends JpaRepository<SchoolClass, Long> {
 
     @Query("""
-                select s.id
+                select s.studentId
                 from SchoolClass sc
                 join sc.students s
                 where sc.id = :classId

@@ -48,8 +48,8 @@ public interface PeriodGradeRepository extends CrudRepository<PeriodGrade, Long>
         from PeriodGrade pg
             join pg.teachingAssignment ta
         where ta.teacherId = :teacherId
-        and pg.id = :gradeId
-""")
+        and pg.id = :periodGradeId
+    """)
     boolean isPeriodGradeOwnedByTeacher(@Param("teacherId") Long teacherId, @Param("periodGradeId") Long periodGradeId);
 
 }
