@@ -22,7 +22,7 @@ public interface AttendanceRepository extends JpaRepository<Attendance,Long> {
             join li.scheduleLesson sl
             join sl.teachingAssignment ta
         where ta.teacherId = :teacherId
-        and a.id = :gradeId
+        and a.id = :attendanceId
     """)
     boolean isAttendanceOwnedByTeacher(@Param("teacherId") Long teacherId, @Param("attendanceId") Long attendanceId);
 

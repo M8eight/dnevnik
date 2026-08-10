@@ -20,7 +20,7 @@ public interface GradeRepository extends JpaRepository<Grade, Long> {
     //Запрос берет из schoolClass ученика и сопоставляет оценками и ограничивает данные по teachingAssignmentId
     @Query("""
         select
-            s.id studentId,
+            s.studentId studentId,
             g.id gradeId,
             g.value value,
             g.type type,
@@ -30,9 +30,9 @@ public interface GradeRepository extends JpaRepository<Grade, Long> {
         join li.scheduleLesson sl
         join sl.teachingAssignment ta
         join ta.schoolClass sc
-        join sc.students s on s.id = g.studentId
+        join sc.students s on s.studentId = g.studentId
         where ta.id = :assignmentId
-        order by s.id asc, g.createdAt
+        order by s.studentId asc, g.createdAt
     """)
     List<GradeJournalItemProjection> getClassGrades(@Param("assignmentId") Long assignmentId);
 
@@ -40,7 +40,7 @@ public interface GradeRepository extends JpaRepository<Grade, Long> {
     Optional<Grade> findWithLessonInstanceById(Long id);
 
     @Query("""
-            select coalesce(sum(g.value * g.weight) / sum(g.weight), 0.0)
+            select coalesce(sum(g.value * g.weight * 1.0) / sum(g.weight), 0.0)
             from Grade g
             join g.lessonInstance li
             where g.studentId = :studentId
