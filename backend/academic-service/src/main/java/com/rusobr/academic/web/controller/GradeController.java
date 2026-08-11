@@ -20,11 +20,6 @@ public class GradeController {
 
     private final GradeService gradeService;
 
-    @GetMapping("/{id}")
-    public GradeResponse getById(@PathVariable Long id) {
-        return gradeService.getById(id);
-    }
-
     @PreAuthorize("@gradeSecurity.canViewStudent(#id, authentication)")
     @GetMapping("/{id}/detail")
     public GradeDetailResponse getDetailById(@PathVariable Long id) {

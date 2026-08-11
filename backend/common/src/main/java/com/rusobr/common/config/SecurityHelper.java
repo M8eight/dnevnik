@@ -21,7 +21,10 @@ public class SecurityHelper {
                     .map(m -> m.get("roles"))
                     .filter(List.class::isInstance)
                     .map(roles -> (List<?>) roles)
-                    .ifPresent(roles -> roles.forEach(r ->
+                    .ifPresent(roles -> roles.stream()
+                            .filter(String.class::isInstance)
+                            .map(String.class::cast)
+                            .forEach(r ->
                             authorities.add(new SimpleGrantedAuthority("ROLE_" + r))));
 
             return new JwtAuthenticationToken(jwt, authorities);

@@ -62,30 +62,6 @@ public class GradeControllerTest {
     }
 
     @Test
-    @DisplayName("GET /grades/{id} — 200 and grade details")
-    void getById_ShouldReturn200() throws Exception {
-        when(gradeService.getById(GRADE_ID)).thenReturn(buildGradeResponse());
-
-        mockMvc.perform(get("/api/v1/grades/{id}", GRADE_ID))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(GRADE_ID))
-                .andExpect(jsonPath("$.studentId").value(STUDENT_ID))
-                .andExpect(jsonPath("$.value").value(5))
-                .andExpect(jsonPath("$.weight").value(2))
-                .andExpect(jsonPath("$.type").value("TEST"));
-    }
-
-    @Test
-    @DisplayName("GET /grades/{id} — 404 when grade not found")
-    void getById_ShouldReturn404_WhenNotFound() throws Exception {
-        when(gradeService.getById(GRADE_ID)).thenThrow(new NotFoundException("Grade with id " + GRADE_ID + " not found", AcademicExceptionCode.GRADE_NOT_FOUND));
-
-        mockMvc.perform(get("/api/v1/grades/{id}", GRADE_ID))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("Grade with id " + GRADE_ID + " not found"));
-    }
-
-    @Test
     @DisplayName("POST /grades — 201 and created grade")
     void create_ShouldReturn201() throws Exception {
         CreateGradeRequest request = buildCreateRequest();
