@@ -30,7 +30,7 @@ public class SecurityConfig {
                         .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .pathMatchers("/user-service/v3/api-docs/**", "/swagger-ui/**").permitAll()
                         .pathMatchers("/academic-service/v3/api-docs/**", "/swagger-ui/**").permitAll()
-                        .pathMatchers("/actuator/**").permitAll()
+                        .pathMatchers("/actuator/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .anyExchange().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> {}))
                 .build();

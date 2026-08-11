@@ -29,7 +29,8 @@ public class SecurityConfig {
                 .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(req -> {
                     req
-                            .requestMatchers("/public/**", "/actuator/**").permitAll()
+                            .requestMatchers("/public/**", "/actuator/**",
+                                    "/v3/api-docs/**", "/swagger-ui/**").permitAll()
                             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                             .requestMatchers(POST, "/api/v1/students/batch").hasAnyRole(TEACHER.name(), ADMIN.name(), STUDENT.name())
