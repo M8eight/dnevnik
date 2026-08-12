@@ -7,6 +7,7 @@ import com.rusobr.academic.web.exception.BadRequestException;
 import com.rusobr.academic.web.exception.AcademicExceptionCode;
 import com.rusobr.common.exception.ForbiddenException;
 import com.rusobr.common.exception.UnauthorizedException;
+import com.rusobr.common.util.ExceptionUtils;
 import com.rusobr.academic.web.exception.UserServiceUnavailableException;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
@@ -22,49 +23,50 @@ public class UserClientFallbackFactory implements FallbackFactory<UserClient> {
 
     @Override
     public UserClient create(Throwable cause) {
+        Throwable rootCause = ExceptionUtils.unwrapRootCause(cause);
         return new UserClient() {
 
             @Override
             public TeacherResponse getTeacherById(Long id) {
-                handleCommonErrors(cause, "getTeacherById id=" + id,
+                handleCommonErrors(rootCause, "getTeacherById id=" + id,
                         "Not found teacher with id: %d".formatted(id),
                         AcademicExceptionCode.USER_SERVICE_TEACHER_NOT_FOUND);
-                throw fallbackFailure("getTeacherById", id, cause);
+                throw fallbackFailure("getTeacherById", id, rootCause);
             }
 
             @Override
             public UserFeignResponse getTeacherSimpleById(Long id) {
-                handleCommonErrors(cause, "getTeacherSimpleById id=" + id,
+                handleCommonErrors(rootCause, "getTeacherSimpleById id=" + id,
                         "Not found teacher with id: %d".formatted(id),
                         AcademicExceptionCode.USER_SERVICE_TEACHER_NOT_FOUND);
-                throw fallbackFailure("getTeacherSimpleById", id, cause);
+                throw fallbackFailure("getTeacherSimpleById", id, rootCause);
             }
 
             @Override
             public BatchUserResponse getBatchTeachers(List<Long> ids) {
-                handleCommonErrors(cause, "getBatchTeachers ids=" + ids, "Not found batch teachers with ids: %s".formatted(ids),
+                handleCommonErrors(rootCause, "getBatchTeachers ids=" + ids, "Not found batch teachers with ids: %s".formatted(ids),
                         AcademicExceptionCode.USER_SERVICE_BATCH_TEACHERS_NOT_FOUND);
-                throw fallbackFailure("getBatchTeachers", ids, cause);
+                throw fallbackFailure("getBatchTeachers", ids, rootCause);
             }
 
             @Override
             public void existStudentById(Long id) {
-                handleCommonErrors(cause, "existStudentById id=" + id,
+                handleCommonErrors(rootCause, "existStudentById id=" + id,
                         "Not found student with id: %d".formatted(id),
                         AcademicExceptionCode.USER_SERVICE_STUDENT_NOT_FOUND);
-                throw fallbackFailure("existStudentById", id, cause);
+                throw fallbackFailure("existStudentById", id, rootCause);
             }
 
             @Override
             public List<UserFeignResponse> getBatchStudentsExcludeAssigned(Set<Long> ids) {
-                handleCommonErrors(cause, "getBatchStudentsExcludeAssigned ids=" + ids, "Not found batch exclude students with ids: %s".formatted(ids),
+                handleCommonErrors(rootCause, "getBatchStudentsExcludeAssigned ids=" + ids, "Not found batch exclude students with ids: %s".formatted(ids),
                         AcademicExceptionCode.USER_SERVICE_BATCH_EXCLUDE_STUDENTS_NOT_FOUND);
-                throw fallbackFailure("getBatchStudentsExcludeAssigned", ids, cause);
+                throw fallbackFailure("getBatchStudentsExcludeAssigned", ids, rootCause);
             }
 
             @Override
             public BatchUserResponse getBatchStudents(List<Long> ids) {
-                handleCommonErrors(cause, "getBatchUsers ids=" + ids, "Not found batch users with ids: %s".formatted(ids),
+                handleCommonErrors(rootCause, "getBatchUsers ids=" + ids, "Not found batch users with ids: %s".formatted(ids),
                         AcademicExceptionCode.USER_SERVICE_BATCH_USERS_NOT_FOUND);
                 return BatchUserResponse.degraded(ids);
             }
