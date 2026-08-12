@@ -1,0 +1,8 @@
+spring:
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connect-timeout: 500
+            read-timeout: 500

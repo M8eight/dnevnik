@@ -3,6 +3,7 @@ package com.rusobr.user.infrastructure.client.feign;
 import com.rusobr.common.exception.ForbiddenException;
 import com.rusobr.common.exception.NotFoundException;
 import com.rusobr.common.exception.UnauthorizedException;
+import com.rusobr.common.util.ExceptionUtils;
 import com.rusobr.user.web.dto.feign.SchoolClassResponse;
 import com.rusobr.user.web.dto.feign.TeacherAcademicFeignDto;
 import com.rusobr.user.web.exception.*;
@@ -17,28 +18,29 @@ public class AcademicClientFallbackFactory implements FallbackFactory<AcademicCl
 
     @Override
     public AcademicClient create(Throwable cause) {
+        Throwable rootCause = ExceptionUtils.unwrapRootCause(cause);
         return new AcademicClient() {
 
             @Override
             public SchoolClassResponse getSchoolClassByStudentId(Long studentId) {
                 handleCommonErrors(
-                        cause,
+                        rootCause,
                         "getSchoolClassByStudentId",
                         "School class with %s not found".formatted(studentId),
                         UserExceptionCode.SCHOOL_CLASS_BY_STUDENT_NOT_FOUND
                 );
-                throw fallbackFailure("getSchoolClassByStudentId", studentId, cause);
+                throw fallbackFailure("getSchoolClassByStudentId", studentId, rootCause);
             }
 
             @Override
             public TeacherAcademicFeignDto getTeacherAcademicInfo(Long teacherId) {
                 handleCommonErrors(
-                        cause,
+                        rootCause,
                         "getTeacherAcademicInfo",
                         "Teacher info with id: %s not found".formatted(teacherId),
                         UserExceptionCode.ACADEMIC_SERVICE_TEACHER_INFO_NOT_FOUND
                 );
-                throw fallbackFailure("getTeacherAcademicInfo", teacherId, cause);
+                throw fallbackFailure("getTeacherAcademicInfo", teacherId, rootCause);
             }
         };
     }
