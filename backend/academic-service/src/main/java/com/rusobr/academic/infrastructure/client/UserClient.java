@@ -13,7 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.util.List;
 import java.util.Set;
 
-@FeignClient(value = "user-service", fallbackFactory = UserClientFallbackFactory.class, configuration = FeignConfig.class)
+@FeignClient(value = "user-service", fallbackFactory = UserClientFallbackFactory.class,
+        configuration = FeignConfig.class, url = "${clients.user-service.url:}")
 public interface UserClient {
 
     @GetMapping("/api/v1/teachers/{id}")
