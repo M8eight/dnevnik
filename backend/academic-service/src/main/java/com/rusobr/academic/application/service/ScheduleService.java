@@ -44,7 +44,8 @@ public class ScheduleService {
     private final ScheduleLessonMapper scheduleLessonMapper;
     private final TeachingAssignmentService teachingAssignmentService;
     private final LessonInstanceRepository lessonInstanceRepository;
-    private final JournalService lessonInstanceService;
+    private final ScheduleGeneratorService scheduleGeneratorService;
+    private final JournalService journalService;
     private final AttendanceMapper attendanceMapper;
     private final HomeworkMapper homeworkMapper;
     private final GradeMapper gradeMapper;
@@ -236,7 +237,7 @@ public class ScheduleService {
         scheduleLessonRepository.save(scheduleLesson);
 
         // Создаем lessonInstance наперед
-        lessonInstanceService.generateInstanceForLesson(scheduleLesson);
+        scheduleGeneratorService.generateInstanceForLesson(scheduleLesson);
     }
 
     @CacheEvict(value = "schedulesByStudentId", allEntries = true)
@@ -268,7 +269,7 @@ public class ScheduleService {
         );
 
         for (ScheduleLesson sl : scheduleLessons) {
-            lessonInstanceService.generateInstanceBetween(sl, fromDate, toDate);
+            scheduleGeneratorService.generateInstanceBetween(sl, fromDate, toDate);
         }
         log.info("load schedule: classId={}, fromDate={}, toDate={}", classId, fromDate, toDate);
     }

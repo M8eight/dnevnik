@@ -169,6 +169,12 @@ public interface ScheduleLessonRepository extends JpaRepository<ScheduleLesson, 
                                                    @Param("startDate") LocalDate startDate,
                                                    @Param("endDate") LocalDate endDate);
 
-
+    @Query("""
+        select sl
+        from ScheduleLesson sl
+        where sl.validFrom <= :end
+            and (sl.validTo is null or sl.validTo >= :start)
+    """)
+    List<ScheduleLesson> findAllBetween(LocalDate start, LocalDate end);
 
 }

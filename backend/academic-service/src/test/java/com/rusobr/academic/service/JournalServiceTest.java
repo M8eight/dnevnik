@@ -6,8 +6,6 @@ import com.rusobr.academic.application.service.AcademicPeriodService;
 import com.rusobr.academic.application.service.JournalService;
 import com.rusobr.academic.domain.enums.GradeType;
 import com.rusobr.academic.domain.model.AcademicPeriod;
-import com.rusobr.academic.domain.model.LessonInstance;
-import com.rusobr.academic.domain.model.ScheduleLesson;
 import com.rusobr.academic.infrastructure.client.UserClient;
 import com.rusobr.academic.infrastructure.persistence.projection.AttendanceStudentProjection;
 import com.rusobr.academic.infrastructure.persistence.projection.GradeJournalProjection;
@@ -33,7 +31,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -46,7 +43,6 @@ import static org.mockito.Mockito.*;
 class JournalServiceTest {
 
     @Mock private LessonInstanceRepository lessonInstanceRepository;
-    @Mock private AcademicPeriodRepository academicPeriodRepository;
     @Mock private AcademicPeriodMapper academicPeriodMapper;
     @Mock private SchoolClassRepository schoolClassRepository;
     @Mock private UserClient userClient;
@@ -54,7 +50,7 @@ class JournalServiceTest {
     @Mock private AcademicPeriodService academicPeriodService;
     @Mock private TransactionTemplate readOnlyTransactionTemplate;
 
-    @InjectMocks private JournalService service;
+    @InjectMocks private JournalService journalService;
 
     private static final Long PERIOD_ID = 1L;
     private static final Long STUDENT_ID = 42L;
@@ -94,7 +90,7 @@ class JournalServiceTest {
                     .thenReturn(dates);
             when(academicPeriodMapper.toResponse(period)).thenReturn(periodResponse);
 
-            GradesLessonsResponse result = service.getGradesByStudentId(STUDENT_ID, PERIOD_ID);
+            GradesLessonsResponse result = journalService.getGradesByStudentId(STUDENT_ID, PERIOD_ID);
 
             assertThat(result).isNotNull();
             assertThat(result.dates()).isEqualTo(dates);
@@ -108,7 +104,7 @@ class JournalServiceTest {
             when(academicPeriodService.getById(PERIOD_ID))
                     .thenThrow(new NotFoundException("Academic period with id " + PERIOD_ID + " not found", null));
 
-            assertThatThrownBy(() -> service.getGradesByStudentId(STUDENT_ID, PERIOD_ID))
+            assertThatThrownBy(() -> journalService.getGradesByStudentId(STUDENT_ID, PERIOD_ID))
                     .isInstanceOf(NotFoundException.class);
         }
     }
@@ -163,7 +159,7 @@ class JournalServiceTest {
 
             when(academicPeriodMapper.toResponse(period)).thenReturn(periodResponse);
 
-            TeacherJournalResponse result = service.getJournalByAssignment(ASSIGNMENT_ID, PERIOD_ID);
+            TeacherJournalResponse result = journalService.getJournalByAssignment(ASSIGNMENT_ID, PERIOD_ID);
 
             assertThat(result).isNotNull();
             assertThat(result.studentsJournal()).hasSize(1);
@@ -190,39 +186,9 @@ class JournalServiceTest {
                     .thenReturn(List.of(lessonProjection));
             when(lessonInstanceMapper.toLessonInstanceDto(lessonProjection)).thenReturn(lessonDto);
 
-            List<LessonInstanceDto> result = service.getInstancesByAssignment(ASSIGNMENT_ID, PERIOD_ID);
+            List<LessonInstanceDto> result = journalService.getInstancesByAssignment(ASSIGNMENT_ID, PERIOD_ID);
 
             assertThat(result).hasSize(1).contains(lessonDto);
-        }
-    }
-
-    @Nested
-    @DisplayName("generateInstanceForLesson")
-    class GenerateInstanceForLesson {
-
-        @Test
-        @DisplayName("успешно генерирует уроки на две недели вперед с проверкой на существование")
-        void success_generatesForTwoWeeks() {
-            LocalDate validFrom = LocalDate.of(2026, 6, 1);
-            ScheduleLesson scheduleLesson = ScheduleLesson.builder()
-                    .validFrom(validFrom)
-                    .validTo(null)
-                    .dayOfWeek(DayOfWeek.MONDAY)
-                    .build();
-
-            LocalDate date1 = LocalDate.of(2026, 6, 1);
-            LocalDate date2 = LocalDate.of(2026, 6, 8);
-            LocalDate date3 = LocalDate.of(2026, 6, 15);
-
-            when(lessonInstanceRepository.existsByScheduleLessonAndLessonDate(scheduleLesson, date1)).thenReturn(false);
-            when(lessonInstanceRepository.existsByScheduleLessonAndLessonDate(scheduleLesson, date2)).thenReturn(true);
-            when(lessonInstanceRepository.existsByScheduleLessonAndLessonDate(scheduleLesson, date3)).thenReturn(false);
-
-            service.generateInstanceForLesson(scheduleLesson);
-
-            verify(lessonInstanceRepository).save(argThat(li -> li.getLessonDate().equals(date1)));
-            verify(lessonInstanceRepository).save(argThat(li -> li.getLessonDate().equals(date3)));
-            verify(lessonInstanceRepository, times(2)).save(any(LessonInstance.class));
         }
     }
 }
