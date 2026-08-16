@@ -5,6 +5,7 @@ import com.rusobr.academic.application.mapper.GradeMapper;
 import com.rusobr.academic.application.mapper.HomeworkMapper;
 import com.rusobr.academic.application.mapper.ScheduleLessonMapper;
 import com.rusobr.academic.application.service.JournalService;
+import com.rusobr.academic.application.service.ScheduleGeneratorService;
 import com.rusobr.academic.application.service.ScheduleService;
 import com.rusobr.academic.application.service.TeachingAssignmentService;
 import com.rusobr.academic.domain.enums.AttendanceStatus;
@@ -64,6 +65,7 @@ class ScheduleServiceTest {
     @Mock private TeachingAssignmentService teachingAssignmentService;
     @Mock private LessonInstanceRepository lessonInstanceRepository;
     @Mock private JournalService lessonInstanceService;
+    @Mock private ScheduleGeneratorService scheduleGeneratorService;
     @Mock private AttendanceMapper attendanceMapper;
     @Mock private HomeworkMapper homeworkMapper;
     @Mock private GradeMapper gradeMapper;
@@ -380,7 +382,7 @@ class ScheduleServiceTest {
             service.createTransactional(request);
 
             verify(scheduleLessonRepository).save(sl);
-            verify(lessonInstanceService).generateInstanceForLesson(sl);
+            verify(scheduleGeneratorService).generateInstanceForLesson(sl);
         }
 
         @Test
@@ -437,7 +439,7 @@ class ScheduleServiceTest {
 
             service.load(CLASS_ID, DATE, to);
 
-            verify(lessonInstanceService).generateInstanceBetween(sl, DATE, to);
+            verify(scheduleGeneratorService).generateInstanceBetween(sl, DATE, to);
         }
     }
 }

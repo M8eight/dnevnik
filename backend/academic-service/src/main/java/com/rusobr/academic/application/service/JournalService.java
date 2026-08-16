@@ -3,8 +3,6 @@ package com.rusobr.academic.application.service;
 import com.rusobr.academic.application.mapper.AcademicPeriodMapper;
 import com.rusobr.academic.application.mapper.LessonInstanceMapper;
 import com.rusobr.academic.domain.model.AcademicPeriod;
-import com.rusobr.academic.domain.model.LessonInstance;
-import com.rusobr.academic.domain.model.ScheduleLesson;
 import com.rusobr.academic.infrastructure.client.UserClient;
 import com.rusobr.academic.infrastructure.persistence.repository.LessonInstanceRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.SchoolClassRepository;
@@ -27,9 +25,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.temporal.TemporalAdjusters;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -199,38 +195,6 @@ public class JournalService {
                 .stream().map(lessonInstanceMapper::toLessonInstanceDto).toList();
     }
 
-    public void generateInstanceForLesson(ScheduleLesson scheduleLesson) {
-        LocalDate from = scheduleLesson.getValidFrom();
-        LocalDate to = from.plusWeeks(2);
 
-        if (scheduleLesson.getValidTo() != null && scheduleLesson.getValidTo().isBefore(to)) {
-            to = scheduleLesson.getValidTo();
-        }
-
-        generateInstanceBetween(scheduleLesson, from, to);
-        log.info("Generate lesson instance for schedule: id={}, from={}, to={}", scheduleLesson.getId(), from, to);
-    }
-
-    public void generateInstanceBetween(ScheduleLesson scheduleLesson, LocalDate from, LocalDate to) {
-        DayOfWeek dayOfWeek = scheduleLesson.getDayOfWeek();
-
-        // начинаем с первого подходящего дня недели в периоде
-        LocalDate current = from.with(TemporalAdjusters.nextOrSame(
-                DayOfWeek.valueOf(dayOfWeek.name())
-        ));
-
-        while (!current.isAfter(to)) {
-            if (!lessonInstanceRepository.existsByScheduleLessonAndLessonDate(scheduleLesson, current)) {
-                LessonInstance li = LessonInstance.builder()
-                        .scheduleLesson(scheduleLesson)
-                        .lessonDate(current)
-                        .build();
-
-                lessonInstanceRepository.save(li);
-            }
-            current = current.plusWeeks(1);
-        }
-        log.info("Generate lesson instance for schedule between: id={}, from={}, to={}", scheduleLesson.getId(), from, to);
-    }
 
 }

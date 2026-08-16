@@ -35,4 +35,15 @@ public interface AcademicPeriodRepository extends JpaRepository<AcademicPeriod,L
 
     Boolean existsByName(String name);
 
+    AcademicPeriod findByEndDateBetween(LocalDate start, LocalDate end);
+
+    @Query("""
+        select ap
+        from AcademicPeriod ap
+        where ap.startDate > :date
+        order by ap.startDate asc
+            limit 1
+    """)
+    Optional<AcademicPeriod> findFirstByStartDateAfter(LocalDate date);
+
 }
