@@ -20,6 +20,8 @@ import com.rusobr.user.web.exception.UserExceptionCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
@@ -43,6 +45,7 @@ public class TeacherService {
     @Autowired
     private TeacherService self;
 
+    @Cacheable(value = "teacherWithUser", key = "#id")
     @Transactional(readOnly = true)
     public TeacherResponse getWithUserById(Long id) {
         Teacher teacher = teacherRepository.findWithUserById(id)
@@ -97,12 +100,14 @@ public class TeacherService {
         return teacherRepository.findByIdWithDeleted(id);
     }
 
+    @CacheEvict(value = {"teacherWithUser", "studentInfo"}, allEntries = true)
     @Transactional
     public void create(Long userId, TeacherDetails teacherDetails) {
         User user = userRepository.findById(userId).orElseThrow(() -> notFoundUser(userId));
         teacherRepository.save(teacherMapper.toEntity(user, teacherDetails));
     }
 
+    @CacheEvict(value = {"teacherWithUser", "studentInfo"}, allEntries = true)
     @Transactional
     public void update(Long userId, TeacherDetails teacherDetails) {
         if (!userRepository.existsById(userId)) {
@@ -119,6 +124,7 @@ public class TeacherService {
         }
     }
 
+    @CacheEvict(value = {"teacherWithUser", "studentInfo"}, allEntries = true)
     public void delete(Long id) {
         if (!teacherRepository.existsById(id)) {
             throw notFoundTeacher(id);

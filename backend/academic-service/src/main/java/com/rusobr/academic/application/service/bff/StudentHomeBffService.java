@@ -22,7 +22,7 @@ import java.util.concurrent.Executor;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class StudentBffService {
+public class StudentHomeBffService {
 
     private final HomeworkService homeworkService;
     private final ScheduleService scheduleService;
@@ -74,7 +74,7 @@ public class StudentBffService {
     }
 
     private String getErrorMessage(String text, Long userId) {
-        return "StudentBff Error: Failed to fetch %s for user %s".formatted(text, userId);
+        return "StudentHomeBff Error: Failed to fetch %s for user %s".formatted(text, userId);
     }
 
 }

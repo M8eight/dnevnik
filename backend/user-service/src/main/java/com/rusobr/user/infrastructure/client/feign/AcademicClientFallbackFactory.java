@@ -6,6 +6,7 @@ import com.rusobr.common.exception.UnauthorizedException;
 import com.rusobr.common.util.ExceptionUtils;
 import com.rusobr.user.web.dto.feign.SchoolClassResponse;
 import com.rusobr.user.web.dto.feign.TeacherAcademicFeignDto;
+import com.rusobr.user.web.dto.student.StudentInfoDto;
 import com.rusobr.user.web.exception.*;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +42,17 @@ public class AcademicClientFallbackFactory implements FallbackFactory<AcademicCl
                         UserExceptionCode.ACADEMIC_SERVICE_TEACHER_INFO_NOT_FOUND
                 );
                 throw fallbackFailure("getTeacherAcademicInfo", teacherId, rootCause);
+            }
+
+            @Override
+            public StudentInfoDto getAcademicStudentInfo(Long userId) {
+                handleCommonErrors(
+                        rootCause,
+                        "getAcademicStudentInfo",
+                        "Student info with id: %s not found".formatted(userId),
+                        UserExceptionCode.ACADEMIC_SERVICE_STUDENT_INFO_NOT_FOUND
+                );
+                throw fallbackFailure("getAcademicStudentInfo", userId, rootCause);
             }
         };
     }

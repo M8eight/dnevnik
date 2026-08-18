@@ -9,7 +9,9 @@ import com.rusobr.user.domain.model.Parent;
 import com.rusobr.user.domain.model.Student;
 import com.rusobr.user.domain.model.User;
 import com.rusobr.common.dto.BatchUserResponse;
+import com.rusobr.user.web.dto.student.StudentInfoDto;
 import com.rusobr.user.web.dto.student.StudentInfoResponse;
+import com.rusobr.user.web.dto.user.UserResponse;
 import com.rusobr.user.web.exception.UserExceptionCode;
 import com.rusobr.user.infrastructure.client.feign.AcademicClient;
 import com.rusobr.user.application.mapper.StudentMapper;
@@ -25,6 +27,7 @@ import com.rusobr.user.web.dto.teacher.TeacherResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.EventListener;
@@ -98,12 +101,18 @@ public class StudentService {
                 .orElseThrow(() -> notFoundStudent(id));
     }
 
+    @Cacheable(value = "studentInfo", key = "#id")
     public StudentInfoResponse getStudentInfoById(Long id) {
         Student student = self.getStudentInfoTransactional(id);
-        SchoolClassResponse schoolClass = academicClient.getSchoolClassByStudentId(student.getId());
-        TeacherResponse teacher = teacherService.getWithUserById(schoolClass.classTeacherId());
+        StudentInfoDto studentInfo = academicClient.getAcademicStudentInfo(id);
+        TeacherResponse teacher = teacherService.getWithUserById(studentInfo.schoolClass().classTeacherId());
 
-        return studentMapper.toStudentInfoResponse(student, schoolClass, teacher);
+        UserResponse parent = null;
+        if (student.getParent() != null) {
+            parent = userMapper.toUserResponse(student.getParent().getUser());
+        }
+        return new StudentInfoResponse(student.getStudyProfile(), parent, studentInfo.schoolClass(), teacher,
+                studentInfo.periodAverage(), studentInfo.attendanceStudentStatus());
     }
 
     @Transactional(readOnly = true)
@@ -116,12 +125,14 @@ public class StudentService {
         return studentRepository.findByIdWithDeleted(id);
     }
 
+    @CacheEvict(value = {"studentInfo", "studentHomeInfo"}, allEntries = true)
     @Transactional
     public void create(Long userId, StudentDetails studentDetails) {
         User user = userRepository.findById(userId).orElseThrow(() -> notFoundUser(userId));
         studentRepository.save(studentMapper.toEntity(user, studentDetails));
     }
 
+    @CacheEvict(value = {"studentInfo", "studentHomeInfo"}, allEntries = true)
     @Transactional
     public void update(Long userId, StudentDetails studentDetails) {
         if (!userRepository.existsById(userId)) {
@@ -135,6 +146,7 @@ public class StudentService {
         }
     }
 
+    @CacheEvict(value = {"studentInfo", "studentHomeInfo"}, allEntries = true)
     @Transactional
     public void assignToParent(Long studentId, Long parentId) {
         Parent parent = parentRepository.findById(parentId)
@@ -150,6 +162,7 @@ public class StudentService {
         studentRepository.save(student);
     }
 
+    @CacheEvict(value = {"studentInfo", "studentHomeInfo"}, allEntries = true)
     @Transactional
     public void unassignFromParent(Long studentId) {
         Student student = studentRepository.findById(studentId)
@@ -163,6 +176,7 @@ public class StudentService {
         studentRepository.save(student);
     }
 
+    @CacheEvict(value = {"studentInfo", "studentHomeInfo"}, allEntries = true)
     public void delete(Long studentId) {
         if (!studentRepository.existsById(studentId)) {
             throw notFoundStudent(studentId);

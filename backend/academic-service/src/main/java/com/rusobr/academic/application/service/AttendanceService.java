@@ -1,20 +1,29 @@
 package com.rusobr.academic.application.service;
 
 import com.rusobr.academic.application.mapper.AttendanceMapper;
+import com.rusobr.academic.domain.enums.AttendanceStatus;
 import com.rusobr.academic.domain.model.AcademicPeriod;
 import com.rusobr.academic.domain.model.Attendance;
 import com.rusobr.academic.domain.model.LessonInstance;
 import com.rusobr.academic.infrastructure.persistence.repository.AttendanceRepository;
+import com.rusobr.academic.infrastructure.persistence.repository.LessonInstanceRepository;
 import com.rusobr.academic.web.dto.attendances.AttendanceRequest;
 import com.rusobr.academic.web.dto.attendances.AttendanceResponse;
+import com.rusobr.academic.web.dto.bff.student.AttendanceStudentStatus;
 import com.rusobr.academic.web.exception.AcademicExceptionCode;
 import com.rusobr.common.exception.ConflictException;
 import com.rusobr.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -25,8 +34,30 @@ public class AttendanceService {
     private final AttendanceMapper attendanceMapper;
     private final LessonInstanceService lessonInstanceService;
     private final AcademicPeriodService academicPeriodService;
+    private final LessonInstanceRepository lessonInstanceRepository;
 
-    @CacheEvict(value = {"journalByAssignment", "journalByStudentId", "schedulesByStudentId"}, allEntries = true)
+    @Cacheable(value = "attendanceStudentStatus", key = "#studentId + '#' + #date")
+    public AttendanceStudentStatus presencePercent(Long studentId, LocalDate date) {
+        AcademicPeriod academicPeriod = academicPeriodService.getByDate(date);
+        LocalDate startDate = academicPeriod.getStartDate();
+        LocalDate endDate = academicPeriod.getEndDate();
+        List<Attendance> attendances = attendanceRepository.getAllAttendanceByStudentAndPeriod(studentId, startDate, endDate);
+
+        int attendancesCount = attendances.size();
+        int lessonsCount = lessonInstanceRepository.countLessonsByPeriod(studentId, startDate, endDate);
+
+        int lateCount = (int) attendances.stream().filter(a -> a.getStatus() == AttendanceStatus.LATE).count();
+        int absenceCount = (int) attendances.stream().filter(a -> a.getStatus() != AttendanceStatus.LATE).count();
+
+        double presencePercent = BigDecimal.valueOf(
+                (double) (lessonsCount - attendancesCount) / lessonsCount * 100)
+                .setScale(1, RoundingMode.HALF_UP)
+                .doubleValue();
+
+        return new AttendanceStudentStatus(presencePercent, lateCount, absenceCount, lessonsCount);
+    }
+
+    @CacheEvict(value = {"journalByAssignment", "journalByStudentId", "schedulesByStudentId", "attendanceStudentStatus"}, allEntries = true)
     @Transactional
     public AttendanceResponse create(AttendanceRequest attendanceRequest) {
         LessonInstance lessonInstance = lessonInstanceService.getById(attendanceRequest.lessonInstanceId());
@@ -51,7 +82,7 @@ public class AttendanceService {
         return response;
     }
 
-    @CacheEvict(value = {"journalByAssignment", "journalByStudentId", "schedulesByStudentId"}, allEntries = true)
+    @CacheEvict(value = {"journalByAssignment", "journalByStudentId", "schedulesByStudentId", "attendanceStudentStatus"}, allEntries = true)
     @Transactional
     public void delete(Long id) {
 

@@ -8,6 +8,8 @@ public record StudentInfoResponse(
     String studyProfile,
     UserResponse parent,
     SchoolClassResponse schoolClass,
-    TeacherResponse classTeacher
+    TeacherResponse classTeacher,
+    Double periodAverage,
+    AttendanceStudentStatus attendanceStudentStatus
 ) {
 }
