@@ -22,6 +22,13 @@ export interface StudentFullDetailsResponse {
 }
 
 export interface StudentInfoResponse {
+    attendanceStudentStatus: {
+        absenceCount: number;        
+        lateCount: number;
+        lessonsCount: number;
+        presencePercent: number;
+    };
+    periodAverage: number;
     studyProfile?: string;
     parent?: UserResponse;
     schoolClass?: SchoolClassResponse;

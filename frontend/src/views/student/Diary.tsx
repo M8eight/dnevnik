@@ -6,7 +6,7 @@ import type { RootState } from "@/store";
 import { useDispatch, useSelector } from "react-redux";
 import { addDays } from "date-fns/addDays";
 import { format } from "date-fns/format";
-import { enUS, ru } from "date-fns/locale";
+import { ru } from "date-fns/locale";
 import { nextWeek, prevWeek } from "@/store/slices/scheduleSlice";
 import Chip from "@/components/student/chip";
 import { LESSON_TIMES, RUSSIAN_DAYS } from "@/constants/component-constants";
@@ -15,6 +15,7 @@ import { GradePopover } from "@/components/student/diary/grade-detail-popover";
 import StudentNavbar from "@/components/layout/navbars/StudentNavbar";
 import { capitalizeFirst, formatRuDate, toISODate } from "@/lib/date";
 import type { DiaryLessonDto } from "@/services/schedule-service";
+import { HomeworkPopover } from "@/components/student/diary/homework-detail-popover";
 
 const mapAttendanceStatus = (status?: string) => {
   if (status === "ABSENT") return "Н";
@@ -51,61 +52,63 @@ function DayCard({
       </div>
 
       <div className="divide-y divide-black/5">
-      {lessons.length === 0 ? (
-        <div className="py-6 flex flex-col items-center justify-center text-center">
-          <p className="text-[13px] font-medium text-black/25">Уроков нет</p>
-        </div>
-      ) : (
-        lessons?.map((lesson) => {
-          const grades = lesson.grades;
-          const homeworks = lesson.homeworks;
-          const attendance = lesson.attendance;
+        {lessons.length === 0 ? (
+          <div className="py-6 flex flex-col items-center justify-center text-center">
+            <p className="text-[13px] font-medium text-black/25">Уроков нет</p>
+          </div>
+        ) : (
+          lessons?.map((lesson) => {
+            const grades = lesson.grades;
+            const homeworks = lesson.homeworks;
+            const attendance = lesson.attendance;
 
-          return (
-            <div key={lesson.lessonInstanceId} className="py-3 first:pt-0 last:pb-0">
-              <div className="flex items-start gap-3">
+            return (
+              <div key={lesson.lessonInstanceId} className="py-3 first:pt-0 last:pb-0">
+                <div className="flex items-start gap-3">
 
-                <div className="flex flex-col justify-center items-end min-w-14 pt-1 shrink-0">
-                  <span className="text-[13px] font-extrabold text-black/30 leading-none tabular-nums">
-                    {LESSON_TIMES[lesson.lessonNumber]?.split("–")[0] ?? "—"}
-                  </span>
-                  <span className="text-[12px] font-medium text-black/15 leading-none tabular-nums">
-                    {LESSON_TIMES[lesson.lessonNumber]?.split("–")[1] ?? ""}
-                  </span>
-                </div>
+                  <div className="flex flex-col justify-center items-end min-w-14 pt-1 shrink-0">
+                    <span className="text-[13px] font-extrabold text-black/30 leading-none tabular-nums">
+                      {LESSON_TIMES[lesson.lessonNumber]?.split("–")[0] ?? "—"}
+                    </span>
+                    <span className="text-[12px] font-medium text-black/15 leading-none tabular-nums">
+                      {LESSON_TIMES[lesson.lessonNumber]?.split("–")[1] ?? ""}
+                    </span>
+                  </div>
 
-                <div className="w-0.5 self-stretch rounded-full bg-black/6 shrink-0" />
+                  <div className="w-0.5 self-stretch rounded-full bg-black/6 shrink-0" />
 
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between items-start gap-2">
-                    <div className="min-w-0">
-                      <p className="font-bold text-[13px] text-(--navy) leading-tight">
-                        {lesson.subject?.name ?? "—"}
-                      </p>
-                      <p className="text-[11px] text-black/20 mt-0.5">
-                        {lesson.classRoom}  
-                      </p>
-                      {homeworks.map(({id, text}) => (
-                        <p className="text-[12px] text-black/35 mt-1 italic leading-snug line-clamp-2" key={id}>
-                          {text}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-start gap-2">
+                      <div className="min-w-0">
+                        <p className="font-bold text-[13px] text-(--navy) leading-tight">
+                          {lesson.subject?.name ?? "—"}
                         </p>
-                      ))
-                      }
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <AttendanceBadge status={mapAttendanceStatus(attendance?.status)} />
-                      {grades.map(({id, value}) => (
-                        <GradePopover gradeId={id} value={value} key={id} />
-                      ))}
+                        <p className="text-[11px] text-black/20 mt-0.5">
+                          {lesson.classRoom}
+                        </p>
+                        {homeworks.map(({ id, text }) => (
+                          <HomeworkPopover
+                            key={id}
+                            text={text}
+                            subjectName={lesson.subject?.name ?? "—"}
+                            variant="compact"
+                          />
+                        ))}
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <AttendanceBadge status={mapAttendanceStatus(attendance?.status)} />
+                        {grades.map(({ id, value }) => (
+                          <GradePopover gradeId={id} value={value} key={id} />
+                        ))}
+                      </div>
                     </div>
                   </div>
-                </div>
 
+                </div>
               </div>
-            </div>
-          );
-        }) ?? []
-      )}
+            );
+          }) ?? []
+        )}
       </div>
     </div>
   );

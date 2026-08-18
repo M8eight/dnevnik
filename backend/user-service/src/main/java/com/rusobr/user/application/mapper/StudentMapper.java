@@ -29,8 +29,4 @@ public interface StudentMapper {
 
     StudentDetails toStudentDetails(Student student);
 
-    @Mapping(target = "parent", source = "student.parent.user")
-    StudentInfoResponse toStudentInfoResponse(Student student, SchoolClassResponse schoolClass,
-                                              TeacherResponse classTeacher);
-
 }

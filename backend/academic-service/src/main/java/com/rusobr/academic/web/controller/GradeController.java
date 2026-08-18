@@ -26,7 +26,7 @@ public class GradeController {
         return gradeService.getDetail(id);
     }
 
-    @PreAuthorize("@teacherSecurity.canCreateGrade(#createGradeRequest.studentId(), createGradeRequest.lessonInstanceId(), authentication)")
+    @PreAuthorize("@teacherSecurity.canCreateGrade(#createGradeRequest.studentId(), #createGradeRequest.lessonInstanceId(), authentication)")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public CreateGradeResponse create(@RequestBody @Valid CreateGradeRequest createGradeRequest) {

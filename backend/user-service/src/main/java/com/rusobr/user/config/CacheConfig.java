@@ -25,6 +25,18 @@ public class CacheConfig {
                         .maximumSize(500)
                         .build());
 
+        cacheManager.registerCustomCache("studentInfo",
+                Caffeine.newBuilder()
+                        .expireAfterWrite(Duration.ofMinutes(10))
+                        .maximumSize(500)
+                        .build());
+
+        cacheManager.registerCustomCache("teacherWithUser",
+                Caffeine.newBuilder()
+                        .expireAfterWrite(Duration.ofMinutes(10))
+                        .maximumSize(500)
+                        .build());
+
         return cacheManager;
     }
 

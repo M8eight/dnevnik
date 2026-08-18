@@ -4,7 +4,7 @@ import { useStudentInfo } from "@/hooks/use-student";
 import { useTeacherInfo } from "@/hooks/use-teacher";
 import { useUserById } from "@/hooks/use-user";
 import type { SchoolClassResponse } from "@/services/school-class-service";
-import { User, GraduationCap, BookOpen, Users, Phone, Mail, ChevronLeft } from "lucide-react";
+import { User, GraduationCap, BookOpen, Users, Phone, Mail, ChevronLeft, CalendarCheck, Star } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 
 
@@ -115,7 +115,7 @@ function StudentView({ userId }: { userId: number }) {
                 </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
                 {classTeacher && (
                     <PersonCard
                         firstName={classTeacher.user.firstName}
@@ -138,6 +138,11 @@ function StudentView({ userId }: { userId: number }) {
                         icon={Users}
                     />
                 )}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <GradeAverageBlock userId={userId} />
+                <AttendanceBlock userId={userId} />
             </div>
 
             {schoolClass && (
@@ -313,9 +318,10 @@ function RightColumnSkeleton() {
     return (
         <>
             <Skeleton className="h-20 w-full rounded-[24px]" />
+            <Skeleton className="h-52 rounded-[28px]" />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Skeleton className="h-52 rounded-[28px]" />
-                <Skeleton className="h-52 rounded-[28px]" />
+                <Skeleton className="h-40 rounded-[28px]" />
+                <Skeleton className="h-40 rounded-[28px]" />
             </div>
         </>
     );
@@ -327,6 +333,71 @@ function StudentClassBlock({ userId }: { userId: number }) {
     return (
         <SectionCard>
             <ClassBlock schoolClass={data.schoolClass} />
+        </SectionCard>
+    );
+}
+
+function GradeAverageBlock({ userId }: { userId: number }) {
+    const { data, isLoading } = useStudentInfo(userId);
+
+    if (isLoading) return <Skeleton className="h-40 rounded-[28px]" />;
+    if (!data) return null;
+
+    const { periodAverage } = data;
+
+    return (
+        <SectionCard>
+            <SectionTitle icon={Star}>Успеваемость</SectionTitle>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-black/35 mb-2">
+                Средний балл (четверть)
+            </p>
+            <div className="flex items-baseline gap-1.5">
+                <span className="font-serif font-black text-4xl text-(--navy) tracking-tight">
+                    {periodAverage != null ? periodAverage.toFixed(1) : "—"}
+                </span>
+                <span className="text-sm font-semibold text-black/35">/ 5.0</span>
+            </div>
+        </SectionCard>
+    );
+}
+
+function AttendanceBlock({ userId }: { userId: number }) {
+    const { data, isLoading } = useStudentInfo(userId);
+
+    if (isLoading) return <Skeleton className="h-40 rounded-[28px]" />;
+    if (!data) return null;
+
+    const { presencePercent, absenceCount, lateCount, lessonsCount } = data.attendanceStudentStatus;
+
+    return (
+        <SectionCard>
+            <SectionTitle icon={CalendarCheck}>Посещаемость</SectionTitle>
+            <div className="flex items-baseline gap-1.5 mb-4">
+                <span className="font-serif font-black text-4xl text-(--navy) tracking-tight">
+                    {presencePercent}%
+                </span>
+                <span className="text-sm font-semibold text-black/35">присутствия</span>
+            </div>
+            <div className="grid grid-cols-3 gap-2.5">
+                <div className="rounded-[16px] bg-(--red-light)/40 p-3 text-center">
+                    <span className="block font-serif font-black text-xl text-(--red)">{absenceCount}</span>
+                    <span className="block text-[10px] font-bold uppercase tracking-wider text-(--red)/70 mt-0.5">
+                        Пропуски
+                    </span>
+                </div>
+                <div className="rounded-[16px] bg-black/4 p-3 text-center">
+                    <span className="block font-serif font-black text-xl text-(--navy)">{lateCount}</span>
+                    <span className="block text-[10px] font-bold uppercase tracking-wider text-black/40 mt-0.5">
+                        Опоздания
+                    </span>
+                </div>
+                <div className="rounded-[16px] bg-black/4 p-3 text-center">
+                    <span className="block font-serif font-black text-xl text-(--navy)">{lessonsCount}</span>
+                    <span className="block text-[10px] font-bold uppercase tracking-wider text-black/40 mt-0.5">
+                        занятий
+                    </span>
+                </div>
+            </div>
         </SectionCard>
     );
 }
@@ -405,7 +476,11 @@ export default function ProfilePage() {
                             </div>
                         </div>
 
-                        {role === "STUDENT" && <StudentClassBlock userId={pathId} />}
+                        {role === "STUDENT" && (
+                            <>
+                                <StudentClassBlock userId={pathId} />
+                            </>
+                        )}
                     </div>
                 )}
 

@@ -39,6 +39,18 @@ public class CacheConfig {
                         .maximumSize(500)
                         .build());
 
+        cacheManager.registerCustomCache("attendanceStudentStatus",
+                Caffeine.newBuilder()
+                        .expireAfterWrite(Duration.ofMinutes(10))
+                        .maximumSize(500)
+                        .build());
+
+        cacheManager.registerCustomCache("schoolClassByStudent",
+                Caffeine.newBuilder()
+                        .expireAfterWrite(Duration.ofMinutes(10))
+                        .maximumSize(500)
+                        .build());
+
         return cacheManager;
     }
 
