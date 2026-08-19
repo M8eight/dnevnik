@@ -132,6 +132,10 @@ export const closeSchedule = async (scheduleId: number, closeDate: string): Prom
     await api.patch(`/academic-service/api/v1/schedules/${scheduleId}/close?closeDate=${closeDate}`);
 }
 
+export const deleteSchedule = async (scheduleId: number): Promise<void> => {
+    await api.delete(`/academic-service/api/v1/schedules/${scheduleId}`);
+}
+
 export const loadLessonInsance = async (classId: number, fromDate: string, toDate: string): Promise<void> => {
     await api.patch(`/academic-service/api/v1/schedules/load?classId=${classId}&fromDate=${fromDate}&toDate=${toDate}`);
 }

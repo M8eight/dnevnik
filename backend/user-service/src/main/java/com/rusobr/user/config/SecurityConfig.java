@@ -2,6 +2,7 @@ package com.rusobr.user.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -20,6 +21,16 @@ import static org.springframework.http.HttpMethod.*;
 public class SecurityConfig {
 
     @Bean
+    @Profile("dev")
+    public SecurityFilterChain devSecurityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(req -> req.anyRequest().permitAll());
+        return http.build();
+    }
+
+    @Bean
+    @Profile("!dev")
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .sessionManagement(session -> {
@@ -53,7 +64,7 @@ public class SecurityConfig {
                             .requestMatchers(DELETE, "/api/v1/users/*").hasRole(ADMIN.name())
                             .requestMatchers(POST, "/api/v1/students/exclude-assigned").hasRole(ADMIN.name())
 
-                            .anyRequest().denyAll();
+                            .anyRequest().permitAll();
                 })
                 .oauth2ResourceServer(oauth2 -> {
                     oauth2.jwt(jwt-> {

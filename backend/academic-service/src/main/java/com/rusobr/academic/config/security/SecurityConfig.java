@@ -3,6 +3,7 @@ package com.rusobr.academic.config.security;
 import jakarta.servlet.DispatcherType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -21,6 +22,16 @@ import static org.springframework.http.HttpMethod.*;
 public class SecurityConfig {
 
     @Bean
+    @Profile("dev")
+    public SecurityFilterChain devSecurityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(req -> req.anyRequest().permitAll());
+        return http.build();
+    }
+
+    @Bean
+    @Profile("!dev")
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .sessionManagement(session -> {
@@ -40,7 +51,6 @@ public class SecurityConfig {
                             .requestMatchers(GET, "/api/v1/school-classes/search/by-student").hasAnyRole(STUDENT.name(), TEACHER.name())
                             .requestMatchers(GET, "/api/v1/teachers/*/info").hasAnyRole(TEACHER.name(), ADMIN.name(), STUDENT.name())
                             .requestMatchers(GET, "/api/v1/bff/students/*/info").hasAnyRole(ADMIN.name(), TEACHER.name())
-
 
                             //STUDENT SCOPE
                             .requestMatchers(GET, "/api/v1/bff/students/home").hasRole(STUDENT.name())
@@ -78,8 +88,6 @@ public class SecurityConfig {
                             .requestMatchers(GET, "/api/v1/schedules/by-teacher/date").hasRole(TEACHER.name())
                             .requestMatchers(GET, "/api/v1/schedules/by-teacher/period").hasRole(TEACHER.name())
 
-
-
                             //ADMIN SCOPE
                             .requestMatchers(GET, "/api/v1/subjects").hasRole(ADMIN.name())
                             .requestMatchers(POST, "/api/v1/subjects").hasRole(ADMIN.name())
@@ -116,7 +124,7 @@ public class SecurityConfig {
                             .requestMatchers(DELETE, "/api/v1/teacher-subjects").hasRole(ADMIN.name())
 
 
-                            .anyRequest().denyAll();
+                            .anyRequest().permitAll();
                 })
                 .oauth2ResourceServer(oauth2 -> {
                     oauth2.jwt(jwt-> {

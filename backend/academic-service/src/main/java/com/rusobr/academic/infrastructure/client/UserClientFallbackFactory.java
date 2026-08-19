@@ -50,7 +50,7 @@ public class UserClientFallbackFactory implements FallbackFactory<UserClient> {
             }
 
             @Override
-            public void existStudentById(Long id) {
+            public boolean existStudentById(Long id) {
                 handleCommonErrors(rootCause, "existStudentById id=" + id,
                         "Not found student with id: %d".formatted(id),
                         AcademicExceptionCode.USER_SERVICE_STUDENT_NOT_FOUND);

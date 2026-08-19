@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 public record TeachingAssignmentRequest(
         @NotNull Long classId,
         @NotNull Long subjectId,
-        @NotNull Long teacherId
+        @NotNull Long teacherId,
+        Long classGroupId
 ) {
 }

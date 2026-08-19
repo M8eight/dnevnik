@@ -86,6 +86,11 @@ public class StudentService {
         return studentMapper.toStudentDetails(student);
     }
 
+    @Transactional(readOnly = true)
+    public boolean existsById(Long id) {
+        return studentRepository.existsById(id);
+    }
+
     @Cacheable(value = "studentHomeInfo", key = "#id")
     public StudentWithClassResponse getWithClassById(Long id) {
         Student student = self.getStudentTransactional(id);

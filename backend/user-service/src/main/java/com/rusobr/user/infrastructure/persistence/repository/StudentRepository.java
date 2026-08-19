@@ -2,6 +2,7 @@ package com.rusobr.user.infrastructure.persistence.repository;
 
 import com.rusobr.user.domain.model.Student;
 import com.rusobr.user.infrastructure.persistence.repository.projection.UserProjection;
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -66,5 +67,6 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
         where s.id = :id
     """)
     Optional<Student> findStudentInfoById(@Param("id") Long id);
+
 
 }

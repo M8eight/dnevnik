@@ -34,7 +34,9 @@ public class ClassStudentService {
     }
 
     public void addStudent(Long classId, Long studentId) {
-        userClient.existStudentById(studentId);
+        if (!userClient.existStudentById(studentId)) {
+            throw new NotFoundException("Student with id " + studentId + " not found", AcademicExceptionCode.USER_SERVICE_STUDENT_NOT_FOUND);
+        }
         writeTransactionTemplate.execute(status -> {
             if (!schoolClassRepository.existsById(classId)) {
                 throw new NotFoundException("SchoolClass with id " + classId + " not found", AcademicExceptionCode.SCHOOL_CLASS_NOT_FOUND);

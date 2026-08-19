@@ -3,6 +3,7 @@ package com.rusobr.gateway.infrastructure.security;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
@@ -15,6 +16,7 @@ import java.util.List;
 
 @EnableWebFluxSecurity
 @Configuration
+@Profile("!dev")
 public class SecurityConfig {
 
     @Value("${frontend.url}")
@@ -31,7 +33,7 @@ public class SecurityConfig {
                         .pathMatchers("/user-service/v3/api-docs/**", "/swagger-ui/**").permitAll()
                         .pathMatchers("/academic-service/v3/api-docs/**", "/swagger-ui/**").permitAll()
                         .pathMatchers("/actuator/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .anyExchange().authenticated())
+                        .anyExchange().permitAll())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> {}))
                 .build();
     }

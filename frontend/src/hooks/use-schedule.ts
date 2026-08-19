@@ -1,4 +1,4 @@
-import { closeSchedule, createSchedule, getDiaryScheduleByStudentId, getScheduleByClassId, getTeacherScheduleDate, getTeacherSchedulePeriod, loadLessonInsance, type DiaryWeekResponse, type ScheduleClassResponse, type ScheduleRequest, type TeacherScheduleItem, type TeacherScheduleItemPeriod } from "@/services/schedule-service"
+import { closeSchedule, createSchedule, deleteSchedule, getDiaryScheduleByStudentId, getScheduleByClassId, getTeacherScheduleDate, getTeacherSchedulePeriod, loadLessonInsance, type DiaryWeekResponse, type ScheduleClassResponse, type ScheduleRequest, type TeacherScheduleItem, type TeacherScheduleItemPeriod } from "@/services/schedule-service"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 export const useDiaryScheduleByStudentId = (startDate: string, endDate: string) => {
@@ -38,6 +38,17 @@ export const useCreateSchedule = () => {
 
     return useMutation({
         mutationFn: (request: ScheduleRequest) => createSchedule(request),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['schedule'] });
+        }
+    })
+}
+
+export const useDeleteSchedule = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (scheduleId: number) => deleteSchedule(scheduleId),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['schedule'] });
         }

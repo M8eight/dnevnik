@@ -45,7 +45,6 @@ public class ScheduleService {
     private final TeachingAssignmentService teachingAssignmentService;
     private final LessonInstanceRepository lessonInstanceRepository;
     private final ScheduleGeneratorService scheduleGeneratorService;
-    private final JournalService journalService;
     private final AttendanceMapper attendanceMapper;
     private final HomeworkMapper homeworkMapper;
     private final GradeMapper gradeMapper;
@@ -172,7 +171,9 @@ public class ScheduleService {
     }
 
     public Map<DayOfWeek, List<ScheduleLessonDto>> getByClass(Long classId, LocalDate date) {
-        List<ScheduleLesson> scheduleLessons = scheduleLessonRepository.findClassSchedule(classId, date);
+        LocalDate monday = date.with(DayOfWeek.MONDAY);
+        LocalDate sunday = date.with(DayOfWeek.SUNDAY);
+        List<ScheduleLesson> scheduleLessons = scheduleLessonRepository.findClassSchedule(classId, monday, sunday);
 
         List<Long> teacherIds = scheduleLessons.stream().map(scheduleLesson ->
                 scheduleLesson.getTeachingAssignment().getTeacherId()).distinct().toList();
@@ -206,38 +207,59 @@ public class ScheduleService {
     }
 
     @Transactional
-    public void createTransactional(ScheduleLessonRequest scheduleLessonRequest) {
-        // С запроса не приходит teaching_assignments, а приходит связка teacher_subjects и отдельно classId
+    public void createTransactional(ScheduleLessonRequest slReq) {
         TeachingAssignment teachingAssignment = teachingAssignmentService.createOrGet(new TeachingAssignmentRequest(
-                scheduleLessonRequest.classId(),
-                scheduleLessonRequest.subjectId(),
-                scheduleLessonRequest.teacherId()));
+                slReq.classId(),
+                slReq.subjectId(),
+                slReq.teacherId(),
+                slReq.classGroupId()));
 
         // Проверяем что у класса этот слот (день + номер урока) уже не занят
+        // Или если есть подгруппа проверяем не занята ли она
         if (scheduleLessonRepository.existsActiveByClassSlot(
-                scheduleLessonRequest.classId(),
-                scheduleLessonRequest.dayOfWeek(),
-                scheduleLessonRequest.lessonNumber(),
-                scheduleLessonRequest.validFrom()
+                slReq.classId(),
+                slReq.dayOfWeek(),
+                slReq.lessonNumber(),
+                slReq.validFrom(),
+                slReq.classGroupId()
         )) {
             throw new ConflictException("Slot is already taken for this class", AcademicExceptionCode.SCHEDULE_SLOT_ALREADY_TAKEN);
         }
 
         // Проверяем что учитель не ведёт другой урок в этот же слот
         if (scheduleLessonRepository.existsByTeacherSlot(
-                scheduleLessonRequest.teacherId(),
-                scheduleLessonRequest.dayOfWeek(),
-                scheduleLessonRequest.lessonNumber(),
-                scheduleLessonRequest.validFrom()
+                slReq.teacherId(),
+                slReq.dayOfWeek(),
+                slReq.lessonNumber(),
+                slReq.validFrom()
         )) {
             throw new ConflictException("Schedule lesson already exists", AcademicExceptionCode.SCHEDULE_ALREADY_EXIST);
         }
 
-        ScheduleLesson scheduleLesson = scheduleLessonMapper.toEntity(scheduleLessonRequest, teachingAssignment);
+        ScheduleLesson scheduleLesson = scheduleLessonMapper.toEntity(slReq, teachingAssignment);
         scheduleLessonRepository.save(scheduleLesson);
 
         // Создаем lessonInstance наперед
         scheduleGeneratorService.generateInstanceForLesson(scheduleLesson);
+    }
+
+    @CacheEvict(value = "schedulesByStudentId", allEntries = true)
+    @Transactional
+    public void delete(Long scheduleId) {
+        if (!scheduleLessonRepository.existsById(scheduleId)) {
+            throw new NotFoundException("Schedule with id: %d not found".formatted(scheduleId),
+                    AcademicExceptionCode.SCHEDULE_NOT_FOUND);
+        }
+
+        if (lessonInstanceRepository.existsAnyDataForSchedule(scheduleId)) {
+            throw new ConflictException("Cannot delete schedule with id %s: there are already recorded data"
+                    .formatted(scheduleId),
+                    AcademicExceptionCode.SCHEDULE_HAS_DATA);
+        }
+
+        lessonInstanceRepository.deleteLessonInstancesByScheduleLessonId(scheduleId);
+        scheduleLessonRepository.deleteById(scheduleId);
+        log.info("Schedule deleted: id={}", scheduleId);
     }
 
     @CacheEvict(value = "schedulesByStudentId", allEntries = true)
@@ -250,6 +272,12 @@ public class ScheduleService {
         if (scheduleLesson.getValidTo() != null && !scheduleLesson.getValidTo().isAfter(LocalDate.now())) {
             throw new ConflictException("Schedule with id: %d is already closed".formatted(scheduleId),
                     AcademicExceptionCode.SCHEDULE_ALREADY_CLOSED);
+        }
+
+        if (lessonInstanceRepository.existsDataAfterDate(scheduleId, closeDate)) {
+            throw new ConflictException("Cannot close schedule on %s: there are already recorded grades/attendance after this date"
+                    .formatted(closeDate),
+                    AcademicExceptionCode.SCHEDULE_HAS_DATA_AFTER_CLOSE_DATE);
         }
 
         scheduleLesson.setValidTo(closeDate);

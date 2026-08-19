@@ -31,7 +31,22 @@ public interface TeachingAssignmentRepository  extends JpaRepository<TeachingAss
 """)
     List<TeachingAssignmentDetailsProjection> findTeachingAssignmentDetailByTeacherId(@Param("teacherId") Long teacherId);
 
-    Optional<TeachingAssignment> findBySubjectIdAndSchoolClassIdAndTeacherId(Long subjectId, Long schoolClassId, Long teacherId);
+    @Query("""
+        select ta
+        from TeachingAssignment ta
+        where ta.subject.id = :subjectId
+            and ta.schoolClass.id = :schoolClassId
+            and ta.teacherId = :teacherId
+            and (
+                (:classGroupId is not null and ta.classGroup.id = :classGroupId)
+                    or
+                (:classGroupId is null and ta.classGroup is null)
+            )
+    """)
+    Optional<TeachingAssignment> findBySubjectIdAndSchoolClassIdAndTeacherIdAndClassGroupId(@Param("subjectId") Long subjectId,
+                                                                                            @Param("schoolClassId") Long schoolClassId,
+                                                                                            @Param("teacherId") Long teacherId,
+                                                                                            @Param("classGroupId") Long classGroupId);
 
     @Query("""
         select s.studentId
@@ -70,5 +85,7 @@ public interface TeachingAssignmentRepository  extends JpaRepository<TeachingAss
         and cs.studentId = :studentId
     """)
     boolean isOwnedByTeacherWithStudent(@Param("teacherId") Long teacherId, @Param("teachingAssignmentId") Long teachingAssignmentId, @Param("studentId") Long studentId);
+
+    boolean existsByClassGroupId(Long classGroupId);
 
 }

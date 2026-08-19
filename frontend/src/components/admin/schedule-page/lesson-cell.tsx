@@ -1,5 +1,5 @@
 import type { ScheduleLessonDto } from "@/services/schedule-service";
-import { MapPin, Trash2 } from "lucide-react";
+import { CalendarX2, MapPin, Trash2 } from "lucide-react";
 import { formatRuMonthDay } from "@/lib/date";
 
 interface LessonCellProps {
@@ -8,9 +8,11 @@ interface LessonCellProps {
     schedule: ScheduleLessonDto[];
     onAddClick: (day: string, slot: number) => void;
     onCloseClick: (lesson: ScheduleLessonDto) => void;
+    onDeleteClick: (lesson: ScheduleLessonDto) => void;
+    isDeleting?: boolean;
 }
 
-export default function LessonCell({ dayKey, slotNum, schedule, onAddClick, onCloseClick }: LessonCellProps) {
+export default function LessonCell({ dayKey, slotNum, schedule, onAddClick, onCloseClick, onDeleteClick, isDeleting }: LessonCellProps) {
     const activeLesson = schedule.find(
         (s) => s.dayOfWeek === dayKey && s.lessonNumber === slotNum
     );
@@ -42,16 +44,29 @@ export default function LessonCell({ dayKey, slotNum, schedule, onAddClick, onCl
                         <MapPin className="w-2.5 h-2.5 text-(--red)" />
                         {activeLesson.classRoom}
                     </span>
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onCloseClick(activeLesson);
-                        }}
-                        className="p-1 rounded-md hover:bg-red-100"
-                        title="Закрыть урок"
-                    >
-                        <Trash2 className="w-3.5 h-3.5 text-black/20 group-hover/cell:text-(--red) transition-colors" />
-                    </button>
+                    <div className="flex items-center gap-0.5">
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onDeleteClick(activeLesson);
+                            }}
+                            disabled={isDeleting}
+                            className="p-1 rounded-md hover:bg-red-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                            title="Удалить урок"
+                        >
+                            <Trash2 className="w-3.5 h-3.5 text-(--red) transition-colors" />
+                        </button>
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onCloseClick(activeLesson);
+                            }}
+                            className="p-1 rounded-md hover:bg-red-100"
+                            title="Закрыть урок"
+                        >
+                            <CalendarX2 className="w-3.5 h-3.5 text-(--red) group-hover/cell:text-(--red) transition-colors" />
+                        </button>
+                    </div>
                 </div>
             </div>
         );

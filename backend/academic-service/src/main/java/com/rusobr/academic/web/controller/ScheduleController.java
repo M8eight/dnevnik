@@ -57,6 +57,11 @@ public class ScheduleController {
         scheduleService.create(scheduleLessonRequest);
     }
 
+    @DeleteMapping("/schedules/{scheduleId}")
+    public void delete(@PathVariable Long scheduleId) {
+        scheduleService.delete(scheduleId);
+    }
+
     @PatchMapping("/schedules/{scheduleId}/close")
     public void close(@PathVariable Long scheduleId, @RequestParam @NotNull LocalDate closeDate) {
         scheduleService.close(scheduleId, closeDate);

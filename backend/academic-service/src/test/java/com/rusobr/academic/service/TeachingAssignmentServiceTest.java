@@ -48,7 +48,7 @@ class TeachingAssignmentServiceTest {
             TeachingAssignmentRequest request = new TeachingAssignmentRequest(CLASS_ID, SUBJECT_ID, TEACHER_ID);
             TeachingAssignment existing = TeachingAssignment.builder().id(100L).build();
 
-            when(teachingAssignmentRepository.findBySubjectIdAndSchoolClassIdAndTeacherId(SUBJECT_ID, CLASS_ID, TEACHER_ID))
+            when(teachingAssignmentRepository.findBySubjectIdAndSchoolClassIdAndTeacherIdAndClassGroupId(SUBJECT_ID, CLASS_ID, TEACHER_ID))
                     .thenReturn(Optional.of(existing));
 
             TeachingAssignment result = service.createOrGet(request);
@@ -64,7 +64,7 @@ class TeachingAssignmentServiceTest {
             SchoolClass schoolClass = new SchoolClass();
             Subject subject = new Subject();
 
-            when(teachingAssignmentRepository.findBySubjectIdAndSchoolClassIdAndTeacherId(SUBJECT_ID, CLASS_ID, TEACHER_ID))
+            when(teachingAssignmentRepository.findBySubjectIdAndSchoolClassIdAndTeacherIdAndClassGroupId(SUBJECT_ID, CLASS_ID, TEACHER_ID))
                     .thenReturn(Optional.empty());
             when(schoolClassRepository.getReferenceById(CLASS_ID)).thenReturn(schoolClass);
             when(subjectRepository.getReferenceById(SUBJECT_ID)).thenReturn(subject);
