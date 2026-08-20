@@ -10,7 +10,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Repository
 public interface ClassGroupRepository extends JpaRepository<ClassGroup,Long> {
@@ -38,10 +37,13 @@ public interface ClassGroupRepository extends JpaRepository<ClassGroup,Long> {
     """)
     Optional<ClassGroup> findWithDetails(@Param("id") Long id);
 
-    @EntityGraph(attributePaths = {"classGroupStudents", "schoolClass.students"})
-    Optional<ClassGroup> findWithClassGroupAndSchoolClassStudentsById(Long id);
+    @EntityGraph(attributePaths = {"classGroupStudents", "schoolClass.students", "schoolClass.academicYear", "schoolClass"})
+    Optional<ClassGroup> findWithSchoolClassAndAcademicYearAndClassStudentsStudentsById(Long id);
 
     @EntityGraph(attributePaths = {"schoolClass"})
     Optional<ClassGroup> findWithSchoolClassById(Long id);
+
+    @EntityGraph(attributePaths = {"schoolClass", "schoolClass.academicYear"})
+    Optional<ClassGroup> findWithSchoolClassAndAcademicYearById(Long classGroupId);
 
 }

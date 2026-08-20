@@ -15,14 +15,15 @@ import {
 } from "@/components/ui/select";
 import AdminNavbar from "@/components/layout/navbars/AdminNavbar";
 import { useGetTeacherSubjects } from "@/hooks/use-teacher-subject";
-import { useScheduleByClassId, useCreateSchedule, useCloseSchedule, useLoadLessonInstance, useDeleteSchedule } from "@/hooks/use-schedule";
+import { useScheduleByClassId, useCloseSchedule, useLoadLessonInstance, useDeleteSchedule } from "@/hooks/use-schedule";
 import type { ScheduleLessonDto } from "@/services/schedule-service";
 import { useGetAllClassesByAcademicYear } from "@/hooks/use-school-class";
 import { DAYS_MAP, LESSON_SLOTS } from "@/constants/component-constants";
 import LessonCell from "@/components/admin/schedule-page/lesson-cell";
 import ConfirmCloseModal from "@/components/admin/schedule-page/confirm-close-modal";
 import GenerateModal from "@/components/admin/schedule-page/generate-modal";
-import CreateScheduleModal, { type CreateScheduleFormData } from "@/components/admin/schedule-page/create-schedule-modal";
+import CreateScheduleModal from "@/components/admin/schedule-page/create-schedule-modal";
+import ScheduleDetailModal from "@/components/admin/schedule-page/schedule-detail-modal";
 import { useAcademicYearSelection } from "@/hooks/use-academic-year-selection";
 import PageHeader from "@/components/admin/page-header";
 import AcademicYearSelect from "@/components/admin/academic-year-select";
@@ -55,12 +56,20 @@ export default function SchedulePage() {
 
     const flatSchedule = useMemo<ScheduleLessonDto[]>(() => {
         if (!scheduleRecord) return [];
-        return Object.values(scheduleRecord).flat();
+        return Object.values(scheduleRecord).flatMap((byLesson) => Object.values(byLesson).flat());
+    }, [scheduleRecord]);
+
+    const getSlotLessons = useMemo(() => {
+        return (dayKey: string, slotNum: number): ScheduleLessonDto[] => {
+            if (!scheduleRecord) return [];
+            const byLesson = scheduleRecord[dayKey];
+            if (!byLesson) return [];
+            return byLesson[slotNum] ?? [];
+        };
     }, [scheduleRecord]);
 
     const { data: teacherSubjects = [], isLoading: isTeachersLoading } = useGetTeacherSubjects();
 
-    const { mutate: createSchedule, isPending: isCreating } = useCreateSchedule();
     const { mutate: closeSchedule, isPending: isClosing } = useCloseSchedule();
     const { mutate: deleteSchedule, isPending: isDeleting } = useDeleteSchedule();
     const { mutate: loadInstances, isPending: isGenerating } = useLoadLessonInstance();
@@ -71,6 +80,7 @@ export default function SchedulePage() {
 
     const [lessonToClose, setLessonToClose] = useState<ScheduleLessonDto | null>(null);
     const [closeDate, setCloseDate] = useState<string>(todayStr);
+    const [selectedLessonId, setSelectedLessonId] = useState<number | null>(null);
 
     const isLoading = isScheduleLoading || isTeachersLoading || isClassesLoading;
 
@@ -92,6 +102,10 @@ export default function SchedulePage() {
         setIsModalOpen(true);
     };
 
+    const handleLessonClick = (lesson: ScheduleLessonDto) => {
+        setSelectedLessonId(lesson.id);
+    };
+
     const handleCloseClick = (lesson: ScheduleLessonDto) => {
         setLessonToClose(lesson);
         setCloseDate(todayStr);
@@ -103,43 +117,6 @@ export default function SchedulePage() {
             onSuccess: () => {
                 setLessonToClose(null);
                 refetchSchedule();
-            },
-        });
-    };
-
-    const handleSaveSchedule = (formData: CreateScheduleFormData) => {
-        if (!targetSlot || !activeClassId) return;
-
-        const payload1 = {
-            classId: Number(activeClassId),
-            teacherId: Number(formData.teacherId),
-            subjectId: Number(formData.subjectId),
-            dayOfWeek: targetSlot.dayOfWeek,
-            lessonNumber: targetSlot.lessonNumber,
-            classRoom: formData.room,
-            validFrom: selectedMondayDate,
-            ...(formData.groupId ? { groupId: formData.groupId } : {}),
-        };
-
-        createSchedule(payload1, {
-            onSuccess: () => {
-                if (formData.isSplit && formData.teacherId2 && formData.subjectId2) {
-                    const payload2 = {
-                        classId: Number(activeClassId),
-                        teacherId: Number(formData.teacherId2),
-                        subjectId: Number(formData.subjectId2),
-                        dayOfWeek: targetSlot.dayOfWeek,
-                        lessonNumber: targetSlot.lessonNumber,
-                        classRoom: formData.room2 || "Не указ.",
-                        validFrom: selectedMondayDate,
-                        ...(formData.groupId2 ? { groupId: formData.groupId2 } : {}),
-                    };
-                    createSchedule(payload2, {
-                        onSuccess: () => refetchSchedule(),
-                    });
-                } else {
-                    refetchSchedule();
-                }
             },
         });
     };
@@ -256,10 +233,11 @@ export default function SchedulePage() {
                                         {DAYS_MAP.map((day) => (
                                             <div key={day.key} className="min-h-20">
                                                 <LessonCell
+                                                    lessons={getSlotLessons(day.key, slot.num)}
+                                                    onAddClick={handleAddClick}
+                                                    onLessonClick={handleLessonClick}
                                                     dayKey={day.key}
                                                     slotNum={slot.num}
-                                                    schedule={flatSchedule}
-                                                    onAddClick={handleAddClick}
                                                     onCloseClick={handleCloseClick}
                                                     onDeleteClick={handleDeleteClick}
                                                     isDeleting={isDeleting}
@@ -280,9 +258,8 @@ export default function SchedulePage() {
                 isOpen={isModalOpen}
                 targetSlot={targetSlot}
                 teacherSubjects={teacherSubjects}
-                isCreating={isCreating}
+                validFrom={selectedMondayDate}
                 onClose={() => setIsModalOpen(false)}
-                onSubmit={handleSaveSchedule}
             />
 
             {/* Модалка генерации / загрузки */}
@@ -305,6 +282,12 @@ export default function SchedulePage() {
                     onCancel={() => setLessonToClose(null)}
                 />
             )}
+
+            {/* Модалка детализации урока */}
+            <ScheduleDetailModal
+                scheduleId={selectedLessonId}
+                onClose={() => setSelectedLessonId(null)}
+            />
         </div>
     );
 }

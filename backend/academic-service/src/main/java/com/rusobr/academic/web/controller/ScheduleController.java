@@ -32,7 +32,7 @@ public class ScheduleController {
     }
 
     @GetMapping("/schedules/by-class")
-    public Map<DayOfWeek, List<ScheduleLessonDto>> getClassSchedule(@RequestParam Long classId,
+    public Map<DayOfWeek, Map<Integer, List<ScheduleLessonDto>>> getClassSchedule(@RequestParam Long classId,
                                                                     @RequestParam LocalDate date) {
         return scheduleService.getByClass(classId, date);
     }
@@ -50,6 +50,11 @@ public class ScheduleController {
                                                                               @RequestParam LocalDate endDate) {
         Long userId = jwt.getClaim("user_id");
         return scheduleService.getByTeacherIdPeriod(userId, startDate, endDate);
+    }
+
+    @GetMapping("/schedules/{id}/details")
+    public ScheduleLessonDetails getScheduleDetails(@PathVariable("id") Long id) {
+        return scheduleService.getDetails(id);
     }
 
     @PostMapping("/schedules")

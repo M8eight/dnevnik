@@ -170,14 +170,14 @@ public class ScheduleService {
                 );
     }
 
-    public Map<DayOfWeek, List<ScheduleLessonDto>> getByClass(Long classId, LocalDate date) {
+    @Cacheable(value = "schedulesByClass", key = "#classId + '#' + #date")
+    public Map<DayOfWeek, Map<Integer, List<ScheduleLessonDto>>> getByClass(Long classId, LocalDate date) {
         LocalDate monday = date.with(DayOfWeek.MONDAY);
         LocalDate sunday = date.with(DayOfWeek.SUNDAY);
         List<ScheduleLesson> scheduleLessons = scheduleLessonRepository.findClassSchedule(classId, monday, sunday);
 
         List<Long> teacherIds = scheduleLessons.stream().map(scheduleLesson ->
                 scheduleLesson.getTeachingAssignment().getTeacherId()).distinct().toList();
-
         Map<Long, UserFeignResponse> teachers = userClient.getBatchTeachers(teacherIds).found()
                 .stream().collect(Collectors.toMap(
                         UserFeignResponse::id,
@@ -185,21 +185,41 @@ public class ScheduleService {
                 ));
 
         return scheduleLessons.stream()
-                .map((scheduleLesson ->
+                .map((sl ->
                         scheduleLessonMapper.toDto(
-                                scheduleLesson,
-                                teachers.get(scheduleLesson.getTeachingAssignment().getTeacherId())
+                                sl,
+                                teachers.get(sl.getTeachingAssignment().getTeacherId())
                         )
                 )).collect(
                         Collectors.groupingBy(
                                 ScheduleLessonDto::dayOfWeek,
                                 () -> new EnumMap<>(DayOfWeek.class),
-                                Collectors.toList()
+                                Collectors.groupingBy(
+                                        ScheduleLessonDto::lessonNumber,
+                                        TreeMap::new,
+                                        Collectors.toList()
+                                )
                         )
                 );
     }
 
-    @CacheEvict(value = "schedulesByStudentId", allEntries = true)
+    public ScheduleLessonDetails getDetails(Long scheduleId) {
+        ScheduleLesson scheduleLesson = self.getDetailsTransactional(scheduleId);
+        UserFeignResponse teacher = userClient
+                .getTeacherSimpleById(scheduleLesson.getTeachingAssignment().getTeacherId());
+        return scheduleLessonMapper.toDetails(scheduleLesson, teacher);
+    }
+
+    @Transactional(readOnly = true)
+    public ScheduleLesson getDetailsTransactional(Long scheduleId) {
+        return scheduleLessonRepository.getDetails(scheduleId)
+                .orElseThrow(() ->
+                    new NotFoundException("Schedule with id: %d not found".formatted(scheduleId),
+                            AcademicExceptionCode.SCHEDULE_NOT_FOUND)
+                );
+    }
+
+    @CacheEvict(value = {"schedulesByStudentId", "schedulesByClass"}, allEntries = true)
     public void create(ScheduleLessonRequest scheduleLessonRequest) {
         userClient.getTeacherById(scheduleLessonRequest.teacherId());
         self.createTransactional(scheduleLessonRequest);
@@ -243,7 +263,7 @@ public class ScheduleService {
         scheduleGeneratorService.generateInstanceForLesson(scheduleLesson);
     }
 
-    @CacheEvict(value = "schedulesByStudentId", allEntries = true)
+    @CacheEvict(value = {"schedulesByStudentId", "schedulesByClass"}, allEntries = true)
     @Transactional
     public void delete(Long scheduleId) {
         if (!scheduleLessonRepository.existsById(scheduleId)) {

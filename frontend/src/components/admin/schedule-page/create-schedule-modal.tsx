@@ -1,4 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
+import { useForm, Controller, useWatch } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { GraduationCap, CheckCircle2, X, Send, Loader2, Split } from "lucide-react";
 import {
     Select,
@@ -9,20 +12,34 @@ import {
 } from "@/components/ui/select";
 import { DAYS_MAP } from "@/constants/component-constants";
 import { useAllClassGroupsBySchoolClass } from "@/hooks/use-class-group";
+import { useCreateSchedule } from "@/hooks/use-schedule";
+import type { ScheduleRequest } from "@/services/schedule-service";
 
-export interface CreateScheduleFormData {
-    isSplit: boolean;
-    // Данные для обычного урока или Группы 1
-    teacherId: string;
-    subjectId: string;
-    room: string;
-    groupId?: number; // id реальной группы (при делении)
-    // Данные для Группы 2 (при делении)
-    teacherId2?: string;
-    subjectId2?: string;
-    room2?: string;
-    groupId2?: number;
-}
+const formSchema = z.object({
+    isSplit: z.boolean(),
+    teacherId: z.string().min(1, "Выберите учителя"),
+    subjectId: z.string().min(1, "Выберите предмет"),
+    room: z.string(),
+    groupId: z.string(),
+    teacherId2: z.string().default(""),
+    subjectId2: z.string().default(""),
+    room2: z.string().default(""),
+    groupId2: z.string().default(""),
+}).refine(
+    (data) => {
+        if (!data.isSplit) return true;
+        return (
+            data.teacherId2.length > 0 &&
+            data.subjectId2.length > 0 &&
+            data.groupId.length > 0 &&
+            data.groupId2.length > 0 &&
+            data.groupId !== data.groupId2
+        );
+    },
+    { message: "Заполните все поля для второй подгруппы и выберите разные группы" }
+);
+
+type FormValues = z.infer<typeof formSchema>;
 
 interface TeacherSubject {
     teacher: { id: number; firstName: string; lastName: string };
@@ -34,12 +51,10 @@ interface CreateScheduleModalProps {
     targetSlot: { dayOfWeek: string; lessonNumber: number } | null;
     schoolClassId: number;
     teacherSubjects: TeacherSubject[];
-    isCreating: boolean;
+    validFrom: string;
     onClose: () => void;
-    onSubmit: (data: CreateScheduleFormData) => void;
 }
 
-// Общие классы, чтобы все дропдауны в модалке выглядели одинаково опрятно
 const selectContentClass =
     "rounded-xl min-w-[var(--radix-select-trigger-width)] max-h-[280px]";
 const selectItemClass = "text-xs font-semibold py-2.5 px-3 cursor-pointer";
@@ -49,34 +64,39 @@ export default function CreateScheduleModal({
     targetSlot,
     schoolClassId,
     teacherSubjects,
-    isCreating,
+    validFrom,
     onClose,
-    onSubmit,
 }: CreateScheduleModalProps) {
-    const [isSplit, setIsSplit] = useState(false);
+    const [success, setSuccess] = useState(false);
+    const createMutation = useCreateSchedule();
 
-    // Группа 1 / Обычный урок
-    const [teacherId, setTeacherId] = useState("");
-    const [subjectId, setSubjectId] = useState("");
-    const [room, setRoom] = useState("");
-    const [groupId, setGroupId] = useState("");
+    const { control, handleSubmit, reset, setValue, getValues, formState: { errors } } = useForm<FormValues>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            isSplit: false,
+            teacherId: "",
+            subjectId: "",
+            room: "",
+            groupId: "",
+            teacherId2: "",
+            subjectId2: "",
+            room2: "",
+            groupId2: "",
+        },
+    });
 
-    // Группа 2
-    const [teacherId2, setTeacherId2] = useState("");
-    const [subjectId2, setSubjectId2] = useState("");
-    const [room2, setRoom2] = useState("");
-    const [groupId2, setGroupId2] = useState("");
+    const isSplit = useWatch({ control, name: "isSplit" });
+    const teacherId = useWatch({ control, name: "teacherId" });
+    const teacherId2 = useWatch({ control, name: "teacherId2" });
+    const groupId = useWatch({ control, name: "groupId" });
+    const groupId2 = useWatch({ control, name: "groupId2" });
 
-    const [saveSuccess, setSaveSuccess] = useState(false);
-
-    // Реальные группы класса вместо моков
     const {
         data: classGroups = [],
         isLoading: isGroupsLoading,
         isError: isGroupsError,
     } = useAllClassGroupsBySchoolClass(isOpen ? schoolClassId : 0);
 
-    // Список уникальных учителей
     const uniqueTeachers = useMemo(() => {
         const seen = new Set<number>();
         return teacherSubjects
@@ -88,7 +108,6 @@ export default function CreateScheduleModal({
             .map((ts) => ts.teacher);
     }, [teacherSubjects]);
 
-    // Предметы для 1-го учителя
     const availableSubjects1 = useMemo(() => {
         if (!teacherId) return [];
         return teacherSubjects
@@ -96,7 +115,6 @@ export default function CreateScheduleModal({
             .map((ts) => ts.subject);
     }, [teacherId, teacherSubjects]);
 
-    // Предметы для 2-го учителя
     const availableSubjects2 = useMemo(() => {
         if (!teacherId2) return [];
         return teacherSubjects
@@ -104,92 +122,135 @@ export default function CreateScheduleModal({
             .map((ts) => ts.subject);
     }, [teacherId2, teacherSubjects]);
 
-    // Автовыбор первых доступных групп, когда список подгрузился (без пересечений)
     useEffect(() => {
         if (!isSplit || classGroups.length === 0) return;
-        if (!groupId) setGroupId(classGroups[0].id.toString());
-        if (!groupId2) {
-            const fallbackId = groupId || classGroups[0].id.toString();
+        const currentGroupId = getValues("groupId");
+        const currentGroupId2 = getValues("groupId2");
+        if (!currentGroupId) setValue("groupId", classGroups[0].id.toString());
+        if (!currentGroupId2) {
+            const fallbackId = currentGroupId || classGroups[0].id.toString();
             const second = classGroups.find((g) => g.id.toString() !== fallbackId) ?? classGroups[0];
-            setGroupId2(second.id.toString());
+            setValue("groupId2", second.id.toString());
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isSplit, classGroups]);
 
-    // Если группы совпали (например, обе стали равны после смены класса) — развести их
     useEffect(() => {
         if (!isSplit || !groupId || !groupId2) return;
         if (groupId !== groupId2) return;
         const alternative = classGroups.find((g) => g.id.toString() !== groupId);
-        if (alternative) setGroupId2(alternative.id.toString());
+        if (alternative) setValue("groupId2", alternative.id.toString());
     }, [isSplit, groupId, groupId2, classGroups]);
+
+    useEffect(() => {
+        if (isOpen) {
+            reset({
+                isSplit: false,
+                teacherId: "",
+                subjectId: "",
+                room: "",
+                groupId: "",
+                teacherId2: "",
+                subjectId2: "",
+                room2: "",
+                groupId2: "",
+            });
+            setSuccess(false);
+        }
+    }, [isOpen, reset]);
 
     if (!isOpen || !targetSlot) return null;
 
-    const isFormValid = isSplit
-        ? teacherId && subjectId && teacherId2 && subjectId2 && groupId && groupId2 && groupId !== groupId2
-        : teacherId && subjectId;
+    const onSubmit = (values: FormValues) => {
+        const base: ScheduleRequest = {
+            classId: schoolClassId,
+            teacherId: Number(values.teacherId),
+            subjectId: Number(values.subjectId),
+            dayOfWeek: targetSlot.dayOfWeek,
+            lessonNumber: targetSlot.lessonNumber,
+            classRoom: values.room.trim() || "Не указ.",
+            validFrom,
+            classGroupId: values.groupId ? Number(values.groupId) : null,
+        };
 
-    const handleSubmit = () => {
-        if (!isFormValid) return;
-
-        onSubmit({
-            isSplit,
-            teacherId,
-            subjectId,
-            room: room.trim() || "Не указ.",
-            groupId: isSplit ? Number(groupId) : undefined,
-            teacherId2: isSplit ? teacherId2 : undefined,
-            subjectId2: isSplit ? subjectId2 : undefined,
-            room2: isSplit ? room2.trim() || "Не указ." : undefined,
-            groupId2: isSplit ? Number(groupId2) : undefined,
+        createMutation.mutate(base, {
+            onSuccess: () => {
+                if (values.isSplit && values.teacherId2 && values.subjectId2) {
+                    const second: ScheduleRequest = {
+                        classId: schoolClassId,
+                        teacherId: Number(values.teacherId2),
+                        subjectId: Number(values.subjectId2),
+                        dayOfWeek: targetSlot.dayOfWeek,
+                        lessonNumber: targetSlot.lessonNumber,
+                        classRoom: values.room2.trim() || "Не указ.",
+                        validFrom,
+                        classGroupId: values.groupId2 ? Number(values.groupId2) : null,
+                    };
+                    createMutation.mutate(second, {
+                        onSuccess: () => {
+                            setSuccess(true);
+                            setTimeout(() => {
+                                setSuccess(false);
+                                onClose();
+                            }, 1000);
+                        },
+                    });
+                } else {
+                    setSuccess(true);
+                    setTimeout(() => {
+                        setSuccess(false);
+                        onClose();
+                    }, 1000);
+                }
+            },
         });
-
-        setSaveSuccess(true);
-        setTimeout(() => {
-            setSaveSuccess(false);
-            onClose();
-        }, 1000);
     };
 
     const renderGroupSelect = (
-        value: string,
-        onChange: (v: string) => void,
-        label: string,
-        excludeId: string
+        name: "groupId" | "groupId2",
+        excludeName: "groupId" | "groupId2",
+        label: string
     ) => {
-        const options = classGroups.filter((g) => g.id.toString() !== excludeId);
+        const currentValue = name === "groupId" ? groupId : groupId2;
+        const excludeValue = name === "groupId" ? groupId2 : groupId;
+        const options = classGroups.filter((g) => g.id.toString() !== excludeValue);
+
         return (
             <div className="space-y-1">
                 <label className="text-[10px] font-black uppercase tracking-widest text-black/40">
                     {label}
                 </label>
-                <Select
-                    value={value}
-                    onValueChange={onChange}
-                    disabled={isGroupsLoading || options.length === 0}
-                >
-                    <SelectTrigger className="w-full h-11 text-xs font-bold rounded-xl bg-white/50 border-white/60 text-(--navy)">
-                        <SelectValue
-                            placeholder={
-                                isGroupsLoading
-                                    ? "Загрузка групп..."
-                                    : isGroupsError
-                                    ? "Ошибка загрузки"
-                                    : options.length === 0
-                                    ? "Нет доступных групп"
-                                    : "Выберите группу"
-                            }
-                        />
-                    </SelectTrigger>
-                    <SelectContent className={selectContentClass}>
-                        {options.map((g) => (
-                            <SelectItem key={g.id} value={g.id.toString()} className={selectItemClass}>
-                                {g.name}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
+                <Controller
+                    name={name}
+                    control={control}
+                    render={({ field }) => (
+                        <Select
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            disabled={isGroupsLoading || options.length === 0}
+                        >
+                            <SelectTrigger className="w-full h-11 text-xs font-bold rounded-xl bg-white/50 border-white/60 text-(--navy)">
+                                <SelectValue
+                                    placeholder={
+                                        isGroupsLoading
+                                            ? "Загрузка групп..."
+                                            : isGroupsError
+                                            ? "Ошибка загрузки"
+                                            : options.length === 0
+                                            ? "Нет доступных групп"
+                                            : "Выберите группу"
+                                    }
+                                />
+                            </SelectTrigger>
+                            <SelectContent className={selectContentClass}>
+                                {options.map((g) => (
+                                    <SelectItem key={g.id} value={g.id.toString()} className={selectItemClass}>
+                                        {g.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    )}
+                />
             </div>
         );
     };
@@ -228,171 +289,221 @@ export default function CreateScheduleModal({
                     </button>
                 </div>
 
-                <div className="px-8 py-6 space-y-5 max-h-[85vh] overflow-y-auto">
-                    {/* Переключатель деления на группы */}
-                    <div className="flex items-center justify-between p-4 rounded-2xl bg-white/40 border border-white/60">
-                        <div className="flex items-center gap-2">
-                            <Split className="w-4 h-4 text-(--red)" />
-                            <span className="text-sm font-bold text-(--navy)">Разделить урок на 2 подгруппы</span>
-                        </div>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                            <input
-                                type="checkbox"
-                                checked={isSplit}
-                                onChange={(e) => setIsSplit(e.target.checked)}
-                                className="sr-only peer"
-                            />
-                            <div className="w-9 h-5 bg-black/15 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-(--red)"></div>
-                        </label>
-                    </div>
+                <form onSubmit={handleSubmit(onSubmit)}>
+                    <div className="px-8 py-6 space-y-5 max-h-[85vh] overflow-y-auto">
+                        {/* Переключатель деления на группы */}
+                        <Controller
+                            name="isSplit"
+                            control={control}
+                            render={({ field }) => (
+                                <div className="flex items-center justify-between p-4 rounded-2xl bg-white/40 border border-white/60">
+                                    <div className="flex items-center gap-2">
+                                        <Split className="w-4 h-4 text-(--red)" />
+                                        <span className="text-sm font-bold text-(--navy)">Разделить урок на 2 подгруппы</span>
+                                    </div>
+                                    <label className="relative inline-flex items-center cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={field.value}
+                                            onChange={field.onChange}
+                                            className="sr-only peer"
+                                        />
+                                        <div className="w-9 h-5 bg-black/15 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-(--red)"></div>
+                                    </label>
+                                </div>
+                            )}
+                        />
 
-                    {/* Сетка для 1 или 2 колонок */}
-                    <div className={`grid ${isSplit ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1"} gap-5`}>
-                        {/* Подгруппа 1 / Весь класс */}
-                        <div className="space-y-4 p-4 rounded-2xl bg-white/20 border border-white/40">
-                            {isSplit && renderGroupSelect(groupId, setGroupId, "Группа (Подгруппа 1)", groupId2)}
+                        {errors.root && (
+                            <p className="text-xs text-(--red) font-semibold text-center">
+                                {errors.root.message}
+                            </p>
+                        )}
 
-                            <div className="space-y-1">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-black/40">
-                                    Преподаватель {isSplit && "1"}
-                                </label>
-                                <Select
-                                    value={teacherId}
-                                    onValueChange={(val) => {
-                                        setTeacherId(val);
-                                        setSubjectId("");
-                                    }}
-                                >
-                                    <SelectTrigger className="w-full h-11 text-xs font-bold rounded-xl bg-white/50 border-white/60 text-(--navy)">
-                                        <SelectValue placeholder="Выберите учителя" />
-                                    </SelectTrigger>
-                                    <SelectContent className={selectContentClass}>
-                                        {uniqueTeachers.map((t) => (
-                                            <SelectItem key={t.id} value={t.id.toString()} className={selectItemClass}>
-                                                {`${t.lastName} ${t.firstName}`}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="space-y-1">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-black/40">
-                                    Дисциплина
-                                </label>
-                                <Select value={subjectId} onValueChange={setSubjectId} disabled={!teacherId}>
-                                    <SelectTrigger className="w-full h-11 text-xs font-bold rounded-xl bg-white/50 border-white/60 text-(--navy) disabled:opacity-40">
-                                        <SelectValue placeholder={teacherId ? "Выберите предмет" : "Сначала учителя"} />
-                                    </SelectTrigger>
-                                    <SelectContent className={selectContentClass}>
-                                        {availableSubjects1.map((s) => (
-                                            <SelectItem key={s.id} value={s.id.toString()} className={selectItemClass}>
-                                                {s.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="space-y-1">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-black/40">
-                                    Аудитория
-                                </label>
-                                <input
-                                    type="text"
-                                    placeholder="Кабинет"
-                                    value={room}
-                                    onChange={(e) => setRoom(e.target.value)}
-                                    className="w-full h-11 bg-white/50 border border-white/60 text-(--navy) rounded-xl px-3 text-xs font-semibold placeholder:font-normal placeholder:text-black/25 focus:outline-none"
-                                />
-                            </div>
-                        </div>
-
-                        {/* Подгруппа 2 (Рендерится только при включенном чекбоксе) */}
-                        {isSplit && (
-                            <div className="space-y-4 p-4 rounded-2xl bg-white/20 border border-white/40 animate-in fade-in duration-200">
-                                {renderGroupSelect(groupId2, setGroupId2, "Группа (Подгруппа 2)", groupId)}
+                        {/* Сетка для 1 или 2 колонок */}
+                        <div className={`grid ${isSplit ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1"} gap-5`}>
+                            {/* Подгруппа 1 / Весь класс */}
+                            <div className="space-y-4 p-4 rounded-2xl bg-white/20 border border-white/40">
+                                {isSplit && renderGroupSelect("groupId", "groupId2", "Группа (Подгруппа 1)")}
 
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-black uppercase tracking-widest text-black/40">
-                                        Преподаватель 2
+                                        Преподаватель {isSplit && "1"}
                                     </label>
-                                    <Select
-                                        value={teacherId2}
-                                        onValueChange={(val) => {
-                                            setTeacherId2(val);
-                                            setSubjectId2("");
-                                        }}
-                                    >
-                                        <SelectTrigger className="w-full h-11 text-xs font-bold rounded-xl bg-white/50 border-white/60 text-(--navy)">
-                                            <SelectValue placeholder="Выберите 2-го учителя" />
-                                        </SelectTrigger>
-                                        <SelectContent className={selectContentClass}>
-                                            {uniqueTeachers.map((t) => (
-                                                <SelectItem key={t.id} value={t.id.toString()} className={selectItemClass}>
-                                                    {`${t.lastName} ${t.firstName}`}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                    <Controller
+                                        name="teacherId"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <Select
+                                                value={field.value}
+                                                onValueChange={(val) => {
+                                                    field.onChange(val);
+                                                    setValue("subjectId", "");
+                                                }}
+                                            >
+                                                <SelectTrigger className="w-full h-11 text-xs font-bold rounded-xl bg-white/50 border-white/60 text-(--navy)">
+                                                    <SelectValue placeholder="Выберите учителя" />
+                                                </SelectTrigger>
+                                                <SelectContent className={selectContentClass}>
+                                                    {uniqueTeachers.map((t) => (
+                                                        <SelectItem key={t.id} value={t.id.toString()} className={selectItemClass}>
+                                                            {`${t.lastName} ${t.firstName}`}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        )}
+                                    />
                                 </div>
 
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-black uppercase tracking-widest text-black/40">
                                         Дисциплина
                                     </label>
-                                    <Select value={subjectId2} onValueChange={setSubjectId2} disabled={!teacherId2}>
-                                        <SelectTrigger className="w-full h-11 text-xs font-bold rounded-xl bg-white/50 border-white/60 text-(--navy) disabled:opacity-40">
-                                            <SelectValue placeholder={teacherId2 ? "Выберите предмет" : "Сначала учителя"} />
-                                        </SelectTrigger>
-                                        <SelectContent className={selectContentClass}>
-                                            {availableSubjects2.map((s) => (
-                                                <SelectItem key={s.id} value={s.id.toString()} className={selectItemClass}>
-                                                    {s.name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                    <Controller
+                                        name="subjectId"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <Select value={field.value} onValueChange={field.onChange} disabled={!teacherId}>
+                                                <SelectTrigger className="w-full h-11 text-xs font-bold rounded-xl bg-white/50 border-white/60 text-(--navy) disabled:opacity-40">
+                                                    <SelectValue placeholder={teacherId ? "Выберите предмет" : "Сначала учителя"} />
+                                                </SelectTrigger>
+                                                <SelectContent className={selectContentClass}>
+                                                    {availableSubjects1.map((s) => (
+                                                        <SelectItem key={s.id} value={s.id.toString()} className={selectItemClass}>
+                                                            {s.name}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        )}
+                                    />
                                 </div>
 
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-black uppercase tracking-widest text-black/40">
                                         Аудитория
                                     </label>
-                                    <input
-                                        type="text"
-                                        placeholder="Кабинет"
-                                        value={room2}
-                                        onChange={(e) => setRoom2(e.target.value)}
-                                        className="w-full h-11 bg-white/50 border border-white/60 text-(--navy) rounded-xl px-3 text-xs font-semibold placeholder:font-normal placeholder:text-black/25 focus:outline-none"
+                                    <Controller
+                                        name="room"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <input
+                                                type="text"
+                                                placeholder="Кабинет"
+                                                value={field.value}
+                                                onChange={field.onChange}
+                                                className="w-full h-11 bg-white/50 border border-white/60 text-(--navy) rounded-xl px-3 text-xs font-semibold placeholder:font-normal placeholder:text-black/25 focus:outline-none"
+                                            />
+                                        )}
                                     />
                                 </div>
                             </div>
-                        )}
-                    </div>
 
-                    <div className="pt-2">
-                        <button
-                            onClick={handleSubmit}
-                            disabled={!isFormValid || saveSuccess || isCreating}
-                            className="w-full gap-2 bg-(--red) hover:bg-(--red-dark) text-white rounded-2xl py-4 text-base font-black shadow-lg shadow-(--red)/20 transition-all active:scale-[0.98] disabled:opacity-40 flex items-center justify-center cursor-pointer"
-                        >
-                            {isCreating ? (
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : saveSuccess ? (
-                                <>
-                                    <CheckCircle2 className="w-4 h-4" />
-                                    Сохранено!
-                                </>
-                            ) : (
-                                <>
-                                    Утвердить {isSplit ? "уроки" : "слот"}
-                                    <Send className="w-4 h-4" />
-                                </>
+                            {/* Подгруппа 2 */}
+                            {isSplit && (
+                                <div className="space-y-4 p-4 rounded-2xl bg-white/20 border border-white/40 animate-in fade-in duration-200">
+                                    {renderGroupSelect("groupId2", "groupId", "Группа (Подгруппа 2)")}
+
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-black/40">
+                                            Преподаватель 2
+                                        </label>
+                                        <Controller
+                                            name="teacherId2"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <Select
+                                                    value={field.value}
+                                                    onValueChange={(val) => {
+                                                        field.onChange(val);
+                                                        setValue("subjectId2", "");
+                                                    }}
+                                                >
+                                                    <SelectTrigger className="w-full h-11 text-xs font-bold rounded-xl bg-white/50 border-white/60 text-(--navy)">
+                                                        <SelectValue placeholder="Выберите 2-го учителя" />
+                                                    </SelectTrigger>
+                                                    <SelectContent className={selectContentClass}>
+                                                        {uniqueTeachers.map((t) => (
+                                                            <SelectItem key={t.id} value={t.id.toString()} className={selectItemClass}>
+                                                                {`${t.lastName} ${t.firstName}`}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            )}
+                                        />
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-black/40">
+                                            Дисциплина
+                                        </label>
+                                        <Controller
+                                            name="subjectId2"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <Select value={field.value} onValueChange={field.onChange} disabled={!teacherId2}>
+                                                    <SelectTrigger className="w-full h-11 text-xs font-bold rounded-xl bg-white/50 border-white/60 text-(--navy) disabled:opacity-40">
+                                                        <SelectValue placeholder={teacherId2 ? "Выберите предмет" : "Сначала учителя"} />
+                                                    </SelectTrigger>
+                                                    <SelectContent className={selectContentClass}>
+                                                        {availableSubjects2.map((s) => (
+                                                            <SelectItem key={s.id} value={s.id.toString()} className={selectItemClass}>
+                                                                {s.name}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            )}
+                                        />
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-black/40">
+                                            Аудитория
+                                        </label>
+                                        <Controller
+                                            name="room2"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <input
+                                                    type="text"
+                                                    placeholder="Кабинет"
+                                                    value={field.value}
+                                                    onChange={field.onChange}
+                                                    className="w-full h-11 bg-white/50 border border-white/60 text-(--navy) rounded-xl px-3 text-xs font-semibold placeholder:font-normal placeholder:text-black/25 focus:outline-none"
+                                                />
+                                            )}
+                                        />
+                                    </div>
+                                </div>
                             )}
-                        </button>
+                        </div>
+
+                        <div className="pt-2">
+                            <button
+                                type="submit"
+                                disabled={createMutation.isPending || success}
+                                className="w-full gap-2 bg-(--red) hover:bg-(--red-dark) text-white rounded-2xl py-4 text-base font-black shadow-lg shadow-(--red)/20 transition-all active:scale-[0.98] disabled:opacity-40 flex items-center justify-center cursor-pointer"
+                            >
+                                {createMutation.isPending ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : success ? (
+                                    <>
+                                        <CheckCircle2 className="w-4 h-4" />
+                                        Сохранено!
+                                    </>
+                                ) : (
+                                    <>
+                                        Утвердить {isSplit ? "уроки" : "слот"}
+                                        <Send className="w-4 h-4" />
+                                    </>
+                                )}
+                            </button>
+                        </div>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
     );

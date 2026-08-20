@@ -1,9 +1,9 @@
 package com.rusobr.academic.application.service;
 
 import com.rusobr.academic.application.mapper.ClassGroupMapper;
+import com.rusobr.academic.domain.model.AcademicYear;
 import com.rusobr.academic.domain.model.ClassGroup;
 import com.rusobr.academic.domain.model.ClassGroupStudents;
-import com.rusobr.academic.domain.model.ClassStudent;
 import com.rusobr.academic.domain.model.SchoolClass;
 import com.rusobr.academic.infrastructure.client.UserClient;
 import com.rusobr.academic.infrastructure.persistence.repository.ClassGroupRepository;
@@ -28,7 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -83,9 +82,13 @@ public class ClassGroupService {
 
     @Transactional
     public void create(ClassGroupRequest req) {
+        SchoolClass schoolClass = schoolClassRepository.findWithAcademicYearById(req.schoolClassId())
+                .orElseThrow(() -> new NotFoundException("School class not found: id=%s".formatted(req.schoolClassId()),
+                        AcademicExceptionCode.SCHOOL_CLASS_NOT_FOUND));
+        validateAcademicYearIsActive(schoolClass.getAcademicYear());
         ClassGroup classGroup = ClassGroup.builder()
                 .name(req.name())
-                .schoolClass(schoolClassRepository.getReferenceById(req.schoolClassId())).build();
+                .schoolClass(schoolClass).build();
         classGroupRepository.save(classGroup);
 
         log.info("Class group created: id={}, name={}, schoolClassId={}",
@@ -94,7 +97,13 @@ public class ClassGroupService {
 
     @Transactional
     public void delete(Long id) {
-        requireClassGroupExists(id);
+
+        ClassGroup classGroup = classGroupRepository.findWithSchoolClassAndAcademicYearById(id)
+                .orElseThrow(() -> new NotFoundException("Class group not found: id=%s".formatted(id),
+                        AcademicExceptionCode.CLASS_GROUP_NOT_FOUND));
+
+        validateAcademicYearIsActive(classGroup.getSchoolClass().getAcademicYear());
+
         if (teachingAssignmentRepository.existsByClassGroupId(id)) {
             throw new ConflictException(
                     "Class group has an active teaching assignment and cannot be deleted: id=%s".formatted(id),
@@ -107,7 +116,12 @@ public class ClassGroupService {
 
     @Transactional
     public void update(Long id, String name) {
-        ClassGroup classGroup = getClassGroupOrThrow(id);
+        ClassGroup classGroup = classGroupRepository.findWithSchoolClassAndAcademicYearById(id)
+                .orElseThrow(() -> new NotFoundException("Class group not found: id=%s".formatted(id),
+                        AcademicExceptionCode.CLASS_GROUP_NOT_FOUND));
+
+        validateAcademicYearIsActive(classGroup.getSchoolClass().getAcademicYear());
+
         classGroup.setName(name);
 
         log.info("Class group updated: id={}, name={}", id, name);
@@ -123,6 +137,8 @@ public class ClassGroupService {
     @Transactional
     public void addStudentTransactional(Long classGroupId, Long studentId) {
         ClassGroup classGroup = getClassGroupWithStudentsOrThrow(classGroupId);
+
+        validateAcademicYearIsActive(classGroup.getSchoolClass().getAcademicYear());
 
         boolean isAlreadyInGroup = classGroup.getClassGroupStudents().stream()
                 .anyMatch(cgs -> cgs.getStudentId().equals(studentId));
@@ -156,9 +172,9 @@ public class ClassGroupService {
 
     @Transactional
     public void removeStudentTransactional(Long classGroupId, Long studentId) {
-        getClassGroupWithStudentsOrThrow(classGroupId);
-
         ClassGroup classGroup = getClassGroupWithStudentsOrThrow(classGroupId);
+
+        validateAcademicYearIsActive(classGroup.getSchoolClass().getAcademicYear());
 
         ClassGroupStudents groupStudent = classGroupStudentsRepository
                 .findByStudentIdAndClassGroupId(studentId, classGroupId)
@@ -180,23 +196,16 @@ public class ClassGroupService {
         }
     }
 
-    private void requireClassGroupExists(Long id) {
-        if (!classGroupRepository.existsById(id)) {
-            throw new NotFoundException("Class group not found: id=%s".formatted(id),
-                    AcademicExceptionCode.CLASS_GROUP_NOT_FOUND);
-        }
-    }
-
-    private ClassGroup getClassGroupOrThrow(Long id) {
-        return classGroupRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Class group not found: id=%s".formatted(id),
-                        AcademicExceptionCode.CLASS_GROUP_NOT_FOUND));
-    }
-
     private ClassGroup getClassGroupWithStudentsOrThrow(Long id) {
-        return classGroupRepository.findWithClassGroupAndSchoolClassStudentsById(id)
+        return classGroupRepository.findWithSchoolClassAndAcademicYearAndClassStudentsStudentsById(id)
                 .orElseThrow(() -> new NotFoundException("Class group not found: id=%s".formatted(id),
                         AcademicExceptionCode.CLASS_GROUP_NOT_FOUND));
+    }
+
+    private void validateAcademicYearIsActive(AcademicYear academicYear) {
+        if (academicYear.isClosed()) {
+            throw new ConflictException("Academic year is closed", AcademicExceptionCode.ACADEMIC_YEAR_CLOSED_CONFLICT);
+        }
     }
 
 }

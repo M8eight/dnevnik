@@ -1,19 +1,20 @@
 package com.rusobr.academic.web.dto.scheduleLesson;
 
 import com.rusobr.academic.web.dto.classGroup.ClassGroupResponse;
-import com.rusobr.common.dto.UserFeignResponse;
+import com.rusobr.academic.web.dto.schoolClass.SchoolClassResponse;
 import com.rusobr.academic.web.dto.subject.SubjectResponseDto;
+import com.rusobr.common.dto.UserFeignResponse;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 
-public record ScheduleLessonDto(
+public record ScheduleLessonDetails(
         Long id,
-        DayOfWeek dayOfWeek,
-        Integer lessonNumber,
         String classRoom,
         SubjectResponseDto subject,
         ClassGroupResponse classGroup,
+        SchoolClassResponse schoolClass,
+        LocalDate validFrom,
+        LocalDate validTo,
         UserFeignResponse teacher
 ) {
 }

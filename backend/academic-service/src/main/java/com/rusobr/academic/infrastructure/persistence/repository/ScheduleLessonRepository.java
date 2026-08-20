@@ -60,6 +60,7 @@ public interface ScheduleLessonRepository extends JpaRepository<ScheduleLesson, 
     from ScheduleLesson sl
         join fetch sl.teachingAssignment ta
         join fetch ta.subject s
+        left join fetch ta.classGroup cg
     where ta.schoolClass.id = :classId
         and sl.validFrom <= :endDate
         and (sl.validTo is null or sl.validTo >= :startDate)
@@ -180,5 +181,17 @@ public interface ScheduleLessonRepository extends JpaRepository<ScheduleLesson, 
             and (sl.validTo is null or sl.validTo >= :start)
     """)
     List<ScheduleLesson> findAllBetween(LocalDate start, LocalDate end);
+
+    @Query("""
+        select sl
+        from ScheduleLesson sl
+            join fetch sl.teachingAssignment
+            join fetch sl.teachingAssignment.subject
+            join fetch sl.teachingAssignment.schoolClass
+            join fetch sl.teachingAssignment.schoolClass.academicYear
+            left join fetch sl.teachingAssignment.classGroup
+        where sl.id = :scheduleId
+    """)
+    Optional<ScheduleLesson> getDetails(@Param("scheduleId") Long scheduleId);
 
 }
