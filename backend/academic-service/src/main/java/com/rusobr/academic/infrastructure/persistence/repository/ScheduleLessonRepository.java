@@ -56,16 +56,19 @@ public interface ScheduleLessonRepository extends JpaRepository<ScheduleLesson, 
     List<ScheduleLesson> findByTeachingAssignmentId(Long teachingAssignmentId);
 
     @Query("""
-        select sl
-        from ScheduleLesson sl
-            join fetch sl.teachingAssignment ta
-            join fetch ta.subject s
-        where ta.schoolClass.id = :classId
-            and sl.validFrom <= :date
-            and (sl.validTo is null or sl.validTo >= :date)
-        order by sl.lessonNumber
+    select distinct sl
+    from ScheduleLesson sl
+        join fetch sl.teachingAssignment ta
+        join fetch ta.subject s
+        left join fetch ta.classGroup cg
+    where ta.schoolClass.id = :classId
+        and sl.validFrom <= :endDate
+        and (sl.validTo is null or sl.validTo >= :startDate)
+    order by sl.dayOfWeek, sl.lessonNumber
     """)
-    List<ScheduleLesson> findClassSchedule(@Param("classId") Long classId, @Param("date") LocalDate date);
+    List<ScheduleLesson> findClassSchedule(@Param("classId") Long classId,
+                                           @Param("startDate") LocalDate startDate,
+                                           @Param("endDate") LocalDate endDate);
 
     @EntityGraph(attributePaths = {"teachingAssignment"})
     Optional<ScheduleLesson> findWithTeachingAssignmentById(Long id);
@@ -78,11 +81,13 @@ public interface ScheduleLessonRepository extends JpaRepository<ScheduleLesson, 
             and sl.dayOfWeek = :dayOfWeek
             and sl.lessonNumber = :lessonNumber
             and (sl.validTo is null or sl.validTo >= :validFrom)
-""")
+            and (ta.classGroup is null or :classGroupId is null or ta.classGroup.id = :classGroupId)
+    """)
     boolean existsActiveByClassSlot(@Param("classId") Long schoolClassId,
                                     @Param("dayOfWeek") DayOfWeek dayOfWeek,
                                     @Param("lessonNumber") Integer lessonNumber,
-                                    @Param("validFrom") LocalDate validFrom);
+                                    @Param("validFrom") LocalDate validFrom,
+                                    @Param("classGroupId") Long classGroupId);
 
     @Query("""
         select count(*) > 0
@@ -132,9 +137,12 @@ public interface ScheduleLessonRepository extends JpaRepository<ScheduleLesson, 
             join fetch ta.subject su
             join ta.schoolClass sc
             join sc.students st
+            left join ta.classGroup cg
+            left join cg.classGroupStudents cgs
         where st.studentId = :studentId
             and sl.validFrom <= :endDate
             and (sl.validTo is null or sl.validTo >= :startDate)
+            and (cg is null or cgs.studentId = :studentId)
         order by sl.lessonNumber
     """)
     List<ScheduleLesson> findDiaryScheduleByStudentId(@Param("studentId") Long studentId,
@@ -176,5 +184,17 @@ public interface ScheduleLessonRepository extends JpaRepository<ScheduleLesson, 
             and (sl.validTo is null or sl.validTo >= :start)
     """)
     List<ScheduleLesson> findAllBetween(LocalDate start, LocalDate end);
+
+    @Query("""
+        select sl
+        from ScheduleLesson sl
+            join fetch sl.teachingAssignment
+            join fetch sl.teachingAssignment.subject
+            join fetch sl.teachingAssignment.schoolClass
+            join fetch sl.teachingAssignment.schoolClass.academicYear
+            left join fetch sl.teachingAssignment.classGroup
+        where sl.id = :scheduleId
+    """)
+    Optional<ScheduleLesson> getDetails(@Param("scheduleId") Long scheduleId);
 
 }

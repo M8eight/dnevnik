@@ -41,7 +41,6 @@ public class SecurityConfig {
                             .requestMatchers(GET, "/api/v1/teachers/*/info").hasAnyRole(TEACHER.name(), ADMIN.name(), STUDENT.name())
                             .requestMatchers(GET, "/api/v1/bff/students/*/info").hasAnyRole(ADMIN.name(), TEACHER.name())
 
-
                             //STUDENT SCOPE
                             .requestMatchers(GET, "/api/v1/bff/students/home").hasRole(STUDENT.name())
                             .requestMatchers(GET, "/api/v1/schedules/diary").hasRole(STUDENT.name())
@@ -49,6 +48,8 @@ public class SecurityConfig {
                             .requestMatchers(GET, "/api/v1/grades/*/detail").hasRole(STUDENT.name())
                             .requestMatchers(GET, "/api/v1/period-final-grades/by-student").hasRole(STUDENT.name())
                             .requestMatchers(GET, "/api/v1/school-classes/by-student").hasRole(STUDENT.name())
+
+                            .requestMatchers(GET, "/api/v1/students/*/exists").hasRole(ADMIN.name())
 
                             .requestMatchers(GET, "/api/v1/pdf/student/grade-report/report").hasRole(STUDENT.name())
                             .requestMatchers(GET, "/api/v1/pdf/student/grade-period-report/report").hasRole(STUDENT.name())
@@ -77,8 +78,6 @@ public class SecurityConfig {
 
                             .requestMatchers(GET, "/api/v1/schedules/by-teacher/date").hasRole(TEACHER.name())
                             .requestMatchers(GET, "/api/v1/schedules/by-teacher/period").hasRole(TEACHER.name())
-
-
 
                             //ADMIN SCOPE
                             .requestMatchers(GET, "/api/v1/subjects").hasRole(ADMIN.name())

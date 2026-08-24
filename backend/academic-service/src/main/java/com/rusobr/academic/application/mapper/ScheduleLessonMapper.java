@@ -19,6 +19,7 @@ public interface ScheduleLessonMapper {
     @Mapping(target = "id", source = "scheduleLesson.id")
     @Mapping(target = "teacher", source = "teacher")
     @Mapping(target = "subject", source = "scheduleLesson.teachingAssignment.subject")
+    @Mapping(target = "classGroup", source = "scheduleLesson.teachingAssignment.classGroup")
     ScheduleLessonDto toDto(ScheduleLesson scheduleLesson, UserFeignResponse teacher);
 
     @Mapping(target = "id", ignore = true)
