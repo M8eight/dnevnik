@@ -135,7 +135,7 @@ export default function PeriodGradesView({
                       </td>
 
                       {academicPeriods.map((period) => {
-                        const targetGrade = student.periodGrades.find(
+                        const targetGrade = student.periodGrades?.find(
                           (pg) => pg.academicPeriodId === period.id
                         ) || null;
 

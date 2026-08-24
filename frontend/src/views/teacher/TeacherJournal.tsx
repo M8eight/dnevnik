@@ -215,7 +215,7 @@ export default function TeacherJournal() {
                 <SelectContent className="rounded-2xl border-none shadow-2xl bg-white/95 backdrop-blur-xl max-h-87.5">
                   {assignments?.map((p) => (
                     <SelectItem key={p.teachingAssignmentId} value={p.teachingAssignmentId.toString()} className="font-bold text-[13px] py-3 rounded-xl cursor-pointer">
-                      <span className="text-(--red) mr-1">{p.schoolClassName}</span> · {p.subjectName}
+                      <span className="text-(--red) mr-1">{p.schoolClassName}</span> · {p.subjectName} {p.classGroupName ? `(${p.classGroupName})` : ""}
                     </SelectItem>
                   ))}
                 </SelectContent>

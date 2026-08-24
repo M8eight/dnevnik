@@ -2,11 +2,7 @@ import { useState, useMemo } from "react";
 import {
     CalendarDays,
     Users,
-    GraduationCap,
-    CheckCircle2,
-    X,
     Calendar,
-    Send,
     Loader2,
     RefreshCw,
 } from "lucide-react";
@@ -19,23 +15,26 @@ import {
 } from "@/components/ui/select";
 import AdminNavbar from "@/components/layout/navbars/AdminNavbar";
 import { useGetTeacherSubjects } from "@/hooks/use-teacher-subject";
-import { useScheduleByClassId, useCreateSchedule, useCloseSchedule, useLoadLessonInstance } from "@/hooks/use-schedule";
+import { useScheduleByClassId, useCloseSchedule, useLoadLessonInstance, useDeleteSchedule } from "@/hooks/use-schedule";
 import type { ScheduleLessonDto } from "@/services/schedule-service";
 import { useGetAllClassesByAcademicYear } from "@/hooks/use-school-class";
 import { DAYS_MAP, LESSON_SLOTS } from "@/constants/component-constants";
 import LessonCell from "@/components/admin/schedule-page/lesson-cell";
 import ConfirmCloseModal from "@/components/admin/schedule-page/confirm-close-modal";
 import GenerateModal from "@/components/admin/schedule-page/generate-modal";
+import CreateScheduleModal from "@/components/admin/schedule-page/create-schedule-modal";
+import ScheduleDetailModal from "@/components/admin/schedule-page/schedule-detail-modal";
 import { useAcademicYearSelection } from "@/hooks/use-academic-year-selection";
 import PageHeader from "@/components/admin/page-header";
 import AcademicYearSelect from "@/components/admin/academic-year-select";
 import ClosedYearAlert from "@/components/admin/closed-year-alert";
-import { toISODate } from "@/lib/date";
+import { getCurrentWeekString, getMondayFromWeekString, toISODate } from "@/lib/date";
 
 export default function SchedulePage() {
     const todayStr = useMemo(() => toISODate(new Date()), []);
+    const [week, setWeek] = useState<string>(() => getCurrentWeekString());
 
-    const [date, setDate] = useState<string>(todayStr);
+    const selectedMondayDate = useMemo(() => getMondayFromWeekString(week), [week]);
 
     const {
         resolvedAcademicYearId,
@@ -47,57 +46,43 @@ export default function SchedulePage() {
     const [viewClassId, setViewClassId] = useState<string>("");
 
     const { data: classes = [], isLoading: isClassesLoading } = useGetAllClassesByAcademicYear(parseInt(resolvedAcademicYearId, 10));
-
     const activeClassId = viewClassId || (classes.length > 0 ? String(classes[0].id) : "");
 
     const {
         data: scheduleRecord,
         isLoading: isScheduleLoading,
         refetch: refetchSchedule,
-    } = useScheduleByClassId(Number(activeClassId), date);
+    } = useScheduleByClassId(Number(activeClassId), selectedMondayDate);
 
     const flatSchedule = useMemo<ScheduleLessonDto[]>(() => {
         if (!scheduleRecord) return [];
-        return Object.values(scheduleRecord).flat();
+        return Object.values(scheduleRecord).flatMap((byLesson) => Object.values(byLesson).flat());
+    }, [scheduleRecord]);
+
+    const getSlotLessons = useMemo(() => {
+        return (dayKey: string, slotNum: number): ScheduleLessonDto[] => {
+            if (!scheduleRecord) return [];
+            const byLesson = scheduleRecord[dayKey];
+            if (!byLesson) return [];
+            return byLesson[slotNum] ?? [];
+        };
     }, [scheduleRecord]);
 
     const { data: teacherSubjects = [], isLoading: isTeachersLoading } = useGetTeacherSubjects();
 
-    const { mutate: createSchedule, isPending: isCreating } = useCreateSchedule();
     const { mutate: closeSchedule, isPending: isClosing } = useCloseSchedule();
+    const { mutate: deleteSchedule, isPending: isDeleting } = useDeleteSchedule();
     const { mutate: loadInstances, isPending: isGenerating } = useLoadLessonInstance();
 
     const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
-
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [targetSlot, setTargetSlot] = useState<{ dayOfWeek: string; lessonNumber: number } | null>(null);
-    const [formTeacherId, setFormTeacherId] = useState("");
-    const [formSubjectId, setFormSubjectId] = useState("");
-    const [roomInput, setRoomInput] = useState("");
-    const [saveSuccess, setSaveSuccess] = useState(false);
 
     const [lessonToClose, setLessonToClose] = useState<ScheduleLessonDto | null>(null);
     const [closeDate, setCloseDate] = useState<string>(todayStr);
+    const [selectedLessonId, setSelectedLessonId] = useState<number | null>(null);
 
     const isLoading = isScheduleLoading || isTeachersLoading || isClassesLoading;
-
-    const uniqueTeachers = useMemo(() => {
-        const seen = new Set<number>();
-        return teacherSubjects
-            .filter((ts) => {
-                if (seen.has(ts.teacher.id)) return false;
-                seen.add(ts.teacher.id);
-                return true;
-            })
-            .map((ts) => ts.teacher);
-    }, [teacherSubjects]);
-
-    const availableSubjectsForTeacher = useMemo(() => {
-        if (!formTeacherId) return [];
-        return teacherSubjects
-            .filter((ts) => ts.teacher.id === Number(formTeacherId))
-            .map((ts) => ts.subject);
-    }, [formTeacherId, teacherSubjects]);
 
     const handleGenerateConfirm = (from: string, to: string) => {
         if (!activeClassId) return;
@@ -114,11 +99,11 @@ export default function SchedulePage() {
 
     const handleAddClick = (dayOfWeek: string, lessonNumber: number) => {
         setTargetSlot({ dayOfWeek, lessonNumber });
-        setFormTeacherId("");
-        setFormSubjectId("");
-        setRoomInput("");
-        setSaveSuccess(false);
         setIsModalOpen(true);
+    };
+
+    const handleLessonClick = (lesson: ScheduleLessonDto) => {
+        setSelectedLessonId(lesson.id);
     };
 
     const handleCloseClick = (lesson: ScheduleLessonDto) => {
@@ -136,38 +121,22 @@ export default function SchedulePage() {
         });
     };
 
-    const handleSaveLesson = () => {
-        if (!targetSlot || !formTeacherId || !formSubjectId || !activeClassId) return;
-
-        createSchedule(
-            {
-                classId: Number(activeClassId),
-                teacherId: Number(formTeacherId),
-                subjectId: Number(formSubjectId),
-                dayOfWeek: targetSlot.dayOfWeek,
-                lessonNumber: targetSlot.lessonNumber,
-                classRoom: roomInput.trim() || "Не указ.",
-                validFrom: date,
-            },
-            {
-                onSuccess: () => {
-                    setSaveSuccess(true);
-                    refetchSchedule();
-                    setTimeout(() => {
-                        setIsModalOpen(false);
-                        setSaveSuccess(false);
-                    }, 1200);
-                },
-            }
-        );
-    };
-
     const currentClass = classes.find((c) => c.id === Number(activeClassId));
     const lessonsCount = flatSchedule.length;
 
+    const handleDeleteClick = (lesson: ScheduleLessonDto) => {
+        if (!window.confirm(`Удалить урок без возможности восстановления? Это действие необратимо.`)) {
+            return;
+        }
+        deleteSchedule(lesson.id, {
+            onSuccess: () => {
+                refetchSchedule();
+            },
+        });
+    };
+
     return (
         <div className="relative z-10 min-h-screen px-4 md:px-10 pt-5 pb-14">
-            
             <AdminNavbar />
 
             <PageHeader
@@ -183,9 +152,9 @@ export default function SchedulePage() {
                     <Calendar className="w-3.5 h-3.5 text-(--red)" />
                     <span>Дата:</span>
                     <input
-                        type="date"
-                        value={date}
-                        onChange={(e) => setDate(e.target.value)}
+                        type="week"
+                        value={week}
+                        onChange={(e) => setWeek(e.target.value)}
                         className="bg-transparent text-(--navy) font-bold focus:outline-none cursor-pointer"
                     />
                 </div>
@@ -193,7 +162,7 @@ export default function SchedulePage() {
                 <button
                     onClick={() => setIsGenerateModalOpen(true)}
                     disabled={!activeClassId}
-                    className="flex items-center gap-2 h-10 px-4 rounded-2xl bg-white/40 border border-white/60 text-xs font-bold text-(--navy) hover:bg-white/60 transition-all disabled:opacity-40"
+                    className="flex items-center gap-2 h-10 px-4 rounded-2xl bg-white/40 border border-white/60 text-xs font-bold text-(--navy) hover:bg-white/60 transition-all disabled:opacity-40 cursor-pointer"
                 >
                     <RefreshCw className="w-3.5 h-3.5 text-(--red)" />
                     Загрузить уроки
@@ -219,6 +188,7 @@ export default function SchedulePage() {
                         ))}
                     </SelectContent>
                 </Select>
+
             </PageHeader>
 
             {isYearClosed && (
@@ -255,19 +225,22 @@ export default function SchedulePage() {
                                 {LESSON_SLOTS.map((slot) => (
                                     <div key={slot.num} className="grid grid-cols-6 gap-1.5 items-stretch">
                                         <div className="flex flex-col items-center justify-center bg-white/30 rounded-[14px] py-3 px-2 text-center">
-                                            <span className="text-xs font-black text-(--navy)">{slot.num}</span>
-                                            <span className="text-[9px] font-semibold text-black/30 mt-0.5 leading-tight">
+                                            <span className="text-sm font-black text-(--navy)">{slot.num}</span>
+                                            <span className="text-xs font-semibold text-black/30 mt-0.5 leading-tight">
                                                 {slot.time}
                                             </span>
                                         </div>
                                         {DAYS_MAP.map((day) => (
                                             <div key={day.key} className="min-h-20">
                                                 <LessonCell
+                                                    lessons={getSlotLessons(day.key, slot.num)}
+                                                    onAddClick={handleAddClick}
+                                                    onLessonClick={handleLessonClick}
                                                     dayKey={day.key}
                                                     slotNum={slot.num}
-                                                    schedule={flatSchedule}
-                                                    onAddClick={handleAddClick}
                                                     onCloseClick={handleCloseClick}
+                                                    onDeleteClick={handleDeleteClick}
+                                                    isDeleting={isDeleting}
                                                 />
                                             </div>
                                         ))}
@@ -280,132 +253,16 @@ export default function SchedulePage() {
             </div>
 
             {/* Модалка создания */}
-            {isModalOpen && targetSlot && (
-                <div
-                    className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-300"
-                    style={{ background: "rgba(15,20,40,0.25)", backdropFilter: "blur(8px)" }}
-                    onClick={() => setIsModalOpen(false)}
-                >
-                    <div
-                        className="glass-card w-full max-w-md rounded-[36px] p-0 overflow-hidden shadow-2xl backdrop-blur-xl animate-in slide-in-from-bottom-4 fade-in duration-300"
-                        style={{ boxShadow: "0 32px 80px rgba(15,20,60,0.12), 0 0 0 1px rgba(255,255,255,0.5)" }}
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <div className="px-6 pt-6 pb-4 flex items-center justify-between border-b border-black/5">
-                            <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 rounded-[12px] bg-(--red-light)/60 flex items-center justify-center ring-1 ring-(--red)/10">
-                                    <GraduationCap className="w-4 h-4 text-(--red)" />
-                                </div>
-                                <div>
-                                    <p className="font-black text-(--navy) text-base leading-none">
-                                        Новый урок
-                                    </p>
-                                    <p className="text-xs text-black/35 font-semibold mt-0.5">
-                                        {DAYS_MAP.find((w) => w.key === targetSlot.dayOfWeek)?.full}, урок №{targetSlot.lessonNumber}
-                                    </p>
-                                </div>
-                            </div>
-                            <button
-                                onClick={() => setIsModalOpen(false)}
-                                className="w-8 h-8 rounded-xl bg-black/5 hover:bg-black/10 flex items-center justify-center text-black/30 hover:text-black/60 transition-all"
-                            >
-                                <X className="w-4 h-4" />
-                            </button>
-                        </div>
+            <CreateScheduleModal
+                schoolClassId={Number(activeClassId)}
+                isOpen={isModalOpen}
+                targetSlot={targetSlot}
+                teacherSubjects={teacherSubjects}
+                validFrom={selectedMondayDate}
+                onClose={() => setIsModalOpen(false)}
+            />
 
-                        <div className="px-6 py-5 space-y-4">
-                            <div className="space-y-1.5">
-                                <label className="text-[11px] font-black uppercase tracking-widest text-black/30">
-                                    Шаг 1 · Преподаватель
-                                </label>
-                                <Select
-                                    value={formTeacherId}
-                                    onValueChange={(val) => {
-                                        setFormTeacherId(val);
-                                        setFormSubjectId("");
-                                    }}
-                                >
-                                    <SelectTrigger className="w-full h-12 text-sm font-bold rounded-2xl bg-white/40 border-white/60 text-(--navy)">
-                                        <SelectValue placeholder="Выберите учителя из штата" />
-                                    </SelectTrigger>
-                                    <SelectContent className="rounded-2xl">
-                                        {uniqueTeachers.map((t) => (
-                                            <SelectItem key={t.id} value={t.id.toString()} className="text-sm font-semibold">
-                                                {`${t.lastName} ${t.firstName}`}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="space-y-1.5">
-                                <label className="text-[11px] font-black uppercase tracking-widest text-black/30">
-                                    Шаг 2 · Дисциплина
-                                </label>
-                                <Select
-                                    value={formSubjectId}
-                                    onValueChange={setFormSubjectId}
-                                    disabled={!formTeacherId}
-                                >
-                                    <SelectTrigger className="w-full h-12 text-sm font-bold rounded-2xl bg-white/40 border-white/60 text-(--navy) disabled:opacity-40">
-                                        <SelectValue
-                                            placeholder={
-                                                formTeacherId
-                                                    ? "Выберите доступный предмет"
-                                                    : "Сначала выберите учителя"
-                                            }
-                                        />
-                                    </SelectTrigger>
-                                    <SelectContent className="rounded-2xl">
-                                        {availableSubjectsForTeacher.map((s) => (
-                                            <SelectItem key={s.id} value={s.id.toString()} className="text-sm font-semibold">
-                                                {s.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="space-y-1.5">
-                                <label className="text-[11px] font-black uppercase tracking-widest text-black/30">
-                                    Аудитория
-                                </label>
-                                <input
-                                    type="text"
-                                    placeholder="Напр. 305, Лекторий"
-                                    value={roomInput}
-                                    onChange={(e) => setRoomInput(e.target.value)}
-                                    className="w-full h-12 bg-white/40 border border-white/60 text-(--navy) rounded-2xl px-4 text-sm font-semibold placeholder:font-normal placeholder:text-black/25 focus:outline-none focus:border-(--red)/40"
-                                />
-                            </div>
-
-                            <div className="pt-1">
-                                <button
-                                    onClick={handleSaveLesson}
-                                    disabled={!formTeacherId || !formSubjectId || saveSuccess || isCreating}
-                                    className="w-full gap-2 bg-(--red) hover:bg-(--red-dark) text-white rounded-2xl py-4 text-base font-black shadow-lg shadow-(--red)/20 transition-all active:scale-[0.98] disabled:opacity-40 flex items-center justify-center"
-                                >
-                                    {isCreating ? (
-                                        <Loader2 className="w-4 h-4 animate-spin" />
-                                    ) : saveSuccess ? (
-                                        <>
-                                            <CheckCircle2 className="w-4 h-4" />
-                                            Сохранено!
-                                        </>
-                                    ) : (
-                                        <>
-                                            Утвердить слот
-                                            <Send className="w-4 h-4" />
-                                        </>
-                                    )}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Модалка подтверждения закрытия */}
+            {/* Модалка генерации / загрузки */}
             {isGenerateModalOpen && (
                 <GenerateModal
                     isGenerating={isGenerating}
@@ -414,6 +271,7 @@ export default function SchedulePage() {
                 />
             )}
 
+            {/* Модалка подтверждения закрытия */}
             {lessonToClose && (
                 <ConfirmCloseModal
                     lesson={lessonToClose}
@@ -424,6 +282,12 @@ export default function SchedulePage() {
                     onCancel={() => setLessonToClose(null)}
                 />
             )}
+
+            {/* Модалка детализации урока */}
+            <ScheduleDetailModal
+                scheduleId={selectedLessonId}
+                onClose={() => setSelectedLessonId(null)}
+            />
         </div>
     );
 }

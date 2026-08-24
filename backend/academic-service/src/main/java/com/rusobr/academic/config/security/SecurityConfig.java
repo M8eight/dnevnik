@@ -1,8 +1,10 @@
 package com.rusobr.academic.config.security;
 
 import jakarta.servlet.DispatcherType;
+import org.apache.http.impl.DefaultBHttpClientConnection;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -99,11 +101,22 @@ public class SecurityConfig {
                             .requestMatchers(PUT, "/api/v1/school-classes/*/teacher/*").hasRole(ADMIN.name())
 
                             .requestMatchers(GET, "/api/v1/schedules").hasRole(ADMIN.name())
+                            .requestMatchers(DELETE, "/api/v1/schedules/*").hasRole(ADMIN.name())
+                            .requestMatchers(GET, "/api/v1/schedules/*/details").hasRole(ADMIN.name())
                             .requestMatchers(POST, "/api/v1/schedules").hasRole(ADMIN.name())
                             .requestMatchers(GET, "/api/v1/schedules/by-class").hasRole(ADMIN.name())
                             .requestMatchers(PATCH, "/api/v1/schedules/load").hasRole(ADMIN.name())
                             .requestMatchers(PATCH, "/api/v1/schedules/*/close").hasRole(ADMIN.name())
                             .requestMatchers(GET, "/api/v1/teacher-subjects").hasRole(ADMIN.name())
+
+                            .requestMatchers(GET, "/api/v1/class-groups/by-school-class/*").hasRole(ADMIN.name())
+                            .requestMatchers(GET, "/api/v1/class-groups/*").hasRole(ADMIN.name())
+                            .requestMatchers(GET, "/api/v1/class-groups/*/unassigned-students").hasRole(ADMIN.name())
+                            .requestMatchers(POST, "/api/v1/class-groups").hasRole(ADMIN.name())
+                            .requestMatchers(DELETE, "/api/v1/class-groups/*").hasRole(ADMIN.name())
+                            .requestMatchers(PATCH, "/api/v1/class-groups/*").hasRole(ADMIN.name())
+                            .requestMatchers(POST, "/api/v1/class-groups/*/students/*").hasRole(ADMIN.name())
+                            .requestMatchers(DELETE, "/api/v1/class-groups/*/students/*").hasRole(ADMIN.name())
 
                             .requestMatchers(GET, "/api/v1/academic-years").hasRole(ADMIN.name())
                             .requestMatchers(POST, "/api/v1/academic-years").hasRole(ADMIN.name())
