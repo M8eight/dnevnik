@@ -97,7 +97,7 @@ public interface ScheduleLessonRepository extends JpaRepository<ScheduleLesson, 
             and sl.dayOfWeek = :dayOfWeek
             and sl.lessonNumber = :lessonNumber
             and (sl.validTo is null or sl.validTo >= :validFrom)
-""")
+    """)
     boolean existsActiveByTeachingAssignmentSlot(@Param("teachingAssignmentId") Long teachingAssignmentId,
                                                  @Param("dayOfWeek") DayOfWeek dayOfWeek,
                                                  @Param("lessonNumber") Integer lessonNumber,

@@ -41,6 +41,8 @@ public enum AcademicExceptionCode implements IExceptionCode {
     SCHEDULE_ALREADY_EXIST,
     SCHEDULE_ALREADY_CLOSED,
     SCHEDULE_NOT_FOUND,
+    SCHEDULE_HAS_DATA_AFTER_CLOSE_DATE,
+    SCHEDULE_HAS_DATA,
 
     SUBJECT_NOT_FOUND,
 

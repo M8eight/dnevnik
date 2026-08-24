@@ -32,7 +32,7 @@ public class ScheduleController {
     }
 
     @GetMapping("/schedules/by-class")
-    public Map<DayOfWeek, List<ScheduleLessonDto>> getClassSchedule(@RequestParam Long classId,
+    public Map<DayOfWeek, Map<Integer, List<ScheduleLessonDto>>> getClassSchedule(@RequestParam Long classId,
                                                                     @RequestParam LocalDate date) {
         return scheduleService.getByClass(classId, date);
     }
@@ -52,9 +52,19 @@ public class ScheduleController {
         return scheduleService.getByTeacherIdPeriod(userId, startDate, endDate);
     }
 
+    @GetMapping("/schedules/{id}/details")
+    public ScheduleLessonDetails getScheduleDetails(@PathVariable("id") Long id) {
+        return scheduleService.getDetails(id);
+    }
+
     @PostMapping("/schedules")
     public void create(@RequestBody ScheduleLessonRequest scheduleLessonRequest) {
         scheduleService.create(scheduleLessonRequest);
+    }
+
+    @DeleteMapping("/schedules/{scheduleId}")
+    public void delete(@PathVariable Long scheduleId) {
+        scheduleService.delete(scheduleId);
     }
 
     @PatchMapping("/schedules/{scheduleId}/close")

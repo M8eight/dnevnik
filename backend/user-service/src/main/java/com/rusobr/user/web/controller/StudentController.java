@@ -27,6 +27,11 @@ public class StudentController {
         return studentService.getDetailsById(id);
     }
 
+    @GetMapping("/{id}/exists")
+    public boolean existsById(@PathVariable Long id) {
+        return studentService.existsById(id);
+    }
+
     @GetMapping("/{id}/info")
     public StudentInfoResponse getStudentInfoById(@PathVariable Long id) {
         return studentService.getStudentInfoById(id);
