@@ -3,9 +3,12 @@ package com.rusobr.academic.application.service;
 import com.rusobr.academic.application.mapper.AcademicPeriodMapper;
 import com.rusobr.academic.application.mapper.LessonInstanceMapper;
 import com.rusobr.academic.domain.model.AcademicPeriod;
+import com.rusobr.academic.domain.model.ClassGroupStudents;
+import com.rusobr.academic.domain.model.ClassStudent;
+import com.rusobr.academic.domain.model.TeachingAssignment;
 import com.rusobr.academic.infrastructure.client.UserClient;
 import com.rusobr.academic.infrastructure.persistence.repository.LessonInstanceRepository;
-import com.rusobr.academic.infrastructure.persistence.repository.SchoolClassRepository;
+import com.rusobr.academic.infrastructure.persistence.repository.TeachingAssignmentRepository;
 import com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodResponse;
 import com.rusobr.academic.web.dto.grade.PeriodFinalGradeResponse;
 import com.rusobr.academic.web.dto.grade.WeightedGrade;
@@ -14,8 +17,10 @@ import com.rusobr.academic.web.dto.grade.periodGrade.PeriodGradeStudentResponse;
 import com.rusobr.academic.web.dto.lessonInstance.*;
 import com.rusobr.academic.web.dto.lessonInstance.teacher.StudentJournalDto;
 import com.rusobr.academic.web.dto.lessonInstance.teacher.TeacherJournalResponse;
+import com.rusobr.academic.web.exception.AcademicExceptionCode;
 import com.rusobr.common.dto.BatchUserResponse;
 import com.rusobr.common.dto.UserFeignResponse;
+import com.rusobr.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
@@ -39,13 +44,13 @@ public class JournalService {
 
     private final LessonInstanceRepository lessonInstanceRepository;
     private final AcademicPeriodMapper academicPeriodMapper;
-    private final SchoolClassRepository schoolClassRepository;
     private final UserClient userClient;
     private final LessonInstanceMapper lessonInstanceMapper;
     private final TransactionTemplate readOnlyTransactionTemplate;
     private final PeriodGradeService periodGradeService;
     private final FinalGradeService finalGradeService;
     private final AcademicPeriodService academicPeriodService;
+    private final TeachingAssignmentRepository teachingAssignmentRepository;
 
 
     @Cacheable(value = "journalByStudentId", key = "#studentId + '#' + #academicPeriodId")
@@ -165,7 +170,17 @@ public class JournalService {
                 .findLessonInstanceByTeachingAssignmentId(teachingAssignmentId, academicPeriod.getStartDate(), academicPeriod.getEndDate())
                 .stream().map(lessonInstanceMapper::toLessonInstanceDto).toList();
 
-        List<Long> studentsIds = schoolClassRepository.findStudentsIdsByTeachingAssignment(teachingAssignmentId);
+        TeachingAssignment ta = teachingAssignmentRepository.findWithGroup(teachingAssignmentId)
+                .orElseThrow(() -> new NotFoundException("TeachingAssignment with id=%s not found",
+                        AcademicExceptionCode.TEACHING_ASSIGNMENT_NOT_FOUND));
+        List<Long> studentsIds;
+        if (ta.getClassGroup() == null) {
+            studentsIds = ta.getSchoolClass().getStudents()
+                    .stream().map(ClassStudent::getStudentId).toList();
+        } else {
+            studentsIds = ta.getClassGroup().getClassGroupStudents()
+                    .stream().map(ClassGroupStudents::getStudentId).toList();
+        }
 
         List<StudentJournalDto.GradeLessonTeacherDto> grades = lessonInstanceRepository
                 .findGradesByTeachingAssignment(teachingAssignmentId, academicPeriod.getStartDate(), academicPeriod.getEndDate())
@@ -194,7 +209,6 @@ public class JournalService {
                 academicPeriod.getStartDate(), academicPeriod.getEndDate())
                 .stream().map(lessonInstanceMapper::toLessonInstanceDto).toList();
     }
-
 
 
 }

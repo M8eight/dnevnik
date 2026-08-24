@@ -243,6 +243,42 @@ public interface LessonInstanceRepository extends JpaRepository<LessonInstance, 
         where cs.studentId = :studentId
             and li.lessonDate between :startDate and :endDate
     """)
-    int countLessonsByPeriod(Long studentId, LocalDate startDate, LocalDate endDate);
+    int countLessonsByPeriod(@Param("studentId") Long studentId,
+                             @Param("startDate") LocalDate startDate,
+                             @Param("endDate") LocalDate endDate);
+
+    @Query("""
+        select count(*) > 0
+        from LessonInstance li
+        where li.scheduleLesson.id = :scheduleId
+            and li.lessonDate > :closeDate
+            and (
+                exists (
+                    select 1 from Grade g where g.lessonInstance.id = li.id and g.deletedAt is null
+                )
+                or exists (
+                    select 1 from Attendance a where a.lessonInstance.id = li.id and a.deletedAt is null
+                )
+                or exists (
+                    select 1 from Homework h where h.lessonInstance.id = li.id and h.deletedAt is null
+                )
+            )
+    """)
+    boolean existsDataAfterDate(@Param("scheduleId") Long scheduleId, @Param("closeDate") LocalDate closeDate);
+
+    @Query("""
+    select count(*) > 0
+    from LessonInstance li
+    where li.scheduleLesson.id = :scheduleId
+        and li.deletedAt is null
+        and (
+            exists (select 1 from Grade g where g.lessonInstance.id = li.id and g.deletedAt is null)
+            or exists (select 1 from Attendance a where a.lessonInstance.id = li.id and a.deletedAt is null)
+            or exists (select 1 from Homework h where h.lessonInstance.id = li.id and h.deletedAt is null)
+        )
+    """)
+    boolean existsAnyDataForSchedule(@Param("scheduleId") Long scheduleId);
+
+    void deleteLessonInstancesByScheduleLessonId(Long scheduleLessonId);
 
 }

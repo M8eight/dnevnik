@@ -113,14 +113,18 @@ export default function HomeworkCalendar({
                     return (
                         <button
                             key={key}
-                            onClick={() => onSelectDate(day)}
+                            onClick={() => hasLesson && onSelectDate(day)}
+                            disabled={!hasLesson}
                             className={cn(
                                 "relative flex flex-col items-start rounded-2xl p-2 min-h-[72px] transition-all text-left border",
+                                !hasLesson && "opacity-30 cursor-not-allowed",
                                 isSelected
                                     ? "bg-[var(--ink-dim)] border-transparent shadow-lg shadow-[var(--navy)]/20"
-                                    : hws.length > 0
-                                    ? "bg-white/50 border-black/5 hover:bg-white/70 hover:border-black/10"
-                                    : "bg-white/20 border-transparent hover:bg-white/35 hover:border-black/5"
+                                    : hasLesson && hws.length > 0
+                                    ? "bg-white/50 border-black/5 hover:bg-white/70 hover:border-black/10 cursor-pointer"
+                                    : hasLesson
+                                    ? "bg-white/20 border-transparent hover:bg-white/35 hover:border-black/5 cursor-pointer"
+                                    : "bg-white/10 border-transparent"
                             )}
                         >
                             {/* Day number */}

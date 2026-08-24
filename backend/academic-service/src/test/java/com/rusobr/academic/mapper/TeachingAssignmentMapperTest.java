@@ -32,10 +32,11 @@ public class TeachingAssignmentMapperTest {
         when(projection.getSchoolClassName()).thenReturn("5А");
         when(projection.getSubjectId()).thenReturn(7L);
         when(projection.getSubjectName()).thenReturn("Алгебра");
+        when(projection.getClassGroupName()).thenReturn("Группа А");
 
         TeachingAssignmentDetailsDto result = mapper.toTeachingAssignmentDetailsDto(projection);
 
-        assertThat(result).isEqualTo(new TeachingAssignmentDetailsDto(1L, 5L, "5А", 7L, "Алгебра"));
+        assertThat(result).isEqualTo(new TeachingAssignmentDetailsDto(1L, 5L, "5А", 7L, "Алгебра", "Группа А"));
     }
 
     @Test

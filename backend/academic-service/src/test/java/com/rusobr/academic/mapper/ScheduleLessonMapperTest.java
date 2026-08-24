@@ -87,9 +87,8 @@ public class ScheduleLessonMapperTest {
                 DayOfWeek.MONDAY,
                 1,
                 "101",
-                VALID_FROM,
-                VALID_TO,
                 new SubjectResponseDto(7L, "Алгебра"),
+                null,
                 teacher));
     }
 
@@ -109,7 +108,7 @@ public class ScheduleLessonMapperTest {
     @Test
     void shouldMapRequestAndAssignmentToEntity() {
         ScheduleLessonRequest request = new ScheduleLessonRequest(
-                5L, 7L, 10L, DayOfWeek.TUESDAY, 2, "102", VALID_FROM);
+                5L, 7L, 10L, DayOfWeek.TUESDAY, 2, "102", null, VALID_FROM);
         TeachingAssignment assignment = TeachingAssignment.builder().id(2L).build();
 
         ScheduleLesson result = mapper.toEntity(request, assignment);

@@ -22,16 +22,33 @@ public interface TeachingAssignmentRepository  extends JpaRepository<TeachingAss
         sc.id schoolClassId,
         sc.name schoolClassName,
         s.id subjectId,
-        s.name subjectName
+        s.name subjectName,
+        cg.name classGroupName
     from TeachingAssignment ta
     join ta.subject s
     join ta.schoolClass sc
+    left join ta.classGroup cg
     where ta.teacherId = :teacherId
     order by s.id asc, sc.name asc
 """)
     List<TeachingAssignmentDetailsProjection> findTeachingAssignmentDetailByTeacherId(@Param("teacherId") Long teacherId);
 
-    Optional<TeachingAssignment> findBySubjectIdAndSchoolClassIdAndTeacherId(Long subjectId, Long schoolClassId, Long teacherId);
+    @Query("""
+        select ta
+        from TeachingAssignment ta
+        where ta.subject.id = :subjectId
+            and ta.schoolClass.id = :schoolClassId
+            and ta.teacherId = :teacherId
+            and (
+                (:classGroupId is not null and ta.classGroup.id = :classGroupId)
+                    or
+                (:classGroupId is null and ta.classGroup is null)
+            )
+    """)
+    Optional<TeachingAssignment> findBySubjectIdAndSchoolClassIdAndTeacherIdAndClassGroupId(@Param("subjectId") Long subjectId,
+                                                                                            @Param("schoolClassId") Long schoolClassId,
+                                                                                            @Param("teacherId") Long teacherId,
+                                                                                            @Param("classGroupId") Long classGroupId);
 
     @Query("""
         select s.studentId
@@ -70,5 +87,18 @@ public interface TeachingAssignmentRepository  extends JpaRepository<TeachingAss
         and cs.studentId = :studentId
     """)
     boolean isOwnedByTeacherWithStudent(@Param("teacherId") Long teacherId, @Param("teachingAssignmentId") Long teachingAssignmentId, @Param("studentId") Long studentId);
+
+    boolean existsByClassGroupId(Long classGroupId);
+
+    @Query("""
+        select ta
+        from TeachingAssignment ta
+        join fetch ta.schoolClass sc
+        join fetch sc.students cs
+        left join fetch ta.classGroup cg
+        left join fetch cg.classGroupStudents cgs
+        where ta.id = :teachingAssignmentId
+    """)
+    Optional<TeachingAssignment> findWithGroup(Long teachingAssignmentId);
 
 }

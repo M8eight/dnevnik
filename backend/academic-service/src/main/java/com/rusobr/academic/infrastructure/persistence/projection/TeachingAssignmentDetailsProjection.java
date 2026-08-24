@@ -6,4 +6,5 @@ public interface TeachingAssignmentDetailsProjection {
     String getSchoolClassName();
     Long getSubjectId();
     String getSubjectName();
+    String getClassGroupName();
 }

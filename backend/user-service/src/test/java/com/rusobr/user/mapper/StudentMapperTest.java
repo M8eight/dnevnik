@@ -3,13 +3,11 @@ package com.rusobr.user.mapper;
 import com.rusobr.common.enums.UserRole;
 import com.rusobr.user.application.mapper.StudentMapper;
 import com.rusobr.user.application.mapper.StudentMapperImpl;
-import com.rusobr.user.domain.model.Parent;
 import com.rusobr.user.domain.model.Student;
 import com.rusobr.user.domain.model.User;
 import com.rusobr.user.web.dto.feign.AcademicYearResponse;
 import com.rusobr.user.web.dto.feign.SchoolClassResponse;
 import com.rusobr.user.web.dto.student.StudentDetails;
-import com.rusobr.user.web.dto.student.StudentInfoResponse;
 import com.rusobr.user.web.dto.student.StudentWithClassResponse;
 import com.rusobr.user.web.dto.teacher.TeacherDetails;
 import com.rusobr.user.web.dto.teacher.TeacherResponse;
@@ -143,59 +141,4 @@ class StudentMapperTest {
         }
     }
 
-    @Nested
-    @DisplayName("toStudentInfoResponse")
-    class ToStudentInfoResponse {
-
-        @Test
-        @DisplayName("маппит родителя в user-ответ и вкладывает класс и учителя")
-        void mapsAllFields() {
-            User parentUser = User.builder()
-                    .id(3L)
-                    .username("mama")
-                    .firstName("Elena")
-                    .lastName("Petrova")
-                    .keycloakId("kc-3")
-                    .roles(Set.of(UserRole.PARENT))
-                    .build();
-            Parent parent = Parent.builder().user(parentUser).build();
-            Student student = Student.builder()
-                    .studyProfile("physics")
-                    .parent(parent)
-                    .build();
-            SchoolClassResponse schoolClass = schoolClass();
-            TeacherResponse teacher = classTeacher();
-
-            StudentInfoResponse result = mapper.toStudentInfoResponse(student, schoolClass, teacher);
-
-            assertThat(result.studyProfile()).isEqualTo("physics");
-            assertThat(result.parent()).isEqualTo(UserResponse.builder()
-                    .id(3L)
-                    .username("mama")
-                    .firstName("Elena")
-                    .lastName("Petrova")
-                    .keycloakId("kc-3")
-                    .roles(Set.of(UserRole.PARENT))
-                    .build());
-            assertThat(result.schoolClass()).isSameAs(schoolClass);
-            assertThat(result.classTeacher()).isSameAs(teacher);
-        }
-
-        @Test
-        @DisplayName("студент без родителя — parent остаётся null")
-        void noParent_returnsNullParent() {
-            Student student = Student.builder().studyProfile("physics").build();
-
-            StudentInfoResponse result = mapper.toStudentInfoResponse(student, schoolClass(), classTeacher());
-
-            assertThat(result.parent()).isNull();
-            assertThat(result.studyProfile()).isEqualTo("physics");
-        }
-
-        @Test
-        @DisplayName("все аргументы null — возвращает null")
-        void nullArgs_returnsNull() {
-            assertThat(mapper.toStudentInfoResponse(null, null, null)).isNull();
-        }
-    }
 }

@@ -102,9 +102,8 @@ public class ScheduleControllerTest {
                 DayOfWeek.MONDAY,
                 2,
                 "101",
-                DATE,
-                DATE.plusWeeks(1),
                 new SubjectResponseDto(SUBJECT_ID, "Mathematics"),
+                null,
                 new UserFeignResponse(TEACHER_ID, "Ivan", "Petrov", "ipetrov", "keycloak-1")
         );
     }
@@ -117,6 +116,7 @@ public class ScheduleControllerTest {
                 DayOfWeek.MONDAY,
                 2,
                 "101",
+                null,
                 DATE
         );
     }
@@ -140,14 +140,14 @@ public class ScheduleControllerTest {
     @DisplayName("GET /schedules/by-class — 200 and class schedule map")
     void getClassSchedule_ShouldReturn200() throws Exception {
         when(scheduleService.getByClass(CLASS_ID, DATE))
-                .thenReturn(Map.of(DayOfWeek.MONDAY, List.of(buildScheduleLessonDto())));
+                .thenReturn(Map.of(DayOfWeek.MONDAY, Map.of(2, List.of(buildScheduleLessonDto()))));
 
         mockMvc.perform(get("/api/v1/schedules/by-class")
                         .param("classId", String.valueOf(CLASS_ID))
                         .param("date", DATE.toString()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.MONDAY[0].id").value(SCHEDULE_ID))
-                .andExpect(jsonPath("$.MONDAY[0].subject.name").value("Mathematics"));
+                .andExpect(jsonPath("$.MONDAY.2[0].id").value(SCHEDULE_ID))
+                .andExpect(jsonPath("$.MONDAY.2[0].subject.name").value("Mathematics"));
     }
 
     @Test

@@ -6,6 +6,7 @@ import com.rusobr.academic.domain.model.SchoolClass;
 import com.rusobr.academic.domain.model.Subject;
 import com.rusobr.academic.domain.model.TeachingAssignment;
 import com.rusobr.academic.infrastructure.persistence.projection.TeachingAssignmentDetailsProjection;
+import com.rusobr.academic.infrastructure.persistence.repository.ClassGroupRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.SchoolClassRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.SubjectRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.TeachingAssignmentRepository;
@@ -31,6 +32,7 @@ class TeachingAssignmentServiceTest {
     @Mock private TeachingAssignmentRepository teachingAssignmentRepository;
     @Mock private SchoolClassRepository schoolClassRepository;
     @Mock private SubjectRepository subjectRepository;
+    @Mock private ClassGroupRepository classGroupRepository;
     @Mock private TeachingAssignmentMapper teachingAssignmentMapper;
 
     @InjectMocks private TeachingAssignmentService service;
@@ -45,26 +47,26 @@ class TeachingAssignmentServiceTest {
         @Test
         @DisplayName("возвращает существующее назначение, если оно есть")
         void returnExisting() {
-            TeachingAssignmentRequest request = new TeachingAssignmentRequest(CLASS_ID, SUBJECT_ID, TEACHER_ID);
+            TeachingAssignmentRequest request = new TeachingAssignmentRequest(CLASS_ID, SUBJECT_ID, TEACHER_ID, null);
             TeachingAssignment existing = TeachingAssignment.builder().id(100L).build();
 
-            when(teachingAssignmentRepository.findBySubjectIdAndSchoolClassIdAndTeacherId(SUBJECT_ID, CLASS_ID, TEACHER_ID))
+            when(teachingAssignmentRepository.findBySubjectIdAndSchoolClassIdAndTeacherIdAndClassGroupId(SUBJECT_ID, CLASS_ID, TEACHER_ID, null))
                     .thenReturn(Optional.of(existing));
 
             TeachingAssignment result = service.createOrGet(request);
 
             assertThat(result).isEqualTo(existing);
-            verifyNoInteractions(schoolClassRepository, subjectRepository);
+            verifyNoInteractions(schoolClassRepository, subjectRepository, classGroupRepository);
         }
 
         @Test
         @DisplayName("создает новое назначение, если его нет")
         void createNew() {
-            TeachingAssignmentRequest request = new TeachingAssignmentRequest(CLASS_ID, SUBJECT_ID, TEACHER_ID);
+            TeachingAssignmentRequest request = new TeachingAssignmentRequest(CLASS_ID, SUBJECT_ID, TEACHER_ID, null);
             SchoolClass schoolClass = new SchoolClass();
             Subject subject = new Subject();
 
-            when(teachingAssignmentRepository.findBySubjectIdAndSchoolClassIdAndTeacherId(SUBJECT_ID, CLASS_ID, TEACHER_ID))
+            when(teachingAssignmentRepository.findBySubjectIdAndSchoolClassIdAndTeacherIdAndClassGroupId(SUBJECT_ID, CLASS_ID, TEACHER_ID, null))
                     .thenReturn(Optional.empty());
             when(schoolClassRepository.getReferenceById(CLASS_ID)).thenReturn(schoolClass);
             when(subjectRepository.getReferenceById(SUBJECT_ID)).thenReturn(subject);
@@ -74,6 +76,7 @@ class TeachingAssignmentServiceTest {
 
             assertThat(result.getSchoolClass()).isEqualTo(schoolClass);
             assertThat(result.getSubject()).isEqualTo(subject);
+            assertThat(result.getClassGroup()).isNull();
             verify(teachingAssignmentRepository).save(any(TeachingAssignment.class));
         }
     }
@@ -103,7 +106,7 @@ class TeachingAssignmentServiceTest {
         @DisplayName("возвращает детали назначений учителя")
         void success() {
             TeachingAssignmentDetailsProjection projection = mock(TeachingAssignmentDetailsProjection.class);
-            TeachingAssignmentDetailsDto dto = new TeachingAssignmentDetailsDto(1L, CLASS_ID, "10A", SUBJECT_ID, "Математика");
+            TeachingAssignmentDetailsDto dto = new TeachingAssignmentDetailsDto(1L, CLASS_ID, "10A", SUBJECT_ID, "Математика", null);
 
             when(teachingAssignmentRepository.findTeachingAssignmentDetailByTeacherId(TEACHER_ID))
                     .thenReturn(List.of(projection));

@@ -5,6 +5,7 @@ public record TeachingAssignmentDetailsDto(
         Long schoolClassId,
         String schoolClassName,
         Long subjectId,
-        String subjectName
+        String subjectName,
+        String classGroupName
 ) {
 }

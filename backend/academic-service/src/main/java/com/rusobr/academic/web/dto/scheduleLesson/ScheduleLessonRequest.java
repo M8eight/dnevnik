@@ -12,6 +12,7 @@ public record ScheduleLessonRequest(
         @NotNull DayOfWeek dayOfWeek,
         @NotNull Integer lessonNumber,
         @NotNull String classRoom,
+        Long classGroupId,
         @NotNull LocalDate validFrom
 ) {
 }

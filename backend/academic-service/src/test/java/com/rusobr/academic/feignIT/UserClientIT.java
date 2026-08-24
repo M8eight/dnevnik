@@ -26,7 +26,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.ok;
 import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
@@ -36,7 +35,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class UserClientIT extends FeignIntegrationTestBase {
@@ -205,17 +203,17 @@ public class UserClientIT extends FeignIntegrationTestBase {
     }
 
     @Test
-    void existStudentById_shouldNotThrow_whenServiceReturns200() {
-        stubFor(get(urlPathEqualTo("/api/v1/students/5/details"))
-                .willReturn(ok()));
+    void existStudentById_shouldReturnTrue_whenServiceReturns200() {
+        stubFor(get(urlPathEqualTo("/api/v1/students/5/exists"))
+                .willReturn(okJson("true")));
 
-        assertThatCode(() -> userClient.existStudentById(5L)).doesNotThrowAnyException();
-        verify(getRequestedFor(urlPathEqualTo("/api/v1/students/5/details")));
+        assertThat(userClient.existStudentById(5L)).isTrue();
+        verify(getRequestedFor(urlPathEqualTo("/api/v1/students/5/exists")));
     }
 
     @Test
     void existStudentById_shouldThrowBadRequest_whenServiceReturns404() {
-        stubFor(get(urlPathEqualTo("/api/v1/students/5/details"))
+        stubFor(get(urlPathEqualTo("/api/v1/students/5/exists"))
                 .willReturn(aResponse().withStatus(404)));
 
         assertThatThrownBy(() -> userClient.existStudentById(5L))

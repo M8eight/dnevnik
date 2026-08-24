@@ -140,7 +140,7 @@ public class ScheduleLessonRepositoryIT extends AbstractRepositoryIT {
         void success() {
             setUpGraph();
 
-            List<ScheduleLesson> lessons = scheduleLessonRepository.findClassSchedule(assignment.getSchoolClass().getId(), NOW);
+            List<ScheduleLesson> lessons = scheduleLessonRepository.findClassSchedule(assignment.getSchoolClass().getId(), NOW, NOW);
 
             assertThat(lessons).extracting(ScheduleLesson::getLessonNumber).containsExactly(1, 2);
             assertThat(lessons).allSatisfy(sl -> assertThat(sl.getTeachingAssignment()).isNotNull());
@@ -175,9 +175,9 @@ public class ScheduleLessonRepositoryIT extends AbstractRepositoryIT {
 
             long classId = assignment.getSchoolClass().getId();
             assertThat(scheduleLessonRepository
-                    .existsActiveByClassSlot(classId, DayOfWeek.MONDAY, 1, NOW)).isTrue();
+                    .existsActiveByClassSlot(classId, DayOfWeek.MONDAY, 1, NOW, null)).isTrue();
             assertThat(scheduleLessonRepository
-                    .existsActiveByClassSlot(classId, DayOfWeek.MONDAY, 5, NOW)).isFalse();
+                    .existsActiveByClassSlot(classId, DayOfWeek.MONDAY, 5, NOW, null)).isFalse();
         }
     }
 

@@ -11,7 +11,7 @@ import com.rusobr.common.entity.BaseEntity;
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString(exclude = {"subject", "schoolClass"})
+@ToString(exclude = {"subject", "schoolClass, classGroup"})
 @Builder
 @Table(name = "teaching_assignments")
 @SQLRestriction("deleted_at is NULL")
@@ -27,6 +27,10 @@ public class TeachingAssignment extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "school_class_id", nullable = false)
     private SchoolClass schoolClass;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "class_group_id")
+    private ClassGroup classGroup;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "subject_id", nullable = false)

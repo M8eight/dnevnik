@@ -130,7 +130,7 @@ export default function HomeworkJournal() {
                                         className="font-bold text-[13px] py-3 rounded-xl cursor-pointer"
                                     >
                                         <span className="text-(--red) mr-1">{p.schoolClassName}</span>
-                                        {" "}· {p.subjectName}
+                                        {" "}· {p.subjectName} {p.classGroupName ? `(${p.classGroupName})` : ""}
                                     </SelectItem>
                                 ))}
                             </SelectContent>

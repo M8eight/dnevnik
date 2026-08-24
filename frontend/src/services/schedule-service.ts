@@ -1,5 +1,6 @@
 import api from "../axios/axios";
 import type { AttendanceSimpleResponse } from "./attendance-service";
+import type { ClassGroupResponse } from "./class-group-service";
 import type { GradeResponse } from "./grade-service";
 import type { HomeworkSimpleResponse } from "./homework-service";
 import type { lessonInstance } from "./lesson-instance-service";
@@ -19,9 +20,8 @@ export interface ScheduleLessonDto {
     dayOfWeek: string;
     lessonNumber: number;
     classRoom: string;
-    validFrom: string;
-    validTo: string;
     subject: SubjectResponse;
+    classGroup: ClassGroupResponse;
     teacher: UserSimpleResponse;
 }
 
@@ -33,6 +33,7 @@ export interface ScheduleRequest {
     lessonNumber: number;
     classRoom: string;
     validFrom: string;
+    classGroupId: number | null;
 }
 
 export interface DiaryWeekResponse {
@@ -87,9 +88,19 @@ export interface TeacherScheduleItem {
     dayOfWeek: string;
 }
 
+export interface ScheduleLessonDetails {
+    id: number;
+    classRoom: string;
+    subject: SubjectResponse;
+    classGroup: ClassGroupResponse;
+    schoolClass: SchoolClassResponse;
+    validFrom: string;
+    validTo: string;
+    teacher: UserSimpleResponse;
+}
 
 export type ScheduleResponse = Record<string, ScheduleItem[]>;
-export type ScheduleClassResponse = Record<string, ScheduleLessonDto[]>;
+export type ScheduleClassResponse = Record<string, Record<number, ScheduleLessonDto[]>>;
 export type TeacherScheduleItemPeriod = Record<string, TeacherScheduleItem[]>;
 
 
@@ -121,6 +132,11 @@ export const getTeacherSchedulePeriod = async (startDate: string, endDate: strin
     return data;
 }
 
+export const getScheduleDetails = async (scheduleId: number): Promise<ScheduleLessonDetails> => {
+    const { data } = await api.get<ScheduleLessonDetails>(`/academic-service/api/v1/schedules/${scheduleId}/details`);
+    return data;
+}
+
 export const createSchedule = async (request: ScheduleRequest): Promise<ScheduleRequest> => {
     const { data } = await api.post<ScheduleRequest>(
         `/academic-service/api/v1/schedules`, request
@@ -130,6 +146,10 @@ export const createSchedule = async (request: ScheduleRequest): Promise<Schedule
 
 export const closeSchedule = async (scheduleId: number, closeDate: string): Promise<void> => {
     await api.patch(`/academic-service/api/v1/schedules/${scheduleId}/close?closeDate=${closeDate}`);
+}
+
+export const deleteSchedule = async (scheduleId: number): Promise<void> => {
+    await api.delete(`/academic-service/api/v1/schedules/${scheduleId}`);
 }
 
 export const loadLessonInsance = async (classId: number, fromDate: string, toDate: string): Promise<void> => {

@@ -42,6 +42,7 @@ public class SecurityConfig {
                             .requestMatchers(GET, "/api/v1/parents/*/details").hasAnyRole(ADMIN.name(), TEACHER.name())
                             .requestMatchers(GET, "/api/v1/teachers/*/details").hasAnyRole(ADMIN.name(), TEACHER.name())
                             .requestMatchers(GET, "/api/v1/students/*/info").hasAnyRole(ADMIN.name(), TEACHER.name())
+                            .requestMatchers(GET, "/api/v1/students/*/exists").hasRole(ADMIN.name())
                             .requestMatchers(GET, "/api/v1/students/*").hasAnyRole(ADMIN.name(), TEACHER.name(), STUDENT.name())
                             .requestMatchers(POST, "/api/v1/teachers/batch").hasAnyRole(ADMIN.name(), STUDENT.name())
 

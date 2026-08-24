@@ -26,8 +26,8 @@ public interface UserClient {
     @PostMapping("/api/v1/teachers/batch")
     BatchUserResponse getBatchTeachers(@RequestBody List<Long> ids);
 
-    @GetMapping("/api/v1/students/{id}/details")
-    void existStudentById(@PathVariable Long id);
+    @GetMapping("/api/v1/students/{id}/exists")
+    boolean existStudentById(@PathVariable Long id);
 
     @PostMapping("/api/v1/students/exclude-assigned")
     List<UserFeignResponse> getBatchStudentsExcludeAssigned(@RequestBody Set<Long> ids);

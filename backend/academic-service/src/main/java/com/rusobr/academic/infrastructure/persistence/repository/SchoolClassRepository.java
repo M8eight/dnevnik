@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface SchoolClassRepository extends JpaRepository<SchoolClass, Long> {
@@ -73,5 +74,19 @@ public interface SchoolClassRepository extends JpaRepository<SchoolClass, Long> 
         order by sc.name
     """)
     List<SchoolClass> findSchoolClassesTeacherId(@Param("teacherId") Long teacherId);
+
+    @Query("""
+        select cs.studentId
+        from SchoolClass sc
+            join sc.students cs
+        where cs.studentId not in (
+            select cgs.studentId
+            from ClassGroupStudents cgs
+            join cgs.classGroup cg
+            where cg.schoolClass.id = :schoolClassId
+        )
+        and sc.id = :schoolClassId
+    """)
+    Set<Long> findUnassignedStudentIdsBySchoolClassId(@Param("schoolClassId") Long schoolClassId);
 
 }
