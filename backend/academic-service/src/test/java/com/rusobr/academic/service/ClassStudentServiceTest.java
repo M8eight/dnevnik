@@ -79,7 +79,7 @@ class ClassStudentServiceTest {
             stubTransactionTemplateToExecuteCallback();
             SchoolClass schoolClass = mock(SchoolClass.class);
 
-            doNothing().when(userClient).existStudentById(STUDENT_ID);
+            when(userClient.existStudentById(STUDENT_ID)).thenReturn(true);
             when(schoolClassRepository.existsById(CLASS_ID)).thenReturn(true);
             when(classStudentRepository.existsByStudentId(STUDENT_ID)).thenReturn(false);
             when(schoolClassRepository.getReferenceById(CLASS_ID)).thenReturn(schoolClass);
@@ -101,7 +101,7 @@ class ClassStudentServiceTest {
         @DisplayName("школьный класс не найден — бросает NotFoundException")
         void classNotFound_throwsNotFoundException() {
             stubTransactionTemplateToExecuteCallback();
-            doNothing().when(userClient).existStudentById(STUDENT_ID);
+            when(userClient.existStudentById(STUDENT_ID)).thenReturn(true);
             when(schoolClassRepository.existsById(CLASS_ID)).thenReturn(false);
 
             assertThatThrownBy(() -> service.addStudent(CLASS_ID, STUDENT_ID))
@@ -116,7 +116,7 @@ class ClassStudentServiceTest {
         @DisplayName("студент уже привязан к классу — бросает ConflictException")
         void studentAlreadyExists_throwsConflictException() {
             stubTransactionTemplateToExecuteCallback();
-            doNothing().when(userClient).existStudentById(STUDENT_ID);
+            when(userClient.existStudentById(STUDENT_ID)).thenReturn(true);
             when(schoolClassRepository.existsById(CLASS_ID)).thenReturn(true);
             when(classStudentRepository.existsByStudentId(STUDENT_ID)).thenReturn(true);
 
@@ -134,7 +134,7 @@ class ClassStudentServiceTest {
             stubTransactionTemplateToExecuteCallback();
             SchoolClass schoolClass = mock(SchoolClass.class);
 
-            doNothing().when(userClient).existStudentById(STUDENT_ID);
+            when(userClient.existStudentById(STUDENT_ID)).thenReturn(true);
             when(schoolClassRepository.existsById(CLASS_ID)).thenReturn(true);
             when(classStudentRepository.existsByStudentId(STUDENT_ID)).thenReturn(false);
             when(schoolClassRepository.getReferenceById(CLASS_ID)).thenReturn(schoolClass);

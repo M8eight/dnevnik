@@ -1,8 +1,5 @@
 package com.rusobr.academic.jpaIT;
 
-import com.rusobr.academic.domain.model.AcademicYear;
-import com.rusobr.academic.domain.model.SchoolClass;
-import com.rusobr.academic.domain.model.Subject;
 import com.rusobr.academic.domain.model.TeachingAssignment;
 import com.rusobr.academic.infrastructure.persistence.projection.TeachingAssignmentDetailsProjection;
 import com.rusobr.academic.infrastructure.persistence.repository.TeachingAssignmentRepository;
@@ -83,11 +80,11 @@ public class TeachingAssignmentRepositoryIT extends AbstractRepositoryIT {
             persist(TestData.assignment(7L, schoolClass, subject));
 
             Optional<TeachingAssignment> found = teachingAssignmentRepository
-                    .findBySubjectIdAndSchoolClassIdAndTeacherId(subject.getId(), schoolClass.getId(), 7L);
+                    .findBySubjectIdAndSchoolClassIdAndTeacherIdAndClassGroupId(subject.getId(), schoolClass.getId(), 7L, null);
 
             assertThat(found).isPresent();
             assertThat(teachingAssignmentRepository
-                    .findBySubjectIdAndSchoolClassIdAndTeacherId(subject.getId(), schoolClass.getId(), 8L)).isNotPresent();
+                    .findBySubjectIdAndSchoolClassIdAndTeacherIdAndClassGroupId(subject.getId(), schoolClass.getId(), 8L, null)).isNotPresent();
         }
     }
 

@@ -95,7 +95,7 @@ class ResourceServerSecurityIT extends AbstractSecurityIT {
     }
 
     @Test
-    @DisplayName("Незамапленный URL без токена -> 401")
+    @DisplayName("Незамапленный URL без токена -> 401 (anyRequest.denyAll)")
     void unmappedUrl_WithoutToken_ShouldReturn401() throws Exception {
         mockMvc.perform(get("/api/v1/nonexistent-endpoint"))
                 .andExpect(status().isUnauthorized());

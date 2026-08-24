@@ -334,17 +334,19 @@ class ScheduleServiceTest {
             ScheduleLesson sl = ScheduleLesson.builder().teachingAssignment(ta).build();
 
             UserFeignResponse teacherResponse = new UserFeignResponse(TEACHER_ID, "Петр", "Петров", "petr", "id");
-            ScheduleLessonDto dto = mock(ScheduleLessonDto.class);
-            when(dto.dayOfWeek()).thenReturn(DayOfWeek.WEDNESDAY);
+            ScheduleLessonDto dto = new ScheduleLessonDto(
+                    SCHEDULE_ID, DayOfWeek.WEDNESDAY, 2, "101",
+                    new SubjectResponseDto(7L, "Алгебра"), null, teacherResponse);
 
-            when(scheduleLessonRepository.findClassSchedule(CLASS_ID, DATE)).thenReturn(List.of(sl));
+            when(scheduleLessonRepository.findClassSchedule(CLASS_ID, DATE, DATE.plusDays(6))).thenReturn(List.of(sl));
             when(userClient.getBatchTeachers(List.of(TEACHER_ID))).thenReturn(new BatchUserResponse(List.of(teacherResponse), List.of(), false));
             when(scheduleLessonMapper.toDto(sl, teacherResponse)).thenReturn(dto);
 
-            Map<DayOfWeek, List<ScheduleLessonDto>> result = service.getByClass(CLASS_ID, DATE);
+            Map<DayOfWeek, Map<Integer, List<ScheduleLessonDto>>> result = service.getByClass(CLASS_ID, DATE);
 
             assertThat(result).containsKey(DayOfWeek.WEDNESDAY);
-            assertThat(result.get(DayOfWeek.WEDNESDAY)).containsExactly(dto);
+            assertThat(result.get(DayOfWeek.WEDNESDAY)).containsKey(2);
+            assertThat(result.get(DayOfWeek.WEDNESDAY).get(2)).containsExactly(dto);
         }
     }
 
@@ -354,7 +356,7 @@ class ScheduleServiceTest {
         @Test
         @DisplayName("валидирует существование учителя и делегирует транзакционное создание")
         void success() {
-            ScheduleLessonRequest request = new ScheduleLessonRequest(CLASS_ID, 2L, TEACHER_ID, DayOfWeek.MONDAY, 1, "101", DATE);
+            ScheduleLessonRequest request = new ScheduleLessonRequest(CLASS_ID, 2L, TEACHER_ID, DayOfWeek.MONDAY, 1, "101", null, DATE);
 
             service.create(request);
 
@@ -366,7 +368,7 @@ class ScheduleServiceTest {
     @Nested
     @DisplayName("createTransactional")
     class CreateTransactional {
-        private final ScheduleLessonRequest request = new ScheduleLessonRequest(CLASS_ID, 2L, TEACHER_ID, DayOfWeek.MONDAY, 1, "101", DATE);
+        private final ScheduleLessonRequest request = new ScheduleLessonRequest(CLASS_ID, 2L, TEACHER_ID, DayOfWeek.MONDAY, 1, "101", null, DATE);
 
         @Test
         @DisplayName("успешно сохраняет слот и запускает генерацию уроков")
@@ -375,7 +377,7 @@ class ScheduleServiceTest {
             ScheduleLesson sl = new ScheduleLesson();
 
             when(teachingAssignmentService.createOrGet(any(TeachingAssignmentRequest.class))).thenReturn(ta);
-            when(scheduleLessonRepository.existsActiveByClassSlot(CLASS_ID, DayOfWeek.MONDAY, 1, DATE)).thenReturn(false);
+            when(scheduleLessonRepository.existsActiveByClassSlot(CLASS_ID, DayOfWeek.MONDAY, 1, DATE, null)).thenReturn(false);
             when(scheduleLessonRepository.existsByTeacherSlot(TEACHER_ID, DayOfWeek.MONDAY, 1, DATE)).thenReturn(false);
             when(scheduleLessonMapper.toEntity(request, ta)).thenReturn(sl);
 
@@ -390,7 +392,7 @@ class ScheduleServiceTest {
         void classSlotTaken_throwsConflictException() {
             TeachingAssignment ta = TeachingAssignment.builder().id(88L).build();
             when(teachingAssignmentService.createOrGet(any(TeachingAssignmentRequest.class))).thenReturn(ta);
-            when(scheduleLessonRepository.existsActiveByClassSlot(CLASS_ID, DayOfWeek.MONDAY, 1, DATE)).thenReturn(true);
+            when(scheduleLessonRepository.existsActiveByClassSlot(CLASS_ID, DayOfWeek.MONDAY, 1, DATE, null)).thenReturn(true);
 
             assertThatThrownBy(() -> service.createTransactional(request))
                     .isInstanceOf(ConflictException.class)

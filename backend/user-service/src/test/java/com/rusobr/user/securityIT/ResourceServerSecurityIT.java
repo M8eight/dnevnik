@@ -14,6 +14,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class ResourceServerSecurityIT extends AbstractSecurityIT {
@@ -109,6 +110,34 @@ class ResourceServerSecurityIT extends AbstractSecurityIT {
         mockMvc.perform(get("/api/v1/nonexistent-endpoint")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + studentToken))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("GET /students/{id}/exists без токена -> 401")
+    void studentExists_WithoutToken_ShouldReturn401() throws Exception {
+        mockMvc.perform(get("/api/v1/students/999/exists"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("GET /students/{id}/exists с ролью STUDENT -> 403 (нужен ADMIN)")
+    void studentExists_AsStudent_ShouldReturn403() throws Exception {
+        String studentToken = JwtTestUtils.token(27L, List.of("STUDENT"));
+
+        mockMvc.perform(get("/api/v1/students/999/exists")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + studentToken))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("GET /students/{id}/exists с ролью ADMIN -> 200")
+    void studentExists_AsAdmin_ShouldReturn200() throws Exception {
+        String adminToken = JwtTestUtils.token(1L, List.of("ADMIN"));
+
+        mockMvc.perform(get("/api/v1/students/999/exists")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken))
+                .andExpect(status().isOk())
+                .andExpect(content().string("false"));
     }
 
 }

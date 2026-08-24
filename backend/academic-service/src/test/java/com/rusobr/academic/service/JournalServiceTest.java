@@ -6,6 +6,9 @@ import com.rusobr.academic.application.service.AcademicPeriodService;
 import com.rusobr.academic.application.service.JournalService;
 import com.rusobr.academic.domain.enums.GradeType;
 import com.rusobr.academic.domain.model.AcademicPeriod;
+import com.rusobr.academic.domain.model.ClassStudent;
+import com.rusobr.academic.domain.model.SchoolClass;
+import com.rusobr.academic.domain.model.TeachingAssignment;
 import com.rusobr.academic.infrastructure.client.UserClient;
 import com.rusobr.academic.infrastructure.persistence.projection.AttendanceStudentProjection;
 import com.rusobr.academic.infrastructure.persistence.projection.GradeJournalProjection;
@@ -14,6 +17,7 @@ import com.rusobr.academic.infrastructure.persistence.projection.LessonInstanceP
 import com.rusobr.academic.infrastructure.persistence.repository.AcademicPeriodRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.LessonInstanceRepository;
 import com.rusobr.academic.infrastructure.persistence.repository.SchoolClassRepository;
+import com.rusobr.academic.infrastructure.persistence.repository.TeachingAssignmentRepository;
 import com.rusobr.academic.web.dto.academicPeriod.AcademicPeriodResponse;
 import com.rusobr.common.dto.BatchUserResponse;
 import com.rusobr.common.dto.UserFeignResponse;
@@ -33,6 +37,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -48,6 +53,7 @@ class JournalServiceTest {
     @Mock private UserClient userClient;
     @Mock private LessonInstanceMapper lessonInstanceMapper;
     @Mock private AcademicPeriodService academicPeriodService;
+    @Mock private TeachingAssignmentRepository teachingAssignmentRepository;
     @Mock private TransactionTemplate readOnlyTransactionTemplate;
 
     @InjectMocks private JournalService journalService;
@@ -126,8 +132,15 @@ class JournalServiceTest {
             AttendanceStudentProjection attendanceProjection = mock(AttendanceStudentProjection.class);
 
             LessonInstanceDto lessonDto = new LessonInstanceDto(LESSON_INSTANCE_ID, START_DATE);
-            List<Long> studentIds = List.of(STUDENT_ID);
             UserFeignResponse studentFeign = new UserFeignResponse(STUDENT_ID, "Иван", "Иванов", "ivan", "key");
+
+            // Назначение без подгруппы: студенты берутся из состава класса
+            ClassStudent classStudent = ClassStudent.builder().studentId(STUDENT_ID).build();
+            SchoolClass schoolClass = SchoolClass.builder().students(java.util.Set.of(classStudent)).build();
+            TeachingAssignment assignment = TeachingAssignment.builder()
+                    .id(ASSIGNMENT_ID)
+                    .schoolClass(schoolClass)
+                    .build();
 
             // Настраиваем внутреннее поведение DTO-шек, так как сервис будет вызывать их геттеры
             StudentJournalDto.GradeLessonTeacherDto mockGradeDto = mock(StudentJournalDto.GradeLessonTeacherDto.class);
@@ -142,12 +155,12 @@ class JournalServiceTest {
 
             // Обучаем репозитории возвращать списки проекций
             when(academicPeriodService.getById(PERIOD_ID)).thenReturn(period);
+            when(teachingAssignmentRepository.findWithGroup(ASSIGNMENT_ID)).thenReturn(Optional.of(assignment));
             when(lessonInstanceRepository.findLessonInstanceByTeachingAssignmentId(ASSIGNMENT_ID, START_DATE, END_DATE))
                     .thenReturn(List.of(lessonProjection));
             when(lessonInstanceMapper.toLessonInstanceDto(lessonProjection)).thenReturn(lessonDto);
 
-            when(schoolClassRepository.findStudentsIdsByTeachingAssignment(ASSIGNMENT_ID)).thenReturn(studentIds);
-            when(userClient.getBatchStudents(studentIds)).thenReturn(new BatchUserResponse(List.of(studentFeign), List.of(), false));
+            when(userClient.getBatchStudents(List.of(STUDENT_ID))).thenReturn(new BatchUserResponse(List.of(studentFeign), List.of(), false));
 
             when(lessonInstanceRepository.findGradesByTeachingAssignment(ASSIGNMENT_ID, START_DATE, END_DATE))
                     .thenReturn(List.of(gradeProjection));
