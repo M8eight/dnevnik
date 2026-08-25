@@ -58,6 +58,7 @@ dependencies {
     testImplementation 'org.mockito:mockito-core'
     testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation 'org.testcontainers:postgresql'
+    testImplementation 'org.junit.platform:junit-platform-suite'
 }
 
 tasks.named('test') {

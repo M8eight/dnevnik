@@ -2,21 +2,7 @@ package com.rusobr.academic.jpaIT;
 
 import com.rusobr.academic.domain.enums.AttendanceStatus;
 import com.rusobr.academic.domain.enums.GradeType;
-import com.rusobr.academic.domain.model.AcademicPeriod;
-import com.rusobr.academic.domain.model.AcademicYear;
-import com.rusobr.academic.domain.model.Attendance;
-import com.rusobr.academic.domain.model.ClassStudent;
-import com.rusobr.academic.domain.model.FinalGrade;
-import com.rusobr.academic.domain.model.Grade;
-import com.rusobr.academic.domain.model.Homework;
-import com.rusobr.academic.domain.model.LessonInstance;
-import com.rusobr.academic.domain.model.PeriodGrade;
-import com.rusobr.academic.domain.model.ScheduleLesson;
-import com.rusobr.academic.domain.model.SchoolClass;
-import com.rusobr.academic.domain.model.Subject;
-import com.rusobr.academic.domain.model.TeacherSubject;
-import com.rusobr.academic.domain.model.TeacherSubjectId;
-import com.rusobr.academic.domain.model.TeachingAssignment;
+import com.rusobr.academic.domain.model.*;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;

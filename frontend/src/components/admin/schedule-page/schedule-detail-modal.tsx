@@ -70,7 +70,7 @@ export default function ScheduleDetailModal({ scheduleId, onClose }: ScheduleDet
                                 <div>
                                     <p className="text-[10px] font-black uppercase tracking-widest text-black/30">Преподаватель</p>
                                     <p className="text-sm font-black text-(--navy)">
-                                        {details.teacher.lastName} {details.teacher.firstName} {details.teacher.patronymic ?? ""}
+                                        {details.teacher.lastName} {details.teacher.firstName}
                                     </p>
                                 </div>
                             </div>

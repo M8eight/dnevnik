@@ -2,6 +2,7 @@ spring:
   cloud:
     circuitbreaker:
       resilience4j:
+        disable-thread-pool: true
         disable-time-limiter: true
         enable-semaphore-default-bulkhead: true
     openfeign:

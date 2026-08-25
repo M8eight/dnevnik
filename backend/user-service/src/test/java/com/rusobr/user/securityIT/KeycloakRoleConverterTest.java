@@ -2,6 +2,7 @@ package com.rusobr.user.securityIT;
 
 import com.rusobr.common.config.SecurityHelper;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
@@ -14,6 +15,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Tag("integration")
 class KeycloakRoleConverterTest {
 
     private final Converter<Jwt, ? extends AbstractAuthenticationToken> converter =

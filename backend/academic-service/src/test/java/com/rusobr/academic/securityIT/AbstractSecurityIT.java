@@ -1,17 +1,23 @@
 package com.rusobr.academic.securityIT;
 
+import com.rusobr.academic.infrastructure.initializer.DebugDataInitializer;
+import org.junit.jupiter.api.Tag;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.containers.PostgreSQLContainer;
 
+@Tag("integration")
 @SpringBootTest(properties = {
         "eureka.client.enabled=false",
         "spring.cloud.discovery.enabled=false"
 })
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 @Import(SecurityITConfiguration.class)
 public abstract class AbstractSecurityIT {
 
@@ -20,6 +26,9 @@ public abstract class AbstractSecurityIT {
     static {
         POSTGRES.start();
     }
+
+    @MockitoBean
+    private DebugDataInitializer debugDataInitializer;
 
     @DynamicPropertySource
     static void datasourceProperties(DynamicPropertyRegistry registry) {

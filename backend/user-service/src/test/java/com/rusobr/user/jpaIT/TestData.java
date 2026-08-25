@@ -5,10 +5,12 @@ import com.rusobr.user.domain.model.Parent;
 import com.rusobr.user.domain.model.Student;
 import com.rusobr.user.domain.model.Teacher;
 import com.rusobr.user.domain.model.User;
+import org.junit.jupiter.api.Tag;
 
 import java.util.ArrayList;
 import java.util.Set;
 
+@Tag("integration")
 public final class TestData {
 
     private TestData() {

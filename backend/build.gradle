@@ -21,6 +21,62 @@ subprojects {
 	apply plugin: 'java'
 	apply plugin: 'io.spring.dependency-management'
 
+tasks.named('test', Test) {
+        exclude '**/*TestSuite.class'
+
+        useJUnitPlatform {
+            excludeTags 'integration'
+        }
+    }
+
+    tasks.register('suiteTest', Test) {
+        group = 'verification'
+        testClassesDirs = sourceSets.test.output.classesDirs
+        classpath = sourceSets.test.runtimeClasspath
+
+        exclude '**/*IntegrationTestSuite.class'
+        include '**/*TestSuite.class'
+
+        useJUnitPlatform {
+            excludeTags 'integration'
+        }
+    }
+
+    tasks.register('suiteIntegrationTest', Test) {
+        group = 'verification'
+
+        testClassesDirs = sourceSets.test.output.classesDirs
+        classpath = sourceSets.test.runtimeClasspath
+
+        include '**/*IntegrationTestSuite.class'
+
+        useJUnitPlatform {
+            includeTags 'integration'
+        }
+
+        shouldRunAfter test
+    }
+
+    tasks.register('integrationTest', Test) {
+        group = 'verification'
+        description = 'Runs integration tests'
+
+        testClassesDirs = sourceSets.test.output.classesDirs
+        classpath = sourceSets.test.runtimeClasspath
+
+        exclude '**/*TestSuite.class'
+
+        useJUnitPlatform {
+            includeTags 'integration'
+        }
+
+        shouldRunAfter test
+    }
+
+    tasks.named('check') {
+        dependsOn integrationTest
+    }
+
 	dependencyManagement {
 		imports {
 			mavenBom "org.springframework.boot:spring-boot-dependencies:3.4.2"

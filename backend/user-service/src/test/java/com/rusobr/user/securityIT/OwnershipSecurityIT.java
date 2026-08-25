@@ -12,6 +12,7 @@ import com.rusobr.user.web.dto.feign.AcademicYearResponse;
 import com.rusobr.user.web.dto.feign.SchoolClassResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
@@ -30,6 +31,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@Tag("integration")
 class OwnershipSecurityIT extends AbstractSecurityIT {
 
     @Autowired

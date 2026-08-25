@@ -52,6 +52,7 @@ dependencies {
     implementation 'io.github.openfeign:feign-micrometer'
     implementation 'io.micrometer:context-propagation'
     implementation 'io.micrometer:micrometer-registry-prometheus'
+    testImplementation 'org.junit.platform:junit-platform-suite'
 
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 }

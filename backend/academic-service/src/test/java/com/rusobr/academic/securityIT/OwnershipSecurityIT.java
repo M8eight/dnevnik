@@ -1,21 +1,9 @@
 package com.rusobr.academic.securityIT;
 
 import com.rusobr.academic.domain.enums.GradeType;
-import com.rusobr.academic.domain.model.AcademicYear;
-import com.rusobr.academic.domain.model.Grade;
-import com.rusobr.academic.domain.model.LessonInstance;
-import com.rusobr.academic.domain.model.ScheduleLesson;
-import com.rusobr.academic.domain.model.SchoolClass;
-import com.rusobr.academic.domain.model.Subject;
-import com.rusobr.academic.domain.model.TeachingAssignment;
+import com.rusobr.academic.domain.model.*;
 import com.rusobr.academic.infrastructure.client.UserClient;
-import com.rusobr.academic.infrastructure.persistence.repository.AcademicYearRepository;
-import com.rusobr.academic.infrastructure.persistence.repository.GradeRepository;
-import com.rusobr.academic.infrastructure.persistence.repository.LessonInstanceRepository;
-import com.rusobr.academic.infrastructure.persistence.repository.ScheduleLessonRepository;
-import com.rusobr.academic.infrastructure.persistence.repository.SchoolClassRepository;
-import com.rusobr.academic.infrastructure.persistence.repository.SubjectRepository;
-import com.rusobr.academic.infrastructure.persistence.repository.TeachingAssignmentRepository;
+import com.rusobr.academic.infrastructure.persistence.repository.*;
 import com.rusobr.common.dto.UserFeignResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

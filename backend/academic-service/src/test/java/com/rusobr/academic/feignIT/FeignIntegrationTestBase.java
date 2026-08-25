@@ -1,10 +1,12 @@
 package com.rusobr.academic.feignIT;
 
+import org.junit.jupiter.api.Tag;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
+@Tag("integration")
 @SpringBootTest
 @AutoConfigureWireMock(port = 0)
 @ActiveProfiles("test")

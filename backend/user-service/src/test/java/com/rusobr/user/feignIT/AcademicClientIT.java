@@ -11,7 +11,11 @@ import com.rusobr.user.web.dto.feign.TeacherAcademicFeignDto;
 import com.rusobr.user.web.exception.AcademicServiceUnavailableException;
 import com.rusobr.user.web.exception.UserExceptionCode;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -21,10 +25,13 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@Tag("integration")
 public class AcademicClientIT extends FeignIntegrationTestBase {
 
+    private static final Logger log = LoggerFactory.getLogger(AcademicClientIT.class);
     @Autowired
     private AcademicClient academicClient;
 
@@ -227,13 +234,17 @@ public class AcademicClientIT extends FeignIntegrationTestBase {
                 .claim("sub", "teacher-1")
                 .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt, List.of()));
+        log.info("Security context set");
+        log.info("{}", SecurityContextHolder.getContext().getAuthentication());
 
         stubFor(get(urlPathEqualTo("/api/v1/teachers/1/info"))
                 .willReturn(okJson("""
                         { "subjects": [], "classes": [], "assignments": [] }
                         """)));
+        log.info("{}", SecurityContextHolder.getContext().getAuthentication());
 
         academicClient.getTeacherAcademicInfo(1L);
+        log.info("{}", SecurityContextHolder.getContext().getAuthentication());
 
         verify(getRequestedFor(urlPathEqualTo("/api/v1/teachers/1/info"))
                 .withHeader("Authorization", equalTo("Bearer incoming")));
@@ -257,5 +268,10 @@ public class AcademicClientIT extends FeignIntegrationTestBase {
         SecurityContextHolder.clearContext();
         removeAllMappings();
         reset();
+    }
+
+    @BeforeEach
+    void setUp() {
+        SecurityContextHolder.clearContext();
     }
 }

@@ -1,6 +1,7 @@
 package com.rusobr.user.securityIT;
 
 import com.rusobr.user.infrastructure.initializer.DebugDataInitializer;
+import org.junit.jupiter.api.Tag;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -10,9 +11,11 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.containers.PostgreSQLContainer;
 
+@Tag("integration")
 @SpringBootTest(properties = {
         "eureka.client.enabled=false",
-        "spring.cloud.discovery.enabled=false"
+        "spring.cloud.discovery.enabled=false",
+        "spring.main.allow-bean-definition-overriding=true"
 })
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
