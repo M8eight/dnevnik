@@ -29,9 +29,10 @@ Backend:
 - Spring Data JPA, PostgreSQL, Flyway
 - Caffeine Cache
 - Spring Security OAuth2 Resource Server, Keycloak
-- MapStruct, Lombok
-- Logback, Loki, Grafana Alloy, Grafana
-- JUnit, Mockito, MockMvc
+- MapStruct, Lombok, Webclient (Keycloak Admin API)
+- Logback, Loki, Grafana, Alloy, Prometheus
+- JUnit, Mockito, MockMvc, testcontainers, Wiremock
+- Openhtmltopdf + Thymeleaf (PDF Export)
 
 Frontend:
 
@@ -171,6 +172,7 @@ sequenceDiagram
 
 - `academic_years`, `academic_periods`
 - `school_classes`, `class_students`
+- `class_group`, `class_group_students`
 - `subjects`, `teacher_subjects`, `teaching_assignments`
 - `schedule_lessons`, `lesson_instances`
 - `grades`, `period_grades`, `final_grades`
@@ -198,23 +200,25 @@ Swagger UI:
 
 Ученик:
 
-- `/student/home` - главная
-- `/student/diary` - дневник
-- `/student/grade` - оценки
+- `/student/home` - Главная
+- `/student/diary` - Дневник
+- `/student/grade` - Оценки
+- `/student/school-class` - Школьный класс 
 
 Учитель:
 
-- `/teacher/journal` - журнал успеваемости
-- `/teacher/homework` - домашние задания
+- `/teacher/home` - Главная (расписание учителя и привязанные классы)
+- `/teacher/journal` - Журнал успеваемости
+- `/teacher/homework` - Домашние задания
 
 Администратор:
 
-- `/admin/subject` - предметы
-- `/admin/period` - учебные периоды
-- `/admin/school-class` - классы
-- `/admin/user` - пользователи
-- `/admin/schedule` - расписание
-- `/admin/academic-year` - учебные годы
+- `/admin/subject` - Предметы
+- `/admin/period` - Учебные периоды
+- `/admin/school-class` - Классы
+- `/admin/user` - Пользователи
+- `/admin/schedule` - Расписание
+- `/admin/academic-year` - Учебные года
 
 Дополнительно:
 
@@ -249,6 +253,21 @@ Grafana:
 
 - login: `admin`
 - password: `admin`
+
+### Готовые пользователи:
+
+**Ученик**
+- login: `ivanov_i`
+- password: `12345678`
+
+**Учитель**
+- login: `teacher_soc`
+- password: `12345678`
+
+**Админ**
+- login: `director`
+- password: `12345678`
+
 
 ## Локальный запуск без Docker
 
@@ -287,6 +306,7 @@ npm run dev
 ![student diary](./docs/student/2.png)
 ![student grades](./docs/student/3.png)
 ![student grades detail](./docs/student/4.png)
+![student grades detail](./docs/student/5.png)
 
 ### Учитель
 
@@ -294,6 +314,8 @@ npm run dev
 ![teacher homework](./docs/teacher/2.png)
 ![teacher homework calendar](./docs/teacher/3.png)
 ![teacher homework form](./docs/teacher/4.png)
+![teacher homework form](./docs/teacher/5.png)
+![teacher homework form](./docs/teacher/6.png)
 
 ### Администратор
 
@@ -304,6 +326,8 @@ npm run dev
 ![admin users details](./docs/admin/5.png)
 ![admin schedule](./docs/admin/6.png)
 ![admin classes](./docs/admin/7.png)
+![admin classes](./docs/admin/8.png)
+![admin classes](./docs/admin/9.png)
 
 ### Авторизация
 
