@@ -19,6 +19,8 @@ export default function Index() {
                 navigate("/student/home", { replace: true });
             } else if (roles.includes("TEACHER")) {
                 navigate("/teacher/journal", { replace: true });
+            } else if (roles.includes("PARENT")) {
+                navigate("/parent/home", { replace: true });
             } else {
                 navigate("/", { replace: true });
             }

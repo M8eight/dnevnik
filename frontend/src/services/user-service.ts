@@ -2,7 +2,7 @@ import type { PageResponse } from "@/helpers/helper-interfaces";
 import api from "../axios/axios";
 
 
-export type UserRole = "STUDENT" | "PARENT" | "TEACHER";
+export type UserRole = "STUDENT" | "PARENT" | "TEACHER" | "ADMIN";
 
 export interface UserBase {
     username: string;
@@ -94,8 +94,6 @@ export interface UserUpdateRequest {
     roles?: UserRole[];
     details: Partial<Record<UserRole, UserProfileDetails>>;
 }
-
-// ─── User req ────────────────────────────────────────────────────────────────────
 
 export const createStudent = async (
     request: CreateStudentRequest

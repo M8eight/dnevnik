@@ -10,6 +10,7 @@ import java.util.Optional;
 
 @Repository
 public interface ParentRepository extends JpaRepository<Parent, Long> {
+
     @Query("""
         select p
         from Parent p
@@ -31,4 +32,5 @@ public interface ParentRepository extends JpaRepository<Parent, Long> {
         where p.id = :id
     """)
     Optional<Parent> findParentInfoById(@Param("id") Long id);
+
 }

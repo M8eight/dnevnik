@@ -43,6 +43,13 @@ export const ROLES: {
             color: "text-emerald-600",
             iconBg: "bg-emerald-50/70",
         },
+        {
+            value: "ADMIN",
+            label: "Админ",
+            icon: <BookUser className="w-4 h-4" />,
+            color: "text-emerald-600",
+            iconBg: "bg-emerald-50/70",
+        },
     ];
 
 
@@ -106,16 +113,6 @@ export const ATTENDANCE_LEGEND_ITEMS = [
   { bg: "bg-amber-50", ring: "ring-amber-100", color: "text-amber-500", label: "ОП", desc: "Опоздал" },
   { bg: "bg-violet-50", ring: "ring-violet-100", color: "text-violet-500", label: "УП", desc: "Уваж. причина" },
 ];
-
-
-// {/* Student */}
-// export const DAYS_MAP = [
-//   { key: "MONDAY",    label: "Пн" },
-//   { key: "TUESDAY",   label: "Вт" },
-//   { key: "WEDNESDAY", label: "Ср" },
-//   { key: "THURSDAY",  label: "Чт" },
-//   { key: "FRIDAY",    label: "Пт" },
-// ];
 
 export const DAYS_MAP = [
     { key: "MONDAY", label: "Пн", full: "Понедельник" },

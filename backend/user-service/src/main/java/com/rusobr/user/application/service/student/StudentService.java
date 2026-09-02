@@ -9,8 +9,8 @@ import com.rusobr.user.domain.model.Parent;
 import com.rusobr.user.domain.model.Student;
 import com.rusobr.user.domain.model.User;
 import com.rusobr.common.dto.BatchUserResponse;
-import com.rusobr.user.web.dto.student.StudentInfoDto;
-import com.rusobr.user.web.dto.student.StudentInfoResponse;
+import com.rusobr.user.infrastructure.specification.UserSpecification;
+import com.rusobr.user.web.dto.student.*;
 import com.rusobr.user.web.dto.user.UserResponse;
 import com.rusobr.user.web.exception.UserExceptionCode;
 import com.rusobr.user.infrastructure.client.feign.AcademicClient;
@@ -21,8 +21,6 @@ import com.rusobr.user.infrastructure.persistence.repository.UserRepository;
 import com.rusobr.user.application.service.teacher.TeacherService;
 import com.rusobr.user.web.dto.feign.SchoolClassResponse;
 import com.rusobr.common.dto.UserFeignResponse;
-import com.rusobr.user.web.dto.student.StudentDetails;
-import com.rusobr.user.web.dto.student.StudentWithClassResponse;
 import com.rusobr.user.web.dto.teacher.TeacherResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +29,11 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.EventListener;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -126,8 +129,28 @@ public class StudentService {
                 .orElseThrow(() -> notFoundStudent(id));
     }
 
+    @Transactional(readOnly = true)
+    public Page<UserResponse> getUnassignedToParent(Pageable pageable, String fullNameSearch) {
+        Specification<User> spec = UserSpecification.findByRole(UserRole.STUDENT)
+                .and(UserSpecification.studentsWithoutParent())
+                .and(UserSpecification.findByFullNameFuzzy(fullNameSearch));
+
+        return userRepository.findAll(spec, PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by(Sort.Direction.ASC, "lastName", "firstName")
+        )).map(userMapper::toUserResponse);
+    }
+
     public Optional<Student> findByIdWithDeleted(Long id) {
         return studentRepository.findByIdWithDeleted(id);
+    }
+
+    @Transactional(readOnly = true)
+    public StudentWithParentDto getParentByStudentId(Long id) {
+        Student user = studentRepository.findWithParentByStudentId(id)
+                .orElseThrow(() -> notFoundStudent(id));
+        return studentMapper.toStudentWithParentDto(user);
     }
 
     @CacheEvict(value = {"studentInfo", "studentHomeInfo"}, allEntries = true)

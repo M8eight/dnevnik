@@ -4,11 +4,11 @@ import com.rusobr.user.application.service.parent.ParentService;
 import com.rusobr.user.web.dto.parent.ParentDetails;
 import com.rusobr.user.web.dto.parent.ParentInfoResponse;
 import com.rusobr.user.web.dto.parent.ParentResponse;
+import com.rusobr.user.web.dto.user.UserResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,6 +30,12 @@ public class ParentController {
     @GetMapping("/{id}/info")
     public ParentInfoResponse getInfoById(@PathVariable Long id) {
         return parentService.getInfoById(id);
+    }
+
+    @GetMapping("/unasigned-to-student")
+    public Page<UserResponse> getUnassignedToStudentParents(Pageable pageable,
+                                                            @RequestParam(required = false) String search) {
+        return parentService.getUnassignedToStudent(pageable, search);
     }
 
 }

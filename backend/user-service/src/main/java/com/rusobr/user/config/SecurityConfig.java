@@ -53,6 +53,12 @@ public class SecurityConfig {
                             .requestMatchers(POST, "/api/v1/users/teachers").hasRole(ADMIN.name())
                             .requestMatchers(DELETE, "/api/v1/users/*").hasRole(ADMIN.name())
                             .requestMatchers(POST, "/api/v1/students/exclude-assigned").hasRole(ADMIN.name())
+                            .requestMatchers(GET, "/api/v1/parents/*").hasRole(ADMIN.name())
+                            .requestMatchers(PATCH, "/api/v1/students/*/assign/*").hasRole(ADMIN.name())
+                            .requestMatchers(PATCH, "/api/v1/students/*/unassign").hasRole(ADMIN.name())
+                            .requestMatchers(GET, "/api/v1/students/unasigned-to-parent").hasRole(ADMIN.name())
+                            .requestMatchers(GET, "/api/v1/parents/unasigned-to-student").hasRole(ADMIN.name())
+                            .requestMatchers(GET, "/api/v1/students/*/with-parent").hasRole(ADMIN.name())
 
                             .anyRequest().denyAll();
                 })

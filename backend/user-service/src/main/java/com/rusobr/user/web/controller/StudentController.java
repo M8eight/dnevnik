@@ -6,8 +6,12 @@ import com.rusobr.common.dto.UserFeignResponse;
 import com.rusobr.user.web.dto.student.StudentDetails;
 import com.rusobr.user.web.dto.student.StudentInfoResponse;
 import com.rusobr.user.web.dto.student.StudentWithClassResponse;
+import com.rusobr.user.web.dto.student.StudentWithParentDto;
+import com.rusobr.user.web.dto.user.UserResponse;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -45,6 +49,17 @@ public class StudentController {
     @PostMapping("/exclude-assigned")
     public List<UserFeignResponse> getBatchWithExcludingIds(@RequestBody @NotNull Set<Long> ids) {
         return studentService.getBatchWithExcludingIds(ids);
+    }
+
+    @GetMapping("/{id}/with-parent")
+    public StudentWithParentDto getStudentWithParent(@PathVariable Long id) {
+        return studentService.getParentByStudentId(id);
+    }
+
+    @GetMapping("/unasigned-to-parent")
+    public Page<UserResponse> getUnassignedToParentStudents(Pageable pageable,
+                                                            @RequestParam(required = false) String search) {
+        return studentService.getUnassignedToParent(pageable, search);
     }
 
     @PatchMapping("/{studentId}/assign/{teacherId}")
