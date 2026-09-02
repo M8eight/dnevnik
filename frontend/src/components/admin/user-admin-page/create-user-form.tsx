@@ -126,7 +126,7 @@ export default function CreateUserForm() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div className="space-y-1.5">
                 <label className="text-xs font-bold tracking-widest uppercase text-black/30">Роль</label>
-                <div className="flex gap-1 bg-black/5 rounded-[18px] p-1">
+                <div className="flex flex-wrap gap-1 bg-black/5 rounded-[18px] p-1">
                     {ROLES.map((r) => (
                         <RoleTab
                             key={r.value}

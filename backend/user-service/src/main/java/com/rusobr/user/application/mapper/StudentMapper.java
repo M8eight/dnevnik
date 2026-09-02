@@ -4,8 +4,8 @@ import com.rusobr.user.domain.model.Student;
 import com.rusobr.user.domain.model.User;
 import com.rusobr.user.web.dto.feign.SchoolClassResponse;
 import com.rusobr.user.web.dto.student.StudentDetails;
-import com.rusobr.user.web.dto.student.StudentInfoResponse;
 import com.rusobr.user.web.dto.student.StudentWithClassResponse;
+import com.rusobr.user.web.dto.student.StudentWithParentDto;
 import com.rusobr.user.web.dto.teacher.TeacherResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -28,5 +28,13 @@ public interface StudentMapper {
     Student toEntity(User user, StudentDetails studentDetails);
 
     StudentDetails toStudentDetails(Student student);
+
+    @Mapping(target = "id", source = "student.user.id")
+    @Mapping(target = "firstName", source = "student.user.firstName")
+    @Mapping(target = "lastName", source = "student.user.lastName")
+    @Mapping(target = "username", source = "student.user.username")
+    @Mapping(target = "keycloakId", source = "student.user.keycloakId")
+    @Mapping(target = "parent", source = "student.parent.user")
+    StudentWithParentDto toStudentWithParentDto(Student student);
 
 }

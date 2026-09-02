@@ -67,4 +67,12 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     """)
     Optional<Student> findStudentInfoById(@Param("id") Long id);
 
+    @Query("""
+        select s
+        from Student s
+        left join fetch s.parent p
+        where s.id = :id
+    """)
+    Optional<Student> findWithParentByStudentId(@Param("id") Long id);
+
 }

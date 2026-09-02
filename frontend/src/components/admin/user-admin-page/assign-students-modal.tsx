@@ -1,13 +1,24 @@
 import { useParent } from "@/hooks/use-parent";
-import { useAssignStudentToParent, useUnassignStudentFromParent } from "@/hooks/use-student";
-import { useFindUsersByFilter } from "@/hooks/use-user";
+import {
+    useAssignStudentToParent,
+    useUnassignedToParentStudents,
+    useUnassignStudentFromParent,
+} from "@/hooks/use-student";
 import { cn } from "@/lib/utils";
 import type { UserResponse } from "@/services/user-service";
-import { UserRound, X, Loader2, GraduationCap, UserMinus, Search, Filter, UserPlus } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import {
+    UserRound,
+    X,
+    Loader2,
+    GraduationCap,
+    UserMinus,
+    Search,
+    Filter,
+    UserPlus,
+} from "lucide-react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
-
 
 export default function AssignStudentsModal({
     parent,
@@ -27,12 +38,15 @@ export default function AssignStudentsModal({
 
     const { data: parentData, isLoading: isParentLoading } = useParent(parent.id);
 
-    const { data: allStudents, isLoading: isStudentsLoading } = useFindUsersByFilter(
-        0,
-        20,
-        "STUDENT",
-        debouncedStudentSearch || undefined
-    );
+    const {
+        data,
+        isLoading: isStudentsLoading,
+        isFetchingNextPage,
+        hasNextPage,
+        fetchNextPage,
+    } = useUnassignedToParentStudents(20, debouncedStudentSearch || undefined);
+
+    const allStudents = data?.pages.flatMap((page) => page.content) ?? [];
 
     const assignMutation = useAssignStudentToParent();
     const unassignMutation = useUnassignStudentFromParent();
@@ -45,8 +59,32 @@ export default function AssignStudentsModal({
 
     useEffect(() => {
         document.body.style.overflow = "hidden";
-        return () => { document.body.style.overflow = ""; };
+        return () => {
+            document.body.style.overflow = "";
+        };
     }, []);
+
+    const observerRef = useRef<IntersectionObserver | null>(null);
+    const loadMoreRef = useCallback(
+        (node: HTMLDivElement | null) => {
+            if (isFetchingNextPage) return;
+
+            if (observerRef.current) {
+                observerRef.current.disconnect();
+            }
+
+            observerRef.current = new IntersectionObserver((entries) => {
+                if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+                    fetchNextPage();
+                }
+            });
+
+            if (node) {
+                observerRef.current.observe(node);
+            }
+        },
+        [hasNextPage, isFetchingNextPage, fetchNextPage]
+    );
 
     const isPending = assignMutation.isPending || unassignMutation.isPending;
 
@@ -57,8 +95,6 @@ export default function AssignStudentsModal({
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm px-4"
         >
             <div className="w-full max-w-lg bg-white/80 backdrop-blur-xl rounded-[32px] shadow-2xl border border-white/60 flex flex-col max-h-[85vh] overflow-hidden">
-
-                {/* Header */}
                 <div className="px-6 pt-6 pb-4 border-b border-black/5 flex items-start justify-between gap-4">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-[14px] bg-violet-50/70 flex items-center justify-center text-violet-600 shrink-0">
@@ -68,7 +104,9 @@ export default function AssignStudentsModal({
                             <p className="font-black text-[var(--navy)] text-base leading-tight">
                                 {parent.firstName} {parent.lastName}
                             </p>
-                            <p className="text-xs font-semibold text-black/40">@{parent.username}</p>
+                            <p className="text-xs font-semibold text-black/40">
+                                @{parent.username}
+                            </p>
                         </div>
                     </div>
                     <button
@@ -80,8 +118,6 @@ export default function AssignStudentsModal({
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-6 space-y-5">
-
-                    {/* Текущие дети */}
                     <div>
                         <p className="text-xs font-bold tracking-widest uppercase text-black/30 mb-3">
                             Привязанные ученики
@@ -140,7 +176,6 @@ export default function AssignStudentsModal({
                         )}
                     </div>
 
-                    {/* Разделитель */}
                     <div className="flex items-center gap-3">
                         <div className="flex-1 h-px bg-black/8" />
                         <span className="text-[10px] font-bold tracking-widest uppercase text-black/20">
@@ -149,7 +184,6 @@ export default function AssignStudentsModal({
                         <div className="flex-1 h-px bg-black/8" />
                     </div>
 
-                    {/* Поиск учеников */}
                     <div className="space-y-3">
                         <div className="relative">
                             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-black/30" />
@@ -165,14 +199,14 @@ export default function AssignStudentsModal({
                             <div className="flex justify-center py-4">
                                 <Loader2 className="w-5 h-5 animate-spin text-black/30" />
                             </div>
-                        ) : allStudents?.content.length === 0 ? (
+                        ) : allStudents.length === 0 ? (
                             <div className="flex items-center gap-2 py-3 px-4 rounded-2xl bg-black/[0.03] text-black/30">
                                 <Filter className="w-4 h-4 shrink-0" />
                                 <p className="text-xs font-semibold">Ученики не найдены</p>
                             </div>
                         ) : (
                             <div className="space-y-1.5">
-                                {allStudents?.content.map((student) => {
+                                {allStudents.map((student) => {
                                     const isAlreadyLinked = childrenIds.has(student.id);
                                     return (
                                         <div
@@ -220,12 +254,25 @@ export default function AssignStudentsModal({
                                         </div>
                                     );
                                 })}
+
+                                <div
+                                    ref={loadMoreRef}
+                                    className="h-8 flex items-center justify-center"
+                                >
+                                    {isFetchingNextPage && (
+                                        <Loader2 className="w-4 h-4 animate-spin text-black/30" />
+                                    )}
+                                    {!hasNextPage && allStudents.length > 0 && (
+                                        <span className="text-[10px] font-bold text-black/20">
+                                            Конец списка
+                                        </span>
+                                    )}
+                                </div>
                             </div>
                         )}
                     </div>
                 </div>
 
-                {/* Footer */}
                 <div className="px-6 py-4 border-t border-black/5">
                     <Button
                         onClick={onClose}

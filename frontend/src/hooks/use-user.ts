@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
     createParent,
     createStudent,
@@ -43,14 +43,18 @@ export const useCreateTeacher = () => {
 };
 
 export const useFindUsersByFilter = (
-        page: number, 
-        size: number,
-        role?: UserRole,
-        searchName?: string
+    size: number,
+    role?: UserRole,
+    searchName?: string
 ) => {
-    return useQuery<PageResponse<UserResponse>>({
-        queryKey: ['users', 'userFilter', { page, size, role, searchName }],
-        queryFn: () => findUsersByFilter(page, size, role, searchName),
+    return useInfiniteQuery<PageResponse<UserResponse>>({
+        queryKey: ['users', 'userFilter', { size, role, searchName }],
+        initialPageParam: 0,
+        queryFn: ({ pageParam }) => findUsersByFilter(pageParam as number, size, role, searchName),
+        getNextPageParam: (lastPage) => {
+            if (lastPage.last) return undefined;
+            return lastPage.number + 1;
+        },
     });
 };
 
