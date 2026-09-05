@@ -27,6 +27,7 @@ class OwnershipSecurityIT extends AbstractSecurityIT {
 
     private static final long STUDENT_OWNER_ID = 27L;
     private static final long STUDENT_OTHER_ID = 99L;
+    private static final long PARENT_ID = 50L;
     private static final long TEACHER_OWNER_ID = 10L;
     private static final long TEACHER_OTHER_ID = 5L;
 
@@ -145,6 +146,52 @@ class OwnershipSecurityIT extends AbstractSecurityIT {
                         .param("teachingAssignmentId", String.valueOf(assignmentId))
                         .param("academicPeriodId", "1")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + otherTeacherToken))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Родитель видит оценку своего ребёнка через X-Student-Id -> 200")
+    void parent_ChildGrade_ShouldReturn200() throws Exception {
+        String parentToken = JwtTestUtils.token(PARENT_ID, List.of("PARENT"));
+        when(userClient.isChild(PARENT_ID, STUDENT_OWNER_ID)).thenReturn(true);
+
+        mockMvc.perform(get("/api/v1/grades/{id}/detail", gradeId)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + parentToken)
+                        .header("X-Student-Id", String.valueOf(STUDENT_OWNER_ID)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("Родитель без X-Student-Id -> 403")
+    void parent_NoStudentHeader_ShouldReturn403() throws Exception {
+        String parentToken = JwtTestUtils.token(PARENT_ID, List.of("PARENT"));
+
+        mockMvc.perform(get("/api/v1/grades/{id}/detail", gradeId)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + parentToken))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Родитель с не привязанным к нему студентом -> 403")
+    void parent_UnattachedStudent_ShouldReturn403() throws Exception {
+        String parentToken = JwtTestUtils.token(PARENT_ID, List.of("PARENT"));
+        when(userClient.isChild(PARENT_ID, STUDENT_OTHER_ID)).thenReturn(false);
+
+        mockMvc.perform(get("/api/v1/grades/{id}/detail", gradeId)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + parentToken)
+                        .header("X-Student-Id", String.valueOf(STUDENT_OTHER_ID)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Родитель видит чужую (не своего ребёнка) оценку -> 403")
+    void parent_NonChildGrade_ShouldReturn403() throws Exception {
+        String parentToken = JwtTestUtils.token(PARENT_ID, List.of("PARENT"));
+        when(userClient.isChild(PARENT_ID, STUDENT_OTHER_ID)).thenReturn(true);
+
+        mockMvc.perform(get("/api/v1/grades/{id}/detail", gradeId)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + parentToken)
+                        .header("X-Student-Id", String.valueOf(STUDENT_OTHER_ID)))
                 .andExpect(status().isForbidden());
     }
 

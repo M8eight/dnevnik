@@ -505,4 +505,61 @@ class StudentServiceTest {
             verify(studentRepository, never()).deleteById(any());
         }
     }
+
+    @Nested
+    @DisplayName("getStudentsByParentId")
+    class GetStudentsByParentId {
+
+        @Test
+        @DisplayName("возвращает список детей родителя")
+        void success() {
+            User user = User.builder().id(STUDENT_ID).build();
+            Student student = Student.builder().id(STUDENT_ID).user(user).build();
+            UserResponse userResponse = UserResponse.builder().id(STUDENT_ID).build();
+
+            when(studentRepository.findStudentsByParentId(PARENT_ID)).thenReturn(List.of(student));
+            when(userMapper.toUserResponse(user)).thenReturn(userResponse);
+
+            List<UserResponse> result = service.getStudentsByParentId(PARENT_ID);
+
+            assertThat(result).containsExactly(userResponse);
+            verify(studentRepository).findStudentsByParentId(PARENT_ID);
+        }
+
+        @Test
+        @DisplayName("возвращает пустой список, если у родителя нет детей")
+        void empty() {
+            when(studentRepository.findStudentsByParentId(PARENT_ID)).thenReturn(List.of());
+
+            List<UserResponse> result = service.getStudentsByParentId(PARENT_ID);
+
+            assertThat(result).isEmpty();
+            verify(userMapper, never()).toUserResponse(any());
+        }
+    }
+
+    @Nested
+    @DisplayName("isChild")
+    class IsChild {
+
+        @Test
+        @DisplayName("возвращает true, когда студент привязан к родителю")
+        void child_returnsTrue() {
+            when(studentRepository.isChildByParentId(PARENT_ID, STUDENT_ID)).thenReturn(true);
+
+            boolean result = service.isChild(PARENT_ID, STUDENT_ID);
+
+            assertThat(result).isTrue();
+        }
+
+        @Test
+        @DisplayName("возвращает false, когда студент не является ребёнком родителя")
+        void nonChild_returnsFalse() {
+            when(studentRepository.isChildByParentId(PARENT_ID, STUDENT_ID)).thenReturn(false);
+
+            boolean result = service.isChild(PARENT_ID, STUDENT_ID);
+
+            assertThat(result).isFalse();
+        }
+    }
 }

@@ -36,7 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(controllers = FinalGradeController.class)
 @AutoConfigureMockMvc(addFilters = false)
-public class FinalGradeControllerTest {
+public class FinalGradeControllerTest extends ControllerTestBase {
 
     @Autowired
     private MockMvc mockMvc;

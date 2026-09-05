@@ -30,7 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(controllers = GradeController.class)
 @AutoConfigureMockMvc(addFilters = false)
-public class GradeControllerTest {
+public class GradeControllerTest extends ControllerTestBase {
 
     @Autowired
     private MockMvc mockMvc;

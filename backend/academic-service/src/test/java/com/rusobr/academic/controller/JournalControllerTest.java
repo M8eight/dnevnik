@@ -39,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(controllers = JournalController.class)
 @AutoConfigureMockMvc(addFilters = false)
-public class JournalControllerTest {
+public class JournalControllerTest extends ControllerTestBase {
 
     @Autowired
     private MockMvc mockMvc;
@@ -66,6 +66,7 @@ public class JournalControllerTest {
                 .claim("user_id", STUDENT_ID)
                 .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+        when(currentStudentContext.getStudentId()).thenReturn(STUDENT_ID);
     }
 
     private AcademicYearResponse buildAcademicYearResponse() {

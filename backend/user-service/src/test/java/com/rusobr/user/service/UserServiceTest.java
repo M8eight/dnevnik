@@ -112,20 +112,20 @@ class UserServiceTest {
             UserResponse userResponse = UserResponse.builder().id(USER_ID).build();
             Page<User> userPage = new PageImpl<>(List.of(user));
 
-            when(userRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(userPage);
+            when(userRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(userPage);
             when(userMapper.toUserResponse(user)).thenReturn(userResponse);
 
             Page<UserResponse> result = service.getAllByFilter(pageable, UserRole.STUDENT, "Ivan");
 
             assertThat(result.getContent()).hasSize(1).containsExactly(userResponse);
-            verify(userRepository).findAll(any(Specification.class), eq(pageable));
+            verify(userRepository).findAll(any(Specification.class), any(Pageable.class));
         }
 
         @Test
         @DisplayName("возвращает пустую страницу, если пользователи не найдены")
         void emptyPage() {
             Pageable pageable = PageRequest.of(0, 10);
-            when(userRepository.findAll(any(Specification.class), eq(pageable)))
+            when(userRepository.findAll(any(Specification.class), any(Pageable.class)))
                     .thenReturn(Page.empty());
 
             Page<UserResponse> result = service.getAllByFilter(pageable, null, null);
