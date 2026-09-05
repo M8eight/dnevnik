@@ -22,8 +22,8 @@ export default function TeacherPicker({
     const [search, setSearch] = useState("");
     const ref = useRef<HTMLDivElement>(null);
 
-    const { data, isLoading } = useFindUsersByFilter(0, 30, "TEACHER", search || undefined);
-    const teachers = data?.content ?? [];
+    const { data, isLoading } = useFindUsersByFilter(30, "TEACHER", search || undefined);
+    const teachers = data?.pages.flatMap((page) => page.content) ?? [];
 
     useEffect(() => {
         const handler = (e: MouseEvent) => {

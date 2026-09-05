@@ -12,10 +12,10 @@ import Chip from "@/components/student/chip";
 import { LESSON_TIMES, RUSSIAN_DAYS } from "@/constants/component-constants";
 import { AttendanceBadge } from "@/components/student/diary/badges";
 import { GradePopover } from "@/components/student/diary/grade-detail-popover";
-import StudentNavbar from "@/components/layout/navbars/StudentNavbar";
 import { capitalizeFirst, formatRuDate, toISODate } from "@/lib/date";
 import type { DiaryLessonDto } from "@/services/schedule-service";
 import { HomeworkPopover } from "@/components/student/diary/homework-detail-popover";
+import StudentParentNavbarSelector from "@/components/layout/navbars/StudentParentNavbarSelector";
 
 const mapAttendanceStatus = (status?: string) => {
   if (status === "ABSENT") return "Н";
@@ -132,7 +132,8 @@ export default function Diary() {
 
   return (
     <div className="relative z-10 min-h-screen px-6 md:px-10 pt-2 pb-14">
-      <StudentNavbar />
+      
+      <StudentParentNavbarSelector />
 
       <header className="flex items-end justify-between mb-10 pb-6 border-b border-black/8 max-w-7xl mx-auto anim-in">
         <div>

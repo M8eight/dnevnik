@@ -79,6 +79,11 @@ export const getStudentWithParent = async (id: number): Promise<StudentWithParen
     return data;
 };
 
+export const getStudentsByParentId = async (): Promise<UserResponse[]> => {
+    const { data } = await api.get(`/user-service/api/v1/students/by-parent`);
+    return data;
+};
+
 export const assignStudentToParent = async (studentId: number, parentId: number): Promise<void> => {
     await api.patch(`/user-service/api/v1/students/${studentId}/assign/${parentId}`);
 }

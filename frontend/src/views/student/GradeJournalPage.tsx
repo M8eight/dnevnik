@@ -6,11 +6,11 @@ import {
 import { Download, CalendarDays, CalendarClock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useGetAcademicPeriodsByAcademicYear } from "@/hooks/use-academic-period";
-import StudentNavbar from "@/components/layout/navbars/StudentNavbar";
 import GradeJournalPeriodGradeTab from "./GradeJournalPeriodGradeTab";
 import GradeJournalGradeTab from "./GradeJournalGradeTab";
 import { useGetAcademicYears } from "@/hooks/use-academic-year";
 import { useCreateStudentPeriodFinalReport, useCreateStudentReport } from "@/hooks/use-pdf";
+import StudentParentNavbarSelector from "@/components/layout/navbars/StudentParentNavbarSelector";
 
 type Tab = "current" | "period";
 
@@ -72,7 +72,8 @@ export default function GradeTablePage() {
     return (
         <div className="relative z-10 min-h-screen px-6 md:px-10 pt-2 pb-14 max-w-400 mx-auto">
 
-            <StudentNavbar />
+            <StudentParentNavbarSelector />
+            
 
             <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 pb-6 border-b border-black/8 anim-in">
                 <div>
