@@ -13,6 +13,10 @@ COPY gradlew .
 COPY settings.gradle .
 COPY gradle gradle
 
+# gradlew должен быть исполняемым внутри образа независимо от того,
+# сохранился ли бит +x в git при коммите/клонировании
+RUN chmod +x gradlew
+
 # Копируем общий модуль
 COPY common common
 

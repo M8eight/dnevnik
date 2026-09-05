@@ -1,6 +1,10 @@
 # Школьный дневник
 
-Микросервисная платформа для управления школой — расписание, оценки, посещаемость, дз, классы
+> Микросервисная платформа для управления учебным процессом школы —
+> функциональный аналог ЭлЖур / Дневник.ру.
+
+Проект демонстрирует построение backend-системы с нуля: от доменной модели
+и микросервисной декомпозиции до аутентификации, мониторинга и отказоустойчивости.
 
 ![Java](https://img.shields.io/badge/Java-ED8B00?style=flat-square&logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-6DB33F?style=flat-square&logo=spring&logoColor=white)
@@ -9,16 +13,68 @@
 ![React](https://img.shields.io/badge/React-20232A?style=flat-square&logo=react&logoColor=61DAFB)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)
 
-## Статус проекта
 
-Проект в разработке, процент закрытых issue до mvp
+## Ключевые инженерные решения
 
-![GitHub Milestone](https://img.shields.io/github/milestones/progress-percent/M8eight/dnevnik/1)
-![Open Issues](https://img.shields.io/github/issues/M8eight/dnevnik)
-![Last Commit](https://img.shields.io/github/last-commit/M8eight/dnevnik)
+- **Микросервисная архитектура** — разделение на domain-сервисы по зоне ответственности (user, academic),
+  API Gateway, service discovery через Eureka, межсервисное взаимодействие через OpenFeign
+- **Безопасность** — OAuth2/OIDC через Keycloak, включая интеграцию с Keycloak Admin API
+  для управления пользователями и ролями
+- **Работа с БД** — миграции схемы через Flyway (`ddl-auto: validate`), кэширование через Caffeine
+- **Тестирование** — юнит-тесты сервисов, контроллеров и мапперов: JUnit, Mockito, MockMvc.
+  А также интеграционные тесты JPA-, Security- и Feign-слоёв (Testcontainers, WireMock)
+- **Отказоустойчивость** — Resilience4J: circuit breaker, retry, bulkhead на межсервисных вызовах
+- **Observability** — централизованные логи (Loki + Grafana Alloy), метрики (Prometheus), дашборды (Grafana)
+- **Экспорт документов** — генерация PDF (Openhtmltopdf + Thymeleaf)
+- **Инфраструктура** — полностью контейнеризировано через Docker Compose, готово к запуску одной командой
 
-### [Mvp milestone](https://github.com/M8eight/dnevnik/milestone/1)
+## Скриншоты
 
+<details>
+<summary><b>Ученик</b></summary>
+
+![student home](./docs/student/1.png)
+![student diary](./docs/student/2.png)
+![student grades](./docs/student/3.png)
+![student grades detail](./docs/student/4.png)
+![student grades detail](./docs/student/5.png)
+
+</details>
+
+<details>
+<summary><b>Учитель</b></summary>
+
+![teacher journal](./docs/teacher/1.png)
+![teacher homework](./docs/teacher/2.png)
+![teacher homework calendar](./docs/teacher/3.png)
+![teacher homework form](./docs/teacher/4.png)
+![teacher homework form](./docs/teacher/5.png)
+![teacher homework form](./docs/teacher/6.png)
+
+</details>
+
+<details>
+<summary><b>Администратор</b></summary>
+
+![admin subjects](./docs/admin/1.png)
+![admin periods](./docs/admin/2.png)
+![admin users](./docs/admin/3.png)
+![admin users edit](./docs/admin/4.png)
+![admin users details](./docs/admin/5.png)
+![admin schedule](./docs/admin/6.png)
+![admin classes](./docs/admin/7.png)
+![admin classes](./docs/admin/8.png)
+![admin classes](./docs/admin/9.png)
+
+</details>
+
+<details>
+<summary><b>Авторизация</b></summary>
+
+![auth login](./docs/auth/1.png)
+![auth update password](./docs/auth/2.png)
+
+</details>
 
 ## Технологический стек
 
@@ -198,12 +254,13 @@ Swagger UI:
 
 ## Frontend routes
 
-Ученик:
+Ученик/Родитель:
 
 - `/student/home` - Главная
 - `/student/diary` - Дневник
 - `/student/grade` - Оценки
-- `/student/school-class` - Школьный класс 
+- `/student/school-class` - Школьный класс
+- `/parent/home` - Родительский роут для выбора ученика
 
 Учитель:
 
@@ -298,38 +355,3 @@ cd frontend
 npm install
 npm run dev
 ```
-## Screenshots
-
-### Ученик
-
-![student home](./docs/student/1.png)
-![student diary](./docs/student/2.png)
-![student grades](./docs/student/3.png)
-![student grades detail](./docs/student/4.png)
-![student grades detail](./docs/student/5.png)
-
-### Учитель
-
-![teacher journal](./docs/teacher/1.png)
-![teacher homework](./docs/teacher/2.png)
-![teacher homework calendar](./docs/teacher/3.png)
-![teacher homework form](./docs/teacher/4.png)
-![teacher homework form](./docs/teacher/5.png)
-![teacher homework form](./docs/teacher/6.png)
-
-### Администратор
-
-![admin subjects](./docs/admin/1.png)
-![admin periods](./docs/admin/2.png)
-![admin users](./docs/admin/3.png)
-![admin users edit](./docs/admin/4.png)
-![admin users details](./docs/admin/5.png)
-![admin schedule](./docs/admin/6.png)
-![admin classes](./docs/admin/7.png)
-![admin classes](./docs/admin/8.png)
-![admin classes](./docs/admin/9.png)
-
-### Авторизация
-
-![auth login](./docs/auth/1.png)
-![auth update password](./docs/auth/2.png)
