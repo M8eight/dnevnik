@@ -31,6 +31,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -134,7 +135,15 @@ public class JournalService {
                 )
         ));
 
-        var journal = data.studentsIds().stream().map(
+        Comparator<UserFeignResponse> byName = Comparator
+                .comparing(UserFeignResponse::lastName, Comparator.nullsLast(String::compareTo))
+                .thenComparing(UserFeignResponse::firstName, Comparator.nullsLast(String::compareTo));
+
+        var journal = data.studentsIds().stream()
+                .sorted(Comparator.comparing(
+                        studentId -> mappedStudents.getOrDefault(studentId, UserFeignResponse.builder().build()),
+                        byName))
+                .map(
                 studentId -> {
                     var gradesOrDefault = mappedGrades.getOrDefault(studentId, Map.of());
                     List<StudentJournalDto.GradeLessonTeacherDto> allGrades = gradesOrDefault.values().stream().flatMap(List::stream).toList();

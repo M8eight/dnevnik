@@ -49,6 +49,7 @@ public class StudentService {
     private final StudentRepository studentRepository;
     private final UserRepository userRepository;
     private final StudentMapper studentMapper;
+    @Lazy
     private final AcademicClient academicClient;
     private final TeacherService teacherService;
     private final ParentRepository parentRepository;
@@ -153,6 +154,20 @@ public class StudentService {
         return studentMapper.toStudentWithParentDto(user);
     }
 
+    @Cacheable(value = "studentsByParentId", key = "#parentId")
+    @Transactional(readOnly = true)
+    public List<UserResponse> getStudentsByParentId(Long parentId) {
+        List<Student> users = studentRepository.findStudentsByParentId(parentId);
+        return users.stream().map(s -> userMapper.toUserResponse(s.getUser())).toList();
+    }
+
+
+    @Cacheable(value = "isChild", key = "#parentId + '#' + #studentId")
+    @Transactional(readOnly = true)
+    public boolean isChild(Long parentId, Long studentId) {
+        return studentRepository.isChildByParentId(parentId, studentId);
+    }
+
     @CacheEvict(value = {"studentInfo", "studentHomeInfo"}, allEntries = true)
     @Transactional
     public void create(Long userId, StudentDetails studentDetails) {
@@ -174,7 +189,7 @@ public class StudentService {
         }
     }
 
-    @CacheEvict(value = {"studentInfo", "studentHomeInfo"}, allEntries = true)
+    @CacheEvict(value = {"studentInfo", "studentHomeInfo", "studentsByParentId"}, allEntries = true)
     @Transactional
     public void assignToParent(Long studentId, Long parentId) {
         Parent parent = parentRepository.findById(parentId)
@@ -190,7 +205,7 @@ public class StudentService {
         studentRepository.save(student);
     }
 
-    @CacheEvict(value = {"studentInfo", "studentHomeInfo"}, allEntries = true)
+    @CacheEvict(value = {"studentInfo", "studentHomeInfo", "studentsByParentId"}, allEntries = true)
     @Transactional
     public void unassignFromParent(Long studentId) {
         Student student = studentRepository.findById(studentId)
@@ -204,7 +219,7 @@ public class StudentService {
         studentRepository.save(student);
     }
 
-    @CacheEvict(value = {"studentInfo", "studentHomeInfo"}, allEntries = true)
+    @CacheEvict(value = {"studentInfo", "studentHomeInfo", "studentsByParentId"}, allEntries = true)
     public void delete(Long studentId) {
         if (!studentRepository.existsById(studentId)) {
             throw notFoundStudent(studentId);

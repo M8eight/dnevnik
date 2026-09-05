@@ -19,10 +19,13 @@ import { ProtectedRoute } from './routes/ProtectedRoute'
 import TeacherSchedule from './views/teacher/TeacherSchedule'
 import SchoolClassDetails from './views/teacher/TeacherSchoolClassDetails'
 import StudentSchoolClassDetails from './views/student/StudentSchoolClassDetails'
+import ParentStudentPicker from './views/parent/ParentStudentPicker'
+import StudentInvalidator from './components/parent/StudentInvalidator'
 
 function App() {
   return (
     <BrowserRouter>
+      <StudentInvalidator />
       <Routes>
 
         <Route path="/" element={<Index />} />
@@ -31,7 +34,11 @@ function App() {
 
         <Route path="/forbidden" element={<ForbiddenPage />} />
 
-        <Route element={<ProtectedRoute roles={["STUDENT"]} />}>
+        <Route element={<ProtectedRoute roles={["PARENT"]} />}>
+          <Route path="/parent/home" element={<ParentStudentPicker /> } />
+        </Route>
+
+        <Route element={<ProtectedRoute roles={["STUDENT", "PARENT"]} />}>
           <Route path="/student/home" element={<Home />} />
           <Route path="/student/school-class" element={<StudentSchoolClassDetails />} />
           <Route path="/student/diary" element={<Diary />} />

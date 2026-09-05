@@ -37,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(controllers = ScheduleController.class)
 @AutoConfigureMockMvc(addFilters = false)
-public class ScheduleControllerTest {
+public class ScheduleControllerTest extends ControllerTestBase {
 
     @Autowired
     private MockMvc mockMvc;
@@ -65,6 +65,7 @@ public class ScheduleControllerTest {
                 .claim("user_id", STUDENT_ID)
                 .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+        when(currentStudentContext.getStudentId()).thenReturn(STUDENT_ID);
     }
 
     private ScheduleLessonResponse buildScheduleLessonResponse() {

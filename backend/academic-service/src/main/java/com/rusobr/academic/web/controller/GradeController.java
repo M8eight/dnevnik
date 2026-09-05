@@ -20,7 +20,7 @@ public class GradeController {
 
     private final GradeService gradeService;
 
-    @PreAuthorize("@gradeSecurity.canViewStudent(#id, authentication)")
+    @PreAuthorize("@gradeSecurity.canViewStudent(#id)")
     @GetMapping("/{id}/detail")
     public GradeDetailResponse getDetailById(@PathVariable Long id) {
         return gradeService.getDetail(id);

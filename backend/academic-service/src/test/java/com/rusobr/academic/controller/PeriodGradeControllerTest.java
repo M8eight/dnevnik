@@ -35,7 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(controllers = PeriodGradeController.class)
 @AutoConfigureMockMvc(addFilters = false)
-public class PeriodGradeControllerTest {
+public class PeriodGradeControllerTest extends ControllerTestBase {
 
     @Autowired
     private MockMvc mockMvc;

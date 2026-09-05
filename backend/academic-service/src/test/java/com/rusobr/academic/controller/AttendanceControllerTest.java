@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(controllers = AttendanceController.class)
 @AutoConfigureMockMvc(addFilters = false)
-public class AttendanceControllerTest {
+public class AttendanceControllerTest extends ControllerTestBase {
 
     @Autowired
     private MockMvc mockMvc;

@@ -1,4 +1,7 @@
 import { keycloak } from '@/lib/keycloak';
+import { store } from '@/store';
+import { selectHasRole } from '@/store/slices/authSlice';
+import { selectSelectedStudentId } from '@/store/slices/selectedStudentSlice';
 import axios from 'axios';
 
 const api = axios.create({
@@ -26,5 +29,15 @@ api.interceptors.response.use(
     return Promise.reject(error)
   }
 )
+
+api.interceptors.request.use( async (config) => {
+  if (selectHasRole("PARENT")) {
+    const studentId = selectSelectedStudentId(store.getState());
+    if (studentId) {
+      config.headers["X-Student-Id"] = String(studentId);
+    }
+  }
+  return config;
+});
 
 export default api;

@@ -41,7 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(controllers = StudentController.class)
 @AutoConfigureMockMvc(addFilters = false)
-public class StudentControllerTest {
+public class StudentControllerTest extends ControllerTestBase {
 
     @Autowired
     private MockMvc mockMvc;
@@ -67,6 +67,7 @@ public class StudentControllerTest {
         SecurityContextHolder.getContext().setAuthentication(
                 new JwtAuthenticationToken(jwt, List.of())
         );
+        when(currentStudentContext.getStudentId()).thenReturn(STUDENT_ID);
     }
 
     @AfterEach

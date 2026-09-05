@@ -2,6 +2,7 @@ package com.rusobr.academic.web.controller;
 
 import com.rusobr.academic.application.service.ClassStudentService;
 import com.rusobr.academic.application.service.SchoolClassService;
+import com.rusobr.common.context.CurrentStudentContext;
 import com.rusobr.common.dto.UserFeignResponse;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassFullResponse;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassRequest;
@@ -24,6 +25,7 @@ public class SchoolClassController {
 
     private final SchoolClassService schoolClassService;
     private final ClassStudentService classStudentService;
+    private final CurrentStudentContext currentStudentContext;
 
     @GetMapping("/{id}")
     public SchoolClassResponse getById(@PathVariable Long id){
@@ -36,9 +38,8 @@ public class SchoolClassController {
     }
 
     @GetMapping("/by-student")
-    public SchoolClassFullResponse getDetailsByStudentId(@AuthenticationPrincipal Jwt jwt) {
-        Long userId = jwt.getClaim("user_id");
-        return schoolClassService.getDetailsByStudentId(userId);
+    public SchoolClassFullResponse getDetailsByStudentId() {
+        return schoolClassService.getDetailsByStudentId(currentStudentContext.getStudentId());
     }
 
     @GetMapping("/search/by-student")
@@ -63,8 +64,8 @@ public class SchoolClassController {
 
     @GetMapping("/by-teacher")
     public List<SchoolClassResponse> getByTeacherId(@AuthenticationPrincipal Jwt jwt) {
-        Long userId = jwt.getClaim("user_id");
-        return schoolClassService.getByTeacherId(userId);
+        Long teacherId = jwt.getClaim("user_id");
+        return schoolClassService.getByTeacherId(teacherId);
     }
 
     @PostMapping

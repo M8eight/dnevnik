@@ -23,7 +23,7 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
                 u.username username,
                 u.keycloakId keycloakId
             from Student s join s.user u where s.id in :studentIds
-                order by u.lastName
+                order by u.lastName, u.firstName
     """)
     List<UserProjection> findAllStudentsByIds(@Param("studentIds") Collection<Long> studentIds);
 
@@ -74,5 +74,24 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
         where s.id = :id
     """)
     Optional<Student> findWithParentByStudentId(@Param("id") Long id);
+
+
+    @Query("""
+        select sts
+        from Parent p
+        join p.children sts
+        join fetch sts.user su
+        where p.id = :parentId
+    """)
+    List<Student> findStudentsByParentId(@Param("parentId") Long parentId);
+
+    @Query("""
+        select count(*) > 0
+            from Parent p
+                join p.children c
+            where p.id = :parentId
+                and c.id = :studentId
+    """)
+    boolean isChildByParentId(@Param("parentId") Long parentId, @Param("studentId") Long studentId);
 
 }

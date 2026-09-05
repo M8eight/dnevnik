@@ -2,9 +2,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useStudentFullDetails } from "@/hooks/use-student";
 import { CurrentDate } from "@/helpers/student-helpers";
 import { UserCard, RatingCard, TeacherCard, TodayScheduleCard, TodayGradesCard, HomeworkCard, WeekScheduleCard } from "@/components/student/home/home-cards";
-import StudentNavbar from "@/components/layout/navbars/StudentNavbar";
 import { useHomeAggregation } from "@/hooks/bff/use-student-bff";
 import { toISODate } from "@/lib/date";
+import StudentParentNavbarSelector from "@/components/layout/navbars/StudentParentNavbarSelector";
 
 
 function Home() {
@@ -20,7 +20,7 @@ function Home() {
   return (
     <div className="relative z-10 min-h-screen px-6 md:px-10 pt-2 pb-14">
       
-      <StudentNavbar />
+      <StudentParentNavbarSelector />
 
       {/* ── Header ── */}
       <header className="flex items-end justify-between mb-10 pb-6 border-b border-black/8 max-w-6xl mx-auto anim-in">

@@ -4,6 +4,7 @@ import {
     getStudentDetails,
     getStudentFullDetails,
     getStudentInfo,
+    getStudentsByParentId,
     getStudentWithParent,
     getUnassignedToParentStudents,
     unassignStudentFromParent,
@@ -44,6 +45,14 @@ export const useStudentWithParent = (userId: number) => {
         queryKey: [QUERY_KEY, "with-parent", userId],
         queryFn: () => getStudentWithParent(userId),
         enabled: !!userId,
+    });
+};
+
+export const useStudentsByParentId = (options?: { enabled?: boolean }) => {
+    return useQuery<UserResponse[]>({
+        queryKey: [QUERY_KEY, "by-parent"],
+        queryFn: () => getStudentsByParentId(),
+        enabled: options?.enabled ?? true,
     });
 };
 

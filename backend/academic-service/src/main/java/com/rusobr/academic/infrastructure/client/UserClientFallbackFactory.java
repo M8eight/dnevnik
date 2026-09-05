@@ -70,6 +70,14 @@ public class UserClientFallbackFactory implements FallbackFactory<UserClient> {
                         AcademicExceptionCode.USER_SERVICE_BATCH_USERS_NOT_FOUND);
                 return BatchUserResponse.degraded(ids);
             }
+
+            @Override
+            public boolean isChild(Long parentId, Long studentId) {
+                handleCommonErrors(rootCause, "isChild parentId=%s studentId=%s".formatted(parentId, studentId),
+                        "Not found isChild with parentId=%s studentId=%s".formatted(parentId, studentId),
+                        AcademicExceptionCode.STUDENT_DOES_NOT_ATTACHED_PARENT);
+                throw fallbackFailure("isChild", List.of(parentId, studentId), rootCause);
+            }
         };
     }
 

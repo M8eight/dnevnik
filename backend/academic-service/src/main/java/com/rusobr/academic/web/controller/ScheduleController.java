@@ -1,7 +1,11 @@
 package com.rusobr.academic.web.controller;
 
 import com.rusobr.academic.application.service.ScheduleService;
-import com.rusobr.academic.web.dto.scheduleLesson.*;
+import com.rusobr.common.context.CurrentStudentContext;
+import com.rusobr.academic.web.dto.scheduleLesson.ScheduleLessonDetails;
+import com.rusobr.academic.web.dto.scheduleLesson.ScheduleLessonDto;
+import com.rusobr.academic.web.dto.scheduleLesson.ScheduleLessonRequest;
+import com.rusobr.academic.web.dto.scheduleLesson.TeacherScheduleItem;
 import com.rusobr.academic.web.dto.scheduleLesson.studentDiary.DiaryWeekResponse;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -22,13 +26,12 @@ import java.util.Map;
 public class ScheduleController {
 
     private final ScheduleService scheduleService;
+    private final CurrentStudentContext currentStudentContext;
 
     @GetMapping("/schedules/diary")
-    public DiaryWeekResponse getDiaryScheduleByStudentId(@AuthenticationPrincipal Jwt jwt,
-                                                         @RequestParam LocalDate startDate,
+    public DiaryWeekResponse getDiaryScheduleByStudentId(@RequestParam LocalDate startDate,
                                                          @RequestParam LocalDate endDate) {
-        Long userId = jwt.getClaim("user_id");
-        return scheduleService.getByStudentId(userId, startDate, endDate);
+        return scheduleService.getByStudentId(currentStudentContext.getStudentId(), startDate, endDate);
     }
 
     @GetMapping("/schedules/by-class")
@@ -38,18 +41,17 @@ public class ScheduleController {
     }
 
     @GetMapping("/schedules/by-teacher/date")
-    public List<TeacherScheduleItem> getTeacherScheduleDate(@AuthenticationPrincipal Jwt jwt,
-                                                                       @RequestParam LocalDate date) {
-        Long userId = jwt.getClaim("user_id");
-        return scheduleService.getByTeacherIdDate(userId, date);
+    public List<TeacherScheduleItem> getTeacherScheduleDate(@AuthenticationPrincipal Jwt jwt, @RequestParam LocalDate date) {
+        Long teacherId = jwt.getClaim("user_id");
+        return scheduleService.getByTeacherIdDate(teacherId, date);
     }
 
     @GetMapping("/schedules/by-teacher/period")
     public Map<DayOfWeek, List<TeacherScheduleItem>> getTeacherSchedulePeriod(@AuthenticationPrincipal Jwt jwt,
                                                                               @RequestParam LocalDate startDate,
                                                                               @RequestParam LocalDate endDate) {
-        Long userId = jwt.getClaim("user_id");
-        return scheduleService.getByTeacherIdPeriod(userId, startDate, endDate);
+        Long teacherId = jwt.getClaim("user_id");
+        return scheduleService.getByTeacherIdPeriod(teacherId, startDate, endDate);
     }
 
     @GetMapping("/schedules/{id}/details")

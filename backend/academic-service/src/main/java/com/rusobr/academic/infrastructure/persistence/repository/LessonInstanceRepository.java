@@ -83,7 +83,7 @@ public interface LessonInstanceRepository extends JpaRepository<LessonInstance, 
         join sl.teachingAssignment ta
         where li.lessonDate between :startDate and :endDate
             and ta.id = :teachingAssignmentId
-        order by li.lessonDate asc
+        order by li.lessonDate asc, sl.lessonNumber asc
     """)
     List<LessonInstanceProjection> findLessonInstanceByTeachingAssignmentId(@Param("teachingAssignmentId") Long teachingAssignmentId,
                                                                             @Param("startDate") LocalDate startDate,

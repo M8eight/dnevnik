@@ -1,4 +1,4 @@
-import StudentNavbar from "@/components/layout/navbars/StudentNavbar";
+import StudentParentNavbarSelector from "@/components/layout/navbars/StudentParentNavbarSelector";
 import { LeftColumnSkeleton, RightColumnSkeleton, SchoolClassCard, StudentsSection, TeacherCard } from "@/components/layout/schoolClassDetails/school-class-details-layout";
 import { useGetDetailsByStudentId } from "@/hooks/use-school-class";
 import {
@@ -12,7 +12,7 @@ export default function StudentSchoolClassDetails() {
     return (
         <div className="relative z-10 min-h-screen px-6 md:px-10 pt-2 pb-14">
 
-            <StudentNavbar />
+            <StudentParentNavbarSelector />
 
             <header className="flex items-end justify-between mb-10 pb-6 border-b border-black/8 max-w-7xl mx-auto anim-in">
                 <div>
