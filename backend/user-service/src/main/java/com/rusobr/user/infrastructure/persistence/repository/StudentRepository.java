@@ -23,7 +23,7 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
                 u.username username,
                 u.keycloakId keycloakId
             from Student s join s.user u where s.id in :studentIds
-                order by u.lastName
+                order by u.lastName, u.firstName
     """)
     List<UserProjection> findAllStudentsByIds(@Param("studentIds") Collection<Long> studentIds);
 

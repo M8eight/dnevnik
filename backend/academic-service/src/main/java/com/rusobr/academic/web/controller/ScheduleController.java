@@ -10,6 +10,8 @@ import com.rusobr.academic.web.dto.scheduleLesson.studentDiary.DiaryWeekResponse
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.DayOfWeek;
@@ -39,14 +41,17 @@ public class ScheduleController {
     }
 
     @GetMapping("/schedules/by-teacher/date")
-    public List<TeacherScheduleItem> getTeacherScheduleDate(@RequestParam LocalDate date) {
-        return scheduleService.getByTeacherIdDate(currentStudentContext.getStudentId(), date);
+    public List<TeacherScheduleItem> getTeacherScheduleDate(@AuthenticationPrincipal Jwt jwt, @RequestParam LocalDate date) {
+        Long teacherId = jwt.getClaim("user_id");
+        return scheduleService.getByTeacherIdDate(teacherId, date);
     }
 
     @GetMapping("/schedules/by-teacher/period")
-    public Map<DayOfWeek, List<TeacherScheduleItem>> getTeacherSchedulePeriod(@RequestParam LocalDate startDate,
+    public Map<DayOfWeek, List<TeacherScheduleItem>> getTeacherSchedulePeriod(@AuthenticationPrincipal Jwt jwt,
+                                                                              @RequestParam LocalDate startDate,
                                                                               @RequestParam LocalDate endDate) {
-        return scheduleService.getByTeacherIdPeriod(currentStudentContext.getStudentId(), startDate, endDate);
+        Long teacherId = jwt.getClaim("user_id");
+        return scheduleService.getByTeacherIdPeriod(teacherId, startDate, endDate);
     }
 
     @GetMapping("/schedules/{id}/details")
