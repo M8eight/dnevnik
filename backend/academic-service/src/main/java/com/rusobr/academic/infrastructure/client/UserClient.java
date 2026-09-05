@@ -5,10 +5,7 @@ import com.rusobr.academic.web.dto.feign.TeacherResponse;
 import com.rusobr.common.dto.UserFeignResponse;
 import com.rusobr.common.config.FeignConfig;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Set;
@@ -34,5 +31,11 @@ public interface UserClient {
 
     @PostMapping("/api/v1/students/batch")
     BatchUserResponse getBatchStudents(@RequestBody List<Long> ids);
+
+//    @GetMapping("/api/v1/students/by-parent")
+//    List<UserFeignResponse> getStudentsByParentId(@RequestParam Long parentId);
+
+    @GetMapping("/api/v1/students/is-child")
+    boolean isChild(@RequestParam Long parentId, @RequestParam Long studentId);
 
 }

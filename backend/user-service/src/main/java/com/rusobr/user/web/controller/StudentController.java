@@ -1,5 +1,6 @@
 package com.rusobr.user.web.controller;
 
+import com.rusobr.common.context.CurrentStudentContext;
 import com.rusobr.user.application.service.student.StudentService;
 import com.rusobr.common.dto.BatchUserResponse;
 import com.rusobr.common.dto.UserFeignResponse;
@@ -25,6 +26,7 @@ import java.util.Set;
 public class StudentController {
 
     private final StudentService studentService;
+    private final CurrentStudentContext currentStudentContext;
 
     @GetMapping("/{id}/details")
     public StudentDetails getDetailsById(@PathVariable Long id) {
@@ -62,6 +64,17 @@ public class StudentController {
         return studentService.getUnassignedToParent(pageable, search);
     }
 
+    @GetMapping("/by-parent")
+    public List<UserResponse> getStudentsByParentId(@AuthenticationPrincipal Jwt jwt) {
+        Long parentId = jwt.getClaim("user_id");
+        return studentService.getStudentsByParentId(parentId);
+    }
+
+    @GetMapping("/is-child")
+    public boolean isChild(@RequestParam Long parentId, @RequestParam Long studentId) {
+        return studentService.isChild(parentId, studentId);
+    }
+
     @PatchMapping("/{studentId}/assign/{teacherId}")
     public void assignToParent(@PathVariable Long studentId,
                                       @PathVariable Long teacherId) {
@@ -74,9 +87,8 @@ public class StudentController {
     }
 
     @GetMapping("/with-class")
-    public StudentWithClassResponse getWithClassById(@AuthenticationPrincipal Jwt jwt) {
-        Long userId = jwt.getClaim("user_id");
-        return studentService.getWithClassById(userId);
+    public StudentWithClassResponse getWithClassById() {
+        return studentService.getWithClassById(currentStudentContext.getStudentId());
     }
 
 }

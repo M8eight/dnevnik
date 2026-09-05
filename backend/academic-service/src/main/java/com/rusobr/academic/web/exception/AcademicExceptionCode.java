@@ -71,5 +71,8 @@ public enum AcademicExceptionCode implements IExceptionCode {
 
     PDF_EXPORT_ERROR,
 
-    UNHANDLED_SERVER_ERROR
+    UNHANDLED_SERVER_ERROR,
+
+    PARENT_STUDENT_ID_NOT_SELECTED,
+    STUDENT_DOES_NOT_ATTACHED_PARENT
 }

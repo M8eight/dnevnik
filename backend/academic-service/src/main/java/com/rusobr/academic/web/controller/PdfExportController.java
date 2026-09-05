@@ -2,6 +2,7 @@ package com.rusobr.academic.web.controller;
 
 import com.rusobr.academic.application.service.report.GradeReportService;
 import com.rusobr.academic.application.service.report.PdfReportService;
+import com.rusobr.common.context.CurrentStudentContext;
 import com.rusobr.academic.web.dto.pdf.StudentGradeReportDto;
 import com.rusobr.academic.web.dto.pdf.StudentPeriodFinalGradeReportDto;
 import com.rusobr.academic.web.dto.pdf.TeacherGradeReportDto;
@@ -10,8 +11,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,14 +23,14 @@ public class PdfExportController {
 
     private final PdfReportService pdfReportService;
     private final GradeReportService gradeReportService;
+    private final CurrentStudentContext currentStudentContext;
 
     @GetMapping(value = "/student/grade-report/report", produces = MediaType.APPLICATION_PDF_VALUE)
-    public ResponseEntity<byte[]> studentGradeReport(@AuthenticationPrincipal Jwt jwt, @RequestParam Long periodId) {
-        Long studentId = jwt.getClaim("user_id");
-
-        StudentGradeReportDto data = gradeReportService.getStudentGradeReport(studentId, periodId);
+    public ResponseEntity<byte[]> studentGradeReport(@RequestParam Long periodId) {
+        StudentGradeReportDto data = gradeReportService
+                .getStudentGradeReport(currentStudentContext.getStudentId(), periodId);
         byte[] pdf = pdfReportService.generateStudentGradeReport(data);
-        String fileName = "grades-%s-%s.pdf".formatted(studentId, periodId);
+        String fileName = "grades-%s-%s.pdf".formatted(currentStudentContext.getStudentId(), periodId);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
                 .contentType(MediaType.APPLICATION_PDF)
@@ -39,12 +38,10 @@ public class PdfExportController {
     }
 
     @GetMapping(value = "/student/grade-period-report/report", produces = MediaType.APPLICATION_PDF_VALUE)
-    public ResponseEntity<byte[]> studentPeriodFinalGradeReport(@AuthenticationPrincipal Jwt jwt, @RequestParam Long academicYearId) {
-        Long studentId = jwt.getClaim("user_id");
-
-        StudentPeriodFinalGradeReportDto data = gradeReportService.getStudentPeriodFinalGradeReport(studentId, academicYearId);
+    public ResponseEntity<byte[]> studentPeriodFinalGradeReport(@RequestParam Long academicYearId) {
+        StudentPeriodFinalGradeReportDto data = gradeReportService.getStudentPeriodFinalGradeReport(currentStudentContext.getStudentId(), academicYearId);
         byte[] pdf = pdfReportService.generateStudentPeriodFinalGradeReport(data);
-        String fileName = "period-grades-%s-%s.pdf".formatted(studentId, academicYearId);
+        String fileName = "period-grades-%s-%s.pdf".formatted(currentStudentContext.getStudentId(), academicYearId);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
                 .contentType(MediaType.APPLICATION_PDF)

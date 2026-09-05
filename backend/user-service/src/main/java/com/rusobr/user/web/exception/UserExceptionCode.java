@@ -34,4 +34,6 @@ public enum UserExceptionCode implements IExceptionCode {
 
     DB_VALIDATION_ERROR,
     VALIDATION_ERROR,
+    PARENT_STUDENT_ID_NOT_SELECTED,
+    STUDENT_DOES_NOT_ATTACHED_PARENT
 }

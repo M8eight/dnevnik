@@ -24,7 +24,7 @@ spring:
     show-sql: false
   flyway:
     enabled: true
-    locations: classpath:db/migration
+    locations: classpath:db/migration/academic-service
   security:
     oauth2:
       resourceserver:
@@ -94,7 +94,7 @@ management:
       enabled: true
   tracing:
     sampling:
-      probability: 1.0
+      probability: 0.2
   metrics:
     distribution:
       percentiles-histogram:

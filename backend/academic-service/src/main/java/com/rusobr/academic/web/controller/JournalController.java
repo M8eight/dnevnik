@@ -1,14 +1,13 @@
 package com.rusobr.academic.web.controller;
 
 import com.rusobr.academic.application.service.JournalService;
+import com.rusobr.common.context.CurrentStudentContext;
 import com.rusobr.academic.web.dto.grade.PeriodFinalGradeResponse;
 import com.rusobr.academic.web.dto.lessonInstance.GradesLessonsResponse;
 import com.rusobr.academic.web.dto.lessonInstance.LessonInstanceDto;
 import com.rusobr.academic.web.dto.lessonInstance.teacher.TeacherJournalResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,19 +21,16 @@ import java.util.List;
 public class JournalController {
 
     private final JournalService journalService;
+    private final CurrentStudentContext currentStudentContext;
 
     @GetMapping("/grades/by-student")
-    public GradesLessonsResponse getGradesByStudentId(@AuthenticationPrincipal Jwt jwt,
-                                                      @RequestParam("academicPeriodId") Long academicPeriodId) {
-        Long userId = jwt.getClaim("user_id");
-        return journalService.getGradesByStudentId(userId, academicPeriodId);
+    public GradesLessonsResponse getGradesByStudentId(@RequestParam("academicPeriodId") Long academicPeriodId) {
+        return journalService.getGradesByStudentId(currentStudentContext.getStudentId(), academicPeriodId);
     }
 
     @GetMapping("/period-final-grades/by-student")
-    public List<PeriodFinalGradeResponse> getPeriodFinalGradesByStudentId(@AuthenticationPrincipal Jwt jwt,
-                                                                          @RequestParam("academicYearId") Long academicYearId) {
-        Long userId = jwt.getClaim("user_id");
-        return journalService.getPeriodFinalGrades(userId, academicYearId);
+    public List<PeriodFinalGradeResponse> getPeriodFinalGradesByStudentId(@RequestParam("academicYearId") Long academicYearId) {
+        return journalService.getPeriodFinalGrades(currentStudentContext.getStudentId(), academicYearId);
     }
 
     @PreAuthorize("@teacherSecurity.canViewAssignment(#teachingAssignmentId, authentication)")
