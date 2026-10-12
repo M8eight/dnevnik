@@ -1,7 +1,8 @@
-import { ROLES } from "@/constants/component-constants";
+import { CREATABLE_ROLES } from "@/constants/component-constants";
 import { useCreateStudent, useCreateParent, useCreateTeacher } from "@/hooks/use-user";
 import { cn } from "@/lib/utils";
 import type { UserRole } from "@/services/user-service";
+import type { CreatableRole } from "@/constants/component-constants";
 import { Loader2, CheckCircle2, Send } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import RoleTab from "./role-tab";
@@ -80,7 +81,7 @@ export default function CreateUserForm() {
         parentMutation.isError ||
         teacherMutation.isError;
 
-    const handleRoleChange = (newRole: UserRole) => {
+    const handleRoleChange = (newRole: CreatableRole) => {
         setValue("role", newRole, { shouldValidate: true });
         studentMutation.reset();
         parentMutation.reset();
@@ -127,7 +128,7 @@ export default function CreateUserForm() {
             <div className="space-y-1.5">
                 <label className="text-xs font-bold tracking-widest uppercase text-black/30">Роль</label>
                 <div className="flex flex-wrap gap-1 bg-black/5 rounded-[18px] p-1">
-                    {ROLES.map((r) => (
+                    {CREATABLE_ROLES.map((r) => (
                         <RoleTab
                             key={r.value}
                             role={r}
