@@ -9,3 +9,4 @@ include("user-service")
 include('academic-service')
 
 include 'common'
+include 'mail-service'

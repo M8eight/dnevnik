@@ -1,0 +1,136 @@
+spring:
+  data:
+    web:
+      pageable:
+        max-page-size: 200
+  cloud:
+    function:
+      definition: mailNotification
+    stream:
+
+      bindings:
+        mailSent-out-0:
+          destination: mail.events
+        mailNotification-in-0:
+          destination: mail.events
+          group: notification-service
+      rabbit:
+        bindings:
+          mailSent-out-0:
+            producer:
+              routing-key-expression: headers['amqp_routingKey']
+          mailNotification-in-0:
+            consumer:
+              binding-routing-key: mail.sent.#
+              auto-bind-dlq: true
+              republish-to-dlq: true
+              max-attempts: 3
+    circuitbreaker:
+      resilience4j:
+        disable-thread-pool: true
+        disable-time-limiter: true
+        enable-semaphore-default-bulkhead: true
+    openfeign:
+      client:
+        config:
+          default:
+            connect-timeout: 3000
+            read-timeout: 10000
+      circuitbreaker:
+        enabled: true
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+  application:
+    name: mail-service
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration/mail-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KC_PUBLIC_URL:http://localhost:9090}/realms/${KC_REALM:dnevnik-realm}
+          jwk-set-uri: ${KC_URL:http://localhost:9090}/realms/${KC_REALM:dnevnik-realm}/protocol/openid-connect/certs
+  datasource:
+    url: ${PSQL_URL:jdbc:postgresql://localhost:5432}/${PSQL_ACADEMIC_DB:mail_db}
+    username: ${PSQL_ACADEMIC_USER:school_user}
+    password: ${PSQL_ACADEMIC_PASS:school_pass}
+    driver-class-name: org.postgresql.Driver
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+
+eureka:
+  instance:
+    hostname: ${APP_NAME:localhost}
+    prefer-ip-address: false
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://user:password@localhost:8761/eureka/}
+
+logging:
+  file:
+    path: ${LOGS_PATH:./logs}
+  loki:
+    url: ${LOKI_URL:http://localhost:3100}/loki/api/v1/push}
+  level:
+    root: INFO
+    com.netflix.discovery: WARN
+    com.netflix.eureka: WARN
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        sliding-window-size: 100
+        minimum-number-of-calls: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 5
+        automatic-transition-from-open-to-half-open-enabled: true
+    instances:
+      user-service:
+        base-config: default
+
+  retry:
+    instances:
+      user-service:
+        max-attempts: 3
+        wait-duration: 500ms
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, circuitbreakers, circuitbreakerevents, metrics, prometheus
+  endpoint:
+    health:
+      show-details: never
+  health:
+    circuitbreakers:
+      enabled: true
+  tracing:
+    sampling:
+      probability: 0.2
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        http.client.requests: true
+    tags:
+      application: ${spring.application.name}
+
+keycloak:
+  url: ${KC_URL:http://localhost:9090}
+  realm: ${KC_REALM:dnevnik-realm}
+
+server:
+  port: 9003
