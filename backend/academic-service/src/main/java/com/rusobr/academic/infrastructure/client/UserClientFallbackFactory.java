@@ -3,7 +3,7 @@ package com.rusobr.academic.infrastructure.client;
 import com.rusobr.common.dto.BatchUserResponse;
 import com.rusobr.academic.web.dto.feign.TeacherResponse;
 import com.rusobr.common.dto.UserFeignResponse;
-import com.rusobr.academic.web.exception.BadRequestException;
+import com.rusobr.common.exception.BadRequestException;
 import com.rusobr.academic.web.exception.AcademicExceptionCode;
 import com.rusobr.common.exception.ForbiddenException;
 import com.rusobr.common.exception.UnauthorizedException;

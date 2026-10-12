@@ -11,7 +11,7 @@ import com.rusobr.common.entity.BaseEntity;
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString
+@ToString(exclude = "subject")
 @Builder
 @Table(name = "teacher_subjects")
 @SQLRestriction("deleted_at is NULL")

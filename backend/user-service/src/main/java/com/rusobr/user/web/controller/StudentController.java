@@ -13,6 +13,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -76,12 +77,14 @@ public class StudentController {
     }
 
     @PatchMapping("/{studentId}/assign/{teacherId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void assignToParent(@PathVariable Long studentId,
                                       @PathVariable Long teacherId) {
         studentService.assignToParent(studentId, teacherId);
     }
 
     @PatchMapping("/{studentId}/unassign")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void unassignFromParent(@PathVariable Long studentId) {
         studentService.unassignFromParent(studentId);
     }

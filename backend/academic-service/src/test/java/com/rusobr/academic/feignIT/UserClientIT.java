@@ -4,7 +4,7 @@ import com.github.tomakehurst.wiremock.http.Fault;
 import com.rusobr.academic.infrastructure.client.UserClient;
 import com.rusobr.academic.web.dto.feign.TeacherResponse;
 import com.rusobr.academic.web.exception.AcademicExceptionCode;
-import com.rusobr.academic.web.exception.BadRequestException;
+import com.rusobr.common.exception.BadRequestException;
 import com.rusobr.academic.web.exception.UserServiceUnavailableException;
 import com.rusobr.common.dto.BatchUserResponse;
 import com.rusobr.common.dto.UserFeignResponse;

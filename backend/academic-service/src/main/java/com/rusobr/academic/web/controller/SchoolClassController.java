@@ -75,21 +75,25 @@ public class SchoolClassController {
     }
 
     @PatchMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void update(@PathVariable Long id, @RequestBody @Valid SchoolClassUpdateRequest request) {
         schoolClassService.update(id, request);
     }
 
     @PostMapping("/{classId}/students/{studentId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void addStudentToClass(@PathVariable Long classId, @PathVariable Long studentId) {
         classStudentService.addStudent(classId, studentId);
     }
 
     @DeleteMapping("/{classId}/students/{studentId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void removeStudentToClass(@PathVariable Long classId, @PathVariable Long studentId) {
         classStudentService.removeStudent(classId, studentId);
     }
 
     @PutMapping("/{classId}/teacher/{teacherId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void assignTeacherToClass(@PathVariable Long classId, @PathVariable Long teacherId) {
         schoolClassService.assignTeacher(classId, teacherId);
     }

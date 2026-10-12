@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <springProperty scope="context" name="appName" source="spring.application.name" defaultValue="academic-service"/>
+    <springProperty scope="context" name="logPath" source="logging.file.path" defaultValue="/app/logs"/>
+
+    <include resource="logback-include.xml"/>
+
+    <logger name="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping" level="DEBUG"/>
+</configuration>

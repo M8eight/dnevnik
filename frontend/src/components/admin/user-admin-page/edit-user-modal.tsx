@@ -3,8 +3,8 @@ import { Loader2, X, CheckCircle2, Save } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ROLES } from "@/constants/component-constants";
-import type { UserResponse, UserRole } from "@/services/user-service";
+import { CREATABLE_ROLES, type CreatableRole } from "@/constants/component-constants";
+import type { UserResponse } from "@/services/user-service";
 import {
     useUpdateUser,
 } from "@/hooks/use-user";
@@ -61,7 +61,7 @@ export default function EditUserModal({ user, onClose }: Props) {
         resolver: zodResolver(formSchema),
         mode: "onChange",
         defaultValues: {
-            roles: user.roles,
+            roles: user.roles.filter((r): r is CreatableRole => r !== "ADMIN"),
             username: user.username,
             firstName: user.firstName,
             lastName: user.lastName,
@@ -100,7 +100,7 @@ export default function EditUserModal({ user, onClose }: Props) {
 
     const { mutate: update, isPending, isError } = useUpdateUser(user.id);
 
-    const toggleRole = (role: UserRole) => {
+    const toggleRole = (role: CreatableRole) => {
         const next = selectedRoles.includes(role)
             ? selectedRoles.length > 1
                 ? selectedRoles.filter((r) => r !== role)
@@ -220,7 +220,7 @@ export default function EditUserModal({ user, onClose }: Props) {
                         <div className="space-y-1.5">
                             <label className="text-xs font-bold tracking-widest uppercase text-black/30">Роли</label>
                             <div className="flex gap-1 bg-black/5 rounded-[18px] p-1">
-                                {ROLES.map((r) => {
+                                {CREATABLE_ROLES.map((r) => {
                                     const isActive = selectedRoles.includes(r.value);
                                     return (
                                         <button

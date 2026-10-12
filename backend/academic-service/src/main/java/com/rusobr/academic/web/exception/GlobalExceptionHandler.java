@@ -62,8 +62,8 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.SERVICE_UNAVAILABLE);
     }
 
-    @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<ErrorResponse> handleBadRequest(BadRequestException ex, HttpServletRequest req) {
+    @ExceptionHandler(com.rusobr.common.exception.BadRequestException.class)
+    public ResponseEntity<ErrorResponse> handleBadRequest(com.rusobr.common.exception.BadRequestException ex, HttpServletRequest req) {
 
         ErrorResponse errorResponse = new ErrorResponse(
                 LocalDateTime.now(),

@@ -33,6 +33,12 @@ spring:
             - Path=/academic-service/**
           filters:
             - TokenRelay=
+        - id: mail-service
+          uri: lb://mail-service
+          predicates:
+            - Path=/mail-service/**
+          filters:
+            - TokenRelay=
 
 springdoc:
   swagger-ui:
@@ -41,6 +47,8 @@ springdoc:
         url: /user-service/v3/api-docs
       - name: "Academic service"
         url: /academic-service/v3/api-docs
+      - name: "Mail service"
+        url: /mail-service/v3/api-docs
   api-docs:
     path: /v3/api-docs
 

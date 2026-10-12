@@ -53,6 +53,19 @@ export const ROLES: {
     ];
 
 
+export type CreatableRole = Exclude<UserRole, "ADMIN">;
+
+export const CREATABLE_ROLES: {
+    value: CreatableRole;
+    label: string;
+    icon: React.ReactNode;
+    color: string;
+    iconBg: string;
+}[] = ROLES.filter(
+    (r): r is (typeof ROLES)[number] & { value: CreatableRole } => r.value !== "ADMIN"
+);
+
+
 export type ViewMode = "ALL" | "GRADES" | "ATTENDANCE";
 
 export const WEEKDAYS = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];

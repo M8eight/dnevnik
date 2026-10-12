@@ -10,6 +10,7 @@ import com.rusobr.academic.web.dto.scheduleLesson.studentDiary.DiaryWeekResponse
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -60,21 +61,25 @@ public class ScheduleController {
     }
 
     @PostMapping("/schedules")
+    @ResponseStatus(HttpStatus.CREATED)
     public void create(@RequestBody ScheduleLessonRequest scheduleLessonRequest) {
         scheduleService.create(scheduleLessonRequest);
     }
 
     @DeleteMapping("/schedules/{scheduleId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long scheduleId) {
         scheduleService.delete(scheduleId);
     }
 
     @PatchMapping("/schedules/{scheduleId}/close")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void close(@PathVariable Long scheduleId, @RequestParam @NotNull LocalDate closeDate) {
         scheduleService.close(scheduleId, closeDate);
     }
 
     @PatchMapping("/schedules/load")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void load(@RequestParam Long classId, @RequestParam LocalDate fromDate, @RequestParam LocalDate toDate) {
         scheduleService.load(classId, fromDate, toDate);
     }

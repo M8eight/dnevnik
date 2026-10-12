@@ -5,6 +5,7 @@ import com.rusobr.academic.web.dto.teacherSubject.TeacherSubjectRequest;
 import com.rusobr.academic.web.dto.teacherSubject.TeacherSubjectResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,6 +23,7 @@ public class TeacherSubjectController {
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public TeacherSubjectResponse create(@RequestBody @Valid TeacherSubjectRequest request) {
         return teacherSubjectService.create(request);
     }

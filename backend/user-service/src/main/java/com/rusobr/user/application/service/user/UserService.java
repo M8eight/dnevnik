@@ -1,5 +1,7 @@
 package com.rusobr.user.application.service.user;
 
+import com.rusobr.common.dto.BatchUserResponse;
+import com.rusobr.common.dto.UserFeignResponse;
 import com.rusobr.common.enums.UserRole;
 import com.rusobr.common.exception.NotFoundException;
 import com.rusobr.user.application.event.UserDeletedEvent;
@@ -62,6 +64,21 @@ public class UserService {
                 pageable.getPageSize(),
                 Sort.by(Sort.Direction.ASC, "lastName", "firstName"))
         ).map(userMapper::toUserResponse);
+    }
+
+    public BatchUserResponse getBatchUsers(List<Long> ids) {
+        List<UserFeignResponse> users = userRepository.findAllById(ids).stream().map(userMapper::toUserFeignResponse).toList();
+        List<Long> foundIds = users.stream().map(UserFeignResponse::id).toList();
+        List<Long> notFound = ids.stream().filter(id -> !foundIds.contains(id)).toList();
+
+        return BatchUserResponse.ok(users, notFound);
+    }
+
+    public void existBatchUsers(List<Long> ids) {
+        Long foundIds = userRepository.countAllByIdIn(ids);
+        if (ids.size() != foundIds) {
+            throw new NotFoundException("Users by ids: %s not found".formatted(ids), USER_NOT_FOUND);
+        }
     }
 
     @Transactional

@@ -345,7 +345,7 @@ public class DebugDataInitializer implements CommandLineRunner {
                         .startDate(LocalDate.of(2026, 1, 1)).endDate(LocalDate.of(2026, 3, 31))
                         .closed(true).build(),
                 AcademicPeriod.builder().name("Четвертая четверть").academicYear(academicYear)
-                        .startDate(LocalDate.of(2026, 4, 1)).endDate(LocalDate.of(2026, 8, 31))
+                        .startDate(LocalDate.of(2026, 4, 1)).endDate(LocalDate.of(2026, 11, 30))
                         .closed(false).build()
         );
 

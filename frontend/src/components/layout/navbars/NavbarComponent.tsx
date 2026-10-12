@@ -5,6 +5,7 @@ import { NavLink } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { selectUsername } from "@/store/slices/authSlice";
 import { clearLogout } from "@/hooks/use-logout";
+import MailButton from "@/views/mail/buttonMail";
 
 type NavbarProps = {
   title: string;
@@ -70,6 +71,8 @@ export default function NavbarComponent({
               <LogOut className="w-5 h-5" />
             </button>
 
+            <MailButton  />
+
             {/* Бургер */}
             <button
               type="button"
@@ -78,6 +81,7 @@ export default function NavbarComponent({
             >
               {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
+
           </div>
         </div>
 
@@ -96,6 +100,7 @@ export default function NavbarComponent({
                 onClick={() => setOpen(false)}
               />
             ))}
+
 
             {/* Выход в мобильном меню */}
             <button

@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -22,6 +23,7 @@ public class SubjectController {
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public SubjectResponseDto create(@RequestBody @Valid SubjectRequest createSubjectRequest) {
         return subjectService.create(createSubjectRequest);
     }
