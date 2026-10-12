@@ -41,6 +41,7 @@ public class ClassGroupController {
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public void create(@RequestBody ClassGroupRequest req) {
         classGroupService.create(req);
     }
@@ -51,8 +52,8 @@ public class ClassGroupController {
         classGroupService.delete(id);
     }
 
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PatchMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void update(@PathVariable Long id, @RequestParam String name) {
         classGroupService.update(id, name);
     }

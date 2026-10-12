@@ -150,6 +150,9 @@ public class SecurityConfig {
                             .requestMatchers(GET, "/api/v1/schedules/by-teacher/period")
                             .hasRole(TEACHER.name())
 
+                            .requestMatchers(GET, "/api/v1/school-classes/*/student-ids")
+                            .hasRole(TEACHER.name())
+
                             // ADMIN SCOPE
                             .requestMatchers(GET, "/api/v1/subjects")
                             .hasRole(ADMIN.name())

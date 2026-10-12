@@ -16,7 +16,7 @@ import com.rusobr.academic.web.dto.pdf.StudentPeriodFinalGradeReportDto;
 import com.rusobr.academic.web.dto.pdf.TeacherGradeReportDto;
 import com.rusobr.academic.web.dto.schoolClass.SchoolClassResponse;
 import com.rusobr.academic.web.exception.AcademicExceptionCode;
-import com.rusobr.academic.web.exception.BadRequestException;
+import com.rusobr.common.exception.BadRequestException;
 import com.rusobr.common.dto.UserFeignResponse;
 import com.rusobr.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
