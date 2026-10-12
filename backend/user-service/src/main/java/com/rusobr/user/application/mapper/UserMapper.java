@@ -18,4 +18,5 @@ public interface UserMapper {
     UserResponse toCreateUserResponse(User user);
     UserResponse toUserResponse(User user);
     UserFeignResponse toUserFeignResponse(UserProjection userProjection);
+    UserFeignResponse toUserFeignResponse(User user);
 }

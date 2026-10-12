@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -23,5 +24,7 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     @Modifying
     @Query("update User u set u.keycloakId = :kId where u.id = :userId")
     void setKeycloakId(@Param("kId") String kId, @Param("userId") Long userId);
+
+    Long countAllByIdIn(List<Long> ids);
 
 }

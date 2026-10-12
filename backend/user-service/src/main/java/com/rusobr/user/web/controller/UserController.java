@@ -1,5 +1,6 @@
 package com.rusobr.user.web.controller;
 
+import com.rusobr.common.dto.BatchUserResponse;
 import com.rusobr.common.enums.UserRole;
 import com.rusobr.user.application.service.user.UserOrchestrator;
 import com.rusobr.user.application.service.user.UserService;
@@ -16,6 +17,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -35,6 +38,16 @@ public class UserController {
     @GetMapping("/{id}")
     public UserResponse getUserById(@PathVariable Long id) {
         return userService.getById(id);
+    }
+
+    @PostMapping("/batch")
+    public BatchUserResponse getBatchUsers(@RequestBody List<Long> ids) {
+        return userService.getBatchUsers(ids);
+    }
+
+    @PostMapping("/batch/exists")
+    public void existBatchUsers(@RequestBody List<Long> ids) {
+        userService.existBatchUsers(ids);
     }
 
     @PostMapping("/students")
