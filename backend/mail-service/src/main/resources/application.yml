@@ -1,4 +1,9 @@
 spring:
+  rabbitmq:
+    host: ${RABBIT_HOST:localhost}
+    port: ${RABBIT_PORT:5672}
+    username: ${RABBIT_USER:guest}
+    password: ${RABBIT_PASS:guest}
   data:
     web:
       pageable:
@@ -7,7 +12,6 @@ spring:
     function:
       definition: mailNotification
     stream:
-
       bindings:
         mailSent-out-0:
           destination: mail.events
@@ -57,9 +61,9 @@ spring:
           issuer-uri: ${KC_PUBLIC_URL:http://localhost:9090}/realms/${KC_REALM:dnevnik-realm}
           jwk-set-uri: ${KC_URL:http://localhost:9090}/realms/${KC_REALM:dnevnik-realm}/protocol/openid-connect/certs
   datasource:
-    url: ${PSQL_URL:jdbc:postgresql://localhost:5432}/${PSQL_ACADEMIC_DB:mail_db}
-    username: ${PSQL_ACADEMIC_USER:school_user}
-    password: ${PSQL_ACADEMIC_PASS:school_pass}
+    url: ${PSQL_URL:jdbc:postgresql://localhost:5432}/${PSQL_MAIL_DB:mail_db}
+    username: ${PSQL_MAIL_USER:school_user}
+    password: ${PSQL_MAIL_PASS:school_pass}
     driver-class-name: org.postgresql.Driver
 
 springdoc:
@@ -78,7 +82,7 @@ logging:
   file:
     path: ${LOGS_PATH:./logs}
   loki:
-    url: ${LOKI_URL:http://localhost:3100}/loki/api/v1/push}
+    url: ${LOKI_URL:http://localhost:3100}/loki/api/v1/push
   level:
     root: INFO
     com.netflix.discovery: WARN

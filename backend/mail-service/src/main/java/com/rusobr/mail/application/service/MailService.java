@@ -80,8 +80,7 @@ public class MailService {
     public MailResponse createMail(Long senderId, DirectMailRequest req) {
         userClient.existBatchUsers(req.recipientIds());
         Mail mail = mailService.createMail(senderId, req.subject(), req.body(), req.recipientIds());
-        String routingKey = "direct." + req.recipientIds();
-        mailPublisher.publishMailEvent(mail, req.recipientIds(), routingKey);
+        mailPublisher.publishMailEvent(mail, req.recipientIds(), "direct");
         MailResponse res = mailMapper.toResponse(mail);
         log.info("Mail for user id: {} created: {}", req.recipientIds(), res);
         return res;
